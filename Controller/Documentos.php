@@ -738,6 +738,9 @@ class Controller_Documentos extends \Controller_App
         }
         // armar xml a partir del DTE temporal
         $EnvioDte = $DteTmp->getEnvioDte($FolioInfo->folio, $FolioInfo->Caf, $Firma);
+        if (!$EnvioDte) {
+            $this->Api->send('No fue posible generar el objeto del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
+        }
         $xml = $EnvioDte->generar();
         if (!$xml) {
             $this->Api->send('No fue posible generar el XML del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
