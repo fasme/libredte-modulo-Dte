@@ -173,7 +173,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-31
+     * @version 2016-09-12
      */
     public function _api_emitir_POST()
     {
@@ -187,15 +187,12 @@ class Controller_Documentos extends \Controller_App
         // datos a un arreglo de PHP (formato JSON)
         $formato = !empty($_GET['formato'])?$_GET['formato']:'json';
         if ($formato!='json') {
-            $parser = \sowerphp\core\Utility_Inflector::camelize($formato);
-            $class = '\sasco\LibreDTE\Sii\Dte\Formatos\\'.$parser;
-            if (!class_exists($class)) {
-                $this->Api->send('Formato '.$formato.' no es válido como entrada para datos del DTE', 400);
-            }
             try {
-                $this->Api->data = (new $class())->toArray(base64_decode($this->Api->data));
+                $this->Api->data = \sasco\LibreDTE\Sii\Dte\Formatos::toArray(
+                    $formato, base64_decode($this->Api->data)
+                );
             } catch (\Exception $e) {
-                $this->Api->send($e->getMessage(), 500);
+                $this->Api->send($e->getMessage(), 400);
             }
         }
         // verificar datos del DTE pasados
