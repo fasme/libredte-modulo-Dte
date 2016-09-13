@@ -169,7 +169,7 @@ class Model_DteVenta extends Model_Base_Libro
      * Método que entrega el resumen real (de los detalles registrados) del
      * libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-12
+     * @version 2016-09-13
      */
     public function getResumen()
     {
@@ -195,7 +195,7 @@ class Model_DteVenta extends Model_Base_Libro
             // agregar detalle al libro
             $Libro->agregar($d);
         }
-        $resumen = $Libro->getResumen();
+        $resumen = $Libro->getResumen() + $this->getResumenManual();
         // limpiar resumen
         $campos = [
             'TpoDoc',
@@ -220,6 +220,22 @@ class Model_DteVenta extends Model_Base_Libro
             }
         }
         return $resumen;
+    }
+
+     /**
+     * Método que entrega el resumen manual, de los totales registrados al
+     * enviar el libro al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-13
+     */
+    public function getResumenManual()
+    {
+        if ($this->_table=='dte_venta' and $this->xml) {
+            $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+            $Libro->loadXML(base64_decode($this->xml));
+            return $Libro->getResumenManual();
+        }
+        return [];
     }
 
 }
