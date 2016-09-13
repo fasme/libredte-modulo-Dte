@@ -1343,13 +1343,12 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-28
+     * @version 2016-09-13
      */
     public function getResumenComprasPeriodos()
     {
         if ($this->db->config['type']!='PostgreSQL')
             return $this->getResumenComprasPeriodosMySQL();
-        $periodo = 'TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER';
         return $this->db->getTable('
             (
                 SELECT
@@ -1376,22 +1375,24 @@ class Model_Contribuyente extends \Model_App
                     c.revision_estado
                 FROM
                     (
-                        SELECT
-                            CASE WHEN r.periodo IS NOT NULL THEN
-                                r.periodo
-                            ELSE
-                                '.$periodo.'
-                            END AS periodo,
-                            COUNT(*) AS recibidos
-                        FROM dte_tipo AS t, dte_recibido AS r
-                        WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion
-                        GROUP BY '.$periodo.', r.periodo
+                        SELECT periodo, COUNT(*) AS recibidos
+                        FROM (
+                            SELECT
+                                CASE WHEN r.periodo IS NOT NULL THEN
+                                    r.periodo
+                                ELSE
+                                    TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER
+                                END AS periodo
+                            FROM dte_tipo AS t, dte_recibido AS r
+                            WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion
+                        ) AS t
+                        GROUP BY periodo
                     ) AS r
                     FULL JOIN (
-                        SELECT '.$periodo.' AS periodo, COUNT(*) AS facturas_compra
+                        SELECT TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER AS periodo, COUNT(*) AS facturas_compra
                         FROM dte_emitido AS r
                         WHERE r.emisor = :rut AND r.certificacion = :certificacion AND r.dte = 46
-                        GROUP BY '.$periodo.'
+                        GROUP BY TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER
                     ) AS f ON r.periodo = f.periodo
                     LEFT JOIN dte_compra AS c ON c.receptor = :rut AND c.certificacion = :certificacion AND c.periodo IN (r.periodo, f.periodo)
             ) UNION (
