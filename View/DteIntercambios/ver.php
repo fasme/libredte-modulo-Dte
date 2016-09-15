@@ -117,7 +117,7 @@ echo '<div class="col-md-6">',"\n";
 echo $f->input([
     'name' => 'responder_a',
     'label' => 'Enviar a',
-    'value' => $DteIntercambio->de,
+    'value' => $DteIntercambio->getEmisor()->config_email_intercambio_user ? $DteIntercambio->getEmisor()->config_email_intercambio_user : $DteIntercambio->de,
     'check' => 'notempty email',
 ]);
 $estado_enviodte = $EnvioDte->getEstadoValidacion(['RutReceptor'=>$Emisor->rut.'-'.$Emisor->dv]);
