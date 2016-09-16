@@ -678,7 +678,7 @@ class Controller_Documentos extends \Controller_App
      * Función de la API que permite emitir un DTE a partir de un documento
      * temporal, asignando folio, firmando y enviando al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-15
+     * @version 2016-09-16
      */
     public function _api_generar_POST()
     {
@@ -759,6 +759,7 @@ class Controller_Documentos extends \Controller_App
         if (in_array($DteEmitido->dte, [110, 111, 112])) {
             $DteEmitido->total = $DteEmitido->exento = $DteTmp->total;
         }
+        $DteEmitido->anulado = 0;
         $DteEmitido->save();
         // guardar referencias si existen
         $datos = json_decode($DteTmp->datos, true);
