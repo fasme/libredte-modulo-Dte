@@ -700,6 +700,14 @@ echo $f->input([
 ]);
 echo $f->input([
     'type' => 'select',
+    'name' => 'config_contabilidad_f29_48',
+    'label' => 'Cuenta código 48',
+    'options' => [''=>'Cuenta sin definir'] + $cuentas,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_f29_48 : false,
+    'help' => 'Cuenta contable del impuesto de 2da categoría para contratos',
+]);
+echo $f->input([
+    'type' => 'select',
     'name' => 'config_contabilidad_f29_151',
     'label' => 'Cuenta código 151',
     'options' => [''=>'Cuenta sin definir'] + $cuentas,
