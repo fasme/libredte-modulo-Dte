@@ -37,12 +37,41 @@ class Model_F29
     /**
      * Constructor del modelo F29
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-02
+     * @version 2016-09-15
      */
     public function __construct(\website\Dte\Model_Contribuyente $Emisor, $periodo)
     {
         $this->Emisor = $Emisor;
         $this->periodo = (int)$periodo;
+        // si hay libro de ventas se sacan de ahí las boletas y pagos electrónicos
+        $boletas = ['total'=>0, 'iva'=>0];
+        $pagos_electronicos = ['total'=>0, 'iva'=>0];
+        $DteVenta = new \website\Dte\Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        if ($DteVenta->exists()) {
+            $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+            $Libro->loadXML(base64_decode($DteVenta->xml));
+            // resumenes boletas electrónicas
+            $resumenBoletas = $Libro->getResumenBoletas();
+            if (isset($resumenBoletas[39])) {
+                $boletas = [
+                    'total' => $resumenBoletas[39]['TotDoc'] - $resumenBoletas[39]['TotAnulado'],
+                    'iva' => $resumenBoletas[39]['TotMntIVA'],
+                ];
+            }
+            // resumenes manuales (boletas y pagos electrónicos)
+            $resumenManual = $Libro->getResumenManual();
+            if (isset($resumenManual[35])) {
+                $boletas['total'] += $resumenManual[35]['TotDoc'] - $resumenManual[35]['TotAnulado'];
+                $boletas['iva'] += $resumenManual[35]['TotMntIVA'];
+            }
+            if (isset($resumenManual[48])) {
+                $pagos_electronicos = [
+                    'total' => $resumenManual[48]['TotDoc'] - $resumenManual[48]['TotAnulado'],
+                    'iva' => $resumenManual[48]['TotMntIVA'],
+                ];
+            }
+        }
+        // asignar datos
         $this->datos = [
             '01' => $this->Emisor->razon_social,
             '03' => num($Emisor->rut).'-'.$Emisor->dv,
@@ -51,10 +80,14 @@ class Model_F29
             '09' => $this->Emisor->telefono,
             '15' => substr($periodo, 4).'/'.substr($periodo, 0, 4),
             '55' => $this->Emisor->email,
+            '110' => $boletas['total'],
+            '111' => $boletas['iva'],
             '115' => $this->Emisor->config_contabilidad_ppm / 100,
             '151' => (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_151))->getHaber($this->periodo),
             '313' => $this->Emisor->config_extra_contador_rut,
             '314' => $this->Emisor->config_extra_representante_rut,
+            '758' => $pagos_electronicos['total'],
+            '759' => $pagos_electronicos['iva'],
         ];
     }
 
