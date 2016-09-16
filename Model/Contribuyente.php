@@ -1223,8 +1223,8 @@ class Model_Contribuyente extends \Model_App
                 re.fecha AS ref_fecha
             FROM
                 dte_emitido AS e
-                LEFT JOIN dte_referencia AS ref ON e.dte = ref.referencia_dte AND e.folio = ref.referencia_folio AND e.certificacion = ref.certificacion
-                LEFT JOIN dte_emitido AS re ON re.dte = ref.dte AND re.folio = ref.folio AND re.certificacion = ref.certificacion,
+                LEFT JOIN dte_referencia AS ref ON e.emisor = ref.emisor AND e.dte = ref.referencia_dte AND e.folio = ref.referencia_folio AND e.certificacion = ref.certificacion
+                LEFT JOIN dte_emitido AS re ON re.emisor = ref.emisor AND re.dte = ref.dte AND re.folio = ref.folio AND re.certificacion = ref.certificacion,
                 contribuyente AS r
             WHERE e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte = 52
             ORDER BY e.fecha, e.folio
