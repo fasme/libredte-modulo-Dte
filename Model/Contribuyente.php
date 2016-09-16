@@ -1192,7 +1192,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de las guías de un período
      * @todo Extraer IndTraslado en MariaDB
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-27
+     * @version 2016-09-15
      */
     public function getGuias($periodo)
     {
@@ -1207,7 +1207,7 @@ class Model_Contribuyente extends \Model_App
         return $this->db->getTable('
             SELECT
                 e.folio,
-                NULL AS anulado,
+                CASE WHEN e.anulado THEN 2 ELSE NULL END AS anulado,
                 1 AS operacion,
                 '.$tipo_col.' AS tipo,
                 e.fecha,

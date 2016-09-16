@@ -43,11 +43,12 @@ class Controller_DteGuias extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de guías al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-27
+     * @version 2016-09-15
      */
     public function enviar_sii($periodo)
     {
         $Emisor = $this->getContribuyente();
+        $DteGuia = new Model_DteGuia($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
         // si el periodo es mayor o igual al actual no se puede enviar
         if ($periodo >= date('Ym')) {
             \sowerphp\core\Model_Datasource_Session::message(
@@ -89,7 +90,7 @@ class Controller_DteGuias extends Controller_Base_Libros
             'NroResol' =>  $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
             'TipoLibro' => 'ESPECIAL',
             'TipoEnvio' => 'TOTAL',
-            'FolioNotificacion' => 1,
+            'FolioNotificacion' => $DteGuia->getFolioNotificacion() + 1,
         ]);
         // obtener XML
         $xml = $Libro->generar();
@@ -108,10 +109,11 @@ class Controller_DteGuias extends Controller_Base_Libros
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
         // guardar libro de ventas
-        $DteGuia = new Model_DteGuia($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
         $DteGuia->documentos = $documentos;
         $DteGuia->xml = base64_encode($xml);
         $DteGuia->track_id = $track_id;
+        $DteGuia->revision_estado = null;
+        $DteGuia->revision_detalle = null;
         $DteGuia->save();
         \sowerphp\core\Model_Datasource_Session::message(
             'Libro de guías período '.$periodo.' envíado', 'ok'

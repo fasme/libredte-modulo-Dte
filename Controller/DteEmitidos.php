@@ -458,11 +458,11 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
-     * Acción que permite actualizar el track_id del DteEmitido
+     * Acción que permite anular un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-16
+     * @version 2016-09-15
      */
-    public function avanzado_track_id($dte, $folio)
+    public function avanzado_anular($dte, $folio)
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
@@ -473,18 +473,19 @@ class Controller_DteEmitidos extends \Controller_App
             );
             $this->redirect('/dte/dte_emitidos/listar');
         }
-        // sólo administrador puede cambiar track id
-        if ($DteEmitido->usuario != $this->Auth->User->id) {
-            \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el Track ID', 'error');
-            $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
+        // verificar que sea documento que se puede anular
+        if ($DteEmitido->dte!=52) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Sólo es posible anular guias de despacho con la opción avanzada', 'error'
+            );
+            $this->redirect(str_replace('avanzado_anular', 'ver', $this->request->request));
         }
-        // cambiar track id
-        $DteEmitido->track_id = (int)$_POST['track_id'];
-        $DteEmitido->revision_estado = null;
-        $DteEmitido->revision_detalle = null;
+        // cambiar estado anulado del documento
+        $DteEmitido->anulado = (int)$_POST['anulado'];
         $DteEmitido->save();
-        \sowerphp\core\Model_Datasource_Session::message('Track ID actualizado', 'ok');
-        $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
+        $msg = $DteEmitido->anulado ? 'DTE anulado' : 'DTE ya no está anulado';
+        \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
+        $this->redirect(str_replace('avanzado_anular', 'ver', $this->request->request).'#avanzado');
     }
 
     /**
@@ -513,13 +514,43 @@ class Controller_DteEmitidos extends \Controller_App
         // sólo administrador puede cambiar el tipo de cambio
         if ($Emisor->usuario != $this->Auth->User->id) {
             \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el tipo de cambio', 'error');
-            $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request).'#avanzado');
+            $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request));
         }
         // cambiar monto total
         $DteEmitido->exento = $DteEmitido->total = abs(round($DteEmitido->getDte()->getMontoTotal() * (float)$_POST['tipo_cambio']));
         $DteEmitido->save();
         \sowerphp\core\Model_Datasource_Session::message('Monto en pesos (CLP) del DTE actualizado', 'ok');
         $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request));
+    }
+
+    /**
+     * Acción que permite actualizar el track_id del DteEmitido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-07-16
+     */
+    public function avanzado_track_id($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // sólo administrador puede cambiar track id
+        if ($DteEmitido->usuario != $this->Auth->User->id) {
+            \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el Track ID', 'error');
+            $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request));
+        }
+        // cambiar track id
+        $DteEmitido->track_id = (int)$_POST['track_id'];
+        $DteEmitido->revision_estado = null;
+        $DteEmitido->revision_detalle = null;
+        $DteEmitido->save();
+        \sowerphp\core\Model_Datasource_Session::message('Track ID actualizado', 'ok');
+        $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
     }
 
     /**

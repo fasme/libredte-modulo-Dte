@@ -229,6 +229,7 @@ CREATE TABLE dte_emitido (
 	track_id INTEGER,
 	revision_estado VARCHAR(50),
 	revision_detalle VARCHAR(255),
+	anulado BOOLEAN NOT NULL DEFAULT false,
 	CONSTRAINT dte_emitido_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_emitido_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL

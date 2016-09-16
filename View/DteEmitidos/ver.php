@@ -307,29 +307,35 @@ if ($referencias) {
 
 <!-- INICIO AVANZADO -->
 <div role="tabpanel" class="tab-pane" id="avanzado">
+<?php
+// si es guía de despacho permitir anular
+if ($DteEmitido->dte == 52) :
+?>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-send-o"></i>
-        Track ID o identificador del envío
+        <i class="fa fa-ban"></i>
+        Anular DTE
     </div>
     <div class="panel-body">
 <?php
-// permitir cambiar el track id
 echo $f->begin([
-    'action' => $_base.'/dte/dte_emitidos/avanzado_track_id/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
-    'id' => 'avanzadoTrackIdForm',
-    'onsubmit' => 'Form.check(\'avanzadoTrackIdForm\') && Form.checkSend(\'¿Está seguro de querer cambiar el Track ID?\n\n¡Perderá el valor actual!\')'
+    'action' => $_base.'/dte/dte_emitidos/avanzado_anular/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id' => 'avanzadoAnuladoForm',
+    'onsubmit' => 'Form.check(\'avanzadoAnuladoForm\')'
 ]);
 echo $f->input([
-    'name' => 'track_id',
-    'label' => 'Track ID',
-    'value' => $DteEmitido->track_id, 'check'=>'notempty integer',
-    'help' => 'Identificador de envío del XML del DTE al SII',
+    'type' => 'select',
+    'name' => 'anulado',
+    'label' => '¿Anulado?',
+    'options' => ['No', 'Si'],
+    'value' => $DteEmitido->anulado,
+    'help' => 'Marcar el DTE como anulado',
 ]);
-echo $f->end('Modificar Track ID');
+echo $f->end('Guardar');
 ?>
     </div>
 </div>
+<?php endif; ?>
 <?php
 // si es exportación permitir cambiar tipo de cambio
 if ($DteEmitido->getDte()->esExportacion()) :
@@ -357,6 +363,30 @@ if ($DteEmitido->getDte()->esExportacion()) :
     </div>
 </div>
 <?php endif; ?>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-send-o"></i>
+        Track ID o identificador del envío
+    </div>
+    <div class="panel-body">
+<?php
+// permitir cambiar el track id
+echo $f->begin([
+    'action' => $_base.'/dte/dte_emitidos/avanzado_track_id/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id' => 'avanzadoTrackIdForm',
+    'onsubmit' => 'Form.check(\'avanzadoTrackIdForm\') && Form.checkSend(\'¿Está seguro de querer cambiar el Track ID?\n\n¡Perderá el valor actual!\')'
+]);
+echo $f->input([
+    'name' => 'track_id',
+    'label' => 'Track ID',
+    'value' => $DteEmitido->track_id,
+    'check'=>'notempty integer',
+    'help' => 'Identificador de envío del XML del DTE al SII',
+]);
+echo $f->end('Modificar Track ID');
+?>
+    </div>
+</div>
 </div>
 <!-- FIN AVANZADO -->
 

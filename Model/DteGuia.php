@@ -178,4 +178,19 @@ class Model_DteGuia extends Model_Base_Libro
         return [];
     }
 
+    /**
+     * Método que entrega el folio de notificación del libro (si existe) o 0
+     * si el XML del libro no existe
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-15
+     */
+    public function getFolioNotificacion()
+    {
+        if (!$this->xml)
+            return 0;
+        $Libro = new \sasco\LibreDTE\Sii\LibroGuia();
+        $Libro->loadXML(base64_decode($this->xml));
+        return $Libro->getFolioNotificacion();
+    }
+
 }
