@@ -540,7 +540,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/listar');
         }
         // sólo administrador puede cambiar track id
-        if ($DteEmitido->usuario != $this->Auth->User->id) {
+        if ($DteEmitido->usuario != $this->Auth->User->id  and (!$Emisor->config_app_soporte or !$this->Auth->User->inGroup(['soporte']))) {
             \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el Track ID', 'error');
             $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request));
         }
@@ -551,6 +551,43 @@ class Controller_DteEmitidos extends \Controller_App
         $DteEmitido->save();
         \sowerphp\core\Model_Datasource_Session::message('Track ID actualizado', 'ok');
         $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
+    }
+
+    /**
+     * Acción que permite realizar consultas sobre el documento en la web del
+     * SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-16
+     */
+    public function sii($dte, $folio, $consulta)
+    {
+        $Emisor = $this->getContribuyente();
+        list($rutQuery, $dvQuery) = explode('-', $Emisor->getFirma()->getId());
+        $servidor = \sasco\LibreDTE\Sii::getServidor();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // se consulta por el estado del envío del DTE al SII
+        if ($consulta=='estado_envio') {
+            $url = 'https://'.$servidor.'.sii.cl/cgi_dte/UPL/QEstadoEnvio2?rutQuery='.$rutQuery.'&amp;dvQuery='.$dvQuery.'&amp;rutCompany='.$Emisor->rut.'&amp;dvCompany='.$Emisor->dv.'&amp;TrackId='.$DteEmitido->track_id.'&amp;NPagina=1';
+        }
+        // se quieren verificar los datos del DTE en el SII
+        else if ($consulta=='verificar_datos') {
+            $url = 'https://'.$servidor.'.sii.cl/cgi_dte/UPL//QEstadoDTE?rutQuery='.$rutQuery.'&amp;dvQuery='.$dvQuery.'&amp;rutCompany='.$Emisor->rut.'&amp;dvCompany='.$Emisor->dv.'&amp;rutReceiver='.$DteEmitido->getReceptor()->rut.'&dvReceiver='.$DteEmitido->getReceptor()->dv.'&tipoDTE='.$DteEmitido->dte.'&folioDTE='.$DteEmitido->folio.'&fechaDTE='.\sowerphp\general\Utility_Date::format($DteEmitido->fecha, 'dmY').'&montoDTE='.$DteEmitido->total;
+        }
+        // error si no es alguna de las anteriores
+        else {
+            \sowerphp\core\Model_Datasource_Session::message('Consulta '.$consulta.' no puede ser realizada al SII', 'error');
+            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
+        }
+        // pasar a la vista
+        $this->layout = null;
+        $this->set('url', $url);
     }
 
     /**

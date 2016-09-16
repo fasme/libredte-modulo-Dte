@@ -76,11 +76,8 @@ new \sowerphp\general\View_Helper_Table([
 <?php if (!$Emisor->config_sii_estado_dte_webservice) : ?>
                     <br/>
 <?php endif; ?>
-<?php
-list($rutQuery, $dvQuery) = explode('-', $Emisor->getFirma()->getId());
-$servidor = \sasco\LibreDTE\Sii::getServidor();
-?>
-                    <a href="#" onclick="__.popup('https://<?=$servidor?>.sii.cl/cgi_dte/UPL/QEstadoEnvio2?rutQuery=<?=$rutQuery?>&amp;dvQuery=<?=$dvQuery?>&amp;rutCompany=<?=$Emisor->rut?>&amp;dvCompany=<?=$Emisor->dv?>&amp;TrackId=<?=$DteEmitido->track_id?>&amp;NPagina=1', 700, 500)" title="Ver el estado del documento en la web del SII">ver estado en SII</a>
+                    <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/estado_envio', 750, 550)" title="Ver el estado del envío sen la web del SII">ver estado envío en SII</a><br/>
+                    <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/verificar_datos', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
 <?php if ($DteEmitido->getEstado()=='R') : ?>
                     <br/>
                     <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
@@ -92,6 +89,7 @@ $servidor = \sasco\LibreDTE\Sii::getServidor();
                 <a class="btn btn-info" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
                 <br/>
                 <span style="font-size:0.8em">
+                    <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/verificar_datos', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
                     <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
                 </span>
             </p>
