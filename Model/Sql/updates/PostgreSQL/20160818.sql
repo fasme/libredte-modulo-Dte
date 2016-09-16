@@ -7,6 +7,8 @@
 -- deberán convertir los datos actuales si llegasen a existir
 --
 
+BEGIN;
+
 ALTER TABLE dte_recibido
 	ADD impuesto_puros INTEGER,
 	ADD impuesto_cigarrillos INTEGER,
@@ -24,3 +26,5 @@ ALTER TABLE dte_recibido ALTER impuesto_adicional TYPE TEXT;
 UPDATE dte_recibido SET impuesto_adicional = NULL;
 ALTER TABLE dte_recibido DROP impuesto_adicional_tasa;
 ALTER TABLE dte_recibido ALTER iva_uso_comun TYPE INTEGER;
+
+COMMIT;
