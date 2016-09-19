@@ -308,7 +308,7 @@ class Model_DteIntercambio extends \Model_App
     /**
      * Método que guarda el enviodte que se ha recibido desde otro contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-09
+     * @version 2016-09-18
      */
     public function save()
     {
@@ -331,6 +331,8 @@ class Model_DteIntercambio extends \Model_App
             ]);
             if ($existe)
                 return true;
+            // corregir datos
+            $this->archivo = utf8_encode($this->archivo);
             // guardar entrada
             $this->db->beginTransaction(true);
             $this->codigo = (int)$this->db->getValue('
@@ -338,9 +340,14 @@ class Model_DteIntercambio extends \Model_App
                 FROM dte_intercambio
                 WHERE receptor = :receptor AND certificacion = :certificacion
             ', [':receptor' => $this->receptor, 'certificacion' => $this->certificacion]) + 1;
-            $status = parent::save();
-            $this->db->commit();
-            return $status;
+            try {
+                $status = parent::save();
+                $this->db->commit();
+                return $status;
+            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                $this->db->rollback();
+                throw new \Exception('Error al guardar el archivo \''.$this->archivo.'\' del intercambio enviado por '.$this->de.' con el asunto \''.$this->asunto.'\' del día '.$this->fecha_hora_email.' / '.$e->getMessage());
+            }
         } else {
             return parent::save();
         }
