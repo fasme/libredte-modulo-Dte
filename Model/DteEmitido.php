@@ -770,4 +770,20 @@ class Model_DteEmitido extends Model_Base_Envio
         }
     }
 
+    /**
+     * Método que corrige el monto total del DTE al valor de la moneda oficial
+     * para el día según lo registrado en el sistema (datos del banco central)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-20
+     */
+    public function calcularCLP()
+    {
+        if (!$this->getDte()->esExportacion())
+	    return false;
+        $moneda = $this->getDte()->getDatos()['Encabezado']['Totales']['TpoMoneda'];
+        $total = $this->getDte()->getDatos()['Encabezado']['Totales']['MntTotal'];
+        $cambio = (float)(new \sowerphp\app\Sistema\General\Model_MonedaCambio($moneda, 'CLP', $this->fecha))->valor;
+        return $cambio ? abs(round($total*$cambio)) : -1;
+    }
+
 }
