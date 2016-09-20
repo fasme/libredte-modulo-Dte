@@ -46,20 +46,20 @@
         'desc' => 'Revisar documentos recibidos',
         'icon' => 'fa fa-sign-in',
     ],
-    '/dte_intercambios/listar' => [
-        'name' => 'Bandeja de intercambio',
-        'desc' => 'Menú de intercambio de DTE entre contribuyentes',
-        'icon' => 'fa fa-exchange',
+    '/dte_ventas' => [
+        'name' => 'Libro de ventas',
+        'desc' => 'Acceder al Libro de Ventas',
+        'icon' => 'fa fa-book',
     ],
     '/dte_compras' => [
         'name' => 'Libro de compras',
         'desc' => 'Acceder al Libro de Compras',
         'icon' => 'fa fa-book',
     ],
-    '/dte_ventas' => [
-        'name' => 'Libro de ventas',
-        'desc' => 'Acceder al Libro de Ventas',
-        'icon' => 'fa fa-book',
+    '/dte_intercambios/listar' => [
+        'name' => 'Bandeja de intercambio',
+        'desc' => 'Menú de intercambio de DTE entre contribuyentes',
+        'icon' => 'fa fa-exchange',
     ],
     '/dte_guias' => [
         'name' => 'Libro de guías',
