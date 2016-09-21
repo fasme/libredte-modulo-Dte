@@ -151,7 +151,7 @@ class Model_DteIntercambioResultado extends \Model_App
     /**
      * Método que guarda el XML del Resultado de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-23
+     * @version 2016-09-21
      */
     public function saveXML($Emisor, $xml) {
         // crear respuesta
@@ -203,7 +203,7 @@ class Model_DteIntercambioResultado extends \Model_App
             $DteIntercambioResultadoDte->responde = $this->responde;
             $DteIntercambioResultadoDte->codigo = $this->codigo;
             $DteIntercambioResultadoDte->estado = $Resultado['EstadoDTE'];
-            $DteIntercambioResultadoDte->glosa = substr($Resultado['EstadoDTEGlosa'], 0, 256);
+            $DteIntercambioResultadoDte->glosa = isset($Resultado['EstadoDTEGlosa']) ? substr($Resultado['EstadoDTEGlosa'], 0, 256) : '';
             if (!$DteIntercambioResultadoDte->save()) {
                 $this->db->rollback();
                 return false;
