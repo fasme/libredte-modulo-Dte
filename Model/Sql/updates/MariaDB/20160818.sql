@@ -7,7 +7,7 @@
 -- deberán convertir los datos actuales si llegasen a existir
 --
 
-BEGIN;
+START TRANSACTION;
 
 ALTER TABLE dte_recibido
 	ADD impuesto_puros INTEGER,
@@ -18,13 +18,14 @@ ALTER TABLE dte_recibido
 	ADD emisor_nc_nd_fc SMALLINT,
 	ADD sucursal_sii_receptor INTEGER
 ;
-ALTER TABLE dte_recibido DROP CONSTRAINT dte_recibido_iva_no_recuperable_fk;
-ALTER TABLE dte_recibido ALTER iva_no_recuperable TYPE TEXT;
+ALTER TABLE dte_recibido DROP FOREIGN KEY dte_recibido_iva_no_recuperable_fk;
+ALTER TABLE dte_recibido MODIFY iva_no_recuperable VARCHAR(1000);
 -- UPDATE dte_recibido SET iva_no_recuperable = NULL;
-ALTER TABLE dte_recibido DROP CONSTRAINT dte_recibido_impuesto_adicional_fk;
-ALTER TABLE dte_recibido ALTER impuesto_adicional TYPE TEXT;
+-- UPDATE dte_recibido SET iva_no_recuperable = CONCAT('[{"codigo":"1","monto":"',iva,'"}]') WHERE iva_no_recuperable IS NOR NULL;
+ALTER TABLE dte_recibido DROP FOREIGN KEY dte_recibido_impuesto_adicional_fk;
+ALTER TABLE dte_recibido MODIFY impuesto_adicional VARCHAR(1000);
 -- UPDATE dte_recibido SET impuesto_adicional = NULL;
 ALTER TABLE dte_recibido DROP impuesto_adicional_tasa;
-ALTER TABLE dte_recibido ALTER iva_uso_comun TYPE INTEGER;
+ALTER TABLE dte_recibido MODIFY iva_uso_comun INTEGER;
 
 COMMIT;
