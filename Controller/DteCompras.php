@@ -129,7 +129,7 @@ class Controller_DteCompras extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de compras al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-02
+     * @version 2016-09-22
      */
     public function enviar_sii($periodo)
     {
@@ -174,17 +174,17 @@ class Controller_DteCompras extends Controller_Base_Libros
                 }
             }
             // agregar iva no recuperable
-            if (!empty($compra['iva_no_recuperable'])) {
+            if (!empty($compra['iva_no_recuperable_codigo'])) {
                 $d['IVANoRec'] = [
-                    'CodIVANoRec' => $compra['iva_no_recuperable'],
+                    'CodIVANoRec' => $compra['iva_no_recuperable_codigo'],
                     'MntIVANoRec' => $compra['iva_no_recuperable_monto'],
                 ];
             }
             // agregar otros impuestos
-            if (!empty($compra['impuesto_adicional'])) {
+            if (!empty($compra['impuesto_adicional_codigo'])) {
                 $d['OtrosImp'] = [
-                    'CodImp' => $compra['impuesto_adicional'],
-                    'TasaImp' => $compra['impuesto_adicional_tasa'],
+                    'CodImp' => $compra['impuesto_adicional_codigo'],
+                    'TasaImp' => $compra['impuesto_adicional_tasa'] ? $compra['impuesto_adicional_tasa'] : 0,
                     'MntImp' => $compra['impuesto_adicional_monto'],
                 ];
             }
