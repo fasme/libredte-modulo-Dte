@@ -18,12 +18,14 @@
 
 <?php
 foreach ($intercambios as &$i) {
-    $documentos = explode('|', $i['documentos']);
-    foreach ($documentos as &$d) {
-        list($tipo, $folio) = explode(',', $d);
-        $d = 'T'.$tipo.'F'.$folio;
+    if (!is_numeric($i['documentos'])) {
+        $documentos = explode('|', $i['documentos']);
+        foreach ($documentos as &$d) {
+            list($tipo, $folio) = explode(',', $d);
+            $d = 'T'.$tipo.'F'.$folio;
+        }
+        $i['documentos'] = implode('<br/>', $documentos);
     }
-    $i['documentos'] = implode('<br/>', $documentos);
     $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$i['codigo'].'" title="Ver detalles del intercambio"><span class="fa fa-search btn btn-default"></span></a>';
     $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$i['codigo'].'" title="Descargar PDF del intercambio"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
     $i[] = $acciones;
