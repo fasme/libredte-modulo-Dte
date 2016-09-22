@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando para actualizar la bandeja de intercambio de los contribuyentes
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-07-01
+ * @version 2016-09-22
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
@@ -36,20 +36,20 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         $this->db = \sowerphp\core\Model_Datasource_Database::get();
         $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
         foreach ($contribuyentes as $rut) {
-            $this->actualizarDocumentosEmitidos($rut);
+            $this->actualizarDocumentosEmitidos($rut, $certificacion);
         }
         $this->showStats();
         return 0;
     }
 
-    private function actualizarDocumentosEmitidos($rut)
+    private function actualizarDocumentosEmitidos($rut, $certificacion)
     {
         $Contribuyente = new Model_Contribuyente($rut);
         if ($this->verbose) {
             $this->out('Buscando documentos del contribuyente '.$Contribuyente->razon_social);
         }
         // actualizar estado de DTE enviados
-        $sin_estado = $Contribuyente->getDteEmitidosSinEstado();
+        $sin_estado = $Contribuyente->getDteEmitidosSinEstado($certificacion);
         foreach ($sin_estado as $d) {
             if ($this->verbose) {
                 $this->out('  Actualizando estado T'.$d['dte'].'F'.$d['folio'].': ', 0);
@@ -76,7 +76,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             }
         }
         // enviar lo generado sin track id
-        $sin_enviar = $Contribuyente->getDteEmitidosSinEnviar();
+        $sin_enviar = $Contribuyente->getDteEmitidosSinEnviar($certificacion);
         foreach ($sin_enviar as $d) {
             if ($this->verbose) {
                 $this->out('  Enviando al SII T'.$d['dte'].'F'.$d['folio'].': ', 0);
