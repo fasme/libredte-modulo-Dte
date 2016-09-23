@@ -1977,6 +1977,12 @@ class Model_Contribuyente extends \Model_App
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
+    /**
+     * Método que entrega el detalle de los documentos emitidos con cierto
+     * estado en un rango de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
     public function getDocumentosEmitidosEstado($desde, $hasta, $estado = null)
     {
         // filtros
@@ -2025,6 +2031,52 @@ class Model_Contribuyente extends \Model_App
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
 
         ', $vars);
+    }
+    
+    /**
+     * Método que entrega el detalle de los documentos emitidos que aun no han
+     * sido enviado al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function getDocumentosEmitidosSinEnviar()
+    {
+        // forma de obtener razón social
+        $razon_social_xpath = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Exportaciones/n:Encabezado/n:Receptor/n:RznSocRecep\', CONVERT_FROM(decode(d.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{"}\')';
+        $razon_social =
+            $this->db->config['type']=='PostgreSQL'
+            ? 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social'
+            : 'r.razon_social'
+        ;
+        // realizar consulta
+        return $this->db->getTable('
+            SELECT
+                d.dte,
+                t.tipo,
+                d.folio,
+                '.$razon_social.',
+                d.fecha,
+                d.total,
+                i.glosa AS intercambio,
+                d.sucursal_sii,
+                u.usuario
+            FROM
+                dte_emitido AS d LEFT JOIN dte_intercambio_resultado_dte AS i
+                    ON i.emisor = d.emisor AND i.dte = d.dte AND i.folio = d.folio AND i.certificacion = d.certificacion,
+                dte_tipo AS t,
+                contribuyente AS r,
+                usuario AS u
+            WHERE
+                d.dte = t.codigo
+                AND d.receptor = r.rut
+                AND d.usuario = u.id
+                AND d.emisor = :rut
+                AND d.certificacion = :certificacion
+                AND d.dte NOT IN (39, 41)
+                AND d.track_id IS NULL
+            ORDER BY d.fecha DESC, t.tipo, d.folio DESC
+
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
     }
 
 }
