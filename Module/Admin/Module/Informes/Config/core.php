@@ -24,9 +24,9 @@
 // Menú para el módulo
 Configure::write('nav.module', array(
     '/documentos' => [
-        'name' => 'Documentos emitidos y recibidos',
+        'name' => 'Documentos usados',
         'desc' => 'Reporte con documentos emitidos y recibidos por contribuyente',
-        'icon' => 'fa fa-files-o',
+        'icon' => 'fa fa-calculator',
     ],
     '/contribuyentes' => [
         'name' => 'Contribuyentes registrados',

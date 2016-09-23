@@ -1917,4 +1917,114 @@ class Model_Contribuyente extends \Model_App
         ', [':emisor'=>$this->rut]);
     }
 
+    /**
+     * Método que entrega la cuota de documentos asignada al contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function getCuota()
+    {
+        return \sowerphp\core\Configure::read('dte.cuota');
+    }
+    
+    /**
+     * Método que entrega los documentos usados por el contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function getDocumentosUsados()
+    {
+        $periodo = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(fecha, "%Y%m")';
+        $datos = $this->db->getTable('
+            SELECT e.periodo, e.total AS emitidos, r.total AS recibidos
+            FROM
+                (
+                    SELECT '.$periodo.' AS periodo, COUNT(*) AS total
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion
+                    GROUP BY '.$periodo.'
+                ) AS e
+                LEFT JOIN
+                (
+                    SELECT '.$periodo.' AS periodo, COUNT(*) AS total
+                    FROM dte_recibido
+                    WHERE receptor = :rut AND certificacion = :certificacion
+                    GROUP BY '.$periodo.'
+                ) AS r ON e.periodo = r.periodo
+            ORDER BY e.periodo DESC
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        $cuota = $this->getCuota();
+        foreach ($datos as &$d) {
+            $d['total'] = $d['emitidos'] + $d['recibidos'];
+            $d['sobre_cuota'] = ($cuota and ($d['total']-$cuota)>0) ? $d['total']-$cuota : null;
+        }
+        return $datos;
+    }
+
+    /**
+     * Método que entrega el resumen de los estados de los DTE para un periodo de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function getDocumentosEmitidosResumenEstados($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT revision_estado AS estado, COUNT(*) AS total
+            FROM dte_emitido
+            WHERE emisor = :rut AND certificacion = :certificacion AND fecha BETWEEN :desde AND :hasta AND track_id > 0
+            GROUP BY revision_estado
+            ORDER BY total DESC
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    public function getDocumentosEmitidosEstado($desde, $hasta, $estado = null)
+    {
+        // filtros
+        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        if ($estado) {
+            $vars[':estado'] = $estado;
+            $estado = 'd.revision_estado = :estado';
+        } else {
+            $estado = 'd.revision_estado IS NULL';
+        }
+        // forma de obtener razón social
+        $razon_social_xpath = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Exportaciones/n:Encabezado/n:Receptor/n:RznSocRecep\', CONVERT_FROM(decode(d.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{"}\')';
+        $razon_social =
+            $this->db->config['type']=='PostgreSQL'
+            ? 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social'
+            : 'r.razon_social'
+        ;
+        // realizar consulta
+        return $this->db->getTable('
+            SELECT
+                d.dte,
+                t.tipo,
+                d.folio,
+                '.$razon_social.',
+                d.fecha,
+                d.total,
+                d.revision_detalle AS estado_detalle,
+                i.glosa AS intercambio,
+                d.sucursal_sii,
+                u.usuario
+            FROM
+                dte_emitido AS d LEFT JOIN dte_intercambio_resultado_dte AS i
+                    ON i.emisor = d.emisor AND i.dte = d.dte AND i.folio = d.folio AND i.certificacion = d.certificacion,
+                dte_tipo AS t,
+                contribuyente AS r,
+                usuario AS u
+            WHERE
+                d.dte = t.codigo
+                AND d.receptor = r.rut
+                AND d.usuario = u.id
+                AND d.emisor = :rut
+                AND d.certificacion = :certificacion
+                AND d.fecha BETWEEN :desde AND :hasta
+                AND d.track_id > 0
+                AND '.$estado.'
+            ORDER BY d.fecha DESC, t.tipo, d.folio DESC
+
+        ', $vars);
+    }
+
 }

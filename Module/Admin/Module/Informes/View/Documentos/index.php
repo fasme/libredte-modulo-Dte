@@ -42,6 +42,6 @@ if (isset($contribuyentes)) {
         $c['rut'] = \sowerphp\app\Utility_Rut::addDV($c['rut']);
         $c['ambiente'] = $c['ambiente'] ? 'Certificación' : 'Producción';
     }
-    array_unshift($contribuyentes, ['RUT', 'Razón social', 'Ambiente', 'Usuario', 'Nombre', 'Email', 'Emitidos', 'Recibidos', 'Total']);
+    array_unshift($contribuyentes, ['RUT', 'Razón social', 'Ambiente', 'Usuario', 'Nombre', 'Email', 'Emitidos', 'Recibidos', 'Total', 'Sobre la cuota']);
     new \sowerphp\general\View_Helper_Table($contribuyentes, 'documentos_emitidos_recibidos_'.$_POST['desde'].'_'.$_POST['hasta'], true);
 }

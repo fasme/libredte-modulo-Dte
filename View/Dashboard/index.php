@@ -164,10 +164,39 @@
             </div>
         </div>
         <!-- fin graficos ventas y compras -->
+        <!-- estado de documentos emitidos -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Estado documentos emitidos período <?=$periodo?>
+                    </div>
+                    <div class="panel-body">
+                        <div id="grafico-dte_emitidos_estados"></div>
+                        <a href="informes/dte_emitidos/estados/<?=$desde?>/<?=$hasta?>" class="btn btn-default btn-block">Ver detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin estado de documentos emitidos -->
     </div>
     <!-- FIN PANEL CENTRO -->
     <!-- PANEL DERECHA -->
     <div class="col-md-3">
+<?php if ($cuota) : ?>
+        <!-- dtes usados (totales de emitidos y recibidos) -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-calculator fa-fw"></i>
+                Documentos usados
+            </div>
+            <div class="panel-body text-center">
+                <span class="lead text-info"><?=num($n_dtes)?></span> <small class="text-muted"> de <?=num($cuota)?></small><br/>
+                <span style="font-size:0.8em"><a href="<?=$_base?>/dte/informes/documentos_usados">ver detalle de uso</a></span>
+            </div>
+        </div>
+        <!-- fin dtes usados (totales de emitidos y recibidos) -->
+<?php endif; ?>
         <!-- folios disponibles -->
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -266,6 +295,14 @@ Morris.Donut({
 Morris.Donut({
     element: 'grafico-compras',
     data: <?=json_encode($compras_periodo)?>,
+    resize: true
+});
+Morris.Bar({
+    element: 'grafico-dte_emitidos_estados',
+    data: <?=json_encode($emitidos_estados)?>,
+    xkey: 'estado',
+    ykeys: ['total'],
+    labels: ['DTEs'],
     resize: true
 });
 </script>

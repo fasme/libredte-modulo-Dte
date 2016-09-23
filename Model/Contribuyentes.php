@@ -98,7 +98,7 @@ class Model_Contribuyentes extends \Model_Plural_App
      * @param rut Filtrar por el RUT de un contribuyente específico
      * @return Tabla con los contribuyentes y sus movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-03
+     * @version 2016-09-23
      */
     public function getConMovimientos($desde = 1, $hasta = null, $certificacion = false, $dte = null, $rut = null)
     {
@@ -156,8 +156,10 @@ class Model_Contribuyentes extends \Model_Plural_App
             WHERE (e.emitidos > 0 OR r.recibidos > 0)
             ORDER BY c.razon_social
         ', $vars);
+        $cuota = \sowerphp\core\Configure::read('dte.cuota');
         foreach ($contribuyentes as &$c) {
             $c['total'] = $c['emitidos'] + $c['recibidos'];
+            $c['sobre_cuota'] = ($cuota and ($c['total']-$cuota)>0) ? $c['total']-$cuota : null;
         }
         return $contribuyentes;
     }

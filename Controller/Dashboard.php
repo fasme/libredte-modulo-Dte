@@ -50,6 +50,9 @@ class Controller_Dashboard extends \Controller_App
         $n_recibidos = (new Model_DteRecibidos())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta', 'dte != 52'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count();
         $n_recibidos += (new Model_DteEmitidos())->setWhereStatement(['emisor = :emisor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta', 'dte = 46'], [':emisor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count();
         $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'usuario IS NULL'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
+        // valores para cuota
+        $cuota = $Emisor->getCuota();
+        $n_dtes = $cuota ? (new Model_DteEmitidos())->setWhereStatement(['emisor = :emisor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta'], [':emisor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count() + (new Model_DteRecibidos())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count() : false;
         // libros pendientes de enviar del período anterior
         $libro_ventas = (new Model_DteVentas())->setWhereStatement(['emisor = :emisor', 'periodo = :periodo', 'certificacion = :certificacion', 'track_id IS NOT NULL'], [':emisor'=>$Emisor->rut, ':periodo'=>$periodo_anterior, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
         $libro_compras = (new Model_DteCompras())->setWhereStatement(['receptor = :receptor', 'periodo = :periodo', 'certificacion = :certificacion', 'track_id IS NOT NULL'], [':receptor'=>$Emisor->rut, ':periodo'=>$periodo_anterior, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
@@ -79,6 +82,8 @@ class Controller_Dashboard extends \Controller_App
                 $f['alerta'] = 1;
             $folios[$f['tipo']] = $f['disponibles'] ? round((1-($f['alerta']/$f['disponibles']))*100) : 0;
         }
+        // estados de documentos emitidos del periodo
+        $emitidos_estados = $Emisor->getDocumentosEmitidosResumenEstados($desde, $hasta);
         // asignar variables a la vista
         $this->set([
             'nav' => array_slice(\sowerphp\core\Configure::read('nav.module'), 1),
@@ -86,6 +91,8 @@ class Controller_Dashboard extends \Controller_App
             'Firma' => $Emisor->getFirma($this->Auth->User->id),
             'periodo' => $periodo,
             'periodo_anterior' => $periodo_anterior,
+            'desde' => $desde,
+            'hasta' => $hasta,
             'n_temporales' => $n_temporales,
             'n_emitidos' => $n_emitidos,
             'n_recibidos' => $n_recibidos,
@@ -96,6 +103,9 @@ class Controller_Dashboard extends \Controller_App
             'ventas_periodo' => $ventas_periodo,
             'compras_periodo' => $compras_periodo,
             'folios' => $folios,
+            'n_dtes' => $n_dtes,
+            'cuota' => $cuota,
+            'emitidos_estados' => $emitidos_estados,
         ]);
     }
 
