@@ -25,7 +25,7 @@
 namespace website\Dte;
 
 /**
- * Clase para el Dashboard del módulode facturación
+ * Clase para el Dashboard del módulo de facturación
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
  * @version 2016-02-02
  */
