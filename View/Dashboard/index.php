@@ -9,7 +9,7 @@
                         <i class="fa fa-file-o fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge"><?=$n_temporales?></div>
+                        <div class="huge"><?=num($n_temporales)?></div>
                         <div>Documentos temporales</div>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                         <i class="fa fa-sign-out fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge"><?=$n_emitidos?></div>
+                        <div class="huge"><?=num($n_emitidos)?></div>
                         <div>Documentos emitidos</div>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                         <i class="fa fa-sign-in fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge"><?=$n_recibidos?></div>
+                        <div class="huge"><?=num($n_recibidos)?></div>
                         <div>Documentoss recibidos</div>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                         <i class="fa fa-exchange fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
-                        <div class="huge"><?=$n_intercambios?></div>
+                        <div class="huge"><?=num($n_intercambios)?></div>
                         <div>Intercambios pendientes</div>
                     </div>
                 </div>
