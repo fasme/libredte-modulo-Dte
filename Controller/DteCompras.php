@@ -75,7 +75,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     /**
      * Acción que permite importar un libro desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-01
+     * @version 2016-10-03
      */
     public function importar()
     {
@@ -97,24 +97,50 @@ class Controller_DteCompras extends Controller_Base_Libros
             $noGuardado = [];
             foreach ($detalle as $d) {
                 $datos = array_combine($keys, $d);
-                $DteRecibido = new Model_DteRecibido();
+                $emisor = explode('-', str_replace('.', '', $datos['rut']))[0];
+                $DteRecibido = new Model_DteRecibido($emisor, $datos['dte'], $datos['folio'], $Receptor->config_ambiente_en_certificacion);
                 $DteRecibido->set($datos);
-                $DteRecibido->emisor = explode('-', str_replace('.', '', $datos['rut']))[0];
-                $DteRecibido->certificacion = $Receptor->config_ambiente_en_certificacion;
+                $DteRecibido->emisor = $emisor;
                 $DteRecibido->receptor = $Receptor->rut;
                 $DteRecibido->usuario = $this->Auth->User->id;
-                try {
-                    if (!$DteRecibido->save()) {
-                        $noGuardado[] = 'T'.$DteRecibido->dte.'F'.$DteRecibido->folio;
+                // si el DTE es de producción y es electrónico entonces se consultará su
+                // estado antes de poder guardar, esto evitará agregar documentos que no
+                // han sido recibidos en el SII o sus datos son incorrectos
+                $guardar = true;
+                if (!$DteRecibido->certificacion and $DteRecibido->getTipo()->electronico) {
+                    // obtener firma
+                    $Firma = $Receptor->getFirma($this->Auth->User->id);
+                    if (!$Firma) {
+                        \sowerphp\core\Model_Datasource_Session::message(
+                            'No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE', 'error'
+                        );
+                        $this->redirect('/dte/admin/firma_electronicas');
                     }
-                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-                    $noGuardado[] = 'T'.$DteRecibido->dte.'F'.$DteRecibido->folio.': '.$e->getMessage();
+                    // consultar estado dte
+                    $estado = $DteRecibido->getEstado($Firma);
+                    if ($estado===false) {
+                        $guardar = false;
+                        $noGuardado[] = 'T'.$DteRecibido->dte.'F'.$DteRecibido->folio.': '.implode(' / ', \sasco\LibreDTE\Log::readAll());
+                    } else if (in_array($estado['ESTADO'], ['DNK', 'FAU', 'FNA', 'EMP'])) {
+                        $guardar = false;
+                        $noGuardado[] = 'T'.$DteRecibido->dte.'F'.$DteRecibido->folio.' Estado DTE: '.(is_array($estado)?implode('. ', $estado):$estado);
+                    }
+                }
+                // guardar documento
+                if ($guardar) {
+                    try {
+                        if (!$DteRecibido->save()) {
+                            $noGuardado[] = 'T'.$DteRecibido->dte.'F'.$DteRecibido->folio;
+                        }
+                    } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                        $noGuardado[] = 'T'.$DteRecibido->dte.'F'.$DteRecibido->folio.': '.$e->getMessage();
+                    }
                 }
             }
             // mostrar errores o redireccionar
             if ($noGuardado) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Los siguientes documentos no se agregaron:<br/><br/>- '.implode('<br/><br/>- ', $noGuardado), 'error'
+                    'Los siguientes documentos no se agregaron:<br/>- '.implode('<br/>- ', $noGuardado), 'error'
                 );
             } else {
                 \sowerphp\core\Model_Datasource_Session::message(
