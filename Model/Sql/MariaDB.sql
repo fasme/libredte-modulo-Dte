@@ -481,7 +481,7 @@ CREATE TABLE dte_intercambio_resultado_dte (
 	responde INTEGER NOT NULL,
 	codigo CHAR(32) NOT NULL,
 	estado INTEGER NOT NULL,
-	glosa VARCHAR(256) NOT NULL,
+	glosa VARCHAR(256),
 	CONSTRAINT dte_intercambio_resultado_dte_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_intercambio_resultado_dte_pk_fk FOREIGN KEY (emisor, dte, folio, certificacion)
 		REFERENCES dte_emitido (emisor, dte, folio, certificacion) MATCH FULL
