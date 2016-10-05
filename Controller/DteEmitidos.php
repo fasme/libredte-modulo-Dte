@@ -557,12 +557,19 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción que permite realizar consultas sobre el documento en la web del
      * SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-16
+     * @version 2016-10-05
      */
     public function sii($dte, $folio, $consulta)
     {
         $Emisor = $this->getContribuyente();
-        list($rutQuery, $dvQuery) = explode('-', $Emisor->getFirma()->getId());
+        $Firma = $Emisor->getFirma($this->Auth->User->id);
+        if (!$Firma) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe firma asociada', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        list($rutQuery, $dvQuery) = explode('-', $Firma->getId());
         $servidor = \sasco\LibreDTE\Sii::getServidor();
         // obtener DTE emitido
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
