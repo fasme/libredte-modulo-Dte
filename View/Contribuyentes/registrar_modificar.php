@@ -686,6 +686,123 @@ echo $f->input([
 <div role="tabpanel" class="tab-pane" id="contabilidad">
     <div class="panel panel-default">
         <div class="panel-heading">
+            <i class="fa fa-map-o"></i>
+            Mapa de cuentas contables para DTEs
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_contabilidad_mapeo_ventas',
+    'label' => 'Ventas',
+    'options' => [''=>'Cuenta sin definir'] + $cuentas,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_ventas : false,
+    'help' => 'Cuenta contable para el monto neto y exento de las ventas (puede ser una cuenta transitoria)',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_contabilidad_mapeo_compras',
+    'label' => 'Compras',
+    'options' => [''=>'Cuenta sin definir'] + $cuentas,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_compras : false,
+    'help' => 'Cuenta contable para el monto neto y exento de las compras (puede ser una cuenta transitoria)',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_contabilidad_mapeo_iva_debito',
+    'label' => 'IVA débito',
+    'options' => [''=>'Cuenta sin definir'] + $cuentas,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_iva_debito : false,
+    'help' => 'Cuenta contable del IVA débito',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_contabilidad_mapeo_iva_credito',
+    'label' => 'IVA crédito',
+    'options' => [''=>'Cuenta sin definir'] + $cuentas,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_iva_credito : false,
+    'help' => 'Cuenta contable del IVA crédito',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-map-o"></i>
+            Mapa de cuentas contables para reportes e informes
+        </div>
+        <div class="panel-body">
+<?php
+$config_contabilidad_mapeo_dinero = [];
+$config_contabilidad_mapeo_por_cobrar = [];
+$config_contabilidad_mapeo_por_pagar = [];
+if (isset($Contribuyente)) {
+    foreach ((array)$Contribuyente->config_contabilidad_mapeo_dinero as $cuenta) {
+        $config_contabilidad_mapeo_dinero[] = [
+            'config_contabilidad_mapeo_dinero' => $cuenta,
+        ];
+    }
+    foreach ((array)$Contribuyente->config_contabilidad_mapeo_por_cobrar as $cuenta) {
+        $config_contabilidad_mapeo_por_cobrar[] = [
+            'config_contabilidad_mapeo_por_cobrar' => $cuenta,
+        ];
+    }
+    foreach ((array)$Contribuyente->config_contabilidad_mapeo_por_pagar as $cuenta) {
+        $config_contabilidad_mapeo_por_pagar[] = [
+            'config_contabilidad_mapeo_por_pagar' => $cuenta,
+        ];
+    }
+}
+echo $f->input([
+    'type' => 'js',
+    'id' => 'config_contabilidad_mapeo_dinero',
+    'label' => 'Dinero',
+    'titles' => ['Cuenta contable'],
+    'inputs' => [
+        [
+            'type' => 'select',
+            'name' => 'config_contabilidad_mapeo_dinero',
+            'options' => $cuentas,
+        ],
+    ],
+    'values' => $config_contabilidad_mapeo_dinero,
+    'help' => 'Cuentas contables que son dinero, ejemplo: caja o banco',
+]);
+echo $f->input([
+    'type' => 'js',
+    'id' => 'config_contabilidad_mapeo_por_cobrar',
+    'label' => 'Por cobrar',
+    'titles' => ['Cuenta contable'],
+    'inputs' => [
+        [
+            'type' => 'select',
+            'name' => 'config_contabilidad_mapeo_por_cobrar',
+            'options' => $cuentas,
+        ],
+    ],
+    'values' => $config_contabilidad_mapeo_por_cobrar,
+    'help' => 'Cuentas contables que representan montos por cobrar',
+]);
+echo $f->input([
+    'type' => 'js',
+    'id' => 'config_contabilidad_mapeo_por_pagar',
+    'label' => 'Por pagar',
+    'titles' => ['Cuenta contable'],
+    'inputs' => [
+        [
+            'type' => 'select',
+            'name' => 'config_contabilidad_mapeo_por_pagar',
+            'options' => $cuentas,
+        ],
+    ],
+    'values' =>  $config_contabilidad_mapeo_por_pagar,
+    'help' => 'Cuentas contables que representan montos por pagar',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <i class="fa fa-dollar"></i>
             Formulario 29
         </div>
