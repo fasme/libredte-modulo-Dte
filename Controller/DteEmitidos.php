@@ -46,7 +46,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite mostrar los documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-13
+     * @version 2016-10-06
      */
     public function listar($pagina = 1)
     {
@@ -62,6 +62,7 @@ class Controller_DteEmitidos extends \Controller_App
             }
         }
         $searchUrl = isset($_GET['search'])?('?search='.$_GET['search']):'';
+        $paginas = 1;
         try {
             $documentos_total = $Emisor->countDocumentosEmitidos($filtros);
             if (!empty($pagina)) {
@@ -71,7 +72,7 @@ class Controller_DteEmitidos extends \Controller_App
                 if ($pagina != 1 && $pagina > $paginas) {
                     $this->redirect('/dte/'.$this->request->params['controller'].'/listar'.$searchUrl);
                 }
-            } else $paginas = 1;
+            }
             $documentos = $Emisor->getDocumentosEmitidos($filtros);
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             \sowerphp\core\Model_Datasource_Session::message(
