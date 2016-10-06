@@ -95,7 +95,7 @@ new \sowerphp\general\View_Helper_Table([
         <div class="panel-body">
 <?php
 $titulos = [];
-$total = ['TpoDoc' => '<strong>Total</strong>',];
+$total = ['TpoDoc' => '<strong>Total</strong>'];
 foreach ($resumen as &$r) {
     $titulos = array_keys($r);
     foreach (['FctProp'] as $c) {
@@ -111,6 +111,19 @@ foreach ($resumen as &$r) {
     foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntActivoFijo', 'TotMntIVAActivoFijo', 'TotIVANoRec', 'TotIVAUsoComun', 'TotCredIVAUsoComun', 'TotOtrosImp', 'TotIVARetTotal', 'TotIVARetParcial', 'TotImpSinCredito', 'TotMntTotal', 'TotIVANoRetenido', 'TotMntNoFact', 'TotMntPeriodo'] as $c) {
         if (!isset($total[$c]))
             $total[$c] = 0;
+        if (is_array($r[$c])) {
+            $valor = 0;
+            if ($c=='TotOtrosImp') {
+                foreach ($r[$c] as $monto) {
+                    $valor += $monto['TotMntImp'];
+                }
+            } else if ($c=='TotIVANoRec') {
+                foreach ($r[$c] as $monto) {
+                    $valor += $monto['TotMntIVANoRec'];
+                }
+            }
+            $r[$c] = $valor;
+        }
         if ($operaciones[$r['TpoDoc']]=='S')
             $total[$c] += $r[$c];
         else if ($operaciones[$r['TpoDoc']]=='R')

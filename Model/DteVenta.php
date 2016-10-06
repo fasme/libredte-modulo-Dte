@@ -169,32 +169,11 @@ class Model_DteVenta extends Model_Base_Libro
      * Método que entrega el resumen real (de los detalles registrados) del
      * libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-13
+     * @version 2016-10-06
      */
     public function getResumen()
     {
-        $ventas = $this->getEmisor()->getVentas($this->periodo);
-        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
-        foreach ($ventas as $venta) {
-            // armar detalle para agregar al libro
-            $d = [];
-            foreach ($venta as $k => $v) {
-                if (strpos($k, 'impuesto_')!==0) {
-                    if ($v!==null)
-                        $d[self::$libro_cols[$k]] = $v;
-                }
-            }
-            // agregar otros impuestos
-            if (!empty($venta['impuesto_codigo'])) {
-                $d['OtrosImp'] = [
-                    'CodImp' => $venta['impuesto_codigo'],
-                    'TasaImp' => $venta['impuesto_tasa'],
-                    'MntImp' => $venta['impuesto_monto'],
-                ];
-            }
-            // agregar detalle al libro
-            $Libro->agregar($d);
-        }
+        $Libro = $this->getEmisor()->getLibroVentas($this->periodo);
         $resumen = $Libro->getResumen() + $this->getResumenManual();
         // limpiar resumen
         $campos = [

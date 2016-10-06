@@ -1132,6 +1132,39 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el objeto del libro de ventas a partir de las ventas registradas en la aplicación
+     * @param periodo Período para el cual se está construyendo el libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-06
+     */
+    public function getLibroVentas($periodo)
+    {
+        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+        $ventas = $this->getVentas($periodo);
+        foreach ($ventas as $venta) {
+            // armar detalle para agregar al libro
+            $d = [];
+            foreach ($venta as $k => $v) {
+                if (strpos($k, 'impuesto_')!==0) {
+                    if ($v!==null)
+                        $d[Model_DteVenta::$libro_cols[$k]] = $v;
+                }
+            }
+            // agregar otros impuestos
+            if (!empty($venta['impuesto_codigo'])) {
+                $d['OtrosImp'] = [
+                    'CodImp' => $venta['impuesto_codigo'],
+                    'TasaImp' => $venta['impuesto_tasa'],
+                    'MntImp' => $venta['impuesto_monto'],
+                ];
+            }
+            // agregar al libro
+            $Libro->agregar($d);
+        }
+        return $Libro;
+    }
+
+    /**
      * Método que entrega el resumen de las ventas diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-03-08
@@ -1551,6 +1584,46 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el objeto del libro de compras a partir de las compras registradas en la aplicación
+     * @param periodo Período para el cual se está construyendo el libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-06
+     */
+    public function getLibroCompras($periodo)
+    {
+        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+        $compras = $this->getCompras($periodo);
+        foreach ($compras as $compra) {
+            // armar detalle para agregar al libro
+            $d = [];
+            foreach ($compra as $k => $v) {
+                if (strpos($k, 'impuesto_adicional')!==0 and strpos($k, 'iva_no_recuperable')!==0) {
+                    if ($v!==null)
+                        $d[Model_DteCompra::$libro_cols[$k]] = $v;
+                }
+            }
+            // agregar iva no recuperable
+            if (!empty($compra['iva_no_recuperable_codigo'])) {
+                $d['IVANoRec'] = [
+                    'CodIVANoRec' => $compra['iva_no_recuperable_codigo'],
+                    'MntIVANoRec' => $compra['iva_no_recuperable_monto'],
+                ];
+            }
+            // agregar otros impuestos
+            if (!empty($compra['impuesto_adicional_codigo'])) {
+                $d['OtrosImp'] = [
+                    'CodImp' => $compra['impuesto_adicional_codigo'],
+                    'TasaImp' => $compra['impuesto_adicional_tasa'] ? $compra['impuesto_adicional_tasa'] : 0,
+                    'MntImp' => $compra['impuesto_adicional_monto'],
+                ];
+            }
+            // agregar detalle al libro
+            $Libro->agregar($d);
+        }
+        return $Libro;
+    }
+
+    /**
      * Método que entrega el resumen de las compras diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-05-28
@@ -1926,7 +1999,7 @@ class Model_Contribuyente extends \Model_App
     {
         return \sowerphp\core\Configure::read('dte.cuota');
     }
-    
+
     /**
      * Método que entrega los documentos usados por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -2032,7 +2105,7 @@ class Model_Contribuyente extends \Model_App
 
         ', $vars);
     }
-    
+
     /**
      * Método que entrega el detalle de los documentos emitidos que aun no han
      * sido enviado al SII

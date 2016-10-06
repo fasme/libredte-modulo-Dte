@@ -43,7 +43,7 @@ class Controller_DteVentas extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de ventas al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-02
+     * @version 2016-10-06
      */
     public function enviar_sii($periodo)
     {
@@ -63,10 +63,6 @@ class Controller_DteVentas extends Controller_Base_Libros
             );
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
-        // obtener ventas
-        $ventas = $Emisor->getVentas($periodo);
-        // crear libro
-        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
         // obtener firma
         $Firma = $Emisor->getFirma($this->Auth->User->id);
         if (!$Firma) {
@@ -74,29 +70,6 @@ class Controller_DteVentas extends Controller_Base_Libros
                 'No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE', 'error'
             );
             $this->redirect('/dte/admin/firma_electronicas');
-        }
-        // agregar detalle
-        $documentos = 0;
-        foreach ($ventas as $venta) {
-            $documentos++;
-            // armar detalle para agregar al libro
-            $d = [];
-            foreach ($venta as $k => $v) {
-                if (strpos($k, 'impuesto_')!==0) {
-                    if ($v!==null)
-                        $d[Model_DteVenta::$libro_cols[$k]] = $v;
-                }
-            }
-            // agregar otros impuestos
-            if (!empty($venta['impuesto_codigo'])) {
-                $d['OtrosImp'] = [
-                    'CodImp' => $venta['impuesto_codigo'],
-                    'TasaImp' => $venta['impuesto_tasa'],
-                    'MntImp' => $venta['impuesto_monto'],
-                ];
-            }
-            // agregar detalle al libro
-            $Libro->agregar($d);
         }
         // agregar carátula al libro
         $caratula = [
@@ -113,6 +86,8 @@ class Controller_DteVentas extends Controller_Base_Libros
             $caratula['TipoLibro'] = 'RECTIFICA';
             $caratula['CodAutRec'] = $_POST['CodAutRec'];
         }
+        // crear libro
+        $Libro = $Emisor->getLibroVentas($periodo);
         $Libro->setCaratula($caratula);
         // se setean resúmenes manuales enviados por post
         if (isset($_POST['TpoDoc'])) {
@@ -162,7 +137,7 @@ class Controller_DteVentas extends Controller_Base_Libros
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
         // guardar libro de ventas
-        $DteVenta->documentos = $documentos;
+        $DteVenta->documentos = $Libro->cantidad();
         $DteVenta->xml = base64_encode($xml);
         $DteVenta->track_id = $track_id;
         $DteVenta->revision_estado = null;

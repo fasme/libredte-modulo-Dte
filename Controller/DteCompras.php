@@ -142,10 +142,6 @@ class Controller_DteCompras extends Controller_Base_Libros
             );
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
-        // obtener compras
-        $compras = $Emisor->getCompras($periodo);
-        // crear libro
-        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
         // obtener firma
         $Firma = $Emisor->getFirma($this->Auth->User->id);
         if (!$Firma) {
@@ -154,37 +150,8 @@ class Controller_DteCompras extends Controller_Base_Libros
             );
             $this->redirect('/dte/admin/firma_electronicas');
         }
-        // agregar detalle
-        $documentos = 0;
-        foreach ($compras as $compra) {
-            $documentos++;
-            // armar detalle para agregar al libro
-            $d = [];
-            foreach ($compra as $k => $v) {
-                if (strpos($k, 'impuesto_adicional')!==0 and strpos($k, 'iva_no_recuperable')!==0) {
-                    if ($v!==null)
-                        $d[Model_DteCompra::$libro_cols[$k]] = $v;
-                }
-            }
-            // agregar iva no recuperable
-            if (!empty($compra['iva_no_recuperable_codigo'])) {
-                $d['IVANoRec'] = [
-                    'CodIVANoRec' => $compra['iva_no_recuperable_codigo'],
-                    'MntIVANoRec' => $compra['iva_no_recuperable_monto'],
-                ];
-            }
-            // agregar otros impuestos
-            if (!empty($compra['impuesto_adicional_codigo'])) {
-                $d['OtrosImp'] = [
-                    'CodImp' => $compra['impuesto_adicional_codigo'],
-                    'TasaImp' => $compra['impuesto_adicional_tasa'] ? $compra['impuesto_adicional_tasa'] : 0,
-                    'MntImp' => $compra['impuesto_adicional_monto'],
-                ];
-            }
-            // agregar detalle al libro
-            $Libro->agregar($d);
-        }
         // agregar carátula al libro
+        $Libro = $Emisor->getLibroCompras($periodo);
         $caratula = [
             'RutEmisorLibro' => $Emisor->rut.'-'.$Emisor->dv,
             'RutEnvia' => $Firma->getID(),
@@ -218,7 +185,7 @@ class Controller_DteCompras extends Controller_Base_Libros
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
         // guardar libro de compras
-        $DteCompra->documentos = $documentos;
+        $DteCompra->documentos = $Libro->cantidad();
         $DteCompra->xml = base64_encode($xml);
         $DteCompra->track_id = $track_id;
         $DteCompra->revision_estado = null;

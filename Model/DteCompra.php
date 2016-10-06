@@ -185,22 +185,11 @@ class Model_DteCompra extends Model_Base_Libro
      * Método que entrega el resumen real (de los detalles registrados) del
      * libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-05
+     * @version 2016-10-06
      */
     public function getResumen()
     {
-        $compras = $this->getReceptor()->getCompras($this->periodo);
-        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
-        foreach ($compras as $compra) {
-            $d = [];
-            foreach ($compra as $k => $v) {
-                if ($v!==null) {
-                    $d[self::$libro_cols[$k]] = $v;
-                }
-            }
-            $Libro->agregar($d);
-        }
-        return $Libro->getResumen();
+        return $this->getReceptor()->getLibroCompras($this->periodo)->getResumen();
     }
 
 }
