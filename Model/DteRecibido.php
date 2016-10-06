@@ -429,6 +429,47 @@ class Model_DteRecibido extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     /**
+     * Método que asigna los campos iva_no_recuperable e impuesto_adicional si
+     * se pasaron separados en varios campos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-06
+     */
+    public function set($datos)
+    {
+        parent::set($datos);
+        // asignar iva no recuperable
+        $iva_no_recuperable = [];
+        if ($datos['iva_no_recuperable_codigo']) {
+            $iva_no_recuperable_codigo = explode(',', $datos['iva_no_recuperable_codigo']);
+            $iva_no_recuperable_monto = explode(',', $datos['iva_no_recuperable_monto']);
+            $n_codigos = count($iva_no_recuperable_codigo);
+            for ($i=0; $i<$n_codigos; $i++) {
+                $iva_no_recuperable[] = [
+                    'codigo' => $iva_no_recuperable_codigo[$i],
+                    'monto' => $iva_no_recuperable_monto[$i],
+                ];
+            }
+        }
+        $this->iva_no_recuperable = $iva_no_recuperable ? json_encode($iva_no_recuperable) : null;
+        // asignar impuesto adicional
+        $impuesto_adicional = [];
+        if ($datos['impuesto_adicional_codigo']) {
+            $impuesto_adicional_codigo = explode(',', $datos['impuesto_adicional_codigo']);
+            $impuesto_adicional_tasa = explode(',', $datos['impuesto_adicional_tasa']);
+            $impuesto_adicional_monto = explode(',', $datos['impuesto_adicional_monto']);
+            $n_codigos = count($impuesto_adicional_codigo);
+            for ($i=0; $i<$n_codigos; $i++) {
+                $impuesto_adicional[] = [
+                    'codigo' => $impuesto_adicional_codigo[$i],
+                    'tasa' => $impuesto_adicional_tasa[$i],
+                    'monto' => $impuesto_adicional_monto[$i],
+                ];
+            }
+        }
+        $this->impuesto_adicional = $impuesto_adicional ? json_encode($impuesto_adicional) : null;
+    }
+
+    /**
      * Método para guardar el documento recibido, creará el emisor si no existe
      * antes de ser guardado el documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

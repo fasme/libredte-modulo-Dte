@@ -46,4 +46,11 @@ echo $f->input([
     'check' => 'notempty',
     'attr' => 'accept="csv"',
 ]);
+echo $f->input([
+    'name' => 'periodo',
+    'label' => 'Período',
+    'value' => isset($DteRecibido) ? $DteRecibido->periodo : '',
+    'check' => 'integer',
+    'help' => 'Período en el que registrar los documentos, se usará sólo si es diferente al mes de la fecha de emisión de estos. Formato: AAAAMM Ejemplo: '.\sowerphp\general\Utility_Date::previousPeriod(),
+]);
 echo $f->end('Importar libro de compras');

@@ -42,7 +42,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     /**
      * Acción que permite importar un libro desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-05
+     * @version 2016-10-06
      */
     public function importar()
     {
@@ -70,6 +70,9 @@ class Controller_DteCompras extends Controller_Base_Libros
                 $DteRecibido->emisor = $emisor;
                 $DteRecibido->receptor = $Receptor->rut;
                 $DteRecibido->usuario = $this->Auth->User->id;
+                if ($_POST['periodo'] and \sowerphp\general\Utility_Date::format($DteRecibido->fecha, 'Ym')!=$_POST['periodo']) {
+                    $DteRecibido->periodo = (int)$_POST['periodo'];
+                }
                 // si el DTE es de producción y es electrónico entonces se consultará su
                 // estado antes de poder guardar, esto evitará agregar documentos que no
                 // han sido recibidos en el SII o sus datos son incorrectos
