@@ -1,8 +1,8 @@
 <?php
 
 /**
- * LibreDTE
- * Copyright (C) SASCO SpA (https://sasco.cl)
+ * SowerPHP
+ * Copyright (C) SowerPHP (http://sowerphp.org)
  *
  * Este programa es software libre: usted puede redistribuirlo y/o
  * modificarlo bajo los términos de la Licencia Pública General Affero de GNU
@@ -29,7 +29,7 @@ namespace website\Dte\Admin\Mantenedores;
  * Comentario de la tabla: Tipos de documentos (electrónicos y no electrónicos)
  * Esta clase permite trabajar sobre un registro de la tabla dte_tipo
  * @author SowerPHP Code Generator
- * @version 2015-09-25 20:58:58
+ * @version 2016-10-05 21:20:59
  */
 class Model_DteTipo extends \Model_App
 {
@@ -44,11 +44,15 @@ class Model_DteTipo extends \Model_App
     public $electronico; ///< Indica si el documento es o no electrónico: boolean() NOT NULL DEFAULT 'true'
     public $compra; ///< boolean() NOT NULL DEFAULT 'false'
     public $venta; ///< boolean() NOT NULL DEFAULT 'false'
+    public $categoria; ///< character(1) NOT NULL DEFAULT 'T'
+    public $enviar; ///< boolean() NOT NULL DEFAULT 'false'
+    public $cedible; ///< boolean() NOT NULL DEFAULT 'false'
+    public $operacion; ///< character(1) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
         'codigo' => array(
-            'name'      => 'Codigo',
+            'name'      => 'Código',
             'comment'   => 'Código asignado por el SII al tipo de documento',
             'type'      => 'smallint',
             'length'    => 16,
@@ -70,7 +74,7 @@ class Model_DteTipo extends \Model_App
             'fk'        => null
         ),
         'electronico' => array(
-            'name'      => 'Electronico',
+            'name'      => 'Electrónico',
             'comment'   => 'Indica si el documento es o no electrónico',
             'type'      => 'boolean',
             'length'    => null,
@@ -98,6 +102,50 @@ class Model_DteTipo extends \Model_App
             'length'    => null,
             'null'      => false,
             'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'categoria' => array(
+            'name'      => 'Categoría',
+            'comment'   => '',
+            'type'      => 'character',
+            'length'    => 1,
+            'null'      => false,
+            'default'   => 'T',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'enviar' => array(
+            'name'      => 'Enviar',
+            'comment'   => '',
+            'type'      => 'boolean',
+            'length'    => null,
+            'null'      => false,
+            'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'cedible' => array(
+            'name'      => 'Cedible',
+            'comment'   => '',
+            'type'      => 'boolean',
+            'length'    => null,
+            'null'      => false,
+            'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'operacion' => array(
+            'name'      => 'Operación',
+            'comment'   => '',
+            'type'      => 'character',
+            'length'    => 1,
+            'null'      => true,
+            'default'   => '',
             'auto'      => false,
             'pk'        => false,
             'fk'        => null
