@@ -1465,7 +1465,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-09
+     * @version 2016-10-06
      */
     public function getCompras($periodo)
     {
@@ -1563,18 +1563,32 @@ class Model_Contribuyente extends \Model_App
         foreach ($compras as &$c) {
             // asignar IVA no recuperable
             if ($c['iva_no_recuperable']) {
-                $iva_no_recuperable = json_decode($c['iva_no_recuperable'], true)[0];
-                $c['iva_no_recuperable_codigo'] = $iva_no_recuperable['codigo'];
-                $c['iva_no_recuperable_monto'] = $iva_no_recuperable['monto'];
-                $c['iva'] = 0;
+                $iva_no_recuperable = json_decode($c['iva_no_recuperable'], true);
+                $iva_no_recuperable_codigo = [];
+                $iva_no_recuperable_monto = [];
+                foreach ($iva_no_recuperable as $inr) {
+                    $iva_no_recuperable_codigo[] = $inr['codigo'];
+                    $iva_no_recuperable_monto[] = $inr['monto'];
+                    $c['iva'] -= $inr['monto'];
+                }
+                $c['iva_no_recuperable_codigo'] = implode(',', $iva_no_recuperable_codigo);
+                $c['iva_no_recuperable_monto'] = implode(',', $iva_no_recuperable_monto);
             }
             unset($c['iva_no_recuperable']);
             // asignar monto de impuesto adicionl
             if ($c['impuesto_adicional']) {
-                $impuesto_adicional = json_decode($c['impuesto_adicional'], true)[0];
-                $c['impuesto_adicional_codigo'] = $impuesto_adicional['codigo'];
-                $c['impuesto_adicional_tasa'] = $impuesto_adicional['tasa'];
-                $c['impuesto_adicional_monto'] = $impuesto_adicional['monto'];
+                $impuesto_adicional = json_decode($c['impuesto_adicional'], true);
+                $impuesto_adicional_codigo = [];
+                $impuesto_adicional_tasa = [];
+                $impuesto_adicional_monto = [];
+                foreach ($impuesto_adicional as $ia) {
+                    $impuesto_adicional_codigo[] = $ia['codigo'];
+                    $impuesto_adicional_tasa[] = $ia['tasa'];
+                    $impuesto_adicional_monto[] = $ia['monto'];
+                }
+                $c['impuesto_adicional_codigo'] = implode(',', $impuesto_adicional_codigo);
+                $c['impuesto_adicional_tasa'] = implode(',', $impuesto_adicional_tasa);
+                $c['impuesto_adicional_monto'] = implode(',', $impuesto_adicional_monto);
             }
             unset($c['impuesto_adicional']);
             // asignar factor de proporcionalidad
