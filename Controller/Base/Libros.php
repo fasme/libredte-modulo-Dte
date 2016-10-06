@@ -48,7 +48,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que muestra la información del libro para cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-12
+     * @version 2016-10-05
      */
     public function ver($periodo)
     {
@@ -62,12 +62,18 @@ abstract class Controller_Base_Libros extends \Controller_App
             );
             $this->redirect('/dte/'.$this->request->params['controller']);
         }
+        $resumen = $Libro->getResumen();
+        $operaciones = [];
+        foreach ($resumen as $r) {
+            $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
+        }
         $this->set([
             'Emisor' => $Emisor,
             'Libro' => $Libro,
-            'resumen' => $Libro->getResumen(),
+            'resumen' => $resumen,
             'detalle' => $detalle,
             'libro_cols' => $class::$libro_cols,
+            'operaciones' => $operaciones,
         ]);
     }
 

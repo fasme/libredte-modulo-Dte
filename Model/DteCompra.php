@@ -149,48 +149,58 @@ class Model_DteCompra extends Model_Base_Libro
     ); ///< Namespaces que utiliza esta clase
 
     public static $libro_cols = [
-        'Tipo Doc',
-        'Folio',
-        'Rut Contraparte',
-        'Tasa Impuesto',
-        'Razón Social Contraparte',
-        'Tipo Impuesto[1=IVA:2=LEY 18211]',
-        'Fecha Emisión',
-        'Anulado[A]',
-        'Monto Exento',
-        'Monto Neto',
-        'Monto IVA (Recuperable)',
-        'Cod IVA no Rec',
-        'Monto IVA no Rec',
-        'IVA Uso Común',
-        'Cod Otro Imp (Con Crédito)',
-        'Tasa Otro Imp (Con Crédito)',
-        'Monto Otro Imp (Con Crédito)',
-        'Monto Otro Imp (Sin Crédito)',
-        'Neto Activo Fijo',
-        'IVA Activo Fijo',
-        'IVA No Retenido',
-        'Monto Imp Cigarrros Puros',
-        'Monto Imp Cigarrillos',
-        'Monto Imp Tabaco Elaborado',
-        'Monto Imp Vehículos y Autos.',
-        'Sucursal SII',
-        'Número Interno',
-        'NC o ND de FC [1]',
-        'Monto Total',
-        'Factor IVA Uso Comun',
-    ]; ///< Columnas del archivo CSV del libro
+        'dte' => 'TpoDoc',
+        'folio' => 'NroDoc',
+        'rut' => 'RUTDoc',
+        'tasa' => 'TasaImp',
+        'razon_social' => 'RznSoc',
+        'impuesto_tipo' => 'TpoImp',
+        'fecha' => 'FchDoc',
+        'anulado' => 'Anulado',
+        'exento' => 'MntExe',
+        'neto' => 'MntNeto',
+        'iva' => 'MntIVA',
+        'iva_no_recuperable_codigo' => 'CodIVANoRec',
+        'iva_no_recuperable_monto' => 'MntIVANoRec',
+        'iva_uso_comun' => 'IVAUsoComun',
+        'impuesto_adicional_codigo' => 'CodImp',
+        'impuesto_adicional_tasa' => 'TasaImp',
+        'impuesto_adicional_monto' => 'MntImp',
+        'impuesto_sin_credito' => 'MntSinCred',
+        'monto_activo_fijo' => 'MntActivoFijo',
+        'monto_iva_activo_fijo' => 'MntIVAActivoFijo',
+        'iva_no_retenido' => 'IVANoRetenido',
+        'impuesto_puros' => 'TabPuros',
+        'impuesto_cigarrillos' => 'TabCigarrillos',
+        'impuesto_tabaco_elaborado' => 'TabElaborado',
+        'impuesto_vehiculos' => 'ImpVehiculo',
+        'sucursal_sii' => 'CdgSIISucur',
+        'numero_interno' => 'NumInt',
+        'emisor_nc_nd_fc' => 'Emisor',
+        'total' => 'MntTotal',
+        'iva_uso_comun_factor' => 'FctProp',
+    ]; ///< Mapeo columna en BD a nombre en detalle del libro
 
     /**
      * Método que entrega el resumen real (de los detalles registrados) del
      * libro
-     * @todo Programar método (por ahora no se está usando)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-12
+     * @version 2016-10-05
      */
     public function getResumen()
     {
-        return [];
+        $compras = $this->getReceptor()->getCompras($this->periodo);
+        $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+        foreach ($compras as $compra) {
+            $d = [];
+            foreach ($compra as $k => $v) {
+                if ($v!==null) {
+                    $d[self::$libro_cols[$k]] = $v;
+                }
+            }
+            $Libro->agregar($d);
+        }
+        return $Libro->getResumen();
     }
 
 }

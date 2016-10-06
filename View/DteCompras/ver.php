@@ -23,6 +23,7 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
+        <li role="presentation"><a href="#resumen" aria-controls="resumen" role="tab" data-toggle="tab">Resumen</a></li>
 <?php if ($n_compras) : ?>
         <li role="presentation"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle</a></li>
         <li role="presentation"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab">Estadísticas</a></li>
@@ -84,6 +85,57 @@ new \sowerphp\general\View_Helper_Table([
 <!-- FIN DATOS BÁSICOS -->
 
 <?php if ($n_compras) : ?>
+
+<!-- INICIO RESUMEN -->
+<div role="tabpanel" class="tab-pane" id="resumen">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Documentos con detalle registrado
+        </div>
+        <div class="panel-body">
+<?php
+$titulos = [];
+$total = ['TpoDoc' => '<strong>Total</strong>',];
+foreach ($resumen as &$r) {
+    $titulos = array_keys($r);
+    foreach (['FctProp'] as $c) {
+        unset($r[$c], $titulos[array_search($c, $titulos)]);
+    }
+    // sumar campos que se suman directamente
+    foreach (['TotDoc', 'TotAnulado', 'TotOpExe'] as $c) {
+        if (!isset($total[$c]))
+            $total[$c] = 0;
+        $total[$c] += $r[$c];
+    }
+    // sumar o restar campos segun operación
+    foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntActivoFijo', 'TotMntIVAActivoFijo', 'TotIVANoRec', 'TotIVAUsoComun', 'TotCredIVAUsoComun', 'TotOtrosImp', 'TotIVARetTotal', 'TotIVARetParcial', 'TotImpSinCredito', 'TotMntTotal', 'TotIVANoRetenido', 'TotMntNoFact', 'TotMntPeriodo'] as $c) {
+        if (!isset($total[$c]))
+            $total[$c] = 0;
+        if ($operaciones[$r['TpoDoc']]=='S')
+            $total[$c] += $r[$c];
+        else if ($operaciones[$r['TpoDoc']]=='R')
+            $total[$c] -= $r[$c];
+    }
+    // dar formato de número
+    foreach ($r as &$v) {
+        if ($v)
+            $v = num($v);
+    }
+}
+foreach ($total as &$tot) {
+    if (is_numeric($tot))
+        $tot = $tot>0 ? num($tot) : null;
+}
+array_unshift($resumen, $titulos);
+$resumen[] = $total;
+$t = new \sowerphp\general\View_Helper_Table();
+$t->setShowEmptyCols(false);
+echo $t->generate($resumen);
+?>
+        </div>
+    </div>
+</div>
+<!-- FIN RESUMEN -->
 
 <!-- INICIO DETALLES -->
 <div role="tabpanel" class="tab-pane" id="detalle">
