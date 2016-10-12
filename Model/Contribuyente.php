@@ -931,27 +931,27 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las boletas por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2016-10-12
      */
     public function getResumenBoletasPeriodos()
     {
-        $periodo = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'fecha');
         return $this->db->getTable('
-            SELECT '.$periodo.' AS periodo, COUNT(*) AS emitidas
+            SELECT '.$periodo_col.' AS periodo, COUNT(*) AS emitidas
             FROM dte_emitido
             WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39, 41)
-            GROUP BY '.$periodo.'
+            GROUP BY '.$periodo_col.'
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
     }
 
     /**
-     * Método que entrega el resumen de las boletas de un período
+     * Método que entrega las boletas de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2016-10-12
      */
     public function getBoletas($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
         return $this->db->getTable('
             SELECT
                 e.dte,
@@ -1048,17 +1048,17 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las ventas por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-08
+     * @version 2016-10-12
      */
     public function getResumenVentasPeriodos()
     {
-        $periodo = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha', 'INTEGER');
         return $this->db->getTable('
             (
-                SELECT '.$periodo.' AS periodo, COUNT(*) AS emitidos, v.documentos AS enviados, v.track_id, v.revision_estado
-                FROM dte_tipo AS t, dte_emitido AS e LEFT JOIN dte_venta AS v ON e.emisor = v.emisor AND e.certificacion = v.certificacion AND '.$periodo.' = v.periodo
+                SELECT '.$periodo_col.' AS periodo, COUNT(*) AS emitidos, v.documentos AS enviados, v.track_id, v.revision_estado
+                FROM dte_tipo AS t, dte_emitido AS e LEFT JOIN dte_venta AS v ON e.emisor = v.emisor AND e.certificacion = v.certificacion AND '.$periodo_col.' = v.periodo
                 WHERE t.codigo = e.dte AND t.venta = true AND e.emisor = :rut AND e.certificacion = :certificacion AND e.dte != 46
-                GROUP BY '.$periodo.', enviados, v.track_id, v.revision_estado
+                GROUP BY '.$periodo_col.', enviados, v.track_id, v.revision_estado
             ) UNION (
                 SELECT periodo, documentos AS emitidos, documentos AS enviados, track_id, revision_estado
                 FROM dte_venta
@@ -1069,13 +1069,13 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
-     * Método que entrega el resumen de las ventas de un período
+     * Método que entrega las ventas de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-10-12
      */
     public function getVentas($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
         $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
         $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // si el contribuyente tiene impuestos adicionales se crean las query para esos campos
@@ -1146,12 +1146,12 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las ventas diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-08
+     * @version 2016-10-12
      */
     public function getVentasDiarias($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')' : 'DATE_FORMAT(e.fecha, "%Y%m")';
-        $dia_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'DD\')::INTEGER' : 'DATE_FORMAT(e.fecha, "%e")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
+        $dia_col = $this->db->date('d', 'e.fecha');
         return $this->db->getAssociativeArray('
             SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
             FROM dte_tipo AS t, dte_emitido AS e
@@ -1165,11 +1165,11 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de ventas por tipo de un período
      * @return Arreglo asociativo con las ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-08
+     * @version 2016-10-12
      */
     public function getVentasPorTipo($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
         return $this->db->getAssociativeArray('
             SELECT t.tipo, COUNT(*) AS ventas
             FROM dte_tipo AS t, dte_emitido AS e
@@ -1181,17 +1181,17 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las guías por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-26
+     * @version 2016-10-12
      */
     public function getResumenGuiasPeriodos()
     {
-        $periodo = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha', 'INTEGER');
         return $this->db->getTable('
             (
-                SELECT '.$periodo.' AS periodo, COUNT(*) AS emitidos, g.documentos AS enviados, g.track_id, g.revision_estado
-                FROM dte_emitido AS e LEFT JOIN dte_guia AS g ON e.emisor = g.emisor AND e.certificacion = g.certificacion AND '.$periodo.' = g.periodo
+                SELECT '.$periodo_col.' AS periodo, COUNT(*) AS emitidos, g.documentos AS enviados, g.track_id, g.revision_estado
+                FROM dte_emitido AS e LEFT JOIN dte_guia AS g ON e.emisor = g.emisor AND e.certificacion = g.certificacion AND '.$periodo_col.' = g.periodo
                 WHERE e.emisor = :rut AND e.certificacion = :certificacion AND e.dte = 52
-                GROUP BY '.$periodo.', enviados, g.track_id, g.revision_estado
+                GROUP BY '.$periodo_col.', enviados, g.track_id, g.revision_estado
             ) UNION (
                 SELECT periodo, documentos AS emitidos, documentos AS enviados, track_id, revision_estado
                 FROM dte_guia
@@ -1209,7 +1209,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getGuias($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
         $tipo_col= $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/IdDoc/IndTraslado', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
             SELECT
@@ -1241,12 +1241,12 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las guías diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-07
+     * @version 2016-10-12
      */
     public function getGuiasDiarias($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(fecha, \'YYYYmm\')' : 'DATE_FORMAT(fecha, "%Y%m")';
-        $dia_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(fecha, \'DD\')::INTEGER' : 'DATE_FORMAT(fecha, "%e")';
+        $periodo_col = $this->db->date('Ym', 'fecha');
+        $dia_col = $this->db->date('d', 'fecha');
         return $this->db->getAssociativeArray('
             SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
             FROM dte_emitido
@@ -1346,12 +1346,13 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-13
+     * @version 2016-10-12
      */
     public function getResumenComprasPeriodos()
     {
         if ($this->db->config['type']!='PostgreSQL')
             return $this->getResumenComprasPeriodosMySQL();
+        $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
         return $this->db->getTable('
             (
                 SELECT
@@ -1384,7 +1385,7 @@ class Model_Contribuyente extends \Model_App
                                 CASE WHEN r.periodo IS NOT NULL THEN
                                     r.periodo
                                 ELSE
-                                    TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER
+                                    '.$periodo_col.'
                                 END AS periodo
                             FROM dte_tipo AS t, dte_recibido AS r
                             WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion
@@ -1392,10 +1393,10 @@ class Model_Contribuyente extends \Model_App
                         GROUP BY periodo
                     ) AS r
                     FULL JOIN (
-                        SELECT TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER AS periodo, COUNT(*) AS facturas_compra
+                        SELECT '.$periodo_col.' AS periodo, COUNT(*) AS facturas_compra
                         FROM dte_emitido AS r
                         WHERE r.emisor = :rut AND r.certificacion = :certificacion AND r.dte = 46
-                        GROUP BY TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER
+                        GROUP BY '.$periodo_col.'
                     ) AS f ON r.periodo = f.periodo
                     LEFT JOIN dte_compra AS c ON c.receptor = :rut AND c.certificacion = :certificacion AND c.periodo IN (r.periodo, f.periodo)
             ) UNION (
@@ -1409,21 +1410,22 @@ class Model_Contribuyente extends \Model_App
 
     /**
      * Método que entrega el resumen de las compras por períodos
-     * @warning Versión del método para MySQL, no soporta facturas de compra
+     * @warning Versión del método para MySQL, no soporta facturas de compra (se hace en método aparte porque no hay FULL JOIN en MySQL)
+     * @todo Emular FULL JOIN para obtener el soporte para facturas de compra
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-28
+     * @version 2016-10-12
      */
     private function getResumenComprasPeriodosMySQL()
     {
-        $periodo = 'DATE_FORMAT(r.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'r.fecha');
         return $this->db->getTable('
             (
-                SELECT '.$periodo.' AS periodo, COUNT(*) AS recibidos, c.documentos AS enviados, c.track_id, c.revision_estado
-                FROM dte_tipo AS t, dte_recibido AS r LEFT JOIN dte_compra AS c ON r.receptor = c.receptor AND r.certificacion = c.certificacion AND '.$periodo.' = c.periodo
+                SELECT '.$periodo_col.' AS periodo, COUNT(*) AS recibidos, c.documentos AS enviados, c.track_id, c.revision_estado
+                FROM dte_tipo AS t, dte_recibido AS r LEFT JOIN dte_compra AS c ON r.receptor = c.receptor AND r.certificacion = c.certificacion AND '.$periodo_col.' = c.periodo
                 WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion
-                GROUP BY '.$periodo.', enviados, c.track_id, c.revision_estado
+                GROUP BY '.$periodo_col.', enviados, c.track_id, c.revision_estado
             ) UNION (
-                SELECT periodo, documentos AS emitidos, documentos AS enviados, track_id, revision_estado
+                SELECT periodo, documentos AS recibidos, documentos AS enviados, track_id, revision_estado
                 FROM dte_compra
                 WHERE receptor = :rut AND certificacion = :certificacion
             )
@@ -1438,7 +1440,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getCompras($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(r.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
         list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('r.xml', [
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TipoImp',
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TasaImp',
@@ -1462,7 +1464,7 @@ class Model_Contribuyente extends \Model_App
                     NULL AS iva_no_recuperable_codigo,
                     NULL AS iva_no_recuperable_monto,
                     r.iva_uso_comun,
-                    r.impuesto_adicional'.($this->db->config['type']=='PostgreSQL'?'::TEXT':'').',
+                    r.impuesto_adicional,
                     NULL AS impuesto_adicional_codigo,
                     NULL AS impuesto_adicional_tasa,
                     NULL AS impuesto_adicional_monto,
@@ -1605,14 +1607,14 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-28
+     * @version 2016-10-12
      */
     public function getComprasDiarias($periodo)
     {
         if ($this->db->config['type']!='PostgreSQL')
             return $this->getComprasDiariasMySQL($periodo);
-        $periodo_col = 'TO_CHAR(r.fecha, \'YYYYmm\')';
-        $dia_col = 'TO_CHAR(r.fecha, \'DD\')::INTEGER';
+        $periodo_col = $this->db->date('Ym', 'r.fecha');
+        $dia_col = $this->db->date('d', 'r.fecha');
         return $this->db->getAssociativeArray('
             SELECT
                 CASE WHEN r.dia IS NOT NULL THEN
@@ -1653,14 +1655,15 @@ class Model_Contribuyente extends \Model_App
 
     /**
      * Método que entrega el resumen de las compras diarias de un período
-     * @warning Versión del método para MySQL, no soporta facturas de compra
+     * @warning Versión del método para MySQL, no soporta facturas de compra (se hace en método aparte porque no hay FULL JOIN en MySQL)
+     * @todo Emular FULL JOIN para obtener el soporte para facturas de compra
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-28
+     * @version 2016-10-12
      */
     private function getComprasDiariasMySQL($periodo)
     {
-        $periodo_col = 'DATE_FORMAT(r.fecha, "%Y%m")';
-        $dia_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(r.fecha, \'DD\')::INTEGER' : 'DATE_FORMAT(r.fecha, "%e")';
+        $periodo_col = $this->db->date('Ym', 'r.fecha');
+        $dia_col = $this->db->date('d', 'r.fecha');
         return $this->db->getAssociativeArray('
             SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
             FROM dte_tipo AS t, dte_recibido AS r
@@ -1674,11 +1677,11 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de compras por tipo de un período
      * @return Arreglo asociativo con las compras
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-08
+     * @version 2016-10-12
      */
     public function getComprasPorTipo($periodo)
     {
-        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(r.fecha, \'YYYYmm\')' : 'DATE_FORMAT(r.fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'r.fecha');
         return $this->db->getAssociativeArray('
             (
                 SELECT t.tipo, COUNT(*) AS compras
@@ -1982,26 +1985,26 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega los documentos usados por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-23
+     * @version 2016-10-12
      */
     public function getDocumentosUsados()
     {
-        $periodo = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(fecha, "%Y%m")';
+        $periodo_col = $this->db->date('Ym', 'fecha');
         $datos = $this->db->getTable('
             SELECT e.periodo, e.total AS emitidos, r.total AS recibidos
             FROM
                 (
-                    SELECT '.$periodo.' AS periodo, COUNT(*) AS total
+                    SELECT '.$periodo_col.' AS periodo, COUNT(*) AS total
                     FROM dte_emitido
                     WHERE emisor = :rut AND certificacion = :certificacion
-                    GROUP BY '.$periodo.'
+                    GROUP BY '.$periodo_col.'
                 ) AS e
                 LEFT JOIN
                 (
-                    SELECT '.$periodo.' AS periodo, COUNT(*) AS total
+                    SELECT '.$periodo_col.' AS periodo, COUNT(*) AS total
                     FROM dte_recibido
                     WHERE receptor = :rut AND certificacion = :certificacion
-                    GROUP BY '.$periodo.'
+                    GROUP BY '.$periodo_col.'
                 ) AS r ON e.periodo = r.periodo
             ORDER BY e.periodo DESC
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
