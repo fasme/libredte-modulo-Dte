@@ -76,8 +76,8 @@ new \sowerphp\general\View_Helper_Table([
 <?php if (!$Emisor->config_sii_estado_dte_webservice) : ?>
                     <br/>
 <?php endif; ?>
-                    <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/estado_envio', 750, 550)" title="Ver el estado del envío sen la web del SII">ver estado envío en SII</a><br/>
-                    <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/verificar_datos', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
+                    <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$DteEmitido->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
+                    <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
 <?php if ($DteEmitido->getEstado()=='R') : ?>
                     <br/>
                     <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>

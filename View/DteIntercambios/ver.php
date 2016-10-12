@@ -147,17 +147,14 @@ foreach ($Documentos as $Dte) {
     $DteRecibido = new \website\Dte\Model_DteRecibido(substr($Dte->getEmisor(), 0, -2), $Dte->getTipo(), $Dte->getFolio(), (int)$Dte->getCertificacion());
     // si el enviodte no está recibido no se reciben los documentos
     if ($estado_enviodte) {
-        $estado_sii = '';
         $estado = 99;
     }
     // si ya está recibido el documento se marca con estado repetido
     else if ($DteRecibido->exists()) {
-        $estado_sii = '';
         $estado = 4;
     }
     // si no está recibido se trata de determinar su estado
     else {
-        $estado_sii = !isset($DteIntercambio->estado) ? $Dte->getEstado($Firma) : ['GLOSA'=>''];
         $estado = $Dte->getEstadoValidacion([
             'RUTEmisor' => $DteIntercambio->getEmisor()->rut.'-'.$DteIntercambio->getEmisor()->dv,
             'RUTRecep'=>$Emisor->rut.'-'.$Emisor->dv
@@ -170,7 +167,7 @@ foreach ($Documentos as $Dte) {
         'RUTEmisor' => $Dte->getEmisor(),
         'RUTRecep' => $Dte->getReceptor(),
         'MntTotal' => $Dte->getMontoTotal(),
-        'estado_sii' => isset($estado_sii['GLOSA']) ? $estado_sii['GLOSA'] : (isset($estado_sii['GLOSA_ERR']) ? $estado_sii['GLOSA_ERR'] : 'No determinado'),
+        'estado_sii' => '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550)" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>',
         'EstadoRecepDTE' => $estado,
         'RecepDTEGlosa' => \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'][$estado],
         'acuse' => (int)(bool)!$estado,
@@ -189,7 +186,7 @@ echo $f->input([
         ['name'=>'RUTEmisor', 'type'=>'hidden'],
         ['name'=>'RUTRecep', 'type'=>'hidden'],
         ['name'=>'MntTotal', 'attr'=>'readonly="readonly" size="10"'],
-        ['name'=>'estado_sii'],
+        ['type'=>'div', 'name'=>'estado_sii'],
         ['name'=>'EstadoRecepDTE', 'type'=>'select', 'options'=>\sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'], 'attr'=>'style="width:12em" onchange="this.parentNode.parentNode.parentNode.childNodes[8].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
         ['name'=>'RecepDTEGlosa'],
         ['name'=>'acuse', 'type'=>'select', 'options'=>[1=>'Si', 0=>'No'], 'attr'=>'style="width:5em"'],

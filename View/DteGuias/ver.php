@@ -65,6 +65,7 @@ new \sowerphp\general\View_Helper_Table([
             <a class="btn btn-info" href="<?=$_base?>/dte/dte_guias/actualizar_estado/<?=$Libro->periodo?>" role="button">Actualizar estado</a><br/>
             <span style="font-size:0.8em">
                 <a href="<?=$_base?>/dte/dte_guias/solicitar_revision/<?=$Libro->periodo?>" title="Solicitar nueva revisión del libro al SII">solicitar nueva revisión</a><br/>
+                <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$Libro->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
                 <a href="<?=$_base?>/dte/dte_guias/enviar_sii/<?=$Libro->periodo?>" title="Volver a enviar el libro de guías al SII" onclick="return Form.checkSend('¿Confirmar reenvío del libro al SII?')">reenviar libro al SII</a>
             </span>
         </p>
