@@ -446,7 +446,7 @@ echo $f->input([
     'label' => 'Intercambio automático',
     'options' => ['No', 'Si'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_emision_intercambio_automatico : 0,
-    'help' => '¿Se debe enviar automáticamente el DTE que está aceptado por el SII y no tiene recibo registrado?',
+    'help' => '¿Se debe enviar automáticamente el DTE que está aceptado por el SII y no tiene recepción registrada?',
 ]);
 ?>
                 </div>
