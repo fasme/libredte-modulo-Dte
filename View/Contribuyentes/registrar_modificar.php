@@ -440,6 +440,14 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_emision_previsualizacion_automatica : 0,
     'help' => '¿Se debe mostrar automáticamente la previsualización del PDF en la pantalla de previsualización?',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_emision_intercambio_automatico',
+    'label' => 'Intercambio automático',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_intercambio_automatico : 0,
+    'help' => '¿Se debe enviar automáticamente el DTE que está aceptado por el SII y no tiene recibo registrado?',
+]);
 ?>
                 </div>
             </div>
