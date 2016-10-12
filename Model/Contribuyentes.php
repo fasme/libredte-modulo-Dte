@@ -98,7 +98,7 @@ class Model_Contribuyentes extends \Model_Plural_App
      * @param rut Filtrar por el RUT de un contribuyente específico
      * @return Tabla con los contribuyentes y sus movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-23
+     * @version 2016-10-12
      */
     public function getConMovimientos($desde = 1, $hasta = null, $certificacion = false, $dte = null, $rut = null)
     {
@@ -106,11 +106,10 @@ class Model_Contribuyentes extends \Model_Plural_App
         $where = ['c.usuario IS NOT NULL', ];
         // definir desde
         if (is_numeric($desde)) {
-            $where[] = 'd.fecha >= '.($this->db->config['type']=='PostgreSQL' ? ('NOW () - INTERVAL \''.(int)$desde.' months\'') : ('DATE_SUB(NOW(), INTERVAL '.(int)$desde.' MONTH)'));
-        } else {
-            $where[] = 'd.fecha >= :desde';
-            $vars[':desde'] = $desde;
+            $desde = date('Y-m-d', strtotime('-'.$desde.' months'));
         }
+        $where[] = 'd.fecha >= :desde';
+        $vars[':desde'] = $desde;
         // definir hasta
         if ($hasta) {
             $where[] = 'd.fecha <= :hasta';
