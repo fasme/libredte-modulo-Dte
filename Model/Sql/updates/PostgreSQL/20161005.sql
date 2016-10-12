@@ -12,5 +12,7 @@ ALTER TABLE dte_tipo
     ADD cedible BOOLEAN NOT NULL DEFAULT false CHECK ((categoria = 'T' AND cedible = true) OR cedible = false),
     ADD operacion CHAR(1) CHECK ((categoria = 'T' AND operacion IN ('S', 'R')) OR (categoria != 'T' AND operacion IS NULL))
 ;
+ALTER TABLE cobranza DROP CONSTRAINT cobranza_usuario_fk;
+ALTER TABLE cobranza ADD CONSTRAINT cobranza_usuario_fk FOREIGN KEY (usuario) REFERENCES usuario (id) MATCH FULL ON UPDATE CASCADE ON DELETE RESTRICT;
 
 COMMIT;

@@ -586,7 +586,7 @@ CREATE TABLE cobranza (
         ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT cobranza_usuario_fk FOREIGN KEY (usuario)
         REFERENCES usuario (id) MATCH FULL
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON UPDATE CASCADE ON DELETE RESTRICT
 
 );
 CREATE INDEX cobranza_emisor_certificacion_fecha_idx ON cobranza (emisor, certificacion, fecha);
