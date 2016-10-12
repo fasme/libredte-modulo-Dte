@@ -142,13 +142,11 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega los totales de documentos emitidos por hora
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-24
+     * @version 2016-10-12
      */
     public function getPorHora($desde, $hasta)
     {
-        $hora = $this->db->xml('xml', [
-            '/*/SetDTE/Caratula/TmstFirmaEnv',
-        ], 'http://www.sii.cl/SiiDte');
+        $hora = $this->db->xml('xml', '/*/SetDTE/Caratula/TmstFirmaEnv', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
             SELECT SUBSTR('.$hora.', 12, 2) AS hora, COUNT(*) AS total
             FROM dte_emitido
@@ -209,13 +207,11 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega los totales de documentos emitidos por nacionalidad
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-24
+     * @version 2016-10-12
      */
     public function getPorNacionalidad($desde, $hasta)
     {
-        $nacionalidad = $this->db->xml('xml', [
-            '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/Extranjero/Nacionalidad',
-        ], 'http://www.sii.cl/SiiDte');
+        $nacionalidad = $this->db->xml('xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/Extranjero/Nacionalidad', 'http://www.sii.cl/SiiDte');
         $datos = $this->db->getTable('
             SELECT '.$nacionalidad.' AS nacionalidad, COUNT(*) AS total
             FROM dte_emitido
@@ -237,13 +233,11 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega los totales de documentos emitidos por moneda
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-24
+     * @version 2016-10-12
      */
     public function getPorMoneda($desde, $hasta)
     {
-        $moneda = $this->db->xml('xml', [
-            '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Totales/TpoMoneda',
-        ], 'http://www.sii.cl/SiiDte');
+        $moneda = $this->db->xml('xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Totales/TpoMoneda', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
             SELECT '.$moneda.' AS moneda, COUNT(*) AS total
             FROM dte_emitido
