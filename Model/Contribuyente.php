@@ -791,7 +791,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-30
+     * @version 2016-10-12
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -809,9 +809,8 @@ class Model_Contribuyente extends \Model_App
             $i = 1;
             foreach ($filtros['xml'] as $nodo => $valor) {
                 $nodo = preg_replace('/[^A-Za-z\/]/', '', $nodo);
-                $nodo = '/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:'.str_replace('/', '/n:', $nodo).'/text()';
-                $where[] = 'BTRIM(XPATH(\''.$nodo.'\', CONVERT_FROM(decode(d.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\') ILIKE :xml'.$i;
-                $vars[':xml'.$i] = '%'.$valor.'%';
+                $where[] = 'LOWER('.$this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/'.$nodo, 'http://www.sii.cl/SiiDte').') LIKE :xml'.$i;
+                $vars[':xml'.$i] = '%'.strtolower($valor).'%';
                 $i++;
             }
         }
@@ -841,19 +840,14 @@ class Model_Contribuyente extends \Model_App
             }
         }
         // forma de obtener razón social
-        $razon_social_xpath = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Exportaciones/n:Encabezado/n:Receptor/n:RznSocRecep\', CONVERT_FROM(decode(d.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{"}\')';
-        $razon_social =
-            $this->db->config['type']=='PostgreSQL'
-            ? 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social'
-            : 'r.razon_social'
-        ;
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
         // armar consulta
         $query = '
             SELECT
                 d.dte,
                 t.tipo,
                 d.folio,
-                '.$razon_social.',
+                CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
                 d.fecha,
                 d.total,
                 d.revision_estado AS estado,
@@ -1077,58 +1071,43 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las ventas de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-01
+     * @version 2016-10-12
      */
     public function getVentas($periodo)
     {
         $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')' : 'DATE_FORMAT(e.fecha, "%Y%m")';
-        $razon_social_xpath = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Exportaciones/n:Encabezado/n:Receptor/n:RznSocRecep\', CONVERT_FROM(decode(e.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{"}\')';
-        $razon_social =
-            $this->db->config['type']=='PostgreSQL'
-            ? 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social'
-            : 'r.razon_social'
-        ;
-        // si el contribuyente no tiene impuestos adicionales se entregan los datos de la tabla de emitidos
-        if (!$this->config_extra_impuestos_adicionales) {
-            return $this->db->getTable('
-                SELECT e.dte, e.folio, e.tasa, e.fecha, e.sucursal_sii, '.$this->db->concat('r.rut', '-', 'r.dv').' AS rut, '.$razon_social.', e.exento, e.neto, e.iva, \'\' AS impuesto_codigo, \'\' AS impuesto_tasa, \'\' AS impuesto_monto, e.total
-                FROM dte_tipo AS t, dte_emitido AS e, contribuyente AS r
-                WHERE t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo  AND e.dte != 46
-                ORDER BY e.fecha, e.dte, e.folio
-            ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        // si el contribuyente tiene impuestos adicionales se crean las query para esos campos
+        if ($this->config_extra_impuestos_adicionales) {
+            list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('e.xml', [
+                '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TipoImp',
+                '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TasaImp',
+                '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/MontoImp',
+            ], 'http://www.sii.cl/SiiDte');
+        } else {
+            $impuesto_codigo = $impuesto_tasa = $impuesto_monto = 'NULL';
         }
-        // si el contribuyente tiene impuestos adicionales se buscan en los XML de los DTE
-        else {
-            if ($this->db->config['type']=='PostgreSQL') {
-                $impuesto_codigo = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:Totales/n:ImptoReten/n:TipoImp/text()\', CONVERT_FROM(decode(e.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-                $impuesto_tasa = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:Totales/n:ImptoReten/n:TasaImp/text()\', CONVERT_FROM(decode(e.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-                $impuesto_monto = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:Totales/n:ImptoReten/n:MontoImp/text()\', CONVERT_FROM(decode(e.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-            } else {
-                $impuesto_codigo = '\'\'';
-                $impuesto_tasa = '\'\'';
-                $impuesto_monto = '\'\'';
-            }
-            return $this->db->getTable('
-                SELECT
-                    e.dte,
-                    e.folio,
-                    e.tasa,
-                    e.fecha,
-                    e.sucursal_sii,
-                    '.$this->db->concat('r.rut', '-', 'r.dv').' AS rut,
-                    '.$razon_social.',
-                    e.exento,
-                    e.neto,
-                    e.iva,
-                    '.$impuesto_codigo.' AS impuesto_codigo,
-                    '.$impuesto_tasa.' AS impuesto_tasa,
-                    '.$impuesto_monto.' AS impuesto_monto,
-                    e.total
-                FROM dte_tipo AS t, dte_emitido AS e, contribuyente AS r
-                WHERE t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
-                ORDER BY e.fecha, e.dte, e.folio
-            ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
-        }
+        return $this->db->getTable('
+            SELECT
+                e.dte,
+                e.folio,
+                e.tasa,
+                e.fecha,
+                e.sucursal_sii,
+                '.$this->db->concat('r.rut', '-', 'r.dv').' AS rut,
+                '.$razon_social.',
+                e.exento,
+                e.neto,
+                e.iva,
+                '.$impuesto_codigo.' AS impuesto_codigo,
+                '.$impuesto_tasa.' AS impuesto_tasa,
+                '.$impuesto_monto.' AS impuesto_monto,
+                e.total
+            FROM dte_tipo AS t, dte_emitido AS e, contribuyente AS r
+            WHERE t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
+            ORDER BY e.fecha, e.dte, e.folio
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
     }
 
     /**
@@ -1226,18 +1205,12 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de las guías de un período
      * @todo Extraer IndTraslado en MariaDB
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-15
+     * @version 2016-10-12
      */
     public function getGuias($periodo)
     {
-        if ($this->db->config['type']=='PostgreSQL') {
-            $periodo_col = 'TO_CHAR(e.fecha, \'YYYYmm\')';
-            $tipo_col = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:IdDoc/n:IndTraslado/text()\', CONVERT_FROM(decode(e.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-        } else {
-            $periodo_col = 'DATE_FORMAT(e.fecha, "%Y%m")';
-            //$tipo_col = 'ExtractValue(, \'\')';
-            $tipo_col = '\'\'';
-        }
+        $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(e.fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(e.fecha, "%Y%m")';
+        $tipo_col= $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/IdDoc/IndTraslado', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
             SELECT
                 e.folio,
@@ -1286,26 +1259,22 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-18
+     * @version 2016-10-12
      */
     public function getIntercambios($soloPendientes = true)
     {
-        if ($this->db->config['type']=='PostgreSQL') {
-            $documentos = 'BTRIM(XPATH(\'/n:*/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:IdDoc/n:TipoDTE/text()|/n:*/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:IdDoc/n:Folio/text()\', CONVERT_FROM(decode(i.archivo_xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\') AS documentos';
-        } else {
-            $documentos = 'i.documentos';
-        }
+        $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
         $select = $soloPendientes ? '' : ', i.estado, u.usuario';
         $where = $soloPendientes ? ' AND i.estado IS NULL' : '';
         $intercambios = $this->db->getTable('
-            SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.$select.'
+            SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos'.$select.'
             FROM dte_intercambio AS i LEFT JOIN contribuyente AS e ON i.emisor = e.rut LEFT JOIN usuario AS u ON i.usuario = u.id
             WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.$where.'
             ORDER BY i.fecha_hora_firma DESC
         ', [':receptor'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
         foreach ($intercambios as &$i) {
             if (!empty($i['razon_social']))
-                $i['emisor']= $i['razon_social'];
+                $i['emisor'] = $i['razon_social'];
             if (isset($i['estado']))
                 $i['estado'] = \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'][$i['estado']];
             $nuevo_dte = true;
@@ -1465,20 +1434,16 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-06
+     * @version 2016-10-12
      */
     public function getCompras($periodo)
     {
         $periodo_col = $this->db->config['type']=='PostgreSQL' ? 'TO_CHAR(r.fecha, \'YYYYmm\')::INTEGER' : 'DATE_FORMAT(r.fecha, "%Y%m")';
-        if ($this->db->config['type']=='PostgreSQL') {
-            $impuesto_codigo = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:Totales/n:ImptoReten/n:TipoImp/text()\', CONVERT_FROM(decode(r.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-            $impuesto_tasa = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:Totales/n:ImptoReten/n:TasaImp/text()\', CONVERT_FROM(decode(r.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-            $impuesto_monto = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Documento/n:Encabezado/n:Totales/n:ImptoReten/n:MontoImp/text()\', CONVERT_FROM(decode(r.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{}\')';
-        } else {
-            $impuesto_codigo = '\'\'';
-            $impuesto_tasa = '\'\'';
-            $impuesto_monto = '\'\'';
-        }
+        list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('r.xml', [
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TipoImp',
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TasaImp',
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/MontoImp',
+        ], 'http://www.sii.cl/SiiDte');
         $compras = $this->db->getTable('
             (
                 SELECT
@@ -2068,7 +2033,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el detalle de los documentos emitidos con cierto
      * estado en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-23
+     * @version 2016-10-12
      */
     public function getDocumentosEmitidosEstado($desde, $hasta, $estado = null)
     {
@@ -2081,12 +2046,8 @@ class Model_Contribuyente extends \Model_App
             $estado = 'd.revision_estado IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Exportaciones/n:Encabezado/n:Receptor/n:RznSocRecep\', CONVERT_FROM(decode(d.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{"}\')';
-        $razon_social =
-            $this->db->config['type']=='PostgreSQL'
-            ? 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social'
-            : 'r.razon_social'
-        ;
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -2124,17 +2085,13 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el detalle de los documentos emitidos que aun no han
      * sido enviado al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-23
+     * @version 2016-10-12
      */
     public function getDocumentosEmitidosSinEnviar()
     {
         // forma de obtener razón social
-        $razon_social_xpath = 'BTRIM(XPATH(\'/n:EnvioDTE/n:SetDTE/n:DTE/n:Exportaciones/n:Encabezado/n:Receptor/n:RznSocRecep\', CONVERT_FROM(decode(d.xml, \'base64\'), \'ISO8859-1\')::XML, \'{{n,http://www.sii.cl/SiiDte}}\')::TEXT, \'{"}\')';
-        $razon_social =
-            $this->db->config['type']=='PostgreSQL'
-            ? 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social'
-            : 'r.razon_social'
-        ;
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
