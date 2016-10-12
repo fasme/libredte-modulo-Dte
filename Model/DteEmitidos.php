@@ -41,7 +41,7 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-24
+     * @version 2016-10-12
      */
     public function getDetalle($desde, $hasta)
     {
@@ -53,11 +53,7 @@ class Model_DteEmitidos extends \Model_Plural_App
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Totales/MntTotal',
             '/*/SetDTE/Caratula/TmstFirmaEnv',
         ], 'http://www.sii.cl/SiiDte');
-        $razon_social =
-            $this->db->config['type']=='PostgreSQL'
-            ? 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social.' END AS razon_social'
-            : 'r.razon_social'
-        ;
+        $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social.' END AS razon_social';
         // realizar consulta
         $datos = $this->db->getTable('
             SELECT
