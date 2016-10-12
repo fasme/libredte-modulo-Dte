@@ -296,7 +296,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-08
+     * @version 2016-10-12
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -313,7 +313,7 @@ class Controller_Documentos extends \Controller_App
             $DteReceptor = $DteEmitido->getDatos()['Encabezado']['Receptor'];
             $Comunas = new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas();
             $DteEmisor['CmnaOrigen'] = $Comunas->getComunaByName($DteEmisor['CmnaOrigen']);
-            $DteReceptor['CmnaRecep'] = $Comunas->getComunaByName($DteReceptor['CmnaRecep']);
+            $DteReceptor['CmnaRecep'] = !empty($DteReceptor['CmnaRecep']) ? $Comunas->getComunaByName($DteReceptor['CmnaRecep']) : null;
             if (empty($DteReceptor['GiroRecep'])) {
                 $DteReceptor['GiroRecep'] = $DteEmitido->getReceptor()->giro;
             }

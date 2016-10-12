@@ -734,12 +734,12 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que propone una referencia para el documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-17
+     * @version 2016-10-12
      */
     public function getPropuestaReferencia()
     {
         // si es factura o boleta se anula con nota crédito
-        if (in_array($this->dte, [33, 34, 39, 41])) {
+        if (in_array($this->dte, [33, 34, 39, 41, 56])) {
             return [
                 'titulo' => 'Anular documento',
                 'color' => 'danger',
@@ -768,6 +768,26 @@ class Model_DteEmitido extends Model_Base_Envio
                 'razon' => 'Se factura',
             ];
         }
+        // si es factura de exportación o nota de débito de exportación se anula con nota de crédito exp
+        else if (in_array($this->dte, [110, 111])) {
+            return [
+                'titulo' => 'Anular documento',
+                'color' => 'danger',
+                'dte' => 112,
+                'codigo' => 1,
+                'razon' => 'Anula documento',
+            ];
+        }
+        // si es nota de crédito de exportación electrónica se anula con nota de débito exp
+        else if ($this->dte==112) {
+            return [
+                'titulo' => 'Anular documento',
+                'color' => 'danger',
+                'dte' => 111,
+                'codigo' => 1,
+                'razon' => 'Anula documento',
+            ];
+        }
     }
 
     /**
@@ -779,7 +799,7 @@ class Model_DteEmitido extends Model_Base_Envio
     public function calcularCLP()
     {
         if (!$this->getDte()->esExportacion())
-	    return false;
+            return false;
         $moneda = $this->getDte()->getDatos()['Encabezado']['Totales']['TpoMoneda'];
         $total = $this->getDte()->getDatos()['Encabezado']['Totales']['MntTotal'];
         $cambio = (float)(new \sowerphp\app\Sistema\General\Model_MonedaCambio($moneda, 'CLP', $this->fecha))->valor;
