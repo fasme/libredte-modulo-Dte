@@ -2126,4 +2126,89 @@ class Model_Contribuyente extends \Model_App
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
     }
 
+    /**
+     * Método que entrega el resumen de los estados de los DTE para un periodo de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function getDocumentosEmitidosResumenEstadoIntercambio($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT
+                CASE WHEN recibo.responde IS NOT NULL THEN true ELSE false END AS recibo,
+                recepcion.estado AS recepcion,
+                resultado.estado  AS resultado,
+                COUNT(*) AS total
+            FROM
+                dte_emitido AS e
+                LEFT JOIN dte_intercambio_recibo_dte AS recibo ON recibo.emisor = e.emisor AND recibo.dte = e.dte AND recibo.folio = e.folio AND recibo.certificacion = e.certificacion
+                LEFT JOIN dte_intercambio_recepcion_dte AS recepcion ON recepcion.emisor = e.emisor AND recepcion.dte = e.dte AND recepcion.folio = e.folio AND recepcion.certificacion = e.certificacion
+                LEFT JOIN dte_intercambio_resultado_dte AS resultado ON resultado.emisor = e.emisor AND resultado.dte = e.dte AND resultado.folio = e.folio AND resultado.certificacion = e.certificacion
+            WHERE
+                e.emisor = :rut
+                AND e.certificacion = :certificacion
+                AND e.fecha BETWEEN :desde AND :hasta
+                AND e.track_id > 0
+                AND  e.revision_estado IS NOT NULL
+            GROUP BY recibo, recepcion, resultado
+            ORDER BY total DESC
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    /**
+     * Método que entrega los estados de los DTE para un periodo de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function getDocumentosEmitidosEstadoIntercambio($desde, $hasta, $recibo, $recepcion, $resultado)
+    {
+        // filtros
+        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        $where = [$recibo ? 'recibo.responde IS NOT NULL' : 'recibo.responde IS NULL'];
+        if ($recepcion!==null) {
+            $where[] = 'recepcion.estado = :recepcion';
+            $vars[':recepcion'] = $recepcion;
+        } else {
+            $where[] = 'recepcion.estado IS NULL';
+        }
+        if ($resultado!==null) {
+            $where[] = 'resultado.estado = :resultado';
+            $vars[':resultado'] = $resultado;
+        } else {
+            $where[] = 'resultado.estado IS NULL';
+        }
+        // forma de obtener razón social
+        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        // realizar consulta
+        return $this->db->getTable('
+            SELECT
+                e.dte,
+                t.tipo,
+                e.folio,
+                '.$razon_social.',
+                e.fecha,
+                e.total,
+                e.revision_estado,
+                e.sucursal_sii,
+                u.usuario
+            FROM
+                dte_emitido AS e
+                LEFT JOIN dte_intercambio_recibo_dte AS recibo ON recibo.emisor = e.emisor AND recibo.dte = e.dte AND recibo.folio = e.folio AND recibo.certificacion = e.certificacion
+                LEFT JOIN dte_intercambio_recepcion_dte AS recepcion ON recepcion.emisor = e.emisor AND recepcion.dte = e.dte AND recepcion.folio = e.folio AND recepcion.certificacion = e.certificacion
+                LEFT JOIN dte_intercambio_resultado_dte AS resultado ON resultado.emisor = e.emisor AND resultado.dte = e.dte AND resultado.folio = e.folio AND resultado.certificacion = e.certificacion
+                JOIN dte_tipo AS t ON t.codigo = e.dte
+                JOIN contribuyente AS r ON r.rut = e.receptor
+                JOIN usuario AS u ON u.id = e.usuario
+            WHERE
+                e.emisor = :rut
+                AND e.certificacion = :certificacion
+                AND e.fecha BETWEEN :desde AND :hasta
+                AND e.track_id > 0
+                AND  e.revision_estado IS NOT NULL
+                AND '.implode(' AND ', $where).'
+            ORDER BY e.fecha DESC, t.tipo, e.folio DESC
+        ', $vars);
+    }
+
 }
