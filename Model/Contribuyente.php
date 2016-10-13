@@ -2165,13 +2165,13 @@ class Model_Contribuyente extends \Model_App
         // filtros
         $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
         $where = [$recibo ? 'recibo.responde IS NOT NULL' : 'recibo.responde IS NULL'];
-        if ($recepcion!==null) {
+        if ($recepcion!==null and $recepcion!=-1) {
             $where[] = 'recepcion.estado = :recepcion';
             $vars[':recepcion'] = $recepcion;
         } else {
             $where[] = 'recepcion.estado IS NULL';
         }
-        if ($resultado!==null) {
+        if ($resultado!==null and $resultado!=-1) {
             $where[] = 'resultado.estado = :resultado';
             $vars[':resultado'] = $resultado;
         } else {
