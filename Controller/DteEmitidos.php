@@ -388,74 +388,38 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que envía por email el PDF y el XML del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-12
+     * @version 2016-10-12
      */
     public function enviar_email($dte, $folio)
     {
-        $Emisor = $this->getContribuyente();
-        // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteEmitido->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el DTE solicitado', 'error'
+        if (isset($_POST['submit'])) {
+            $Emisor = $this->getContribuyente();
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User->hash);
+            $response = $rest->post(
+                $this->request->url.'/api/dte/dte_emitidos/enviar_email/'.$dte.'/'.$folio.'/'.$Emisor->rut,
+                [
+                    'emails' => $_POST['emails'],
+                    'asunto' => $_POST['asunto'],
+                    'mensaje' => $_POST['mensaje'],
+                    'pdf' => 1,
+                    'cedible' => (int)isset($_POST['cedible']),
+                    'papelContinuo' => $Emisor->config_pdf_dte_papel,
+                ]
             );
-            $this->redirect('/dte/dte_emitidos/listar');
-        }
-        // se verifican datos mínimos
-        foreach (['emails', 'asunto', 'mensaje'] as $attr) {
-            if (empty($_POST[$attr])) {
+            if ($response===false) {
+                \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+            }
+            else if ($response['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            }
+            else {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Debe especificar el campo: '.$attr, 'error'
+                    'Se envió el DTE a: '.implode(', ', $_POST['emails']), 'ok'
                 );
-                $this->redirect(str_replace('enviar_email', 'ver', $this->request->request).'#email');
             }
         }
-        // crear email
-        $email = $Emisor->getEmailSmtp();
-        $email->to($_POST['emails']);
-        $email->subject($_POST['asunto']);
-        // adjuntar PDF
-        $data = [
-            'xml' => $DteEmitido->xml,
-            'cedible' => isset($_POST['cedible']),
-            'papelContinuo' => $Emisor->config_pdf_dte_papel,
-            'compress' => false,
-        ];
-        $logo = \sowerphp\core\Configure::read('dte.logos.dir').'/'.$Emisor->rut.'.png';
-        if (is_readable($logo)) {
-            $data['logo'] = base64_encode(file_get_contents($logo));
-        }
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($this->Auth->User->hash);
-        $response = $rest->post($this->request->url.'/api/dte/documentos/generar_pdf', $data);
-        if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            $this->redirect(str_replace('enviar_email', 'ver', $this->request->request).'#email');
-        }
-        $email->attach([
-            'data' => $response['body'],
-            'name' => 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf',
-            'type' => 'application/pdf',
-        ]);
-        // adjuntar XML
-        $email->attach([
-            'data' => base64_decode($DteEmitido->xml),
-            'name' => 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml',
-            'type' => 'application/xml',
-        ]);
-        // enviar email
-        $status = $email->send($_POST['mensaje']);
-        if ($status===true) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Se envió el DTE a: '.implode(', ', $_POST['emails']), 'ok'
-            );
-            $this->redirect(str_replace('enviar_email', 'ver', $this->request->request));
-        } else {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible enviar el email, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
-            );
-            $this->redirect(str_replace('enviar_email', 'ver', $this->request->request).'#email');
-        }
+        $this->redirect(str_replace('enviar_email', 'ver', $this->request->request).'#email');
     }
 
     /**
@@ -900,6 +864,50 @@ class Controller_DteEmitidos extends \Controller_App
         try {
             $DteEmitido->enviar($User->id);
             return $DteEmitido;
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), 502);
+        }
+    }
+
+    /**
+     * Acción de la API que permite enviar el DTE emitido por correo electrónico
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-12
+     */
+    public function _api_enviar_email_POST($dte, $folio, $emisor)
+    {
+        // verificar permisos y crear DteEmitido
+        if ($this->Auth->User) {
+            $User = $this->Auth->User;
+        } else {
+            $User = $this->Api->getAuthUser();
+            if (is_string($User)) {
+                $this->Api->send($User, 401);
+            }
+        }
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists())
+            $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        // parametros por defecto
+        $data = array_merge([
+            'emails' => $DteEmitido->getReceptor()->config_email_intercambio_user,
+            'asunto' => null,
+            'mensaje' => null,
+            'pdf' => false,
+            'cedible' => false,
+            'papelContinuo' => $Emisor->config_pdf_dte_papel,
+        ], $this->Api->data);
+        // enviar por correo
+        try {
+            $DteEmitido->email($data['emails'], $data['asunto'], $data['mensaje'], $data['pdf'], $data['cedible'], $data['papelContinuo']);
+            return true;
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), 502);
         }

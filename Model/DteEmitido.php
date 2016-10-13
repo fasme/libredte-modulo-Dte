@@ -806,4 +806,64 @@ class Model_DteEmitido extends Model_Base_Envio
         return $cambio ? abs(round($total*$cambio)) : -1;
     }
 
+    /**
+     * Método que envía el DTE por correo electrónico
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-12
+     */
+    public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
+    {
+        // variables por defecto
+        if (!$to)
+            $to = $this->getReceptor()->config_email_intercambio_user;
+        if (!$to)
+            throw new \Exception('No hay correo a quien enviar el DTE');
+        if (!is_array($to))
+            $to = [$to];
+        if (!$subject)
+            $subject = 'EnvioDTE: '.num($this->getEmisor()->rut).'-'.$this->getEmisor()->dv.' - '.$this->getTipo()->tipo.' N° '.$this->folio;
+        if (!$msg)
+            $msg = 'Se adjunta '.$this->getTipo()->tipo.' N° '.$this->folio.' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-';
+        if ($papelContinuo===null)
+            $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
+        // crear email
+        $email = $this->getEmisor()->getEmailSmtp();
+        $email->to($to);
+        $email->subject($subject);
+        // adjuntar PDF
+        if ($pdf) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->getEmisor()->getUsuario()->hash);
+            $Request = new \sowerphp\core\Network_Request();
+            $response = $rest->get($Request->url.'/api/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/'.$this->emisor, [
+                'cedible' => $cedible,
+                'papelContinuo' => $papelContinuo,
+                'compress' => false,
+            ]);
+            if ($response['status']['code']!=200) {
+                throw new \Exception($response['body']);
+            }
+            $email->attach([
+                'data' => $response['body'],
+                'name' => 'dte_'.$this->getEmisor()->rut.'-'.$this->getEmisor()->dv.'_T'.$this->dte.'F'.$this->folio.'.pdf',
+                'type' => 'application/pdf',
+            ]);
+        }
+        // adjuntar XML
+        $email->attach([
+            'data' => base64_decode($this->xml),
+            'name' => 'dte_'.$this->getEmisor()->rut.'-'.$this->getEmisor()->dv.'_T'.$this->dte.'F'.$this->folio.'.xml',
+            'type' => 'application/xml',
+        ]);
+        // enviar email
+        $status = $email->send($msg);
+        if ($status===true) {
+            return true;
+        } else {
+            throw new \Exception(
+                'No fue posible enviar el email: '.$status['message']
+            );
+        }
+    }
+
 }
