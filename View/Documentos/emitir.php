@@ -41,14 +41,18 @@ echo $f->begin(['id'=>'emitir_dte', 'focus'=>'RUTRecepField', 'action'=>$_base.'
             <input type="text" name="RUTRecep" id="RUTRecepField" class="check notempty rut form-control" placeholder="RUT del receptor" maxlength="12" readonly="readonly" value="<?=$DteReceptor['RUTRecep']?>" />
 <?php endif; ?>
         </div>
-        <div class="form-group col-md-5"><?=$f->input(['name' => 'RznSocRecep', 'placeholder' => 'Razón social del receptor', 'check' => 'notempty', 'attr' => 'maxlength="100"', 'value'=>(isset($DteReceptor['RznSocRecep'])?$DteReceptor['RznSocRecep']:'')])?></div>
-        <div class="form-group col-md-4"><?=$f->input(['name' => 'GiroRecep', 'placeholder' => 'Giro del receptor', 'check' => 'notempty', 'attr' => 'maxlength="40"', 'value'=>(isset($DteReceptor['GiroRecep'])?substr($DteReceptor['GiroRecep'],0,40):'')])?></div>
+        <div class="form-group col-md-9"><?=$f->input(['name' => 'RznSocRecep', 'placeholder' => 'Razón social del receptor', 'check' => 'notempty', 'attr' => 'maxlength="100"', 'value'=>(isset($DteReceptor['RznSocRecep'])?$DteReceptor['RznSocRecep']:'')])?></div>
     </div>
     <div class="row">
+        <div class="form-group col-md-6"><?=$f->input(['name' => 'GiroRecep', 'placeholder' => 'Giro del receptor', 'check' => 'notempty', 'attr' => 'maxlength="40"', 'value'=>(isset($DteReceptor['GiroRecep'])?substr($DteReceptor['GiroRecep'],0,40):'')])?></div>
         <div class="form-group col-md-3"><?=$f->input([ 'name' => 'DirRecep', 'placeholder' => 'Dirección del receptor', 'check' => 'notempty', 'attr' => 'maxlength="70"', 'value'=>(isset($DteReceptor['DirRecep'])?$DteReceptor['DirRecep']:'')])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'select', 'name' => 'CmnaRecep', 'options' => [''=>'Comuna del receptor'] + $comunas, 'check' => 'notempty', 'value'=>(isset($DteReceptor['CmnaRecep'])?$DteReceptor['CmnaRecep']:'')])?></div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6"><?=$f->input(['name' => 'CorreoRecep', 'placeholder' => 'Email del receptor (opcional)', 'check'=>'email', 'attr' => 'maxlength="80"', 'value'=>(isset($DteReceptor['CorreoRecep'])?$DteReceptor['CorreoRecep']:'')])?></div>
         <div class="form-group col-md-3"><?=$f->input(['name' => 'Contacto', 'placeholder' => 'Teléfono del receptor (opcional)', 'check'=>'telephone', 'attr' => 'maxlength="20"', 'value'=>(isset($DteReceptor['Contacto'])?$DteReceptor['Contacto']:'')])?></div>
-        <div class="form-group col-md-3"><?=$f->input(['name' => 'CorreoRecep', 'placeholder' => 'Email del receptor (opcional)', 'check'=>'email', 'attr' => 'maxlength="80"', 'value'=>(isset($DteReceptor['CorreoRecep'])?$DteReceptor['CorreoRecep']:'')])?></div>
+        <div class="form-group col-md-3"><?=$f->input(['name' => 'RUTSolicita', 'placeholder' => 'RUT que solicita el DTE (opcional)', 'check'=>'rut', 'attr' => 'maxlength="10"'])?></div>
     </div>
     <!-- DATOS DE TRANSPORTE EN CASO QUE SEA GUÍA DE DESPACHO -->
     <div class="row" id="datosTransporte" style="display:none">

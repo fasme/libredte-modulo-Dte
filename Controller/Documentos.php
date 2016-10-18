@@ -355,7 +355,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-16
+     * @version 2016-10-18
      */
     public function previsualizacion()
     {
@@ -460,6 +460,7 @@ class Controller_Documentos extends \Controller_App
                     'DirRecep' => $Receptor->direccion,
                     'CmnaRecep' => !empty($_POST['CmnaRecep']) ? $Receptor->getComuna()->comuna : false,
                 ],
+                'RUTSolicita' => !empty($_POST['RUTSolicita']) ? str_replace('.', '', $_POST['RUTSolicita']) : false,
             ],
         ];
         // agregar pagos programados si es venta a crédito
@@ -647,8 +648,9 @@ class Controller_Documentos extends \Controller_App
             $this->redirect('/dte/documentos/emitir');
         }
         if (empty($response['body']['emisor']) or empty($response['body']['receptor']) or empty($response['body']['dte']) or empty($response['body']['codigo'])) {
+            $msg = is_string($response['body']) ? $response['body'] : json_encode($response['body']);
             \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible generar el documento de previsualización', 'error'
+                'Hubo problemas al generar el documento temporal: '.$msg, 'error'
             );
             $this->redirect('/dte/documentos/emitir');
         }
