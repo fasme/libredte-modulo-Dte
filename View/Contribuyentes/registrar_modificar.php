@@ -189,12 +189,6 @@ echo $f->input([
     'check' => 'rut',
 ]);
 echo $f->input([
-    'name' => 'config_extra_contador_rut',
-    'label' => 'RUT contador',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_contador_rut : null,
-    'check' => 'rut',
-]);
-echo $f->input([
     'name' => 'config_extra_web',
     'label' => 'Web',
     'value' => isset($Contribuyente) ? $Contribuyente->config_extra_web : null,
@@ -838,6 +832,27 @@ echo $f->input([
     'options' => [''=>'Cuenta sin definir'] + $cuentas,
     'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_f29_151 : false,
     'help' => 'Cuenta contable de la retención de impuesto del 10% sobre rentas',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-info"></i>
+            Datos contador
+        </div>
+        <div class="panel-body">
+<?php
+    echo $f->input([
+    'name' => 'config_contabilidad_contador_rut',
+    'label' => 'RUT contador',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_contador_rut : null,
+    'check' => 'rut',
+]);
+echo $f->input([
+    'name' => 'config_contabilidad_contador_nombre',
+    'label' => 'Nombre contador',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_contador_nombre : null,
 ]);
 ?>
         </div>

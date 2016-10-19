@@ -14,5 +14,6 @@ ALTER TABLE dte_tipo
 ;
 ALTER TABLE cobranza DROP CONSTRAINT cobranza_usuario_fk;
 ALTER TABLE cobranza ADD CONSTRAINT cobranza_usuario_fk FOREIGN KEY (usuario) REFERENCES usuario (id) MATCH FULL ON UPDATE CASCADE ON DELETE RESTRICT;
+UPDATE contribuyente_config SET configuracion = 'contabilidad' WHERE variable = 'contador_rut';
 
 COMMIT;
