@@ -22,7 +22,12 @@ $(function() {
         <li role="presentation"><a href="#ambientes" aria-controls="ambientes" role="tab" data-toggle="tab">Ambientes</a></li>
         <li role="presentation"><a href="#correos" aria-controls="correos" role="tab" data-toggle="tab">Correos</a></li>
         <li role="presentation"><a href="#facturacion" aria-controls="facturacion" role="tab" data-toggle="tab">Facturación</a></li>
+<?php if (\sowerphp\core\Module::loaded('Lce')) : ?>
         <li role="presentation"><a href="#contabilidad" aria-controls="contabilidad" role="tab" data-toggle="tab">Contabilidad</a></li>
+<?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Pos')) : ?>
+        <li role="presentation"><a href="#pos" aria-controls="pos" role="tab" data-toggle="tab">POS</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API</a></li>
         <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
     </ul>
@@ -684,6 +689,7 @@ echo $f->input([
 </div>
 <!-- FIN CONFIGURACIÓN FACTURACIÓN -->
 
+<?php if (\sowerphp\core\Module::loaded('Lce')) : ?>
 <!-- INICIO CONTABILIDAD -->
 <div role="tabpanel" class="tab-pane" id="contabilidad">
     <div class="panel panel-default">
@@ -859,6 +865,32 @@ echo $f->input([
     </div>
 </div>
 <!-- FIN CONTABILIDAD -->
+<?php endif; ?>
+
+<?php if (\sowerphp\core\Module::loaded('Pos')) : ?>
+<!-- INICIO PUNTO DE VENTA -->
+<div role="tabpanel" class="tab-pane" id="pos">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-list-alt"></i>
+            Categorías de productos y servicios
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pos_item_clasificacion_defecto',
+    'label' => 'Clasificación por defecto',
+    'options' => isset($Contribuyente) ? (new \website\Dte\Admin\Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList() : [],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pos_item_clasificacion_defecto : false,
+    'help' => 'Clasificación que aparecerá abierta por defecto en el punto de venta',
+]);
+?>
+        </div>
+    </div>
+</div>
+<!-- FIN PUNTO DE VENTA -->
+<?php endif; ?>
 
 <!-- INICIO API -->
 <div role="tabpanel" class="tab-pane" id="api">
