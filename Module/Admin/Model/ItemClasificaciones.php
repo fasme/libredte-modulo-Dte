@@ -41,26 +41,53 @@ class Model_ItemClasificaciones extends \Model_Plural_App
     /**
      * Método que entrega el listado de clasificaciones
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-24
+     * @version 2016-10-25
      */
     public function getList()
     {
-        return $this->getListByContribuyente(\sowerphp\core\Model_Datasource_Session::read('dte.Contribuyente')->rut);
+        return $this->getListByContribuyente($this->getContribuyente()->rut);
     }
 
     /**
      * Método que entrega el listado de clasificaciones de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-24
+     * @version 2016-10-26
      */
     public function getListByContribuyente($rut)
     {
         return $this->db->getTable('
             SELECT codigo, clasificacion
             FROM item_clasificacion
-            WHERE contribuyente = :rut
+            WHERE contribuyente = :rut AND activa = true
             ORDER BY clasificacion
         ', [':rut'=>$rut]);
+    }
+
+    /**
+     * Método que entrega el listado de clasificaciones con sus items y valores brutos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-26
+     */
+    public function getListItems()
+    {
+        return \sowerphp\core\Utility_Array::tableToAssociativeArray(\sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($this->db->getTable('
+            SELECT
+                c.codigo AS clasificacion_codigo,
+                c.clasificacion,
+                i.codigo,
+                i.item,
+                CASE WHEN i.bruto OR i.exento != 0 THEN
+                    i.precio
+                ELSE
+                    i.precio * 1.'.\sasco\LibreDTE\Sii::getIVA().'
+                END AS precio,
+                i.moneda
+            FROM
+                item AS i
+                JOIN item_clasificacion AS c ON i.clasificacion = c.codigo
+            WHERE c.contribuyente = :rut AND c.activa = true AND i.activo = true
+            ORDER BY c.clasificacion
+        ', [':rut'=>$this->getContribuyente()->rut]), 2, 'items'));
     }
 
 }
