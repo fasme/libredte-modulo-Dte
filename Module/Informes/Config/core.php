@@ -23,9 +23,34 @@
 
 // Menú para el módulo
 Configure::write('nav.module', array(
+    '/dte_emitidos' => [
+        'name' => 'Documentos emitidos',
+        'desc' => 'Informe de documentos emitidos',
+        'icon' => 'fa fa-sign-out',
+    ],
     '/impuestos/propuesta_f29' => [
-        'name' => 'Propuesta F29',
+        'name' => 'Propuesta formulario 29',
         'desc' => 'Propuesta para el formulario 29',
         'icon' => 'fa fa-file',
+    ],
+    '/dte_emitidos/intercambio' => [
+        'name' => 'Respuesta intercambio DTE',
+        'desc' => 'Respuestas del proceso de intercambio para DTE emitidos a clientes',
+        'icon' => 'fa fa-exchange',
+    ],
+    '/dte_emitidos/estados' => [
+        'name' => 'Estado DTEs emitidos',
+        'desc' => 'Estados de documentos emitidos y envíados al SII',
+        'icon' => 'fa fa-files-o',
+    ],
+    '/dte_emitidos/sin_enviar' => [
+        'name' => 'Documentos sin enviar al SII',
+        'desc' => 'Documentos emitidos y que no han sido envíados al SII',
+        'icon' => 'fa fa-send-o',
+    ],
+    '/documentos_usados' => [
+        'name' => 'Documentos usados',
+        'desc' => 'Estadística de documentos usados, tanto emitidos como recibidos y el uso de sobre cuota',
+        'icon' => 'fa fa-calculator',
     ],
 ));
