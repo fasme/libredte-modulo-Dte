@@ -50,7 +50,7 @@ echo $f->input([
 ]);
 echo $f->input([
     'name' => 'precio',
-    'label' => 'Precio neto',
+    'label' => 'Precio',
     'value' => isset($Obj)?$Obj->precio:'',
     'check' => 'notempty real',
 ]);
@@ -60,6 +60,14 @@ echo $f->input([
     'label' => 'Moneda',
     'options' => ['CLP'=>'Pesos', 'CLF'=>'UF', 'USD'=>'Dólares', 'EUR'=>'Euros'],
     'value' => isset($Obj)?$Obj->moneda:'CLP',
+    'check' => 'notempty',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'bruto',
+    'label' => 'Tipo precio',
+    'options' => ['Neto', 'Bruto'],
+    'value' => isset($Obj)?$Obj->bruto:false,
     'check' => 'notempty',
 ]);
 echo $f->input([

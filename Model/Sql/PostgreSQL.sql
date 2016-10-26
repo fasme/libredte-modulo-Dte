@@ -547,6 +547,7 @@ CREATE TABLE item (
     clasificacion VARCHAR(10) NOT NULL,
     unidad VARCHAR(4),
     precio REAL NOT NULL CHECK (precio > 0),
+    bruto BOOLEAN NOT NULL DEFAULT false,
     moneda VARCHAR(3) NOT NULL,
     exento SMALLINT NOT NULL DEFAULT 0 CHECK (exento >= 0 AND exento <= 6),
     descuento REAL NOT NULL DEFAULT 0 CHECK (descuento >= 0),

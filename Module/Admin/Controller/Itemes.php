@@ -27,14 +27,14 @@ namespace website\Dte\Admin;
 /**
  * Clase para las acciones asociadas a items
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-02-24
+ * @version 2016-10-25
  */
 class Controller_Itemes extends \Controller_Maintainer
 {
 
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
     protected $columnsView = [
-        'listar'=>['codigo', 'item', 'precio', 'moneda', 'clasificacion', 'activo']
+        'listar'=>['codigo', 'item', 'precio', 'moneda', 'bruto', 'clasificacion', 'activo']
     ]; ///< Columnas que se deben mostrar en las vistas
 
     /**
@@ -98,11 +98,11 @@ class Controller_Itemes extends \Controller_Maintainer
      * Recurso de la API que permite obtener los datos de un item a partir de su
      * código
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-02
+     * @version 2016-10-25
      */
     public function _api_info_GET($empresa, $codigo)
     {
-        extract($this->Api->getQuery(['fecha', 'tipo']));
+        extract($this->Api->getQuery(['fecha', 'tipo', 'bruto'=>false, 'moneda'=>'CLP']));
         // obtener usuario autenticado
         if ($this->Auth->User) {
             $User = $this->Auth->User;
@@ -141,7 +141,9 @@ class Controller_Itemes extends \Controller_Maintainer
                 'DscItem' => $Item->descripcion,
                 'IndExe' => $Item->exento,
                 'UnmdItem' => $Item->unidad,
-                'PrcItem' => $Item->getPrecio($fecha),
+                'PrcItem' => $Item->getPrecio($fecha, $bruto, $moneda),
+                'Moneda' => $moneda,
+                'MntBruto' => (bool)$bruto,
                 'ValorDR' => $Item->descuento,
                 'TpoValor' => $Item->descuento_tipo,
                 'CodImpAdic' => $Item->impuesto_adicional,

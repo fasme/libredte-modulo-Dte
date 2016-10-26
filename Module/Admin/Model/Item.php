@@ -48,6 +48,7 @@ class Model_Item extends \Model_App
     public $unidad; ///< character varying(4) NULL DEFAULT ''
     public $precio; ///< real(24) NOT NULL DEFAULT ''
     public $moneda; ///< character varying(3) NOT NULL DEFAULT ''
+    public $bruto; ///< boolean() NOT NULL DEFAULT 'false'
     public $exento; ///< smallint(16) NOT NULL DEFAULT '0'
     public $descuento; ///< real(24) NOT NULL DEFAULT '0'
     public $descuento_tipo; ///< character(1) NOT NULL DEFAULT '%'
@@ -155,6 +156,17 @@ class Model_Item extends \Model_App
             'pk'        => false,
             'fk'        => null
         ),
+        'bruto' => array(
+            'name'      => 'Bruto',
+            'comment'   => '',
+            'type'      => 'boolean',
+            'length'    => null,
+            'null'      => false,
+            'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
         'exento' => array(
             'name'      => 'Exento',
             'comment'   => '',
@@ -243,19 +255,23 @@ class Model_Item extends \Model_App
     }
 
     /**
-     * Método que entrega el precio del item, si el precio no está en CLP se
-     * calculará cuanto CLP equivalen en la moneda que esté el item
+     * Método que entrega el precio del item
+     * @param fecha Permite solicitar el precio para una fecha en particular (sirve cuando el precio no está en CLP)
+     * @param bruto =false se obtendrá el valor neto del item, =true se obtendrá el valor bruto (con impuestos)
+     * @param moneda Tipo de moneda en la que se desea obtener el precio del item
+     * @todo Implementar obtención de precio en moneda diferente a CLP y montos neto/bruto cuando hay impuestos específicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-24
+     * @version 2016-10-25
      */
-    public function getPrecio($fecha = null)
+    public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP')
     {
+        $precio = $this->bruto ? round($this->precio/1.19) : $this->precio;
         if ($this->moneda=='CLP')
-            return $this->precio;
+            return $precio;
         if (!$fecha)
             $fecha = date('Y-m-d');
         $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, 'CLP', $fecha))->valor;
-        return round($this->precio * $cambio);
+        return round($precio * $cambio);
     }
 
 }
