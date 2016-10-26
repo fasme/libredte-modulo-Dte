@@ -112,6 +112,7 @@ Receptor.setDatos = function (form) {
     f.CmnaRecep.value = "";
     f.Contacto.value = "";
     f.CorreoRecep.value = "";
+    f.RUTSolicita.value = "";
     // si no se indicó el rut no se hace nada más
     if (__.empty(f.RUTRecep.value))
         return;
