@@ -265,7 +265,7 @@ class Model_Item extends \Model_App
      */
     public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP')
     {
-        $precio = $this->bruto ? round($this->precio/1.19) : $this->precio;
+        $precio = $this->bruto ? round($this->precio/1.19, $this->moneda!='CLP'?3:0) : $this->precio;
         if ($this->moneda=='CLP')
             return $precio;
         if (!$fecha)
