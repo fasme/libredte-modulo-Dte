@@ -248,4 +248,27 @@ class Model_DteEmitidos extends \Model_Plural_App
         ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
+    /**
+     * Método que entrega los totales de documentos emitidos por día de todos los contribuyentes
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-27
+     */
+    public function countDiarios($desde, $hasta, $certificacion)
+    {
+        if (is_numeric($desde)) {
+            $desde = date('Y-m-d', strtotime('-'.$desde.' months'));
+        }
+        if (!$hasta)
+            $hasta = date('Y-m-d');
+        return $this->db->getTable('
+            SELECT fecha AS dia, COUNT(*) AS total
+            FROM dte_emitido
+            WHERE
+                certificacion = :certificacion
+                AND fecha BETWEEN :desde AND :hasta
+            GROUP BY fecha
+            ORDER BY fecha
+        ', [':certificacion'=>(int)$certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
 }
