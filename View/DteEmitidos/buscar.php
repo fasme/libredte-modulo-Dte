@@ -30,6 +30,7 @@ echo $f->input([
         ['name'=>'xml_nodo', 'check'=>'notempty'],
         ['name'=>'xml_valor', 'check'=>'notempty'],
     ],
+    'values' => [],
 ]);
 ?>
 <p>Los nodos deben ser los del XML desde el tag Documento del DTE. Por ejemplo para buscar en los productos usar: Detalle/NmbItem</p>
@@ -38,6 +39,7 @@ echo $f->input([
 echo $f->end(false);
 // mostrar documentos
 if (isset($documentos)) {
+    echo '<hr/>';
     foreach ($documentos as &$d) {
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento"><span class="fa fa-search btn btn-default"></span></a>';
         $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
@@ -45,9 +47,10 @@ if (isset($documentos)) {
         $d['total'] = num($d['total']);
         unset($d['dte']);
     }
-    array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Intercambio', 'Usuario', 'Acciones']);
+    array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Intercambio', 'Sucursal', 'Usuario', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
-    $t->setColsWidth([null, null, null, null, null, null, null, null, 100]);
+    $t->setColsWidth([null, null, null, null, null, null, null, null, null, 100]);
     $t->setId('dte_emitidos_'.$Emisor->rut);
+    $t->setExport(true);
     echo $t->generate($documentos);
 }
