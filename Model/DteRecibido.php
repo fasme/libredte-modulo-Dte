@@ -470,14 +470,18 @@ class Model_DteRecibido extends \Model_App
     }
 
     /**
-     * Método para guardar el documento recibido, creará el emisor si no existe
-     * antes de ser guardado el documento
+     * Método para guardar el documento recibido, se hacen algunas validaciones previo a guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-29
+     * @version 2016-10-28
      */
     public function save()
     {
-        $this->getEmisor(); // si el emisor no existe con esto se creará
+        // si el emisor no existe con esto se creará
+        $this->getEmisor();
+        // campo emisor solo en nc y nd
+        if (!in_array($this->dte, [55, 56, 60, 61]))
+            $this->emisor_nc_nd_fc = null;
+        // se guarda el receptor
         return parent::save();
     }
 
