@@ -174,6 +174,7 @@ echo $f->input([
     'name' => 'CodAutRec',
     'label'=>'Autorización rectificación',
     'help' => 'Código de autorización de rectificación obtenido desde el SII (sólo si es rectificación)',
+    'check' => ($Libro->track_id and $Libro->getEstado()!='LRH')?'notempty':'',
 ]);
 ?>
             <div class="row">
