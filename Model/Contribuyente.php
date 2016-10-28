@@ -207,7 +207,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-27
+     * @version 2016-10-27
      */
     public function __construct($rut = null)
     {
@@ -230,6 +230,10 @@ class Model_Contribuyente extends \Model_App
                     $this->save();
                 } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 }
+            }
+            foreach (['telefono', 'email', 'direccion'] as $attr) {
+                if (!$this->$attr)
+                    $this->$attr = null;
             }
         }
         $this->contribuyente = &$this->razon_social;
