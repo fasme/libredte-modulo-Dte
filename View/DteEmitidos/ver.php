@@ -89,7 +89,7 @@ new \sowerphp\general\View_Helper_Table([
                 <a class="btn btn-info" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
                 <br/>
                 <span style="font-size:0.8em">
-                    <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/verificar_datos', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
+                    <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
                     <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
                 </span>
             </p>
