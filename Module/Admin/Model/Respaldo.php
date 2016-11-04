@@ -27,7 +27,7 @@ namespace website\Dte\Admin;
 /**
  * Modelo para generar respaldo de datos de un contribuyente
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-04
+ * @version 2016-11-04
  */
 class Model_Respaldo
 {
@@ -114,6 +114,9 @@ class Model_Respaldo
             'rut' => 'contribuyente',
         ],
         'lce_cuenta' => [
+            'rut' => 'contribuyente',
+        ],
+        'lce_cuenta_clasificacion' => [
             'rut' => 'contribuyente',
         ],
     ]; ///< Información de las tabla que se exportarán
