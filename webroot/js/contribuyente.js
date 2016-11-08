@@ -15,8 +15,10 @@ function config_email_set(email, uso) {
     }
     dominio = email.value.substr(email.value.indexOf('@')+1);
     if (email_config[dominio] !== undefined ) {
-        document.getElementById('config_email_' + uso + '_smtpField').value = email_config[dominio].smtp;
-        document.getElementById('config_email_' + uso + '_imapField').value = email_config[dominio].imap;
+        if (__.empty(document.getElementById('config_email_' + uso + '_smtpField').value))
+            document.getElementById('config_email_' + uso + '_smtpField').value = email_config[dominio].smtp;
+        if (__.empty(document.getElementById('config_email_' + uso + '_imapField').value))
+            document.getElementById('config_email_' + uso + '_imapField').value = email_config[dominio].imap;
     }
 }
 
