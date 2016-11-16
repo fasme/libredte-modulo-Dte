@@ -27,18 +27,18 @@ namespace website\Dte;
  * Comando para enviar el reporte de consumo de folios de las boletas
  * electrónicas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-08-28
+ * @version 2016-11-16
  */
 class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
 {
 
-    public function main($grupo = null, $certificacion = 0)
+    public function main($grupo = 'dte_plus', $certificacion = 0)
     {
         \sasco\LibreDTE\Sii::setAmbiente((int)$certificacion);
         $from_unix_time = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
         $day_before = strtotime('yesterday', $from_unix_time);
         $dia = date('Y-m-d', $day_before);
-        $contribuyentes = $this->getContribuyentes($grupo);
+        $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
         foreach ($contribuyentes as $rut) {
             $this->enviar($rut, $dia, $certificacion);
         }
@@ -83,41 +83,30 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
         }
     }
 
-    private function getContribuyentes($grupo = null)
+    private function getContribuyentes($grupo, $certificacion)
     {
         if (is_numeric($grupo))
             return [$grupo];
         $db = \sowerphp\core\Model_Datasource_Database::get();
-        if ($grupo) {
-            return $db->getCol('
-                SELECT DISTINCT c.rut
-                FROM
-                    contribuyente AS c
-                    JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
-                    JOIN contribuyente_dte AS cd ON cd.contribuyente = c.rut
-                    JOIN usuario AS u ON c.usuario = u.id
-                    JOIN usuario_grupo AS ug ON ug.usuario = u.id
-                    JOIN grupo AS g ON ug.grupo = g.id
-                WHERE
-                    g.grupo = :grupo
-                    AND cc.configuracion = \'ambiente\'
-                    AND cc.variable = \'en_certificacion\'
-                    AND cc.valor = \'0\'
-                    AND cd.dte IN (39, 41)
-            ', [':grupo' => $grupo]);
-        } else {
-            return $db->getCol('
-                SELECT DISTINCT cd.contribuyente
-                FROM
-                    contribuyente_dte AS cd
-                    JOIN contribuyente_config AS cc ON cc.contribuyente = cd.contribuyente
-                WHERE
-                    cc.configuracion = \'ambiente\'
-                    AND cc.variable = \'en_certificacion\'
-                    AND cc.valor = \'0\'
-                    AND cd.dte IN (39, 41)
-            ');
-        }
+        return $db->getCol('
+            SELECT DISTINCT c.rut
+            FROM
+                contribuyente AS c
+                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
+                JOIN contribuyente_dte AS cd ON cd.contribuyente = c.rut
+                JOIN usuario AS u ON c.usuario = u.id
+                JOIN usuario_grupo AS ug ON ug.usuario = u.id
+                JOIN grupo AS g ON ug.grupo = g.id
+                JOIN dte_folio AS f ON f.emisor = c.rut AND f.dte = cd.dte
+            WHERE
+                g.grupo = :grupo
+                AND cc.configuracion = \'ambiente\'
+                AND cc.variable = \'en_certificacion\'
+                AND cc.valor = :certificacion_t
+                AND cd.dte IN (39, 41)
+                AND f.dte IN (39, 41)
+                AND f.certificacion = :certificacion
+        ', [':grupo' => $grupo, ':certificacion'=>(int)$certificacion, ':certificacion_t'=>(int)$certificacion]);
     }
 
 }
