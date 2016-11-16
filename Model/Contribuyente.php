@@ -383,6 +383,7 @@ class Model_Contribuyente extends \Model_App
         $this->telefono = substr($this->telefono, 0, 20);
         $this->email = substr($this->email, 0, 80);
         $this->direccion = substr($this->direccion, 0, 70);
+        $this->modificado = date('Y-m-d H:i:s');
         // guardar contribuyente
         if (!parent::save())
             return false;
@@ -412,15 +413,46 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que 'elimina' al contribuyente. En realidad los contribuyentes
+     * nunca se eliminan. Lo que se hace es desasociar al contribuyente de su
+     * usuario administrador y se elimina la configuración.
+     * Los datos del contribuyente de documentos emitidos, recibidos, etc no se
+     * eliminan por defecto, se debe solicitar específicamente.
+     * @todo Eliminar datos de DTE emitidos, recibidos, consumos, folios, etc (no el contribuyente en si)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-11-16
+     */
+    public function delete($all = false)
+    {
+        $this->db->beginTransaction();
+        // limpieza general
+        $this->config = [
+            'email' => ['intercambio_user' => $this->config_email_intercambio_user],
+        ];
+        $this->usuario = null;
+        $this->db->query('DELETE FROM contribuyente_config WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+        if (!$this->save()) {
+            $this->db->rollback();
+            return false;
+        }
+        $this->db->commit();
+        // eliminar todos los registros de la empresa de la base de datos
+        if ($all) {
+            // TODO
+        }
+        return true;
+    }
+
+    /**
      * Método que envía un correo electrónico al contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-11
+     * @version 2016-11-14
      */
-    public function notificar($asunto, $mensaje)
+    public function notificar($asunto, $mensaje, $para = null)
     {
         $email = new \sowerphp\core\Network_Email();
-        $email->to($this->getUsuario()->email);
-        $email->subject($this->getRUT().' '.$asunto);
+        $email->to($para ? $para : $this->getUsuario()->email);
+        $email->subject('['.\sowerphp\core\Configure::read('page.body.title').'] '.$this->getRUT().': '.$asunto);
         $msg = $mensaje."\n\n".'-- '."\n".\sowerphp\core\Configure::read('page.body.title');
         return $email->send($msg) === true ? true : false;
     }
