@@ -25,7 +25,11 @@ CREATE TABLE dte_tipo (
 	tipo CHARACTER VARYING (60) NOT NULL,
 	electronico BOOLEAN NOT NULL DEFAULT true,
 	compra BOOLEAN NOT NULL DEFAULT false,
-	venta BOOLEAN NOT NULL DEFAULT false
+	venta BOOLEAN NOT NULL DEFAULT false,
+	categoria CHAR(1) NOT NULL DEFAULT 'T' CHECK (categoria IN ('T', 'I')),
+	enviar BOOLEAN NOT NULL DEFAULT false CHECK ((enviar = true AND electronico = true) OR enviar = false),
+	cedible BOOLEAN NOT NULL DEFAULT false CHECK ((categoria = 'T' AND cedible = true) OR cedible = false),
+	operacion CHAR(1) CHECK ((categoria = 'T' AND operacion IN ('S', 'R')) OR (categoria != 'T' AND operacion IS NULL))
 );
 COMMENT ON TABLE dte_tipo IS 'Tipos de documentos (electrónicos y no electrónicos)';
 COMMENT ON COLUMN dte_tipo.codigo IS 'Código asignado por el SII al tipo de documento';
