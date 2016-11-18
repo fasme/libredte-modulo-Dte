@@ -38,6 +38,10 @@ class Model_DteTipos extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_tipo'; ///< Tabla del modelo
 
+    private $internos = [
+        'HES' => 'Hoja de entrada de servicios',
+    ]; ///< Tipos de documentos internos de LibreDTE (sin código oficial del SII)
+
     /**
      * Método que entrega el listado de tipos de documentos tributarios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -66,15 +70,19 @@ class Model_DteTipos extends \Model_Plural_App
      * Método que entrega el listado de todos los tipos de documentos que se
      * pueden usar como referencias
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-13
+     * @version 2016-11-18
      */
     public function getListReferencias()
     {
-        return $this->db->getTable('
-            SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').'
+        $tipos = $this->db->getTable('
+            SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').' AS glosa
             FROM dte_tipo
             ORDER BY codigo
         ');
+        foreach ($this->internos as $codigo => $glosa) {
+            $tipos[] = [$codigo, $codigo.' - '.$glosa];
+        }
+        return $tipos;
     }
 
 }

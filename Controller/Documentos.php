@@ -769,7 +769,7 @@ class Controller_Documentos extends \Controller_App
             if (!isset($datos['Referencia'][0]))
                 $datos['Referencia'] = [$datos['Referencia']];
             foreach ($datos['Referencia'] as $referencia) {
-                if ($referencia['TpoDocRef']<800) {
+                if (is_numeric($referencia['TpoDocRef']) and $referencia['TpoDocRef']<200) {
                     $DteReferencia = new Model_DteReferencia();
                     $DteReferencia->emisor = $DteEmitido->emisor;
                     $DteReferencia->dte = $DteEmitido->dte;
