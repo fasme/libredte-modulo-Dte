@@ -327,4 +327,43 @@ class Controller_DteFolios extends \Controller_App
         return $DteFolio;
     }
 
+    /**
+     * Recurso que permite solicitar un CAF al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-11-17
+     */
+    public function _api_timbrar_GET($dte, $emisor)
+    {
+        extract($this->Api->getQuery(['cantidad']));
+        // crear usuario, emisor y verificar permisos
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Emisor = new \website\Dte\Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/admin/dte_folios/subir_caf')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // recuperar firma electrónica
+        $Firma = $Emisor->getFirma($User->id);
+        if (!$Firma) {
+            $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de timbrar', 506);
+        }
+        // solicitar timbraje
+        if (!class_exists('\sasco\LibreDTE\Sii\Timbraje')) {
+            $this->Api->send('Timbraje no disponible', 500);
+        }
+        \sasco\LibreDTE\Sii::setAmbiente((int)$Emisor->config_ambiente_en_certificacion);
+        $Timbraje = new \sasco\LibreDTE\Sii\Timbraje($Firma, $Emisor->getRUT());
+        try {
+            $caf = $Timbraje->getCAF($dte, $cantidad);
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), 500);
+        }
+        return $caf;
+    }
+
 }
