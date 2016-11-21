@@ -626,7 +626,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-27
+     * @version 2016-11-20
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
@@ -647,7 +647,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
-            $this->Api->send('No existe el documento solicitado T.'.$dte.'F'.$folio, 404);
+            $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         // datos por defecto
         extract($this->Api->getQuery([
