@@ -962,7 +962,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Recurso de la API que genera el PDF de los DTEs contenidos en un EnvioDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-05
+     * @version 2016-11-21
      */
     public function _api_generar_pdf_POST()
     {
@@ -998,7 +998,7 @@ class Controller_Documentos extends \Controller_App
             $this->Api->send('Hubo algún problema al recibir el archivo XML con el EnvioDTE', 400);
         }
         $Caratula = $EnvioDte->getCaratula();
-        $Documentos = $EnvioDte->getDocumentos();
+        $Documentos = $EnvioDte->getDocumentos(false); // usar saveXML en vez de C14N
         // recuperar contenido del logo (si existe)
         if (isset($this->Api->data['logo'])) {
             $logo = base64_decode($this->Api->data['logo']);

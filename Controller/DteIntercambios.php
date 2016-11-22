@@ -194,9 +194,9 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-27
+     * @version 2016-11-21
      */
-    public function pdf($codigo, $cedible = false)
+    public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE intercambiado
@@ -207,11 +207,23 @@ class Controller_DteIntercambios extends \Controller_App
             );
             $this->redirect('/dte/dte_intercambios/listar');
         }
+        // obtener XML que se debe usar
+        if ($DteIntercambio->documentos>1 and $emisor and $dte and $folio) {
+            $Documento = $DteIntercambio->getDocumento($emisor, $dte, $folio);
+            if (!$Documento) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No existe el DTE T'.$dte.'F'.$folio.' del RUT '.$emisor.' en el intercambio N° '.$codigo, 'error'
+                );
+                $this->redirect('/dte/dte_intercambios/ver/'.$codigo);
+            }
+            $xml = base64_encode($Documento->saveXML());
+        } else {
+            $xml = $DteIntercambio->archivo_xml;
+        }
         // armar datos con archivo XML y flag para indicar si es cedible o no
         $data = [
-            'xml' => $DteIntercambio->archivo_xml,
+            'xml' => $xml,
             'cedible' => $cedible,
-            'compress' => $DteIntercambio->documentos == 1 ? false : true,
         ];
         // si hay un logo para la empresa se usa
         $logo = \sowerphp\core\Configure::read('dte.logos.dir').'/'.$DteIntercambio->emisor.'.png';

@@ -167,18 +167,18 @@ foreach ($Documentos as $Dte) {
         'RUTEmisor' => $Dte->getEmisor(),
         'RUTRecep' => $Dte->getReceptor(),
         'MntTotal' => $Dte->getMontoTotal(),
-        'estado_sii' => '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550)" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>',
         'EstadoRecepDTE' => $estado,
         'RecepDTEGlosa' => \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'][$estado],
         'acuse' => (int)(bool)!$estado,
+        'acciones' => '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550)" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a> <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>',
     ];
 }
 $f->setStyle(false);
 echo $f->input([
-    'type' => 'js',
+    'type' => 'table',
     'id' => 'documentos',
     'label' => 'Documentos',
-    'titles' => ['DTE', 'Folio', 'Total', 'Estado SII', 'Estado', 'Glosa', 'Acuse'],
+    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', 'Acuse', 'Acciones'],
     'inputs' => [
         ['name'=>'TipoDTE', 'attr'=>'readonly="readonly" size="3"'],
         ['name'=>'Folio', 'attr'=>'readonly="readonly" size="10"'],
@@ -186,10 +186,10 @@ echo $f->input([
         ['name'=>'RUTEmisor', 'type'=>'hidden'],
         ['name'=>'RUTRecep', 'type'=>'hidden'],
         ['name'=>'MntTotal', 'attr'=>'readonly="readonly" size="10"'],
-        ['type'=>'div', 'name'=>'estado_sii'],
-        ['name'=>'EstadoRecepDTE', 'type'=>'select', 'options'=>\sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'], 'attr'=>'style="width:12em" onchange="this.parentNode.parentNode.parentNode.childNodes[8].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
+        ['name'=>'EstadoRecepDTE', 'type'=>'select', 'options'=>\sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'], 'attr'=>'style="width:12em" onchange="this.parentNode.parentNode.parentNode.childNodes[7].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
         ['name'=>'RecepDTEGlosa'],
         ['name'=>'acuse', 'type'=>'select', 'options'=>[1=>'Si', 0=>'No'], 'attr'=>'style="width:5em"'],
+        ['type'=>'div', 'name'=>'acciones'],
     ],
     'values' => $RecepcionDTE,
 ]);

@@ -372,13 +372,24 @@ class Model_DteIntercambio extends \Model_App
      * Método que entrega un arreglo con los objetos Dte con los documentos
      * @return Arreglo de \sasco\LibreDTE\Sii\Dte
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-28
+     * @version 2016-11-21
      */
     public function getDocumentos()
     {
         if (!isset($this->Documentos))
-            $this->Documentos = $this->getEnvioDte()->getDocumentos();
+            $this->Documentos = $this->getEnvioDte()->getDocumentos(false); // usar saveXML en vez de C14N
         return $this->Documentos;
+    }
+
+    /**
+     * Método que entrega un objetos Dte con el documento solicitado o false si no se encontró
+     * @return \sasco\LibreDTE\Sii\Dte
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-11-21
+     */
+    public function getDocumento($emisor, $dte, $folio)
+    {
+        return $this->getEnvioDte()->getDocumento($emisor, $dte, $folio);
     }
 
     /**
