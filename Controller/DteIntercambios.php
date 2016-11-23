@@ -275,7 +275,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-17
+     * @version 2016-11-23
      */
     public function responder($codigo)
     {
@@ -475,11 +475,7 @@ class Controller_DteIntercambios extends \Controller_App
             foreach ($Documentos as $Dte) {
                 if (in_array($Dte->getID(true), $EnvioRecibos_r)) {
                     $resumen = $Dte->getResumen();
-                    $DteRecibido = new Model_DteRecibido();
-                    $DteRecibido->emisor = $DteIntercambio->getEmisor()->rut;
-                    $DteRecibido->dte = $resumen['TpoDoc'];
-                    $DteRecibido->folio = $resumen['NroDoc'];
-                    $DteRecibido->certificacion = (int)$DteIntercambio->certificacion;
+                    $DteRecibido = new Model_DteRecibido($DteIntercambio->getEmisor()->rut, $resumen['TpoDoc'], $resumen['NroDoc'], (int)$DteIntercambio->certificacion);
                     if (!$DteRecibido->exists()) {
                         $DteRecibido->receptor = $Emisor->rut;
                         $DteRecibido->tasa = (int)$resumen['TasaImp'];
@@ -516,6 +512,9 @@ class Controller_DteIntercambios extends \Controller_App
                                 ['codigo'=>1, 'monto'=>$DteRecibido->iva]
                             ]);
                         }
+                        $DteRecibido->save();
+                    } else if (!$DteRecibido->intercambio) {
+                        $DteRecibido->intercambio = $DteIntercambio->codigo;
                         $DteRecibido->save();
                     }
                 }
