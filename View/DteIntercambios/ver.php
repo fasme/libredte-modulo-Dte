@@ -83,7 +83,19 @@ new \sowerphp\general\View_Helper_Table([
 
 <!-- INICIO DOCUMENTOS -->
 <div role="tabpanel" class="tab-pane" id="documentos">
-<p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
+<div class="row" style="margin-bottom:1em">
+    <div class="col-sm-8">
+        <p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
+    </div>
+    <div class="col-sm-4 text-right">
+        <a class="btn btn-success btn-lg" href="#" onclick="intercambio_aceptar(); return false" role="button">
+            Aceptar
+        </a>
+        <a class="btn btn-danger btn-lg" href="#" onclick="intercambio_rechazar(); return false" role="button">
+            Rechazar
+        </a>
+    </div>
+</div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['action'=>$_base.'/dte/dte_intercambios/responder/'.$DteIntercambio->codigo, 'onsubmit'=>'Form.check() && Form.checkSend()']);
@@ -198,6 +210,7 @@ echo '<div class="text-center">';
 echo $f->input([
     'type' => 'submit',
     'name' => 'submit',
+    'id' => 'btnRespuesta',
     'value' => 'Generar y enviar respuesta del intercambio',
 ]);
 echo '</div>';

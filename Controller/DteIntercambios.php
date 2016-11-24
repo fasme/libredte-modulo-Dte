@@ -79,7 +79,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que muestra la página de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-28
+     * @version 2016-11-24
      */
     public function ver($codigo)
     {
@@ -102,6 +102,7 @@ class Controller_DteIntercambios extends \Controller_App
         }
         // asignar variables para la vista
         $this->set([
+            '_header_extra' => ['js'=>['/dte/js/intercambio.js']],
             'Emisor' => $Emisor,
             'DteIntercambio' => $DteIntercambio,
             'EnvioDte' => $DteIntercambio->getEnvioDte(),
