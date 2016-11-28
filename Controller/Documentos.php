@@ -1261,7 +1261,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-04
+     * @version 2016-11-27
      */
     private function guardarReceptor($datos)
     {
@@ -1270,7 +1270,8 @@ class Controller_Documentos extends \Controller_App
         if ($Receptor->usuario)
             return $Receptor;
         $Receptor->dv = $dv;
-        $Receptor->razon_social = substr($datos['RznSocRecep'], 0, 100);
+        if (!empty($datos['RznSocRecep']))
+            $Receptor->razon_social = substr($datos['RznSocRecep'], 0, 100);
         if (!empty($datos['GiroRecep']))
             $Receptor->giro = substr($datos['GiroRecep'], 0, 80);
         if (!empty($datos['Contacto']))
