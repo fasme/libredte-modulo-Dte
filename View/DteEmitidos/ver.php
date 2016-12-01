@@ -306,6 +306,35 @@ if ($referencias) {
 <!-- INICIO AVANZADO -->
 <div role="tabpanel" class="tab-pane" id="avanzado">
 <?php
+// si es nota de crédito permitir marcar iva como fuera de plazo
+if ($DteEmitido->dte == 61) :
+?>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-ban"></i>
+        IVA fuera de plazo (no recuperable)
+    </div>
+    <div class="panel-body">
+<?php
+echo $f->begin([
+    'action' => $_base.'/dte/dte_emitidos/avanzado_iva_fuera_plazo/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id' => 'avanzadoIVAFueraPlazoForm',
+    'onsubmit' => 'Form.check(\'avanzadoIVAFueraPlazoForm\')'
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'iva_fuera_plazo',
+    'label' => '¿Fuera de plazo?',
+    'options' => ['No', 'Si'],
+    'value' => $DteEmitido->iva_fuera_plazo,
+    'help' => 'Marcar el IVA como fuera de plazo (no recuperable, no descuenta IVA débito)',
+]);
+echo $f->end('Guardar');
+?>
+    </div>
+</div>
+<?php endif; ?>
+<?php
 // si es guía de despacho permitir anular
 if ($DteEmitido->dte == 52) :
 ?>
@@ -361,6 +390,7 @@ if ($DteEmitido->getDte()->esExportacion()) :
     </div>
 </div>
 <?php endif; ?>
+<?php if ($DteEmitido->getTipo()->enviar) : ?>
 <div class="panel panel-default">
     <div class="panel-heading">
         <i class="fa fa-send-o"></i>
@@ -385,6 +415,7 @@ echo $f->end('Modificar Track ID');
 ?>
     </div>
 </div>
+<?php endif; ?>
 </div>
 <!-- FIN AVANZADO -->
 

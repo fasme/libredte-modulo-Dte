@@ -423,6 +423,36 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite marcar el IVA como fuera de plazo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-01
+     */
+    public function avanzado_iva_fuera_plazo($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // verificar que sea documento que se puede marcar como fuera de plazo
+        if ($DteEmitido->dte!=61) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Sólo es posible marcar IVA fuera de plazo en notas de crédito', 'error'
+            );
+            $this->redirect(str_replace('avanzado_iva_fuera_plazo', 'ver', $this->request->request));
+        }
+        // marcar IVA como fuera de plazo
+        $DteEmitido->iva_fuera_plazo = (int)$_POST['iva_fuera_plazo'];
+        $DteEmitido->save();
+        $msg = $DteEmitido->iva_fuera_plazo ? 'IVA marcado como fuera de plazo (no recuperable)' : 'IVA marcado como recuperable';
+        \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
+        $this->redirect(str_replace('avanzado_iva_fuera_plazo', 'ver', $this->request->request).'#avanzado');
+    }
+    /**
      * Acción que permite anular un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-09-15

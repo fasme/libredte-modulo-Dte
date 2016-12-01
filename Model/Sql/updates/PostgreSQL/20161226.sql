@@ -5,5 +5,6 @@
 BEGIN;
 
 ALTER TABLE dte_recibido ALTER folio TYPE BIGINT;
+ALTER TABLE dte_emitido ADD iva_fuera_plazo BOOLEAN NOT NULL DEFAULT false;
 
 COMMIT;

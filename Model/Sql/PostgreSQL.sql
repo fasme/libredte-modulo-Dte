@@ -217,6 +217,7 @@ CREATE TABLE dte_emitido (
 	revision_estado VARCHAR(100),
 	revision_detalle TEXT,
 	anulado BOOLEAN NOT NULL DEFAULT false,
+	iva_fuera_plazo BOOLEAN NOT NULL DEFAULT false,
 	CONSTRAINT dte_emitido_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_emitido_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL

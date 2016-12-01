@@ -57,6 +57,7 @@ class Model_DteEmitido extends Model_Base_Envio
     public $revision_estado; ///< character varying(100) NULL DEFAULT ''
     public $revision_detalle; ///< character text() NULL DEFAULT ''
     public $anulado; ///< boolean() NOT NULL DEFAULT 'false'
+    public $iva_fuera_plazo; ///< boolean() NOT NULL DEFAULT 'false'
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -249,6 +250,17 @@ class Model_DteEmitido extends Model_Base_Envio
         ),
         'anulado' => array(
             'name'      => 'Anulado',
+            'comment'   => '',
+            'type'      => 'boolean',
+            'length'    => null,
+            'null'      => false,
+            'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'iva_fuera_plazo' => array(
+            'name'      => 'IVA fuera plazo',
             'comment'   => '',
             'type'      => 'boolean',
             'length'    => null,
