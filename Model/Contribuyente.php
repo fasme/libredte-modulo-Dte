@@ -1106,8 +1106,9 @@ class Model_Contribuyente extends \Model_App
 
     /**
      * Método que entrega las ventas de un período
+     * @todo Corregir ID en Extranjero y asignar los NULL por los valores que corresponden (quizás haya que modificar tabla dte_emitido)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2016-12-01
      */
     public function getVentas($periodo)
     {
@@ -1124,21 +1125,54 @@ class Model_Contribuyente extends \Model_App
         } else {
             $impuesto_codigo = $impuesto_tasa = $impuesto_monto = 'NULL';
         }
+        // campos para datos extranjeros
+        list($extranjero_id, $extranjero_nacionalidad) = $this->db->xml('e.xml', [
+            '/EnvioDTE/SetDTE/DTE/Exportaciones/Referencia/FolioRef', // FIXME
+            '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/Extranjero/Nacionalidad',
+        ], 'http://www.sii.cl/SiiDte');
+        $extranjero_id = 'NULL'; // TODO: fix xpath para seleccionar la referencia que tiene codigo 813 (u otro doc identidad que se defina)
+        // realizar consulta
         return $this->db->getTable('
             SELECT
                 e.dte,
                 e.folio,
-                e.tasa,
-                e.fecha,
-                e.sucursal_sii,
                 '.$this->db->concat('r.rut', '-', 'r.dv').' AS rut,
+                e.tasa,
                 '.$razon_social.',
+                e.fecha,
+                CASE WHEN e.anulado THEN \'A\' ELSE NULL END AS anulado,
                 e.exento,
                 e.neto,
                 e.iva,
+                CASE WHEN e.iva_fuera_plazo THEN e.iva ELSE NULL END AS iva_fuera_plazo,
                 '.$impuesto_codigo.' AS impuesto_codigo,
                 '.$impuesto_tasa.' AS impuesto_tasa,
                 '.$impuesto_monto.' AS impuesto_monto,
+                NULL AS iva_propio,
+                NULL AS iva_terceros,
+                NULL AS iva_retencion_total,
+                NULL AS iva_retencion_parcial,
+                NULL AS iva_no_retenido,
+                NULL AS ley_18211,
+                NULL AS credito_constructoras,
+                NULL AS referencia_tipo,
+                NULL AS referencia_folio,
+                NULL AS deposito_envases,
+                NULL AS monto_no_facturable,
+                NULL AS monto_periodo,
+                NULL AS pasaje_nacional,
+                NULL AS pasaje_internacional,
+                CASE WHEN e.dte IN (110, 111, 112) THEN '.$extranjero_id.' ELSE NULL END AS extranjero_id,
+                CASE WHEN e.dte IN (110, 111, 112) THEN '.$extranjero_nacionalidad.' ELSE NULL END AS extranjero_nacionalidad,
+                NULL AS indicador_servicio,
+                NULL AS indicador_sin_costo,
+                NULL AS liquidacion_rut,
+                NULL AS liquidacion_comision_neto,
+                NULL AS liquidacion_comision_exento,
+                NULL AS liquidacion_comision_iva,
+                e.sucursal_sii,
+                NULL AS numero_interno,
+                NULL AS emisor_nc_nd_fc,
                 e.total
             FROM dte_tipo AS t, dte_emitido AS e, contribuyente AS r
             WHERE t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
