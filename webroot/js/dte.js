@@ -133,10 +133,10 @@ Receptor.setDatos = function (form) {
         success: function (c) {
             f.RznSocRecep.value = c.razon_social;
             f.GiroRecep.value = c.giro.substr(0, 40);
-            f.DirRecep.value = c.direccion;
-            f.CmnaRecep.value = c.comuna;
-            f.Contacto.value = c.telefono;
-            f.CorreoRecep.value = c.email;
+            f.DirRecep.value = (c.direccion!==undefined && c.direccion) ? c.direccion : '';
+            f.CmnaRecep.value = (c.comuna!==undefined && c.comuna) ? c.comuna : '';
+            f.Contacto.value = (c.telefono!==undefined && c.telefono) ? c.telefono : '';
+            f.CorreoRecep.value = (c.email!==undefined && c.email) ? c.email : '';
         },
         error: function (jqXHR) {
             console.log(jqXHR.responseJSON);
@@ -235,9 +235,9 @@ DTE.setItem = function (contribuyente, codigo) {
                 // asignar valores del item
                 cols[0].childNodes[0].childNodes[0].childNodes[0].value = item.VlrCodigo !== undefined ? item.VlrCodigo : '';
                 cols[1].childNodes[0].childNodes[0].value = item.NmbItem !== undefined ? item.NmbItem : '';
-                cols[2].childNodes[0].childNodes[0].value = item.DscItem !== undefined ? item.DscItem : '';
+                cols[2].childNodes[0].childNodes[0].value = (item.DscItem !== undefined && item.DscItem) ? item.DscItem : '';
                 cols[3].childNodes[0].childNodes[0].value = item.IndExe !== undefined ? item.IndExe : 0;
-                cols[5].childNodes[0].childNodes[0].value = item.UnmdItem !== undefined ? item.UnmdItem : '';
+                cols[5].childNodes[0].childNodes[0].value = (item.UnmdItem !== undefined && item.UnmdItem)? item.UnmdItem : '';
                 cols[6].childNodes[0].childNodes[0].value = item.PrcItem !== undefined ? item.PrcItem : '';
                 cols[7].childNodes[0].childNodes[0].value = item.ValorDR !== undefined ? item.ValorDR : 0;
                 cols[8].childNodes[0].childNodes[0].value = item.TpoValor !== undefined ? item.TpoValor : '%';
