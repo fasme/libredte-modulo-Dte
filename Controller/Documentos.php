@@ -963,7 +963,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Recurso de la API que genera el PDF de los DTEs contenidos en un EnvioDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-21
+     * @version 2016-12-02
      */
     public function _api_generar_pdf_POST()
     {
@@ -1031,7 +1031,7 @@ class Controller_Documentos extends \Controller_App
             // generar PDF
             $pdf = new \sasco\LibreDTE\Sii\PDF\Dte($papelContinuo);
             $pdf->setFooterText(\sowerphp\core\Configure::read('dte.pdf.footer'));
-            if (isset($logo)) {
+            if (isset($logo) and isset($Emisor)) {
                 $pdf->setLogo('@'.$logo, $Emisor->config_pdf_logo_posicion);
             }
             $pdf->setResolucion(['FchResol'=>$Caratula['FchResol'], 'NroResol'=>$Caratula['NroResol']]);
