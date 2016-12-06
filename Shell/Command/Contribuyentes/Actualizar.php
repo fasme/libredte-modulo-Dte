@@ -34,9 +34,9 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-16
+     * @version 2016-12-06
      */
-    public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION)
+    public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
     {
         if ($opcion != 'all') {
             if (method_exists($this, $opcion)) {
@@ -48,7 +48,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 return 1;
             }
         } else {
-            $this->sii($ambiente);
+            $this->sii($ambiente, $dia);
             $this->corregir();
         }
         $this->showStats();
@@ -59,9 +59,9 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
      * Método que carga actualiza los datos de los contribuyentes desde el
      * listado de contribuyentes del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-12
+     * @version 2016-12-06
      */
-    private function sii($ambiente)
+    private function sii($ambiente, $dia)
     {
         // obtener firma electrónica
         try {
@@ -71,7 +71,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             return 1;
         }
         // obtener contribuyentes de ambiente de producción
-        $contribuyentes = \sasco\LibreDTE\Sii::getContribuyentes($Firma, $ambiente);
+        $contribuyentes = \sasco\LibreDTE\Sii::getContribuyentes($Firma, $ambiente, $dia);
         if (!$contribuyentes) {
             $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
             return 2;
