@@ -944,6 +944,80 @@ echo $f->input([
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-cogs"></i>
+            Configuración LibreDTE
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Administrador',
+    'value' => isset($Contribuyente) ? ($Contribuyente->getUsuario()->nombre.' ('.$Contribuyente->getUsuario()->usuario.')') : null,
+]);
+if (isset($Contribuyente) and $Contribuyente->config_libredte_ingreso) {
+    echo $f->input([
+        'type' => 'div',
+        'label' => 'Fecha ingreso',
+        'value' => $Contribuyente->config_libredte_ingreso,
+    ]);
+}
+if (\sowerphp\core\Configure::read('dte.cuota')) {
+    echo $f->input([
+        'type' => 'div',
+        'label' => 'Cuota',
+        'value' => num(isset($Contribuyente) ? $Contribuyente->getCuota() : 0),
+    ]);
+}
+if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
+    echo $f->input([
+        'type' => 'div',
+        'label' => 'Saldo',
+        'value' => '$'.num(isset($Contribuyente) ? (int)$Contribuyente->config_libredte_saldo : 0).'.-',
+    ]);
+}
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Modificado',
+    'value' => isset($Contribuyente) ? $Contribuyente->modificado : null,
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-envelope-o"></i>
+            Datos de contacto
+        </div>
+        <div class="panel-body">
+<?php
+$config_app_contacto_comercial = [];
+if (isset($Contribuyente)) {
+    foreach ((array)$Contribuyente->config_app_contacto_comercial as $c) {
+        $config_app_contacto_comercial[] = [
+            'config_app_contacto_comercial_nombre' => $c->nombre,
+            'config_app_contacto_comercial_email' => $c->email,
+            'config_app_contacto_comercial_telefono' => $c->telefono,
+        ];
+    }
+}
+echo $f->input([
+    'type' => 'js',
+    'id' => 'config_app_contacto_comercial',
+    'label' => 'Comercial',
+    'titles' => ['Nombre', 'Email', 'Teléfono'],
+    'inputs' => [
+        ['name' => 'config_app_contacto_comercial_nombre'],
+        ['name' => 'config_app_contacto_comercial_email', 'check' => 'notempty email'],
+        ['name' => 'config_app_contacto_comercial_telefono', 'check' => 'telephone'],
+    ],
+    'values' => $config_app_contacto_comercial,
+    'help' => 'Datos para contacto comercial (ej: envío de cobros del servicio)',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-support"></i>
             Soporte
         </div>
         <div class="panel-body">

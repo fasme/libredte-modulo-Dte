@@ -5,6 +5,9 @@ foreach ($empresas as &$e) {
     // agregar acciones
     $acciones = '';
     if ($e['administrador']) {
+        if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
+            $acciones .= '<a href="'.$_base.'/sistema/libredte/pagos/dashboard/'.$e['rut'].'" title="Pagos y facturación empresa '.$e['razon_social'].'"><span class="fa fa-dollar btn btn-default"></span></a> ';
+        }
         $acciones .= '<a href="modificar/'.$e['rut'].'" title="Editar empresa '.$e['razon_social'].'"><span class="fa fa-edit btn btn-default"></span></a>';
         $acciones .= ' <a href="usuarios/'.$e['rut'].'" title="Mantenedor usuarios autorizados a operar con la empresa '.$e['razon_social'].'"><span class="fa fa-users btn btn-default"></span></a> ';
     }
@@ -18,7 +21,7 @@ foreach ($empresas as &$e) {
 }
 array_unshift($empresas, ['RUT', 'Razón social', 'Giro', 'Ambiente', 'Administrador', 'Acciones']);
 $t = new \sowerphp\general\View_Helper_Table();
-$t->setColsWidth([null, null, null, null, null, 150]);
+$t->setColsWidth([null, null, null, null, null, 190]);
 echo $t->generate($empresas);
 if ($registrar_empresa) :
 ?>

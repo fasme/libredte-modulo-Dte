@@ -253,10 +253,19 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-08
+     * @version 2016-12-06
      */
     private function prepararDatosContribuyente(&$Contribuyente)
     {
+        // si hay cualquier campo que empiece por 'config_libredte_' se quita ya que son
+        // configuraciones reservadas para los administradores de LibreDTE y no pueden
+        // ser asignadas por los usuarios (esto evita que envién "a la mala" una
+        // configuración del sistema)
+        foreach ($_POST as $var => $val) {
+            if (strpos($var, 'config_libredte_')===0) {
+                unset($_POST[$var]);
+            }
+        }
         // crear arreglo con actividades económicas secundarias
         if (!empty($_POST['config_extra_otras_actividades_actividad'])) {
             $n_codigos = count($_POST['config_extra_otras_actividades_actividad']);
@@ -339,6 +348,24 @@ class Controller_Contribuyentes extends \Controller_App
         }
         if ($config_pdf_detalle_ancho) {
             $_POST['config_pdf_detalle_ancho'] = $config_pdf_detalle_ancho;
+        }
+        // crear arreglo con datos de contacto comercial
+        if (!empty($_POST['config_app_contacto_comercial_email'])) {
+            $n_emails = count($_POST['config_app_contacto_comercial_email']);
+            for ($i=0; $i<$n_emails; $i++) {
+                if (!empty($_POST['config_app_contacto_comercial_email'][$i])) {
+                    $_POST['config_app_contacto_comercial'][] = [
+                        'nombre' => !empty($_POST['config_app_contacto_comercial_nombre'][$i]) ? $_POST['config_app_contacto_comercial_nombre'][$i] : null,
+                        'email' => $_POST['config_app_contacto_comercial_email'][$i],
+                        'telefono' => !empty($_POST['config_app_contacto_comercial_telefono'][$i]) ? $_POST['config_app_contacto_comercial_telefono'][$i] : null,
+                    ];
+                }
+            }
+            unset($_POST['config_app_contacto_comercial_nombre']);
+            unset($_POST['config_app_contacto_comercial_email']);
+            unset($_POST['config_app_contacto_comercial_telefono']);
+        } else {
+            $_POST['config_app_contacto_comercial'] = null;
         }
         // poner valores por defecto
         foreach (Model_Contribuyente::$defaultConfig as $key => $value) {
