@@ -52,11 +52,11 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-13
+     * @version 2016-12-06
      */
-    public function cotizacion($receptor, $dte, $codigo)
+    public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
-        $Emisor = $this->getContribuyente();
+        $Emisor = $emisor===null ? $this->getContribuyente() : new Model_Contribuyente($emisor);
         // obtener datos JSON del DTE
         $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
         if (!$DteTmp->exists()) {
