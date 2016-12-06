@@ -41,6 +41,7 @@ class Model_ContribuyenteDte extends \Model_App
     // Atributos de la clase (columnas en la base de datos)
     public $contribuyente; ///< integer(32) NOT NULL DEFAULT '' PK FK:contribuyente.rut
     public $dte; ///< smallint(16) NOT NULL DEFAULT '' PK FK:dte_tipo.codigo
+    public $activo; ///< boolean() NOT NULL DEFAULT 'true'
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -65,6 +66,17 @@ class Model_ContribuyenteDte extends \Model_App
             'auto'      => false,
             'pk'        => true,
             'fk'        => array('table' => 'dte_tipo', 'column' => 'codigo')
+        ),
+        'activo' => array(
+            'name'      => 'Activo',
+            'comment'   => 'Indica si el documento está o no activo',
+            'type'      => 'boolean',
+            'length'    => null,
+            'null'      => false,
+            'default'   => 'true',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
         ),
 
     );

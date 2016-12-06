@@ -637,19 +637,19 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
-     * Método que entrega los documentos que el contribuyente tiene autorizado
+     * Método que entrega los documentos que el contribuyente tiene autorizados
      * a emitir en la aplicación
      * @return Listado de documentos autorizados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-21
+     * @version 2016-12-06
      */
     public function getDocumentosAutorizados()
     {
         return $this->db->getTable('
             SELECT t.codigo, t.tipo
             FROM dte_tipo AS t, contribuyente_dte AS c
-            WHERE t.codigo = c.dte AND c.contribuyente = :rut
-        ', [':rut'=>$this->rut]);
+            WHERE t.codigo = c.dte AND c.contribuyente = :rut AND c.activo = :activo
+        ', [':rut'=>$this->rut, ':activo'=>1]);
     }
 
     /**
@@ -658,15 +658,15 @@ class Model_Contribuyente extends \Model_App
      * @param dte Código del DTE que se quiere saber si está autorizado
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-21
+     * @version 2016-12-06
      */
     public function documentoAutorizado($dte)
     {
         return (bool)$this->db->getValue('
             SELECT COUNT(*)
             FROM contribuyente_dte
-            WHERE contribuyente = :rut AND dte = :dte
-        ', [':rut'=>$this->rut, ':dte'=>$dte]);
+            WHERE contribuyente = :rut AND dte = :dte AND activo = :activo
+        ', [':rut'=>$this->rut, ':dte'=>$dte, ':activo'=>1]);
     }
 
     /**
