@@ -21,8 +21,11 @@ foreach ($intercambios as &$i) {
     if (!is_numeric($i['documentos'])) {
         $documentos = explode('|', $i['documentos']);
         foreach ($documentos as &$d) {
-            list($tipo, $folio) = explode(',', $d);
-            $d = 'T'.$tipo.'F'.$folio;
+            $aux = explode(',', $d);
+            if (isset($aux[1])) {
+                list($tipo, $folio) = $aux;
+                $d = 'T'.$tipo.'F'.$folio;
+            }
         }
         $i['documentos'] = implode('<br/>', $documentos);
     }
