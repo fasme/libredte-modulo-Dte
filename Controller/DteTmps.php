@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de dte temporales
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-12
+ * @version 2016-12-07
  */
 class Controller_DteTmps extends \Controller_App
 {
@@ -46,6 +46,29 @@ class Controller_DteTmps extends \Controller_App
         $this->set([
             'Emisor' => $Emisor,
             'dtes' => $DteTmps->getObjects(),
+        ]);
+    }
+    
+    /**
+     * Acción que muestra la página del documento temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-07
+     */
+    public function ver($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener datos JSON del DTE
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        $this->set([
+            'Emisor' => $Emisor,
+            'Receptor' => $DteTmp->getReceptor(),
+            'DteTmp' => $DteTmp,
         ]);
     }
 
@@ -205,6 +228,31 @@ class Controller_DteTmps extends \Controller_App
         print $xml;
         exit;
     }
+    
+    /**
+     * Método que entrega el JSON del DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-07
+     */
+    public function json($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener datos JSON del DTE
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // entregar xml
+        $json = json_encode(json_decode($DteTmp->datos), JSON_PRETTY_PRINT);
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Content-Length: '.strlen($json));
+        header('Content-Disposition: attachement; filename="'.$receptor.'_'.$dte.'_'.$codigo.'.json"');
+        print $json;
+        exit;
+    }
 
     /**
      * Método que elimina un DTE temporal
@@ -240,7 +288,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que actualiza un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-13
+     * @version 2016-12-07
      */
     public function actualizar($receptor, $dte, $codigo, $fecha = null, $actualizar_precios = true)
     {
@@ -255,7 +303,11 @@ class Controller_DteTmps extends \Controller_App
         }
         // nueva fecha de actualización
         if (!$fecha) {
-            $fecha = date('Y-m-d');
+            $fecha = isset($_POST['fecha']) ? $_POST['fecha'] : date('Y-m-d');
+        }
+        if (isset($_POST['actualizar_precios'])) {
+            $actualizar_precios = (bool)$_POST['actualizar_precios'];
+            debug($actualizar_precios, true); exit;
         }
         if ($DteTmp->fecha==$fecha) {
             \sowerphp\core\Model_Datasource_Session::message(

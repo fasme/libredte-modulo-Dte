@@ -200,6 +200,16 @@ class Model_DteTmp extends \Model_App
     }
 
     /**
+     * Método que entrega el objeto del tipo de dte
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-07
+     */
+    public function getTipo()
+    {
+        return $this->getDte();
+    }
+
+    /**
      * Método que entrega el objeto del emisor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-01-02
