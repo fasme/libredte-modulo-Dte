@@ -151,7 +151,7 @@ class Model_DteIntercambioRecibo extends \Model_App
     /**
      * Método que guarda el XML del Recibo de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-23
+     * @version 2016-12-07
      */
     public function saveXML($Emisor, $xml) {
         // crear recibo
@@ -202,10 +202,21 @@ class Model_DteIntercambioRecibo extends \Model_App
             );
             $DteIntercambioReciboDte->responde = $this->responde;
             $DteIntercambioReciboDte->codigo = $this->codigo;
-            $DteIntercambioReciboDte->recinto = substr($Recibo['DocumentoRecibo']['Recinto'], 0, 80);
-            $DteIntercambioReciboDte->firma = substr($Recibo['DocumentoRecibo']['RutFirma'], 0, 10);
-            $DteIntercambioReciboDte->fecha_hora = str_replace('T', ' ', $Recibo['DocumentoRecibo']['TmstFirmaRecibo']);
-            if (!$DteIntercambioReciboDte->save()) {
+            if (!empty($Recibo['DocumentoRecibo']['Recinto'])) {
+                $DteIntercambioReciboDte->recinto = substr($Recibo['DocumentoRecibo']['Recinto'], 0, 80);
+            }
+            if (!empty($Recibo['DocumentoRecibo']['RutFirma'])) {
+                $DteIntercambioReciboDte->firma = substr($Recibo['DocumentoRecibo']['RutFirma'], 0, 10);
+            }
+            if (!empty($Recibo['DocumentoRecibo']['TmstFirmaRecibo'])) {
+                $DteIntercambioReciboDte->fecha_hora = str_replace('T', ' ', $Recibo['DocumentoRecibo']['TmstFirmaRecibo']);
+            }
+            try {
+                if (!$DteIntercambioReciboDte->save()) {
+                    $this->db->rollback();
+                    return false;
+                }
+            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 $this->db->rollback();
                 return false;
             }

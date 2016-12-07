@@ -175,7 +175,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
     /**
      * Método que guarda el XML de la Recepción de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-23
+     * @version 2016-12-07
      */
     public function saveXML($Emisor, $xml) {
 
@@ -206,7 +206,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
         foreach ($RespuestaEnvio->getRecepciones() as $Recepcion) {
             // si el RUT del emisor no corresponde con el del contribuyente el
             // acuse no es para este
-            if (explode('-', $Recepcion['RUTEmisor'])[0] != $Emisor->rut) {
+            if (!isset($Recepcion['RUTEmisor']) or explode('-', $Recepcion['RUTEmisor'])[0] != $Emisor->rut) {
                 $this->db->rollback();
                 return false;
             }
