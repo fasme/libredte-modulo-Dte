@@ -228,9 +228,18 @@ class Model_DteIntercambioRecepcion extends \Model_App
             );
             $DteIntercambioRecepcionDte->responde = $this->responde;
             $DteIntercambioRecepcionDte->codigo = $this->codigo;
-            $DteIntercambioRecepcionDte->estado = $Recepcion['EstadoRecepDTE'];
-            $DteIntercambioRecepcionDte->glosa = substr($Recepcion['RecepDTEGlosa'], 0, 256);
-            if (!$DteIntercambioRecepcionDte->save()) {
+            if (!empty($Recepcion['EstadoRecepDTE'])) {
+                $DteIntercambioRecepcionDte->estado = $Recepcion['EstadoRecepDTE'];
+            }
+            if (!empty($Recepcion['RecepDTEGlosa']) and is_string($Recepcion['RecepDTEGlosa'])) {
+                $DteIntercambioRecepcionDte->glosa = substr($Recepcion['RecepDTEGlosa'], 0, 256);
+            }
+            try {
+                if (!$DteIntercambioRecepcionDte->save()) {
+                    $this->db->rollback();
+                    return false;
+                }
+            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 $this->db->rollback();
                 return false;
             }
