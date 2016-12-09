@@ -1265,11 +1265,14 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-27
+     * @version 2016-12-09
      */
     private function guardarReceptor($datos)
     {
-        list($receptor, $dv) = explode('-', $datos['RUTRecep']);
+        $aux = explode('-', $datos['RUTRecep']);
+        if (!isset($aux[1]))
+            return false;
+        list($receptor, $dv) = $aux;
         $Receptor = new Model_Contribuyente($receptor);
         if ($Receptor->usuario)
             return $Receptor;
