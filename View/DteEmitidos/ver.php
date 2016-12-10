@@ -26,6 +26,9 @@ $(function() {
         <li role="presentation"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab">Resultado intercambio</a></li>
         <li role="presentation"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab">Cobranza</a></li>
         <li role="presentation"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab">Referencias</a></li>
+<?php if ($DteEmitido->getTipo()->cedible) : ?>
+        <li role="presentation"><a href="#cesion" aria-controls="cesion" role="tab" data-toggle="tab">Cesión</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab">Avanzado</a></li>
     </ul>
     <div class="tab-content">
@@ -302,6 +305,55 @@ if ($referencias) {
 </div>
 </div>
 <!-- FIN REFERENCIAS -->
+
+<?php if ($DteEmitido->getTipo()->cedible) : ?>
+<!-- INICIO CESIÓN -->
+<div role="tabpanel" class="tab-pane" id="cesion">
+<?php if ($DteEmitido->cesion_track_id) : ?>
+<div class="bg-info lead center" style="padding:0.5em">
+    Documento tiene track id de cesión: <?=$DteEmitido->cesion_track_id?>
+    <br/>
+    <small><a href="<?=$_base?>/dte/dte_emitidos/cesion_xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>">Descargar AEC</a></small>
+</div>
+<?php
+else :
+echo $f->begin([
+    'action' => $_base.'/dte/dte_emitidos/ceder/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id' => 'cesionForm',
+    'onsubmit' => 'Form.check(\'cesionForm\') && Form.checkSend(\'¿Está seguro de querer ceder el DTE?\')'
+]);
+echo $f->input([
+    'name' => 'cedente_email',
+    'label' => 'Email cedente',
+    'check' => 'notempty email',
+    'value' => $_Auth->User->email,
+]);
+echo $f->input([
+    'name' => 'cesionario_rut',
+    'label' => 'RUT cesionario',
+    'check' => 'notempty rut',
+]);
+echo $f->input([
+    'name' => 'cesionario_razon_social',
+    'label' => 'Razón social cesionario',
+    'check' => 'notempty',
+]);
+echo $f->input([
+    'name' => 'cesionario_direccion',
+    'label' => 'Dirección cesionario',
+    'check' => 'notempty',
+]);
+echo $f->input([
+    'name' => 'cesionario_email',
+    'label' => 'Email cesionario',
+    'check' => 'notempty email',
+]);
+echo $f->end('Generar archivo cesión y enviar al SII');
+endif;
+?>
+</div>
+<!-- FIN CESIÓN -->
+<?php endif; ?>
 
 <!-- INICIO AVANZADO -->
 <div role="tabpanel" class="tab-pane" id="avanzado">

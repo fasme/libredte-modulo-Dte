@@ -58,6 +58,8 @@ class Model_DteEmitido extends Model_Base_Envio
     public $revision_detalle; ///< character text() NULL DEFAULT ''
     public $anulado; ///< boolean() NOT NULL DEFAULT 'false'
     public $iva_fuera_plazo; ///< boolean() NOT NULL DEFAULT 'false'
+    public $cesion_xml; ///< text() NOT NULL DEFAULT ''
+    public $cesion_track_id; ///< integer(32) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -266,6 +268,28 @@ class Model_DteEmitido extends Model_Base_Envio
             'length'    => null,
             'null'      => false,
             'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'cesion_xml' => array(
+            'name'      => 'Cesion Xml',
+            'comment'   => '',
+            'type'      => 'text',
+            'length'    => null,
+            'null'      => false,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'cesion_track_id' => array(
+            'name'      => 'Cesion Track Id',
+            'comment'   => '',
+            'type'      => 'integer',
+            'length'    => 32,
+            'null'      => true,
+            'default'   => '',
             'auto'      => false,
             'pk'        => false,
             'fk'        => null

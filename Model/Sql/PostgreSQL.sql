@@ -218,6 +218,8 @@ CREATE TABLE dte_emitido (
 	revision_detalle TEXT,
 	anulado BOOLEAN NOT NULL DEFAULT false,
 	iva_fuera_plazo BOOLEAN NOT NULL DEFAULT false,
+	cesion_xml TEXT,
+	cesion_track_id INTEGER,
 	CONSTRAINT dte_emitido_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_emitido_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL

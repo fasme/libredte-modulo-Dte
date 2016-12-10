@@ -423,6 +423,115 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite ceder el documento emitido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-10
+     */
+    public function ceder($dte, $folio)
+    {
+        if (!isset($_POST['submit'])) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Debe enviar el formulario para poder realizar la cesión', 'error'
+            );
+            $this->redirect(str_replace('ceder', 'ver', $this->request->request).'#cesion');
+        }
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // verificar que sea documento cedible
+        if (!$DteEmitido->getTipo()->cedible) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Documento no es cedible', 'error'
+            );
+            $this->redirect(str_replace('ceder', 'ver', $this->request->request));
+        }
+        // verificar que no esté cedido (enviado al SII)
+        if ($DteEmitido->cesion_track_id) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Documento ya fue enviado al SII para cesión', 'error'
+            );
+            $this->redirect(str_replace('ceder', 'ver', $this->request->request).'#cesion');
+        }
+        // objeto de firma electrónica
+        $Firma = $Emisor->getFirma($this->Auth->User->id);
+        // armar el DTE cedido
+        $DteCedido = new \sasco\LibreDTE\Sii\Factoring\DteCedido($DteEmitido->getDte());
+        $DteCedido->firmar($Firma);
+        // crear declaración de cesión
+        $Cesion = new \sasco\LibreDTE\Sii\Factoring\Cesion($DteCedido);
+        $Cesion->setCesionario([
+            'RUT' => str_replace('.', '', $_POST['cesionario_rut']),
+            'RazonSocial' => $_POST['cesionario_razon_social'],
+            'Direccion' => $_POST['cesionario_direccion'],
+            'eMail' => $_POST['cesionario_email'],
+        ]);
+        $Cesion->setCedente([
+            'eMail' => $_POST['cedente_email'],
+            'RUTAutorizado' => [
+                'RUT' => $Firma->getID(),
+                'Nombre' => $Firma->getName(),
+            ],
+        ]);
+        $Cesion->firmar($Firma);
+        // crear AEC
+        $AEC = new \sasco\LibreDTE\Sii\Factoring\Aec();
+        $AEC->setFirma($Firma);
+        $AEC->agregarDteCedido($DteCedido);
+        $AEC->agregarCesion($Cesion);
+        // enviar el XML de la cesión al SII
+        $xml = $AEC->generar();
+        $track_id = $AEC->enviar();
+        if ($track_id) {
+            $DteEmitido->cesion_xml = base64_encode($xml);
+            $DteEmitido->cesion_track_id = $track_id;
+            $DteEmitido->save();
+            \sowerphp\core\Model_Datasource_Session::message('Archivo de cesión enviado al SII con track id '.$track_id, 'ok');
+        } else {
+            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error');
+        }
+        $this->redirect(str_replace('ceder', 'ver', $this->request->request).'#cesion');
+    }
+
+    /**
+     * Acción que descarga el XML de la cesión del documento emitido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-10
+     */
+    public function cesion_xml($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // verificar que exista XML
+        if (!$DteEmitido->cesion_xml) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'DTE no tiene XML de AEC asociado', 'error'
+            );
+            $this->redirect(str_replace('cesion_xml', 'ver', $this->request->request).'#cesion');
+        }
+        // entregar XML
+        $file = 'cesion_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml';
+        $xml = base64_decode($DteEmitido->cesion_xml);
+        header('Content-Type: application/xml; charset=ISO-8859-1');
+        header('Content-Length: '.strlen($xml));
+        header('Content-Disposition: attachement; filename="'.$file.'"');
+        print $xml;
+        exit;
+    }
+
+    /**
      * Acción que permite marcar el IVA como fuera de plazo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-01
