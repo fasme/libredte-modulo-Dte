@@ -974,6 +974,13 @@ if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
         'value' => '$'.num(isset($Contribuyente) ? (int)$Contribuyente->config_libredte_saldo : 0).'.-',
     ]);
 }
+if (isset($Contribuyente) and $Contribuyente->config_libredte_siguiente_cobro) {
+    echo $f->input([
+        'type' => 'div',
+        'label' => 'Siguiente cobro',
+        'value' => $Contribuyente->config_libredte_siguiente_cobro,
+    ]);
+}
 echo $f->input([
     'type' => 'div',
     'label' => 'Modificado',
