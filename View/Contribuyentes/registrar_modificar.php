@@ -28,6 +28,9 @@ $(function() {
 <?php if (\sowerphp\core\Module::loaded('Pos')) : ?>
         <li role="presentation"><a href="#pos" aria-controls="pos" role="tab" data-toggle="tab">POS</a></li>
 <?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Pagos')) : ?>
+        <li role="presentation"><a href="#pagos" aria-controls="pagos" role="tab" data-toggle="tab">Pagos</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API</a></li>
         <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
     </ul>
@@ -890,6 +893,127 @@ echo $f->input([
     </div>
 </div>
 <!-- FIN PUNTO DE VENTA -->
+<?php endif; ?>
+
+<?php if (\sowerphp\core\Module::loaded('Pagos')) : ?>
+<!-- INICIO PAGOS -->
+<div role="tabpanel" class="tab-pane" id="pagos">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-cogs"></i>
+            Configuración general
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pagos_habilitado',
+    'label' => '¿Habilitado?',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_habilitado : false,
+    'help' => '¿Está disponible el sistema de pagos para los clientes de la empresa?',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bank"></i>
+            Cuenta bancaria
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pagos_cuenta_banco',
+    'label' => 'Banco',
+    'options' => [''=>''] + (new \website\Sistema\General\Model_Bancos())->getList(),
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_banco : false,
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pagos_cuenta_tipo',
+    'label' => 'Tipo cuenta',
+    'options' => [''=>'', 'C'=>'Corriente', 'V'=>'Vista', 'A'=>'Ahorro'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_tipo : 'C',
+]);
+echo $f->input([
+    'name' => 'config_pagos_cuenta_numero',
+    'label' => 'Número cuenta',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_numero : false,
+    'check' => 'integer',
+]);
+echo $f->input([
+    'name' => 'config_pagos_cuenta_rut',
+    'label' => 'RUT titular',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_rut : false,
+    'check' => 'rut',
+]);
+echo $f->input([
+    'name' => 'config_pagos_cuenta_titular',
+    'label' => 'Nombre titular',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_titular : false,
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-dollar"></i>
+            Khipu
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'name' => 'config_pagos_khipu_id',
+    'label' => 'ID cobrador',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_khipu_id : false,
+    'check' => 'integer',
+]);
+echo $f->input([
+    'name' => 'config_pagos_khipu_key',
+    'label' => 'Llave',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_khipu_key : false,
+]);
+$url_pagos = $_url.'/api/pagos/khipu/notificar_pago/'.$Contribuyente->rut;
+echo $f->input([
+    'type' => 'div',
+    'name' => 'config_pagos_khipu_url_pagos',
+    'label' => 'URL pagos',
+    'value' => isset($Contribuyente) ? ('<a href="'.$url_pagos.'">'.$url_pagos.'</a>') : false,
+    'help' => 'URL para la notificación instantánea de pagos',
+]);
+$url_rendiciones = $_url.'/api/pagos/khipu/notificar_rendicion/'.$Contribuyente->rut;
+echo $f->input([
+    'type' => 'div',
+    'name' => 'config_pagos_khipu_url_rendiciones',
+    'label' => 'URL rendiciones',
+    'value' => isset($Contribuyente) ? ('<a href="'.$url_rendiciones.'">'.$url_rendiciones.'</a>') : false,
+    'help' => 'URL para la notificación instantánea de rendiciones',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-credit-card-alt"></i>
+            Transbank
+        </div>
+        <div class="panel-body">
+            ¡Próximamente!
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-paypal"></i>
+            Paypal
+        </div>
+        <div class="panel-body">
+            ¡Próximamente!
+        </div>
+    </div>
+</div>
+<!-- FIN PAGOS -->
 <?php endif; ?>
 
 <!-- INICIO API -->
