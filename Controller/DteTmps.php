@@ -27,10 +27,21 @@ namespace website\Dte;
 /**
  * Controlador de dte temporales
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-12-07
+ * @version 2016-12-13
  */
 class Controller_DteTmps extends \Controller_App
 {
+
+    /**
+     * Se permite descargar las cotizaciones sin estar logueado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-13
+     */
+    public function beforeFilter()
+    {
+        $this->Auth->allow('cotizacion');
+        parent::beforeFilter();
+    }
 
     /**
      * Método que muestra los documentos temporales disponibles
@@ -48,7 +59,7 @@ class Controller_DteTmps extends \Controller_App
             'dtes' => $DteTmps->getObjects(),
         ]);
     }
-    
+
     /**
      * Acción que muestra la página del documento temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -228,7 +239,7 @@ class Controller_DteTmps extends \Controller_App
         print $xml;
         exit;
     }
-    
+
     /**
      * Método que entrega el JSON del DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
