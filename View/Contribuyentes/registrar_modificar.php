@@ -913,6 +913,13 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_habilitado : false,
     'help' => '¿Está disponible el sistema de pagos para los clientes de la empresa?',
 ]);
+echo $f->input([
+    'name' => 'config_pagos_email',
+    'label' => 'Email',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_email : false,
+    'help' => 'Correo electrónico donde se informarán los pagos realizados por clientes',
+    'check' => 'email',
+]);
 ?>
         </div>
     </div>
@@ -953,6 +960,12 @@ echo $f->input([
     'name' => 'config_pagos_cuenta_titular',
     'label' => 'Nombre titular',
     'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_titular : false,
+]);
+echo $f->input([
+    'type' => 'textarea',
+    'name' => 'config_pagos_cuenta_observacion',
+    'label' => 'Observación',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_observacion : false,
 ]);
 ?>
         </div>
