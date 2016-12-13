@@ -15,5 +15,5 @@ foreach ($dtes as &$dte) {
     ];
 }
 $t = new \sowerphp\general\View_Helper_Table();
-$t->setColsWidth([null, null, null, null, 230]);
+$t->setColsWidth([null, null, null, null, 150]);
 echo $t->generate($documentos);
