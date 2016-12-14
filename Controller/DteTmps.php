@@ -63,7 +63,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Acción que muestra la página del documento temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-07
+     * @version 2016-12-14
      */
     public function ver($receptor, $dte, $codigo)
     {
@@ -80,6 +80,7 @@ class Controller_DteTmps extends \Controller_App
             'Emisor' => $Emisor,
             'Receptor' => $DteTmp->getReceptor(),
             'DteTmp' => $DteTmp,
+            'emails' => $DteTmp->getEmails(),
         ]);
     }
 
@@ -143,6 +144,83 @@ class Controller_DteTmps extends \Controller_App
         header('Content-Disposition: '.($disposition=='inline'?'inline':$response['header']['Content-Disposition']));
         echo $response['body'];
         exit;
+    }
+
+    /**
+     * Acción que envía por email el PDF de la cotización del DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-14
+     */
+    public function enviar_email($receptor, $dte, $codigo)
+    {
+        if (isset($_POST['submit'])) {
+            $Emisor = $this->getContribuyente();
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User->hash);
+            $response = $rest->post(
+                $this->request->url.'/api/dte/dte_tmps/enviar_email/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut,
+                [
+                    'emails' => $_POST['emails'],
+                    'asunto' => $_POST['asunto'],
+                    'mensaje' => $_POST['mensaje'],
+                    'cotizacion' => $_POST['cotizacion'],
+                ]
+            );
+            if ($response===false) {
+                \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+            }
+            else if ($response['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            }
+            else {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Se envió el PDF a: '.implode(', ', $_POST['emails']), 'ok'
+                );
+            }
+        }
+        $this->redirect(str_replace('enviar_email', 'ver', $this->request->request).'#email');
+    }
+
+    /**
+     * Acción de la API que permite enviar el DTE temporal por correo electrónico
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-14
+     */
+    public function _api_enviar_email_POST($receptor, $dte, $codigo, $emisor)
+    {
+        // verificar permisos y crear DteEmitido
+        if ($this->Auth->User) {
+            $User = $this->Auth->User;
+        } else {
+            $User = $this->Api->getAuthUser();
+            if (is_string($User)) {
+                $this->Api->send($User, 401);
+            }
+        }
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists())
+            $this->Api->send('No existe el documento temporal solicitado N° '.$DteTmp->getFolio(), 404);
+        // parametros por defecto
+        $data = array_merge([
+            'emails' => $DteTmp->getReceptor()->email,
+            'asunto' => null,
+            'mensaje' => null,
+            'cotizacion' => true,
+        ], $this->Api->data);
+        // enviar por correo
+        try {
+            $DteTmp->email($data['emails'], $data['asunto'], $data['mensaje'], $data['cotizacion']);
+            return true;
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), 502);
+        }
     }
 
     /**

@@ -333,4 +333,92 @@ class Model_DteTmp extends \Model_App
         return $DteEmitido;
     }
 
+    /**
+     * Método que entrega el listado de correos a los que se podría enviar el documento
+     * temporal (correo receptor, correo del dte y contacto comercial)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-14
+     */
+    public function getEmails()
+    {
+        $aux = [];
+        if (\sowerphp\core\Configure::read('libredte.proveedor.rut')==$this->emisor) {
+            $i = 1;
+            foreach ($this->getReceptor()->config_app_contacto_comercial as $c) {
+                $aux['Contacto comercial #'.$i++] = $c->email;
+            }
+        }
+        if ($this->getReceptor()->email) {
+            $aux['Email receptor'] = $this->getReceptor()->email;
+        }
+        if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'])) {
+            $aux[$this->getFolio()] = $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'];
+        }
+        $emails = [];
+        foreach ($aux as $k => $e) {
+            if (!empty($e) and !in_array($e, $emails)) {
+                $emails[$k] = $e;
+            }
+        }
+        return $emails ? $emails : false;
+    }
+
+    /**
+     * Método que envía el DTE temporal por correo electrónico
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-14
+     */
+    public function email($to = null, $subject = null, $msg = null, $cotizacion = true)
+    {
+        $Request = new \sowerphp\core\Network_Request();
+        // variables por defecto
+        if (!$to)
+            $to = $this->getReceptor()->email;
+        if (!$to)
+            throw new \Exception('No hay correo a quien enviar el DTE');
+        if (!is_array($to))
+            $to = [$to];
+        if (!$subject)
+            $subject = 'Documento N° '.$this->getFolio().' de '.$this->getEmisor()->razon_social.' ('.$this->getEmisor()->getRUT().')';
+        if (!$msg) {
+            $msg .= 'Se adjunta documento N° '.$this->getFolio().' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-'."\n\n";
+            if ($this->getEmisor()->config_pagos_habilitado and $this->getDte()->operacion=='S') {
+                $enlace_pagar_cotizacion = $Request->url.'/pagos/cotizaciones/pagar/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo.'/'.$this->emisor;
+                $msg .= 'Enlace pago en línea: '.$enlace_pagar_cotizacion."\n\n";
+            }
+        }
+        // crear email
+        $email = $this->getEmisor()->getEmailSmtp();
+        $email->to($to);
+        if ($this->getEmisor()->config_pagos_email or $this->getEmisor()->email) {
+            $email->replyTo($this->getEmisor()->config_pagos_email ? $this->getEmisor()->config_pagos_email : $this->getEmisor()->email);
+        }
+        $email->subject($subject);
+        // adjuntar PDF
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth($this->getEmisor()->getUsuario()->hash);
+        if ($cotizacion) {
+            $response = $rest->get($Request->url.'/dte/dte_tmps/cotizacion/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo.'/'.$this->emisor);
+        } else {
+            $response = $rest->get($Request->url.'/api/dte/dte_tmps/pdf/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo.'/'.$this->emisor);
+        }
+        if ($response['status']['code']!=200) {
+            throw new \Exception($response['body']);
+        }
+        $email->attach([
+            'data' => $response['body'],
+            'name' => ($cotizacion?'cotizacion':'dte_tmp').'_'.$this->getEmisor()->getRUT().'_'.$this->getFolio().'.pdf',
+            'type' => 'application/pdf',
+        ]);
+        // enviar email
+        $status = $email->send($msg);
+        if ($status===true) {
+            return true;
+        } else {
+            throw new \Exception(
+                'No fue posible enviar el email: '.$status['message']
+            );
+        }
+    }
+
 }
