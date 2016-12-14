@@ -902,4 +902,14 @@ class Model_DteEmitido extends Model_Base_Envio
         }
     }
 
+    /**
+     * Método que entrega el pago asociado al DTE emitido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-14
+     */
+    public function getPago()
+    {
+        return (new \website\Pagos\Model_Pago())->setDocumento($this);
+    }
+
 }
