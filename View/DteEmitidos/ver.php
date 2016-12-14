@@ -24,6 +24,9 @@ $(function() {
         <li role="presentation"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab">PDF</a></li>
         <li role="presentation"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Enviar por email</a></li>
         <li role="presentation"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab">Resultado intercambio</a></li>
+<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S'): ?>
+        <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab">Cobranza</a></li>
         <li role="presentation"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab">Referencias</a></li>
 <?php if ($DteEmitido->getTipo()->cedible) : ?>
@@ -130,10 +133,16 @@ echo $f->end('Descargar PDF');
 <!-- INICIO ENVIAR POR EMAIL -->
 <div role="tabpanel" class="tab-pane" id="email">
 <?php
+$enlace_pagar_dte = $_url.'/pagos/documentos/pagar/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$Emisor->rut.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total;
 if ($emails) {
     $asunto = 'EnvioDTE: '.num($Emisor->rut).'-'.$Emisor->dv.' - '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio;
     $mensaje = $Receptor->razon_social.','."\n\n";
-    $mensaje .= 'Se adjunta '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha).' por un monto total de $'.num($DteEmitido->total).'.-'."\n\n".'Enlace directo: '.$pdf_publico."\n\n";
+    $mensaje .= 'Se adjunta '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha).' por un monto total de $'.num($DteEmitido->total).'.-'."\n\n";
+    if ($Emisor->config_pagos_habilitado and $DteEmitido->getTipo()->operacion=='S') {
+        $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+    } else {
+        $mensaje .= 'Enlace directo: '.$pdf_publico."\n\n";
+    }
     $mensaje .= 'Saluda atentamente,'."\n\n";
     $mensaje .= '-- '."\n";
     if ($Emisor->config_extra_nombre_fantasia) {
@@ -245,6 +254,20 @@ if ($Resultado) {
 ?>
 </div>
 <!-- FIN INTERCAMBIO -->
+
+<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S'): ?>
+<!-- INICIO PAGAR -->
+<div role="tabpanel" class="tab-pane" id="pagar">
+<?php if ($Emisor->config_pagos_habilitado) : ?>
+<a class="btn btn-primary btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
+    Enlace público a la página para el pago del DTE
+</a>
+<?php else : ?>
+<p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
+<?php endif; ?>
+</div>
+<!-- FIN PAGAR -->
+<?php endif; ?>
 
 <!-- INICIO COBRANZA -->
 <div role="tabpanel" class="tab-pane" id="cobranza">
