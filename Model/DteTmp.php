@@ -344,7 +344,7 @@ class Model_DteTmp extends \Model_App
         $aux = [];
         if (\sowerphp\core\Configure::read('libredte.proveedor.rut')==$this->emisor) {
             $i = 1;
-            foreach ($this->getReceptor()->config_app_contacto_comercial as $c) {
+            foreach ((array)$this->getReceptor()->config_app_contacto_comercial as $c) {
                 $aux['Contacto comercial #'.$i++] = $c->email;
             }
         }
