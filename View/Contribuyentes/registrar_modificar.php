@@ -1009,7 +1009,7 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-credit-card-alt"></i>
+            <i class="fa fa-credit-card"></i>
             Transbank
         </div>
         <div class="panel-body">
@@ -1018,8 +1018,8 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-paypal"></i>
-            Paypal
+            <i class="fa fa-credit-card-alt"></i>
+            Servipag
         </div>
         <div class="panel-body">
             ¡Próximamente!
