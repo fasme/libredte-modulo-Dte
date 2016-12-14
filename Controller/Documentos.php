@@ -680,7 +680,7 @@ class Controller_Documentos extends \Controller_App
      * Función de la API que permite emitir un DTE a partir de un documento
      * temporal, asignando folio, firmando y enviando al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-06
+     * @version 2016-12-13
      */
     public function _api_generar_POST()
     {
@@ -723,95 +723,12 @@ class Controller_Documentos extends \Controller_App
         if (!$DteTmp->exists()) {
             $this->Api->send('No existe el DTE temporal solicitado', 404);
         }
-        // obtener firma electrónica
-        $Firma = $Emisor->getFirma($User->id);
-        if (!$Firma) {
-            $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE', 506);
-        }
-        // solicitar folio
-        $FolioInfo = $Emisor->getFolio($DteTmp->dte);
-        if (!$FolioInfo) {
-            $this->Api->send('No fue posible obtener un folio para el DTE de tipo '.$DteTmp->dte, 508);
-        }
-        // si quedan pocos folios y se debe alertar al usuario admnistrador de la empresa se hace
-        if ($FolioInfo->DteFolio->disponibles<=$FolioInfo->DteFolio->alerta and !$FolioInfo->DteFolio->alertado) {
-            $msg = 'Se ha alcanzado el límite de folios del tipo de DTE '.$FolioInfo->DteFolio->dte.' para el contribuyente '.$Emisor->razon_social.', quedan '.$FolioInfo->DteFolio->disponibles.'. Por favor, solicite un nuevo archivo CAF y súbalo en: '."\n\n".$this->request->url.'/dte/admin/dte_folios';
-            if ($this->Notify->send(null, $Emisor->getUsuario()->id, $msg, 'email')) {
-                $FolioInfo->DteFolio->alertado = 1;
-                $FolioInfo->DteFolio->save();
-            }
-        }
-        // armar xml a partir del DTE temporal
-        $EnvioDte = $DteTmp->getEnvioDte($FolioInfo->folio, $FolioInfo->Caf, $Firma);
-        if (!$EnvioDte) {
-            $this->Api->send('No fue posible generar el objeto del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
-        }
-        $xml = $EnvioDte->generar();
-        if (!$xml) {
-            $this->Api->send('No fue posible generar el XML del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
-        }
-        // guardar DTE
-        $r = $EnvioDte->getDocumentos()[0]->getResumen();
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $r['TpoDoc'], $r['NroDoc'], (int)$Emisor->config_ambiente_en_certificacion);
-        if ($DteEmitido->exists()) {
-            $this->Api->send('Ya existe un DTE del tipo '.$r['TpoDoc'].' y folio '.$r['NroDoc'].' emitido', 409);
-        }
-        $cols = ['tasa'=>'TasaImp', 'fecha'=>'FchDoc', 'sucursal_sii'=>'CdgSIISucur', 'receptor'=>'RUTDoc', 'exento'=>'MntExe', 'neto'=>'MntNeto', 'iva'=>'MntIVA', 'total'=>'MntTotal'];
-        foreach ($cols as $attr => $col) {
-            if ($r[$col]!==false)
-                $DteEmitido->$attr = $r[$col];
-        }
-        $DteEmitido->receptor = substr($DteEmitido->receptor, 0, -2);
-        $DteEmitido->xml = base64_encode($xml);
-        $DteEmitido->usuario = $User->id;
-        if (in_array($DteEmitido->dte, [110, 111, 112])) {
-            $DteEmitido->total = $DteEmitido->exento = $DteTmp->total;
-        }
-        $DteEmitido->anulado = 0;
-        $DteEmitido->iva_fuera_plazo = 0;
-        $DteEmitido->save();
-        // guardar referencias si existen
-        $datos = json_decode($DteTmp->datos, true);
-        if (!empty($datos['Referencia'])) {
-            if (!isset($datos['Referencia'][0]))
-                $datos['Referencia'] = [$datos['Referencia']];
-            foreach ($datos['Referencia'] as $referencia) {
-                if (is_numeric($referencia['TpoDocRef']) and $referencia['TpoDocRef']<200) {
-                    $DteReferencia = new Model_DteReferencia();
-                    $DteReferencia->emisor = $DteEmitido->emisor;
-                    $DteReferencia->dte = $DteEmitido->dte;
-                    $DteReferencia->folio = $DteEmitido->folio;
-                    $DteReferencia->certificacion = $DteEmitido->certificacion;
-                    $DteReferencia->referencia_dte = $referencia['TpoDocRef'];
-                    $DteReferencia->referencia_folio = $referencia['FolioRef'];
-                    $DteReferencia->codigo = !empty($referencia['CodRef']) ? $referencia['CodRef'] : null;
-                    $DteReferencia->razon = !empty($referencia['RazonRef']) ? $referencia['RazonRef'] : null;
-                    $DteReferencia->save();
-                }
-            }
-        }
-        // guardar pagos programados si existen
-        $MntPagos = $DteEmitido->getPagosProgramados();
-        if (!empty($MntPagos)) {
-            foreach ($MntPagos as $pago) {
-                $Cobranza = new \website\Dte\Cobranzas\Model_Cobranza();
-                $Cobranza->emisor = $DteEmitido->emisor;
-                $Cobranza->dte = $DteEmitido->dte;
-                $Cobranza->folio = $DteEmitido->folio;
-                $Cobranza->certificacion = $DteEmitido->certificacion;
-                $Cobranza->fecha = $pago['FchPago'];
-                $Cobranza->monto = $pago['MntPago'];
-                $Cobranza->glosa = !empty($pago['GlosaPagos']) ? $pago['GlosaPagos'] : null;
-                $Cobranza->save();
-            }
-        }
-        // enviar al SII
+        // generar DTE real
         try {
-            $DteEmitido->enviar($User->id);
+            $DteEmitido = $DteTmp->generar($User->id);
         } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
         }
-        // eliminar DTE temporal
-        $DteTmp->delete();
         // entregar DTE emitido al cliente de la API
         if (!$getXML)
             $DteEmitido->xml = false;
