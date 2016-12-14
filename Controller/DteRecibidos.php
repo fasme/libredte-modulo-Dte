@@ -145,7 +145,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Método que agrega o modifica un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-09
+     * @version 2016-12-14
      */
     private function save()
     {
@@ -163,7 +163,7 @@ class Controller_DteRecibidos extends \Controller_App
         list($emisor, $dv) = explode('-', str_replace('.', '', $_POST['emisor']));
         $DteRecibido = new Model_DteRecibido($emisor, $_POST['dte'], (int)$_POST['folio'], (int)$Emisor->config_ambiente_en_certificacion);
         $DteRecibido->receptor = $Emisor->rut;
-        $DteRecibido->tasa = !empty($_POST['neto']) ? (int)$_POST['tasa'] : 0;
+        $DteRecibido->tasa = !empty($_POST['neto']) ? (float)$_POST['tasa'] : 0;
         $DteRecibido->fecha = $_POST['fecha'];
         $DteRecibido->exento = !empty($_POST['exento']) ? $_POST['exento'] : null;
         $DteRecibido->neto = !empty($_POST['neto']) ? $_POST['neto'] : null;

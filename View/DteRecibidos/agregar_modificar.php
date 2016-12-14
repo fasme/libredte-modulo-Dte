@@ -87,14 +87,14 @@ echo $f->input([
 ]);
 echo $f->input([
     'name' => 'tasa',
-    'label' => 'Tasa IVA',
+    'label' => 'Tasa impuesto',
     'value' => isset($DteRecibido) ? $DteRecibido->tasa : $iva_tasa,
-    'check' => 'integer',
+    'check' => 'real',
     'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
 ]);
 echo $f->input([
     'name' => 'iva',
-    'label' => 'IVA',
+    'label' => 'Impuesto',
     'value' => isset($DteRecibido) ? $DteRecibido->iva : '',
     'check' => 'integer',
     'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',

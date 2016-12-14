@@ -324,7 +324,7 @@ CREATE TABLE dte_recibido (
 	folio BIGINT NOT NULL,
 	certificacion BOOLEAN NOT NULL DEFAULT false,
 	receptor INTEGER NOT NULL,
-	tasa SMALLINT NOT NULL DEFAULT 0,
+	tasa REAL NOT NULL DEFAULT 0,
 	fecha DATE NOT NULL,
 	sucursal_sii INTEGER,
 	exento INTEGER,
