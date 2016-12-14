@@ -1067,9 +1067,18 @@ echo $f->input([
     'name' => 'config_api_url_items',
     'label' => 'Items',
     'value' => isset($Contribuyente) ? $Contribuyente->config_api_url_items : null,
-    'help' => 'URL para consultar por GET los items a través de su código. Ejemplos: https://example.com/api/items/ o https://example.com/api/items?codigo=',
+    'help' => 'URL para consultar los items a través de su código (<a href="https://wiki.libredte.cl/doku.php/sowerphp/integracion/url_items">documentación</a>).',
     'attr' => 'maxlength="255"',
 ]);
+if (\sowerphp\core\Module::loaded('Pagos')) {
+    echo $f->input([
+        'name' => 'config_api_pagos_notificar',
+        'label' => 'Notificar pagos',
+        'value' => isset($Contribuyente) ? $Contribuyente->config_api_pagos_notificar : null,
+        'help' => 'URL para notificar los pagos recibidos (<a href="https://wiki.libredte.cl/doku.php/sowerphp/integracion/pagos_notificar">documentación</a>).',
+        'attr' => 'maxlength="255"',
+    ]);
+}
 ?>
         </div>
     </div>
