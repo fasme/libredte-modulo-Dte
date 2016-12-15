@@ -138,6 +138,7 @@ class Model_DteTmp extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     private $Receptor; ///< Caché para el receptor
+    private $cache_datos; ///< Caché para los datos del documento
 
     /**
      * Método que genera el XML de EnvioDTE a partir de los datos ya
@@ -422,6 +423,19 @@ class Model_DteTmp extends \Model_App
     }
 
     /**
+     * Método que entrega el arreglo con los datos del documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-14
+     */
+    public function getDatos()
+    {
+        if (!isset($this->cache_datos)) {
+            $this->cache_datos = json_decode($this->datos, true);
+        }
+        return $this->cache_datos;
+    }
+
+    /**
      * Método que entrega el cobro asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-14
@@ -429,6 +443,17 @@ class Model_DteTmp extends \Model_App
     public function getCobro()
     {
         return (new \website\Pagos\Model_Cobro())->setDocumento($this);
+    }
+
+    /**
+     * Método que entrega el vencimiento del documento si es que existe
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-15
+     */
+    public function getVencimiento()
+    {
+        $datos = $this->getDatos();
+        return !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? $datos['Encabezado']['IdDoc']['FchVenc'] : null;
     }
 
 }

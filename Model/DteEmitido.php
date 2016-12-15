@@ -912,4 +912,15 @@ class Model_DteEmitido extends Model_Base_Envio
         return (new \website\Pagos\Model_Cobro())->setDocumento($this);
     }
 
+    /**
+     * Método que entrega el vencimiento del documento si es que existe
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-15
+     */
+    public function getVencimiento()
+    {
+        $datos = $this->getDatos();
+        return !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? $datos['Encabezado']['IdDoc']['FchVenc'] : null;
+    }
+
 }
