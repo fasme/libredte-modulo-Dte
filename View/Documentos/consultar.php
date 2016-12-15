@@ -37,7 +37,7 @@ echo $f->end('Consultar DTE');
 if (isset($DteEmitido)) : ?>
 <h2><?=$DteEmitido->getTipo()->tipo?> #<?=$DteEmitido->folio?> a <?=\sowerphp\app\Utility_Rut::addDV($DteEmitido->receptor)?></h2>
 <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-<?=$DteEmitido->track_id?9:12?>">
 <?php
     new \sowerphp\general\View_Helper_Table([
     ['Documento', 'Folio', 'Receptor', 'Exento', 'Neto', 'IVA', 'Total'],
@@ -60,11 +60,20 @@ if (isset($DteEmitido)) : ?>
         </div>
     </div>
 <?php if ($DteEmitido->track_id) : ?>
-    <div class="col-md-3 center bg-info">
+    <div class="col-md-3 center bg-info" style="padding:1em">
         <span class="lead">Track ID SII: <?=$DteEmitido->track_id?></span>
         <p><strong><?=$DteEmitido->revision_estado?></strong></p>
         <p><?=$DteEmitido->revision_detalle?></p>
     </div>
 <?php endif; ?>
 </div>
+
+<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getEmisor()->config_pagos_habilitado) : ?>
+<div class="row" style="margin-top:2em">
+    <a class="btn btn-info btn-lg btn-block" href="<?=$_url.'/pagos/documentos/pagar/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$DteEmitido->emisor.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total?>" role="button">
+        Ir a la página de pago del documento
+    </a>
+</div>
+<?php endif; ?>
+
 <?php endif; ?>
