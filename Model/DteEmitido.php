@@ -845,7 +845,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2016-12-15
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -864,6 +864,9 @@ class Model_DteEmitido extends Model_Base_Envio
             $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
         // crear email
         $email = $this->getEmisor()->getEmailSmtp();
+        if ($this->getEmisor()->config_pagos_email or $this->getEmisor()->email) {
+            $email->replyTo($this->getEmisor()->config_pagos_email ? $this->getEmisor()->config_pagos_email : $this->getEmisor()->email);
+        }
         $email->to($to);
         $email->subject($subject);
         // adjuntar PDF
