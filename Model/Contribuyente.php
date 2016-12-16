@@ -448,12 +448,15 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que envía un correo electrónico al contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-14
+     * @version 2016-12-16
      */
-    public function notificar($asunto, $mensaje, $para = null)
+    public function notificar($asunto, $mensaje, $para = null, $responder_a = null)
     {
         $email = new \sowerphp\core\Network_Email();
         $email->to($para ? $para : $this->getUsuario()->email);
+        if ($responder_a) {
+            $email->replyTo($responder_a);
+        }
         $email->subject('['.\sowerphp\core\Configure::read('page.body.title').'] '.$this->getRUT().': '.$asunto);
         $msg = $mensaje."\n\n".'-- '."\n".\sowerphp\core\Configure::read('page.body.title');
         return $email->send($msg) === true ? true : false;
