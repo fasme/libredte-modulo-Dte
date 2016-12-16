@@ -6,7 +6,7 @@ foreach ($empresas as &$e) {
     $acciones = '';
     if ($e['administrador']) {
         if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
-            $acciones .= '<a href="'.$_base.'/sistema/libredte/pagos/contribuyente/'.$e['rut'].'" title="Pagos y facturación empresa '.$e['razon_social'].'"><span class="fa fa-dollar btn btn-default"></span></a> ';
+            $acciones .= '<a href="'.$_base.'/sistema/libredte/cobros/contribuyente/'.$e['rut'].'" title="Cobros, pagos y facturación empresa '.$e['razon_social'].'"><span class="fa fa-dollar btn btn-default"></span></a> ';
         }
         $acciones .= '<a href="modificar/'.$e['rut'].'" title="Editar empresa '.$e['razon_social'].'"><span class="fa fa-edit btn btn-default"></span></a>';
         $acciones .= ' <a href="usuarios/'.$e['rut'].'" title="Mantenedor usuarios autorizados a operar con la empresa '.$e['razon_social'].'"><span class="fa fa-users btn btn-default"></span></a> ';
