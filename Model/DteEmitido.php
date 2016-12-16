@@ -845,10 +845,11 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-15
+     * @version 2016-12-16
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
+        $Request = new \sowerphp\core\Network_Request();
         // variables por defecto
         if (!$to)
             $to = $this->getReceptor()->config_email_intercambio_user;
@@ -858,10 +859,16 @@ class Model_DteEmitido extends Model_Base_Envio
             $to = [$to];
         if (!$subject)
             $subject = 'EnvioDTE: '.num($this->getEmisor()->rut).'-'.$this->getEmisor()->dv.' - '.$this->getTipo()->tipo.' N° '.$this->folio;
-        if (!$msg)
-            $msg = 'Se adjunta '.$this->getTipo()->tipo.' N° '.$this->folio.' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-';
-        if ($papelContinuo===null)
+        if (!$msg) {
+            $msg = 'Se adjunta '.$this->getTipo()->tipo.' N° '.$this->folio.' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-'."\n\n";
+            if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->operacion=='S') {
+                $enlace_pagar_dte = $Request->url.'/pagos/documentos/pagar/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
+                $msg .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+            }
+        }
+        if ($papelContinuo===null) {
             $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
+        }
         // crear email
         $email = $this->getEmisor()->getEmailSmtp();
         if ($this->getEmisor()->config_pagos_email or $this->getEmisor()->email) {
@@ -873,7 +880,6 @@ class Model_DteEmitido extends Model_Base_Envio
         if ($pdf) {
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->getEmisor()->getUsuario()->hash);
-            $Request = new \sowerphp\core\Network_Request();
             $response = $rest->get($Request->url.'/api/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/'.$this->emisor, [
                 'cedible' => $cedible,
                 'papelContinuo' => $papelContinuo,
