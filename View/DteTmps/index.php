@@ -1,3 +1,10 @@
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal (cotización)">
+            <span class="fa fa-edit"></span> Emitir documento
+        </a>
+    </li>
+</ul>
 <h1>Documentos temporales</h1>
 <p>Aquí se listan los documentos temporales del emisor <?=$Emisor->razon_social?> que ya están normalizados pero que aun no han sido generados oficialmente (no poseen folio, ni timbre, ni firma).</p>
 <?php

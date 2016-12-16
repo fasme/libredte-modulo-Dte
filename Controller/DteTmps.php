@@ -377,7 +377,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que actualiza un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-07
+     * @version 2016-12-16
      */
     public function actualizar($receptor, $dte, $codigo, $fecha = null, $actualizar_precios = true)
     {
@@ -396,7 +396,6 @@ class Controller_DteTmps extends \Controller_App
         }
         if (isset($_POST['actualizar_precios'])) {
             $actualizar_precios = (bool)$_POST['actualizar_precios'];
-            debug($actualizar_precios, true); exit;
         }
         if ($DteTmp->fecha==$fecha) {
             \sowerphp\core\Model_Datasource_Session::message(

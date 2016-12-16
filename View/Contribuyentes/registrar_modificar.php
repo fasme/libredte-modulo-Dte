@@ -920,6 +920,28 @@ echo $f->input([
     'help' => 'Correo electrónico donde se informarán los pagos realizados por clientes',
     'check' => 'email',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_cobros_temporal_automatico',
+    'label' => 'Cobro de cotización automático',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_cobros_temporal_automatico : false,
+    'help' => '¿Se debe generar automáticamente un cobro para el pago de una cotización (DTE temporal)?',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_cobros_emitido_automatico',
+    'label' => 'Cobro de DTE automático',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_cobros_emitido_automatico : false,
+    'help' => '¿Se debe generar automáticamente un cobro para el pago de un DTE emitido?',
+]);
+echo $f->input([
+    'type' => 'textarea',
+    'name' => 'config_pagos_observacion',
+    'label' => 'Observación',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_observacion : false,
+]);
 ?>
         </div>
     </div>

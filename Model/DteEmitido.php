@@ -526,9 +526,9 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que elimina el DTE, y si no hay DTE posterior del mismo tipo,
      * restaura el folio para que se volver a utilizar.
-     * Sólo se pueden eliminar DTE que estén rechazados
+     * Sólo se pueden eliminar DTE que estén rechazados o no enviados al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-19
+     * @version 2016-12-16
      */
     public function delete()
     {
@@ -550,10 +550,18 @@ class Model_DteEmitido extends Model_Base_Envio
                 return false;
             }
         }
-        debug('delete');
         if (!parent::delete()) {
             $this->db->rollback();
             return false;
+        }
+        if ($this->getEmisor()->config_pagos_habilitado) {
+            $Cobro = $this->getCobro(false);
+            if ($Cobro->exists()) {
+                if (!$Cobro->delete()) {
+                    $this->db->rollback();
+                    return false;
+                }
+            }
         }
         $this->db->commit();
         return true;

@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-13
+     * @version 2016-12-16
      */
     public function generar($user_id = null)
     {
@@ -328,10 +328,47 @@ class Model_DteTmp extends \Model_App
             $DteEmitido->enviar($user_id);
         } catch (\Exception $e) {
         }
+        // generar cobro si corresponde o actualizar el existe si está pagado
+        if ($Emisor->config_pagos_habilitado) {
+            $Cobro = $this->getCobro(false);
+            if (!$Cobro->pagado) {
+                if ($Emisor->config_cobros_emitido_automatico) {
+                    $DteEmitido->getCobro();
+                }
+            } else {
+                $Cobro->emitido = $DteEmitido->folio;
+                $Cobro->save();
+            }
+        }
         // eliminar DTE temporal
         $this->delete();
         // entregar DTE emitido
         return $DteEmitido;
+    }
+
+    /**
+     * Método que borra el DTE temporal y su cobro asociado si existe
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-16
+     */
+    public function delete($borrarCobro = true)
+    {
+        $this->db->beginTransaction();
+        if ($borrarCobro and $this->getEmisor()->config_pagos_habilitado) {
+            $Cobro = $this->getCobro(false);
+            if ($Cobro->exists() and !$Cobro->pagado) {
+                if (!$Cobro->delete(false)) {
+                    $this->db->rollback();
+                    return false;
+                }
+            }
+        }
+        if (!parent::delete()) {
+            $this->db->rollback();
+            return false;
+        }
+        $this->db->commit();
+        return true;
     }
 
     /**
