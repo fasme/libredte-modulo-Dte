@@ -438,11 +438,11 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que entrega el cobro asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-14
+     * @version 2016-12-16
      */
-    public function getCobro()
+    public function getCobro($crearSiNoExiste = true)
     {
-        return (new \website\Pagos\Model_Cobro())->setDocumento($this);
+        return (new \website\Pagos\Model_Cobro())->setDocumento($this, $crearSiNoExiste);
     }
 
     /**
