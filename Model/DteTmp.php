@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-16
+     * @version 2016-12-17
      */
     public function generar($user_id = null)
     {
@@ -329,7 +329,7 @@ class Model_DteTmp extends \Model_App
         } catch (\Exception $e) {
         }
         // generar cobro si corresponde o actualizar el existe si está pagado
-        if ($Emisor->config_pagos_habilitado) {
+        if ($this->getTipo()->operacion=='S' and $Emisor->config_pagos_habilitado) {
             $Cobro = $this->getCobro(false);
             if (!$Cobro->pagado) {
                 if ($Emisor->config_cobros_emitido_automatico) {

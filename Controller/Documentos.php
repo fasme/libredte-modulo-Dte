@@ -173,7 +173,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-16
+     * @version 2016-12-17
      */
     public function _api_emitir_POST()
     {
@@ -279,7 +279,7 @@ class Controller_Documentos extends \Controller_App
         }
         try {
             if ($DteTmp->save()) {
-                if ($Emisor->config_pagos_habilitado and $Emisor->config_cobros_temporal_automatico) {
+                if ($DteTmp->getTipo()->operacion=='S' and $Emisor->config_pagos_habilitado and $Emisor->config_cobros_temporal_automatico) {
                     $DteTmp->getCobro();
                 }
                 return [
