@@ -390,22 +390,34 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el listado de correos a los que se debería enviar el
      * DTE (correo receptor, correo intercambio y correo del dte)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-24
+     * @version 2016-12-21
      */
     public function getEmails()
     {
-        $aux = [
-            'Email receptor' => $this->getReceptor()->email,
-            'Email intercambio' => $this->getReceptor()->config_email_intercambio_user,
-            'DTE T'.$this->dte.'F'.$this->folio => isset($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) ? $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'] : false,
-        ];
         $emails = [];
-        foreach ($aux as $k => $e) {
-            if (!empty($e) and !in_array($e, $emails)) {
-                $emails[$k] = $e;
+        if ($this->getReceptor()->config_email_intercambio_user) {
+            $emails['Email intercambio'] = $this->getReceptor()->config_email_intercambio_user;
+        }
+        if ($this->getReceptor()->email and !in_array($this->getReceptor()->email, $emails)) {
+            $emails['Email receptor'] = $this->getReceptor()->email;
+        }
+        if ($this->getReceptor()->getUsuario()->email and !in_array($this->getReceptor()->getUsuario()->email, $emails)) {
+            $emails['Email usuario administrador'] = $this->getReceptor()->getUsuario()->email;
+        }
+        if ($this->emisor==\sowerphp\core\Configure::read('libredte.proveedor.rut')) {
+            if ($this->getReceptor()->config_app_contacto_comercial) {
+                $i = 1;
+                foreach($this->getReceptor()->config_app_contacto_comercial as $contacto) {
+                    if (!in_array($contacto->email, $emails)) {
+                        $emails['Contacto comercial #'.$i++] = $contacto->email;
+                    }
+                }
             }
         }
-        return $emails ? $emails : false;
+        if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'], $emails)) {
+            $aux['DTE T'.$this->dte.'F'.$this->folio] = $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'];
+        }
+        return $emails;
     }
 
     /**

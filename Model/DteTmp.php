@@ -375,30 +375,31 @@ class Model_DteTmp extends \Model_App
      * Método que entrega el listado de correos a los que se podría enviar el documento
      * temporal (correo receptor, correo del dte y contacto comercial)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-14
+     * @version 2016-12-21
      */
     public function getEmails()
     {
-        $aux = [];
-        if (\sowerphp\core\Configure::read('libredte.proveedor.rut')==$this->emisor) {
-            $i = 1;
-            foreach ((array)$this->getReceptor()->config_app_contacto_comercial as $c) {
-                $aux['Contacto comercial #'.$i++] = $c->email;
+        $emails = [];
+        if ($this->getReceptor()->email) {
+            $emails['Email receptor'] = $this->getReceptor()->email;
+        }
+        if ($this->getReceptor()->getUsuario()->email and !in_array($this->getReceptor()->getUsuario()->email, $emails)) {
+            $emails['Email usuario administrador'] = $this->getReceptor()->getUsuario()->email;
+        }
+        if ($this->emisor==\sowerphp\core\Configure::read('libredte.proveedor.rut')) {
+            if ($this->getReceptor()->config_app_contacto_comercial) {
+                $i = 1;
+                foreach($this->getReceptor()->config_app_contacto_comercial as $contacto) {
+                    if (!in_array($contacto->email, $emails)) {
+                        $emails['Contacto comercial #'.$i++] = $contacto->email;
+                    }
+                }
             }
         }
-        if ($this->getReceptor()->email) {
-            $aux['Email receptor'] = $this->getReceptor()->email;
-        }
-        if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'])) {
+        if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'], $emails)) {
             $aux[$this->getFolio()] = $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'];
         }
-        $emails = [];
-        foreach ($aux as $k => $e) {
-            if (!empty($e) and !in_array($e, $emails)) {
-                $emails[$k] = $e;
-            }
-        }
-        return $emails ? $emails : false;
+        return $emails;
     }
 
     /**
