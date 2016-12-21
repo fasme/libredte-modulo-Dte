@@ -404,14 +404,14 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que envía el DTE temporal por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-14
+     * @version 2016-12-20
      */
     public function email($to = null, $subject = null, $msg = null, $cotizacion = true)
     {
         $Request = new \sowerphp\core\Network_Request();
         // variables por defecto
         if (!$to)
-            $to = $this->getReceptor()->email;
+            $to = $this->getEmails();
         if (!$to)
             throw new \Exception('No hay correo a quien enviar el DTE');
         if (!is_array($to))
