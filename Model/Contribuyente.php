@@ -1342,7 +1342,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2016-12-21
      */
     public function getIntercambios($soloPendientes = true)
     {
@@ -1350,7 +1350,7 @@ class Model_Contribuyente extends \Model_App
         $select = $soloPendientes ? '' : ', i.estado, u.usuario';
         $where = $soloPendientes ? ' AND i.estado IS NULL' : '';
         $intercambios = $this->db->getTable('
-            SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos'.$select.'
+            SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos, i.documentos AS n_documentos'.$select.'
             FROM dte_intercambio AS i LEFT JOIN contribuyente AS e ON i.emisor = e.rut LEFT JOIN usuario AS u ON i.usuario = u.id
             WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.$where.'
             ORDER BY i.fecha_hora_firma DESC
@@ -1360,16 +1360,20 @@ class Model_Contribuyente extends \Model_App
                 $i['emisor'] = $i['razon_social'];
             if (isset($i['estado']))
                 $i['estado'] = \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'][$i['estado']];
-            $nuevo_dte = true;
-            $n_letras = strlen($i['documentos']);
-            for ($j=0; $j<$n_letras; $j++) {
-                if ($i['documentos'][$j]==',') {
-                    $nuevo_dte = !$nuevo_dte;
-                    if ($nuevo_dte)
-                        $i['documentos'][$j] = '|';
+            if (!empty($i['documentos'])) {
+                $nuevo_dte = true;
+                $n_letras = strlen($i['documentos']);
+                for ($j=0; $j<$n_letras; $j++) {
+                    if ($i['documentos'][$j]==',') {
+                        $nuevo_dte = !$nuevo_dte;
+                        if ($nuevo_dte)
+                            $i['documentos'][$j] = '|';
+                    }
                 }
+            } else {
+                $i['documentos'] = $i['n_documentos'];
             }
-            unset($i['razon_social']);
+            unset($i['razon_social'], $i['n_documentos']);
         }
         return $intercambios;
     }
