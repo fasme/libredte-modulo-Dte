@@ -781,7 +781,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Recurso de la API que genera el XML de los DTEs solicitados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-04-05
+     * @version 2016-12-21
      */
     public function _api_generar_xml_POST()
     {
@@ -832,7 +832,7 @@ class Controller_Documentos extends \Controller_App
             $DTE = new \sasco\LibreDTE\Sii\Dte($d, $normalizar_dte);
             // timbrar, firmar y validar el documento
             if (!isset($folios[$DTE->getTipo()])) {
-                return $this->Api->send('Falta el CAF para el tipo de DTE '.$DTE->getTipo(), 508);
+                return $this->Api->send('Falta el CAF para el tipo de DTE '.$DTE->getTipo().': '.implode('. ', \sasco\LibreDTE\Log::readAll()), 508);
             }
             if (!$DTE->timbrar($folios[$DTE->getTipo()]) or !$DTE->firmar($Firma) or !$DTE->schemaValidate()) {
                 return $this->Api->send(implode("\n", \sasco\LibreDTE\Log::readAll()), 508);
