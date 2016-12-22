@@ -1197,7 +1197,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el objeto del libro de ventas a partir de las ventas registradas en la aplicación
      * @param periodo Período para el cual se está construyendo el libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-06
+     * @version 2016-12-21
      */
     public function getLibroVentas($periodo)
     {
@@ -1207,10 +1207,18 @@ class Model_Contribuyente extends \Model_App
             // armar detalle para agregar al libro
             $d = [];
             foreach ($venta as $k => $v) {
-                if (strpos($k, 'impuesto_')!==0) {
-                    if ($v!==null)
+                if (strpos($k, 'impuesto_')!==0 and strpos($k, 'extranjero_')!==0) {
+                    if ($v!==null) {
                         $d[Model_DteVenta::$libro_cols[$k]] = $v;
+                    }
                 }
+            }
+            // agregar datos si es extranjero
+            if (!empty($venta['extranjero_id']) or !empty($venta['extranjero_nacionalidad'])) {
+                $d['Extranjero'] = [
+                    'NumId' => !empty($venta['extranjero_id']) ? $venta['extranjero_id'] : false,
+                    'Nacionalidad' => !empty($venta['extranjero_nacionalidad']) ? $venta['extranjero_nacionalidad'] : false,
+                ];
             }
             // agregar otros impuestos
             if (!empty($venta['impuesto_codigo'])) {
