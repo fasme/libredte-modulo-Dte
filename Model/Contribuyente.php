@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para mapear la tabla contribuyente de la base de datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-05-28
+ * @version 2016-12-26
  */
 class Model_Contribuyente extends \Model_App
 {
@@ -2048,6 +2048,18 @@ class Model_Contribuyente extends \Model_App
             'direccion' => $this->direccion,
             'comuna' => $this->comuna,
         ];
+    }
+
+    /**
+     * Método que entrega las coordenadas geográficas del emisor según su dirección
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-26
+     */
+    public function getCoordenadas($sucursal = null)
+    {
+        $Sucursal = $this->getSucursal($sucursal);
+        $direccion = $Sucursal->direccion.', '.(new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comuna($Sucursal->comuna))->comuna;
+        return (new \sowerphp\general\Utility_Mapas_Google())->getCoordenadas($direccion);
     }
 
     /**
