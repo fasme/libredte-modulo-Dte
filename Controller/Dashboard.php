@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-17
+     * @version 2016-12-27
      */
     public function index()
     {
@@ -52,7 +52,7 @@ class Controller_Dashboard extends \Controller_App
         $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'usuario IS NULL'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
         // valores para cuota
         $cuota = $Emisor->getCuota();
-        $n_dtes = $cuota ? (new Model_DteEmitidos())->setWhereStatement(['emisor = :emisor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta'], [':emisor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count() + (new Model_DteRecibidos())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count() : false;
+        $n_dtes = $cuota ? $Emisor->getTotalDocumentosUsadosPeriodo() : false;
         // libros pendientes de enviar del período anterior
         $libro_ventas = (new Model_DteVentas())->setWhereStatement(['emisor = :emisor', 'periodo = :periodo', 'certificacion = :certificacion', 'track_id IS NOT NULL'], [':emisor'=>$Emisor->rut, ':periodo'=>$periodo_anterior, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
         $libro_compras = (new Model_DteCompras())->setWhereStatement(['receptor = :receptor', 'periodo = :periodo', 'certificacion = :certificacion', 'track_id IS NOT NULL'], [':receptor'=>$Emisor->rut, ':periodo'=>$periodo_anterior, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();

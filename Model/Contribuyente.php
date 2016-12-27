@@ -2092,7 +2092,7 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
-     * Método que entrega los documentos usados por el contribuyente
+     * Método que entrega los documentos usados por el contribuyente en todos los periodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-10-12
      */
@@ -2123,6 +2123,33 @@ class Model_Contribuyente extends \Model_App
             $d['sobre_cuota'] = ($cuota and ($d['total']-$cuota)>0) ? $d['total']-$cuota : null;
         }
         return $datos;
+    }
+
+    /**
+     * Método que entrega el total de documentos usados por el contribuyente en
+     * un periodo en particular
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-27
+     */
+    public function getTotalDocumentosUsadosPeriodo($periodo = null)
+    {
+        if (!$periodo)
+            $periodo = date('Ym');
+        $periodo_col = $this->db->date('Ym', 'fecha');
+        return $this->db->getValue('
+            SELECT (e.total + r.total)
+            FROM
+                (
+                    SELECT COUNT(*) AS total
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion AND '.$periodo_col.' = :periodo
+                ) AS e,
+                (
+                    SELECT COUNT(*) AS total
+                    FROM dte_recibido
+                    WHERE receptor = :rut AND certificacion = :certificacion AND '.$periodo_col.' = :periodo
+                ) AS r
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
     }
 
     /**
