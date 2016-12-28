@@ -375,6 +375,37 @@ class Controller_DteTmps extends \Controller_App
     }
 
     /**
+     * Servicio web que elimina un DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-28
+     */
+    public function _api_eliminar_GET($receptor, $dte, $codigo, $emisor)
+    {
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear emisor
+        $Emisor = new \website\Dte\Model_Contribuyente($emisor);
+        if (!$Emisor->usuario) {
+            $this->Api->send('Contribuyente no está registrado en la aplicación', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_tmps')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // eliminar
+        return $DteTmp->delete();
+    }
+
+    /**
      * Método que actualiza un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-16
