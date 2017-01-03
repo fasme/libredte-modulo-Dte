@@ -980,7 +980,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las boletas por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-01-03
      */
     public function getResumenBoletasPeriodos()
     {
@@ -990,6 +990,7 @@ class Model_Contribuyente extends \Model_App
             FROM dte_emitido
             WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39, 41)
             GROUP BY '.$periodo_col.'
+            ORDER BY '.$periodo_col.' DESC
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
     }
 
