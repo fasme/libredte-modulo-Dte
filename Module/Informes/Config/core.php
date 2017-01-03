@@ -28,6 +28,11 @@ Configure::write('nav.module', array(
         'desc' => 'Informe de documentos emitidos',
         'icon' => 'fa fa-sign-out',
     ],
+    '/despachos' => [
+        'name' => 'Despachos diarios',
+        'desc' => 'Informe diario de guías de despachos a realizar (incluye mapa)',
+        'icon' => 'fa fa-map',
+    ],
     '/impuestos/propuesta_f29' => [
         'name' => 'Propuesta formulario 29',
         'desc' => 'Propuesta para el formulario 29',
