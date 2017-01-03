@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de libro de guías de despacho
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-14
+ * @version 2016-12-26
  */
 class Controller_DteGuias extends Controller_Base_Libros
 {
@@ -119,6 +119,36 @@ class Controller_DteGuias extends Controller_Base_Libros
             'Libro de guías período '.$periodo.' envíado', 'ok'
         );
         $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+    }
+
+    /**
+     * Método que permite buscar las guías que se desean facturar masivamente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-26
+     */
+    public function facturar()
+    {
+        $Emisor = $this->getContribuyente();
+        // buscar guías a facturar
+        if (!empty($_POST['desde']) and !empty($_POST['hasta'])) {
+            $this->set([
+                'Emisor' => $Emisor,
+                'guias' => (new Model_DteGuias())->setContribuyente($Emisor)->getSinFacturar($_POST['desde'], $_POST['hasta'], $_POST['receptor']),
+            ]);
+        }
+        // facturar las guías seleccionadas
+        else if (!empty($_POST['guias'])) {
+            try {
+                $this->set([
+                    'temporales' => (new Model_DteGuias())->setContribuyente($Emisor)->facturar($_POST['guias'], $_POST['fecha'])
+                ]);
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible facturar las guías seleccionadas:'.$e->getMessage(), 'error'
+                );
+                $this->redirect('/dte/dte_guias');
+            }
+        }
     }
 
 }

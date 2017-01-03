@@ -38,4 +38,218 @@ class Model_DteGuias extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_guia'; ///< Tabla del modelo
 
+    /**
+     * Método que entrega los despachos de un contribuyente para cierta fecha
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-26
+     */
+    public function getDespachos(array $filtros = [])
+    {
+        if (empty($filtros['fecha'])) {
+            $filtros['fecha'] = date('Y-m-d');
+        }
+        $where = ['e.fecha = :fecha'];
+        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':fecha' => $filtros['fecha']];
+        if (!empty($filtros['receptor'])) {
+            $where[] = 'e.receptor = :receptor';
+            $vars[':receptor'] = \sowerphp\app\Utility_Rut::normalizar($filtros['receptor']);
+        }
+        if (!empty($filtros['usuario'])) {
+            $where[] = 'e.usuario = :usuario';
+            $vars[':usuario'] = $filtros['usuario'];
+        }
+        if (!empty($filtros['sucursal'])) {
+            $where[] = 'e.sucursal_sii = :sucursal';
+            $vars[':sucursal'] = $filtros['sucursal'];
+        } else {
+            $where[] = 'e.sucursal_sii IS NULL';
+        }
+        if (!empty($filtros['patente'])) {
+            $where[] = 'LOWER('.$this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Transporte/Patente', 'http://www.sii.cl/SiiDte').') LIKE :patente';
+            $vars[':patente'] = '%'.strtolower($filtros['patente']).'%';
+        }
+        if (!empty($filtros['transportista'])) {
+            $where[] = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Transporte/RUTTrans', 'http://www.sii.cl/SiiDte').' = :transportista';
+            $vars[':transportista'] = str_replace('.', '', $filtros['transportista']);
+        }
+        if (!empty($filtros['vendedor'])) {
+            $where[] = 'LOWER('.$this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Emisor/CdgVendedor', 'http://www.sii.cl/SiiDte').') LIKE :vendedor';
+            $vars[':vendedor'] = '%'.strtolower($filtros['vendedor']).'%';
+        }
+        list($direccion, $comuna, $transporte_direccion, $transporte_comuna, $items) = $this->db->xml('e.xml', [
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Receptor/DirRecep',
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Receptor/CmnaRecep',
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Transporte/DirDest',
+            '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Transporte/CmnaDest',
+            '/EnvioDTE/SetDTE/DTE/Documento/Detalle/NmbItem',
+        ], 'http://www.sii.cl/SiiDte');
+        $despachos = $this->db->getTable('
+            SELECT
+                e.folio,
+                r.razon_social,
+                CASE WHEN '.$transporte_direccion.' != \'\' THEN '.$transporte_direccion.' ELSE '.$direccion.' END AS direccion,
+                CASE WHEN '.$transporte_comuna.' != \'\' THEN '.$transporte_comuna.' ELSE '.$comuna.' END AS comuna,
+                '.$items.' AS items,
+                e.total
+            FROM
+                dte_emitido AS e
+                JOIN contribuyente AS r ON r.rut = e.receptor
+            WHERE e.emisor = :rut AND e.dte = 52 AND e.certificacion = :certificacion AND '.implode(' AND ', $where).'
+            ORDER BY '.$comuna.', e.folio
+        ', $vars);
+        foreach ($despachos as &$d) {
+            $d['direccion'] = utf8_decode($d['direccion']);
+            $d['comuna'] = utf8_decode($d['comuna']);
+            $d['items'] = explode('","', utf8_decode($d['items']));
+            if (!empty($filtros['mapa'])) {
+                list($latitud, $longitud) = (new \sowerphp\general\Utility_Mapas_Google())->getCoordenadas($d['direccion'].', '.$d['comuna']);
+                $d['latitud'] = $latitud;
+                $d['longitud'] = $longitud;
+                $d['color'] = 'red';
+            }
+        }
+        return $despachos;
+    }
+
+    /**
+     * Método que entrega las guías de despacho que no se han facturado, esto
+     * es aquellas que tienen indicador de traslado "operación constituye venta"
+     * y no poseen una referencia desde una factura electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-26
+     */
+    public function getSinFacturar($desde, $hasta, $receptor = null)
+    {
+        $where = ['e.fecha BETWEEN :desde AND :hasta'];
+        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        if ($receptor) {
+            $vars[':receptor'] = \sowerphp\app\Utility_Rut::normalizar($receptor);
+            $where[] = 'e.receptor = :receptor';
+        }
+        $where[] = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/IdDoc/IndTraslado', 'http://www.sii.cl/SiiDte').'::INTEGER = 1';
+        return $this->db->getTable('
+            SELECT e.folio, r.razon_social, e.fecha, e.total
+            FROM
+                dte_emitido AS e
+                JOIN contribuyente AS r ON r.rut = e.receptor
+            WHERE
+                e.emisor = :rut AND e.dte = 52 AND e.certificacion = :certificacion AND '.implode(' AND ', $where).'
+                AND (e.emisor, e.dte, e.folio, e.certificacion) NOT IN (
+                    SELECT r.emisor, r.referencia_dte, r.referencia_folio, r.certificacion
+                    FROM
+                        dte_referencia AS r
+                        JOIN dte_emitido AS e ON e.emisor = r.emisor AND e.dte = r.dte AND e.folio = r.folio AND r.certificacion = e.certificacion
+                    WHERE e.fecha >= :desde
+                )
+            ORDER BY r.razon_social, e.fecha, e.folio
+        ', $vars);
+    }
+
+    /**
+     * Método que realiza la facturación masiva de las guías de despacho
+     * Creará una factura para cada RUT que se esté facturando
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-26
+     */
+    public function facturar(array $folios, $fecha = null)
+    {
+        if (!$fecha)
+            $fecha = date('Y-m-d');
+        // armar arreglo con las guías por cada receptor
+        sort($folios);
+        $facturacion = [];
+        foreach ($folios as $folio) {
+            $Guia = new Model_DteEmitido($this->getContribuyente()->rut, 52, $folio, (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $facturacion[$Guia->receptor][] = $Guia;
+        }
+        // crear el documento temporal de cada receptor
+        $temporales = [];
+        foreach ($facturacion as $receptor => &$guias) {
+            $DteTmp = $this->crearDteTmp($guias, $fecha);
+            $temporales[] = $DteTmp;
+        }
+        return $temporales;
+    }
+
+    /**
+     * Método que crea el DTE temporal de una factura para un grupo de guías de
+     * despacho
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-12-26
+     */
+    private function crearDteTmp($guias, $fecha)
+    {
+        $guias_max = 10;
+        // crear detalle y referencia usando indicador global
+        if (isset($guias[$guias_max])) {
+            $folios = [];
+            $neto = 0;
+            foreach ($guias as $Guia) {
+                $folios[] = '#'.$Guia->folio.' del '.\sowerphp\general\Utility_Date::format($Guia->fecha);
+                $neto += $Guia->neto;
+            }
+            $Detalle = [
+                'NmbItem' => 'Facturación de múltiples guías de despacho',
+                'DscItem' => 'Según folios número: '.implode(', ', $folios),
+                'PrcItem' => $neto,
+            ];
+            $Referencia = [
+                'TpoDocRef' => 52,
+                'IndGlobal' => 1,
+                'FolioRef' => 0,
+                'FchRef' => $fecha,
+                'RazonRef' => 'Se facturan '.count($guias).' guías',
+            ];
+        }
+        // se crea una referencia por cada guía que se está facturando
+        else {
+            $Detalle = [];
+            $Referencia = [];
+            foreach ($guias as $Guia) {
+                $Detalle[] = [
+                    'NmbItem' => 'Guía de despacho #'.$Guia->folio.' del '.\sowerphp\general\Utility_Date::format($Guia->fecha),
+                    'PrcItem' => $Guia->neto,
+                ];
+                $Referencia[] = [
+                    'TpoDocRef' => 52,
+                    'FolioRef' => $Guia->folio,
+                    'FchRef' => $Guia->fecha,
+                    'RazonRef' => 'Se factura guía',
+                ];
+            }
+        }
+        // preparar datos del DTE
+        $dte = [
+            'Encabezado' => [
+                'IdDoc' => [
+                    'TipoDTE' => 33,
+                    'FchEmis' => $fecha,
+                ],
+                'Emisor' => [
+                    'RUTEmisor' => $this->getContribuyente()->rut.'-'.$this->getContribuyente()->dv,
+                ],
+                'Receptor' => [
+                    'RUTRecep' => $guias[0]->getReceptor()->rut.'-'.$guias[0]->getReceptor()->dv,
+                    'RznSocRecep' => $guias[0]->getReceptor()->razon_social,
+                    'GiroRecep' => $guias[0]->getReceptor()->giro ? $guias[0]->getReceptor()->giro : false,
+                    'Contacto' => $guias[0]->getReceptor()->telefono ? $guias[0]->getReceptor()->telefono : false,
+                    'CorreoRecep' => $guias[0]->getReceptor()->email ? $guias[0]->getReceptor()->email : false,
+                    'DirRecep' => $guias[0]->getReceptor()->direccion,
+                    'CmnaRecep' => $guias[0]->getReceptor()->getComuna()->comuna,
+                ],
+            ],
+            'Detalle' => $Detalle,
+            'Referencia' => $Referencia,
+        ];
+        // consumir servicio web para crear documento temporal
+        $Request = new \sowerphp\core\Network_Request();
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth($this->getContribuyente()->getUsuario()->hash);
+        $response = $rest->post($Request->url.'/api/dte/documentos/emitir', $dte);
+        if ($response['status']['code']!=200) {
+            throw new \Exception($response['body']);
+        }
+        return new \website\Dte\Model_DteTmp($response['body']['emisor'], $response['body']['receptor'], $response['body']['dte'], $response['body']['codigo']);
+    }
+
 }

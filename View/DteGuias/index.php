@@ -1,3 +1,10 @@
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/dte_guias/facturar" title="Facturar masivamente guías de despacho">
+            Facturación masiva
+        </a>
+    </li>
+</ul>
 <h1>Libro de guías de despacho</h1>
 <?php
 foreach ($periodos as &$p) {
