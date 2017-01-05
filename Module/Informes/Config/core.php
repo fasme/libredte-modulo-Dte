@@ -58,4 +58,9 @@ Configure::write('nav.module', array(
         'desc' => 'Estadística de documentos usados, tanto emitidos como recibidos y el uso de sobre cuota',
         'icon' => 'fa fa-calculator',
     ],
+    '/compras/activos_fijos' => [
+        'name' => 'Compras de activos fijos',
+        'desc' => 'Informe con listado de documentos de compras de activos fijos según IEC',
+        'icon' => 'fa fa-list',
+    ],
 ));

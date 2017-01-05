@@ -38,4 +38,73 @@ class Model_DteRecibidos extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_recibido'; ///< Tabla del modelo
 
+    /**
+     * Método que entrega el listado de documentos que tienen compras de
+     * activos fijos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-03
+     */
+    public function getActivosFijos($filtros)
+    {
+        if (empty($filtros['desde']) or empty($filtros['hasta'])) {
+            return false;
+        }
+        $where = ['r.fecha BETWEEN :desde AND :hasta'];
+        $vars = [
+                ':receptor' => $this->getContribuyente()->rut,
+                ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+                ':desde' => $filtros['desde'],
+                ':hasta' => $filtros['hasta'],
+        ];
+        if (isset($filtros['sucursal'])) {
+            if ($filtros['sucursal']) {
+                $where[] = 'r.sucursal_sii_receptor IS NULL';
+                $vars[':sucursal'] = $filtros['sucursal'];
+            } else {
+                $where[] = 'r.sucursal_sii_receptor IS NULL';
+            }
+        }
+        list($items, $precios) = $this->db->xml('i.archivo_xml', [
+            '/*/SetDTE/DTE/*/Detalle/NmbItem',
+            '/*/SetDTE/DTE/*/Detalle/PrcItem',
+        ], 'http://www.sii.cl/SiiDte');
+        $recibidos = $this->db->getTable('
+            SELECT
+                r.fecha,
+                r.sucursal_sii_receptor AS sucursal,
+                e.razon_social,
+                r.emisor,
+                r.intercambio,
+                r.dte,
+                t.tipo AS documento,
+                r.folio,
+                r.neto,
+                r.monto_activo_fijo,
+                CASE WHEN r.neto = r.monto_activo_fijo THEN \'Total\' ELSE \'Parcial\' END AS montos,
+                CASE WHEN r.intercambio IS NOT NULL THEN '.$items.' ELSE NULL END AS items,
+                CASE WHEN r.intercambio IS NOT NULL THEN '.$precios.' ELSE NULL END AS precios
+            FROM
+                dte_recibido AS r
+                JOIN contribuyente AS e ON r.emisor = e.rut
+                JOIN dte_tipo AS t ON t.codigo = r.dte
+                LEFT JOIN dte_intercambio AS i ON i.receptor = r.receptor AND i.codigo = r.intercambio AND i.certificacion = r.certificacion
+            WHERE
+                r.receptor = :receptor
+                AND r.certificacion = :certificacion
+                AND '.implode(' AND ', $where).'
+                AND r.monto_activo_fijo IS NOT NULL
+            ORDER BY r.fecha, r.sucursal_sii_receptor, r.emisor, r.folio
+        ', $vars);
+        foreach ($recibidos as &$f) {
+            $f['sucursal'] = $this->getContribuyente()->getSucursal($f['sucursal'])->sucursal;
+            if ($f['items']) {
+                $f['items'] = explode('","', utf8_decode($f['items']));
+                $f['precios'] = explode('","', utf8_decode($f['precios']));
+            } else {
+                $f['items'] = $f['precios'] = [];
+            }
+        }
+        return $recibidos;
+    }
+
 }
