@@ -175,7 +175,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
     /**
      * Método que guarda el XML de la Recepción de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-07
+     * @version 2017-01-05
      */
     public function saveXML($Emisor, $xml) {
 
@@ -228,7 +228,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
             );
             $DteIntercambioRecepcionDte->responde = $this->responde;
             $DteIntercambioRecepcionDte->codigo = $this->codigo;
-            if (!empty($Recepcion['EstadoRecepDTE'])) {
+            if (!empty($Recepcion['EstadoRecepDTE']) or is_numeric($Recepcion['EstadoRecepDTE'])) {
                 $DteIntercambioRecepcionDte->estado = $Recepcion['EstadoRecepDTE'];
             }
             if (!empty($Recepcion['RecepDTEGlosa']) and is_string($Recepcion['RecepDTEGlosa'])) {
