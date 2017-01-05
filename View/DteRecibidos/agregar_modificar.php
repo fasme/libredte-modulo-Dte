@@ -69,14 +69,14 @@ echo $f->input([
     'label' => 'Monto exento',
     'value' => isset($DteRecibido) ? $DteRecibido->exento : '',
     'check' => 'integer',
-    'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
+    //'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
 ]);
 echo $f->input([
     'name' => 'neto',
     'label' => 'Neto',
     'value' => isset($DteRecibido) ? $DteRecibido->neto : '',
     'check' => 'integer',
-    'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
+    //'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
 ]);
 echo $f->input([
     'type' => 'select',
@@ -90,14 +90,14 @@ echo $f->input([
     'label' => 'Tasa impuesto',
     'value' => isset($DteRecibido) ? $DteRecibido->tasa : $iva_tasa,
     'check' => 'real',
-    'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
+    //'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
 ]);
 echo $f->input([
     'name' => 'iva',
     'label' => 'Impuesto',
     'value' => isset($DteRecibido) ? $DteRecibido->iva : '',
     'check' => 'integer',
-    'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
+    //'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
 ]);
 echo $f->input([
     'type' => 'select',
