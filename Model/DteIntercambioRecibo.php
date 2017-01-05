@@ -151,7 +151,7 @@ class Model_DteIntercambioRecibo extends \Model_App
     /**
      * Método que guarda el XML del Recibo de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-07
+     * @version 2017-01-05
      */
     public function saveXML($Emisor, $xml) {
         // crear recibo
@@ -204,6 +204,8 @@ class Model_DteIntercambioRecibo extends \Model_App
             $DteIntercambioReciboDte->codigo = $this->codigo;
             if (!empty($Recibo['DocumentoRecibo']['Recinto'])) {
                 $DteIntercambioReciboDte->recinto = substr($Recibo['DocumentoRecibo']['Recinto'], 0, 80);
+            } else {
+                $DteIntercambioReciboDte->recinto = 'Sin recinto informado';
             }
             if (!empty($Recibo['DocumentoRecibo']['RutFirma'])) {
                 $DteIntercambioReciboDte->firma = substr($Recibo['DocumentoRecibo']['RutFirma'], 0, 10);
