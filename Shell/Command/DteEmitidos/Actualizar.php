@@ -64,7 +64,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                     if ($DteEmitido->revision_detalle) {
                         $msg .= $DteEmitido->revision_detalle."\n\n";
                     }
-                    $msg .= 'Revisar el documento y su estado en '.(new \sowerphp\core\Network_Request())->url.'/dte/contribuyentes/seleccionar/'.$Contribuyente->rut.'/'.base64_encode('/dte/dte_emitidos/actualizar_estado/'.$DteEmitido->dte.'/'.$DteEmitido->folio)."\n\n";
+                    $msg .= 'Revisar el documento y su estado en '.(new \sowerphp\core\Network_Request())->url.'/dte/contribuyentes/seleccionar/'.$Contribuyente->rut.'/'.base64_encode('/dte/dte_emitidos/actualizar_estado/'.$DteEmitido->dte.'/'.$DteEmitido->folio).' Si el estado del DTE no está disponible se solicitará una nueva revisión, espere un momento y vuelva a hacer click en "Actualizar estado"'."\n\n";
                     $msg .= 'Adicionalmente puede hacer click en "ver estado envío en SII" bajo el botón "Actualizar estado", en la página del documento, para ver el motivo del rechazo en el sitio del SII.'."\n\n";
                     $msg .= 'También puede encontrar más información sobre los motivos de los rechazos en https://wiki.libredte.cl/doku.php/faq/sii/estado_envio#estados_rechazados';
                     $Contribuyente->notificar('T'.$DteEmitido->dte.'F'.$DteEmitido->folio.' RECHAZADO!', $msg);
