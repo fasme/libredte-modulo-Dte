@@ -1,6 +1,6 @@
 <ul class="nav nav-pills pull-right">
     <li>
-        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal (cotización)">
+        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal">
             <span class="fa fa-edit"></span> Emitir documento
         </a>
     </li>

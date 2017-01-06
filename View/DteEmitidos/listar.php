@@ -1,5 +1,10 @@
 <ul class="nav nav-pills pull-right">
     <li>
+        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal">
+            <span class="fa fa-edit"></span> Emitir documento
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/dte_emitidos/cargar_xml" title="Cargar un XML emitido externamente">
             <span class="fa fa-upload"></span> Cargar XML
         </a>
