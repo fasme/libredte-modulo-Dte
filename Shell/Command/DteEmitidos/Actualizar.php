@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando para actualizar la bandeja de intercambio de los contribuyentes
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-09-22
+ * @version 2017-01-06
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
@@ -59,7 +59,14 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                 $estado_original = $DteEmitido->revision_estado;
                 $DteEmitido->actualizarEstado();
                 if ($DteEmitido->getEstado()=='R') {
-                    $msg = $DteEmitido->revision_estado."\n\n".$DteEmitido->revision_detalle;
+                    $msg = $Contribuyente->razon_social.','."\n\n";
+                    $msg .= 'El documento '.$DteEmitido->getTipo()->tipo.' folio '.$DteEmitido->folio.' se encuentra '.$DteEmitido->revision_estado."\n\n";
+                    if ($DteEmitido->revision_detalle) {
+                        $msg .= $DteEmitido->revision_detalle."\n\n";
+                    }
+                    $msg .= 'Revisar el documento y su estado en '.(new \sowerphp\core\Network_Request())->url.'/dte/contribuyentes/seleccionar/'.$Contribuyente->rut.'/'.base64_encode('/dte/dte_emitidos/actualizar_estado/'.$DteEmitido->dte.'/'.$DteEmitido->folio)."\n\n";
+                    $msg .= 'Adicionalmente puede hacer click en "ver estado envío en SII" bajo el botón "Actualizar estado", en la página del documento, para ver el motivo del rechazo en el sitio del SII.'."\n\n";
+                    $msg .= 'También puede encontrar más información sobre los motivos de los rechazos en https://wiki.libredte.cl/doku.php/faq/sii/estado_envio#estados_rechazados';
                     $Contribuyente->notificar('T'.$DteEmitido->dte.'F'.$DteEmitido->folio.' RECHAZADO!', $msg);
                 }
                 if ($estado_original=='-11' and $DteEmitido->revision_estado!=$estado_original) {
