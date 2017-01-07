@@ -65,7 +65,7 @@ class Model_Contribuyentes extends \Model_Plural_App
      * @param usuario ID del usuario que se quiere obtener el listado de contribuyentes con los que está autorizado a operar
      * @return Tabla con los usuarios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-27
+     * @version 2017-01-07
      */
     public function getByUsuario($usuario)
     {
@@ -85,7 +85,7 @@ class Model_Contribuyentes extends \Model_Plural_App
                     AND a.configuracion = \'ambiente\'
                     AND a.variable = \'en_certificacion\'
             )
-            ORDER BY administrador DESC, razon_social
+            ORDER BY certificacion, administrador DESC, razon_social
         ', [':usuario'=>$usuario]);
     }
 
