@@ -173,7 +173,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-17
+     * @version 2017-01-10
      */
     public function _api_emitir_POST()
     {
@@ -264,7 +264,7 @@ class Controller_Documentos extends \Controller_App
         $DteTmp->emisor = $Emisor->rut;
         $DteTmp->receptor = $Receptor->rut;
         $DteTmp->dte = $resumen['TpoDoc'];
-        $DteTmp->codigo = md5($DteTmp->datos);
+        $DteTmp->codigo = md5(md5($DteTmp->datos).date('U'));
         $DteTmp->fecha = $resumen['FchDoc'];
         if (!$Dte->esExportacion()) {
             $DteTmp->total = $resumen['MntTotal'];
