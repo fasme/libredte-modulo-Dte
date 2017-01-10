@@ -124,6 +124,13 @@ echo $f->input([
     'attr' => 'maxlength="80"',
     'help' => 'Lugar donde se recibieron los productos o prestaron los servicios',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'sucursal',
+    'label' => 'Sucursal',
+    'options' => $Emisor->getSucursales(),
+    'help' => 'Sucursal a la que corresponden los documentos',
+]);
 echo '</div>',"\n";
 echo '<div class="col-md-6">',"\n";
 echo $f->input([
@@ -149,6 +156,12 @@ echo $f->input([
     'check' => 'notempty',
     'attr' => 'maxlength="256"',
     'help' => 'Detalles del estado del envío (sobre todo si se está rechazando)',
+]);
+echo $f->input([
+    'name' => 'periodo',
+    'label' => 'Período',
+    'check' => 'integer',
+    'help' => 'Periodo del libro del documento. Si se deja en blanco se usa la fecha de emisión. Ejemplo: '.date('Ym'),
 ]);
 echo '</div>',"\n";
 echo '</div>',"\n";

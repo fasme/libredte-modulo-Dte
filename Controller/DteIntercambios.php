@@ -276,7 +276,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-23
+     * @version 2017-01-10
      */
     public function responder($codigo)
     {
@@ -491,6 +491,22 @@ class Controller_DteIntercambios extends \Controller_App
                         $DteRecibido->usuario = $this->Auth->User->id;
                         $DteRecibido->intercambio = $DteIntercambio->codigo;
                         $DteRecibido->impuesto_tipo = 1; // se asume siempre que es IVA
+                        if (!empty($_POST['periodo'])) {
+                            $DteRecibido->periodo = $_POST['periodo'];
+                        }
+                        if (!empty($_POST['sucursal'])) {
+                            $DteRecibido->sucursal_sii_receptor = $_POST['sucursal'];
+                        }
+                        // si hay IVA y esta fuera de plazo se marca como no recuperable
+                        if ($DteRecibido->iva and $DteRecibido->periodo) {
+                            $periodo_dte = (int)substr(str_replace('-', '', $DteRecibido->fecha),0, 6);
+                            $meses = \sowerphp\general\Utility_Date::countMonths($periodo_dte, $DteRecibido->periodo);
+                            if ($meses > 2) {
+                                $DteRecibido->iva_no_recuperable = json_encode([
+                                    ['codigo'=>2, 'monto'=>$DteRecibido->iva]
+                                ]);
+                            }
+                        }
                         // copiar impuestos adicionales
                         $datos = $Dte->getDatos();
                         if (!empty($datos['Encabezado']['Totales']['ImptoReten'])) {
