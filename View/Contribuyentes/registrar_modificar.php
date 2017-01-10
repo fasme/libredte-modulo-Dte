@@ -358,7 +358,7 @@ $f->setColsLabel();
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-send-o"></i>
-            Emisión DTE
+            Emisión documentos
         </div>
         <div class="panel-body">
             <div class="row">
@@ -669,6 +669,24 @@ $f->setStyle(false);
                 </div>
             </div>
 <?php $f->setStyle('horizontal'); ?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-file-o"></i>
+            Recepción documentos
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_recepcion_omitir_verificacion_sii',
+    'label' => 'Verificar DTE',
+    'options' => ['Verificar documento recibido contra el SII (recomendado)', 'Permitir ingresar documentos sin verificar (no recomendado)'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_recepcion_omitir_verificacion_sii : 0,
+    'help' => 'Permite omitir la verificación de un DTE contra el SII al ser agregado manualmente. Se recomienda nunca activar esta opción, ya que de acuerdo a la legislación sólo se deben incluir en los documentos recibidos aquellos que el SII tiene aceptados.',
+]);
+?>
         </div>
     </div>
     <div class="panel panel-default">

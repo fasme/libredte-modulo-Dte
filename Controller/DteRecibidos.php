@@ -222,7 +222,7 @@ class Controller_DteRecibidos extends \Controller_App
         // si el DTE es de producción y es electrónico entonces se consultará su
         // estado antes de poder guardar, esto evitará agregar documentos que no
         // han sido recibidos en el SII o sus datos son incorrectos
-        if (!$Emisor->config_ambiente_en_certificacion and $DteRecibido->getTipo()->electronico) {
+        if (!$Emisor->config_ambiente_en_certificacion and $DteRecibido->getTipo()->electronico and !$Emisor->config_recepcion_omitir_verificacion_sii) {
             // obtener firma
             $Firma = $Emisor->getFirma($this->Auth->User->id);
             if (!$Firma) {

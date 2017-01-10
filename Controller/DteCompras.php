@@ -77,7 +77,7 @@ class Controller_DteCompras extends Controller_Base_Libros
                 // estado antes de poder guardar, esto evitará agregar documentos que no
                 // han sido recibidos en el SII o sus datos son incorrectos
                 $guardar = true;
-                if (!$DteRecibido->certificacion and $DteRecibido->getTipo()->electronico) {
+                if (!$DteRecibido->certificacion and $DteRecibido->getTipo()->electronico and !$Emisor->config_recepcion_omitir_verificacion_sii) {
                     // obtener firma
                     $Firma = $Receptor->getFirma($this->Auth->User->id);
                     if (!$Firma) {
