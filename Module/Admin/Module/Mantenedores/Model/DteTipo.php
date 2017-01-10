@@ -168,5 +168,25 @@ class Model_DteTipo extends \Model_App
         parent::__construct($codigo);
         $this->dte_tipo = &$this->tipo;
     }
+    
+    /**
+     * Método que indica si se puede generar cotización al DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-10
+     */
+    public function permiteCotizacion()
+    {
+        return $this->operacion=='S';
+    }
+
+    /**
+     * Método que indica si se puede generar un cobro al DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-01-10
+     */
+    public function permiteCobro()
+    {
+        return \sowerphp\core\Module::loaded('Pagos') and $this->operacion=='S';
+    }
 
 }

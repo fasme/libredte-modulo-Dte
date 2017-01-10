@@ -22,7 +22,7 @@ $(function() {
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
         <li role="presentation"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Enviar por email</a></li>
-<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteTmp->getDte()->operacion=='S'): ?>
+<?php if ($DteTmp->getTipo()->permiteCobro()): ?>
         <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
 <?php endif; ?>
         <li role="presentation"><a href="#actualizar_fecha" aria-controls="actualizar_fecha" role="tab" data-toggle="tab">Actualizar fecha</a></li>
@@ -39,8 +39,8 @@ new \sowerphp\general\View_Helper_Table([
 ?>
     <div class="row">
         <div class="col-md-3">
-            <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/cotizacion/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="fa fa-dollar" style="font-size:24px"></span>
+            <a class="btn btn-default btn-lg btn-block<?=!$DteTmp->getTipo()->permiteCotizacion()?>" href="<?=$_base?>/dte/dte_tmps/cotizacion/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+                <span class="fa fa-file-o" style="font-size:24px"></span>
                 Cotización
             </a>
         </div>
@@ -133,13 +133,22 @@ if ($emails) {
 </div>
 <!-- FIN ENVIAR POR EMAIL -->
 
-<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteTmp->getDte()->operacion=='S'): ?>
+<?php if ($DteTmp->getTipo()->permiteCobro()): ?>
 <!-- INICIO PAGAR -->
 <div role="tabpanel" class="tab-pane" id="pagar">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
-<a class="btn btn-primary btn-lg btn-block" href="<?=$enlace_pagar_cotizacion?>" role="button">
-    Enlace público a la página para el pago de la cotización
-</a>
+<div class="row">
+    <div class="col-sm-6">
+    <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+            Registrar pago
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_cotizacion?>" role="button">
+            Enlace público para pagar
+        </a>
+    </div>
+</div>
 <?php else : ?>
 <p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
 <?php endif; ?>

@@ -24,7 +24,7 @@ $(function() {
         <li role="presentation"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab">PDF</a></li>
         <li role="presentation"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Enviar por email</a></li>
         <li role="presentation"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab">Resultado intercambio</a></li>
-<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S'): ?>
+<?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
         <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
 <?php endif; ?>
         <li role="presentation"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab">Cobranza</a></li>
@@ -255,13 +255,26 @@ if ($Resultado) {
 </div>
 <!-- FIN INTERCAMBIO -->
 
-<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S'): ?>
+<?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
 <!-- INICIO PAGAR -->
 <div role="tabpanel" class="tab-pane" id="pagar">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
-<a class="btn btn-primary btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
-    Enlace público a la página para el pago del DTE
-</a>
+<?php if (!$Cobro->pagado) : ?>
+<div class="row">
+    <div class="col-sm-6">
+    <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+            Registrar pago
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
+            Enlace público para pagar
+        </a>
+    </div>
+</div>
+<?php else: ?>
+<p>El documento se encuentra pagado con fecha <?=\sowerphp\general\Utility_Date::format($Cobro->pagado)?> usando el medio de pago <?=$Cobro->getMedioPago()->medio_pago?>.</p>
+<?php endif; ?>
 <?php else : ?>
 <p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
 <?php endif; ?>

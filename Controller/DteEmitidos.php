@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-17
+     * @version 2017-01-10
      */
     public function ver($dte, $folio)
     {
@@ -144,6 +144,7 @@ class Controller_DteEmitidos extends \Controller_App
             'referencias' => $DteEmitido->getReferencias(),
             'referencia' => $DteEmitido->getPropuestaReferencia(),
             'enviar_sii' => !(in_array($DteEmitido->dte, [39, 41]) or $DteEmitido->track_id == -1),
+            'Cobro' => (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S') ? $DteEmitido->getCobro(false) : false,
         ]);
     }
 
@@ -655,6 +656,36 @@ class Controller_DteEmitidos extends \Controller_App
         $DteEmitido->save();
         \sowerphp\core\Model_Datasource_Session::message('Track ID actualizado', 'ok');
         $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
+    }
+
+    /**
+     * Acción que permite crear el cobro para el DTE y enviar al formulario de pago
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-10
+     */
+    public function pagar($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // si no permite cobro error
+        if (!$DteEmitido->getTipo()->permiteCobro()) {
+            \sowerphp\core\Model_Datasource_Session::message('Documento no permite cobro', 'error');
+            $this->redirect(str_replace('pagar', 'ver', $this->request->request));
+        }
+        // obtener cobro
+        $Cobro = $DteEmitido->getCobro();
+        if ($Cobro->pagado) {
+            \sowerphp\core\Model_Datasource_Session::message('Documento ya se encuentra pagado', 'ok');
+            $this->redirect(str_replace('pagar', 'ver', $this->request->request));
+        }
+        $this->redirect('/pagos/cobros/pagar/'.$Cobro->codigo);
     }
 
     /**

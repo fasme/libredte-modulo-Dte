@@ -497,5 +497,35 @@ class Controller_DteTmps extends \Controller_App
         }
         $this->redirect('/dte/dte_tmps');
     }
+    
+    /**
+     * Acción que permite crear el cobro para el DTE y enviar al formulario de pago
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-10
+     */
+    public function pagar($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // si no permite cobro error
+        if (!$DteTmp->getTipo()->permiteCobro()) {
+            \sowerphp\core\Model_Datasource_Session::message('Documento no permite cobro', 'error');
+            $this->redirect(str_replace('pagar', 'ver', $this->request->request));
+        }
+        // obtener cobro
+        $Cobro = $DteTmp->getCobro();
+        if ($Cobro->pagado) {
+            \sowerphp\core\Model_Datasource_Session::message('Documento ya se encuentra pagado', 'ok');
+            $this->redirect(str_replace('pagar', 'ver', $this->request->request));
+        }
+        $this->redirect('/pagos/cobros/pagar/'.$Cobro->codigo);
+    }
 
 }
