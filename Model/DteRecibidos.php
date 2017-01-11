@@ -107,4 +107,62 @@ class Model_DteRecibidos extends \Model_Plural_App
         return $recibidos;
     }
 
+    /**
+     * Método que busca en los documentos recibidos de un contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-11
+     */
+    public function buscar($filtros)
+    {
+        // determinar receptor, fecha desde y hasta para la busqueda
+        if (!empty($filtros['fecha'])) {
+            $fecha_desde = $fecha_hasta = $filtros['fecha'];
+        } else if (!empty($filtros['fecha_desde']) and !empty($filtros['fecha_hasta'])) {
+            $fecha_desde = $filtros['fecha_desde'];
+            $fecha_hasta = $filtros['fecha_hasta'];
+        }
+        if (empty($fecha_desde) or empty($fecha_hasta)) {
+            throw new \Exception('Debe indicar una fecha o un rango para la búsqueda');
+        }
+        $where = ['d.receptor = :receptor', 'd.fecha BETWEEN :fecha_desde AND :fecha_hasta'];
+        $vars = [':receptor'=>$this->getContribuyente()->rut, ':fecha_desde'=>$fecha_desde, ':fecha_hasta'=>$fecha_hasta];
+        // filtro emisor
+        if (!empty($filtros['emisor'])) {
+            $where[] = 'd.emisor = :emisor';
+            $vars[':emisor'] = $filtros['emisor'];
+        }
+        // filtro dte
+        if (!empty($filtros['dte'])) {
+            $where[] = 'd.dte = :dte';
+            $vars[':dte'] = $filtros['dte'];
+        }
+        // filtro total
+        if (!empty($filtros['total'])) {
+            $where[] = 'd.total = :total';
+            $vars[':total'] = $filtros['total'];
+        } else if (!empty($filtros['total_desde']) and !empty($filtros['total_hasta'])) {
+            $where[] = 'd.total BETWEEN :total_desde AND :total_hasta';
+            $vars[':total_desde'] = $filtros['total_desde'];
+            $vars[':total_hasta'] = $filtros['total_hasta'];
+        }
+        // realizar consultar
+        return $this->db->getTable('
+            SELECT
+                d.fecha,
+                d.emisor,
+                e.razon_social,
+                d.dte,
+                d.folio,
+                d.sucursal_sii_receptor AS sucursal,
+                d.exento,
+                d.neto,
+                d.total
+            FROM
+                dte_recibido AS d
+                JOIN contribuyente AS e ON d.emisor = e.rut
+            WHERE '.implode(' AND ', $where).'
+            ORDER BY d.fecha, d.emisor, d.dte, d.folio
+        ', $vars);
+    }
+
 }

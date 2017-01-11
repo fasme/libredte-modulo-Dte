@@ -316,4 +316,37 @@ class Controller_DteRecibidos extends \Controller_App
         $this->Api->send($DteRecibido, 200, JSON_PRETTY_PRINT);
     }
 
+    /**
+     * Acción de la API que permite buscar dentro de los documentos recibidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-11
+     */
+    public function _api_buscar_GET($receptor)
+    {
+        // crear receptor y verificar autorización
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_emitidos/listar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // buscar documentos
+        $filtros = $this->Api->getQuery([
+            'fecha_desde' => date('Y-m-01'),
+            'fecha_hasta' => date('Y-m-d'),
+            'fecha' => null,
+            'emisor' => null,
+            'dte' => null,
+            'total_desde' => null,
+            'total_hasta' => null,
+            'total' => null,
+        ]);
+        $this->Api->send((new Model_DteRecibidos())->setContribuyente($Receptor)->buscar($filtros), 200, JSON_PRETTY_PRINT);
+    }
+
 }
