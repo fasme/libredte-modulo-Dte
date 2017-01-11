@@ -346,7 +346,11 @@ class Controller_DteRecibidos extends \Controller_App
             'total_hasta' => null,
             'total' => null,
         ]);
-        $this->Api->send((new Model_DteRecibidos())->setContribuyente($Receptor)->buscar($filtros), 200, JSON_PRETTY_PRINT);
+        $documentos = (new Model_DteRecibidos())->setContribuyente($Receptor)->buscar($filtros);
+        if (!$documentos) {
+            $this->Api->send('No se encontraron documentos', 404);
+        }
+        $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
     }
 
 }
