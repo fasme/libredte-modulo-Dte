@@ -141,7 +141,7 @@ class Controller_Contribuyentes extends \Controller_App
             'impuestos_adicionales_tasa' => $impuestos_adicionales_tasa,
             'cuentas' => [],
             'titulo' => 'Registrar nueva empresa',
-            'descripcion' => 'Aquí podrá registrar una nueva empresa para la cual usted será el usuario administrador de la misma. Deberá completar los datos obligatorios de las pestañas "Datos empresa", "Ambientes" e "Emails". Las otras dos pestañas son opcionales.',
+            'descripcion' => 'Aquí podrá registrar una nueva empresa y ser su administrador. Deberá completar los datos obligatorios de las pestañas "Empresa", "Ambientes" y "Correos". Los datos de la pestaña "Facturación" pueden quedar por defecto.',
             'form_id' => 'registrarContribuyente',
             'boton' => 'Registrar empresa',
         ]);
@@ -253,7 +253,7 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-06
+     * @version 2017-01-10
      */
     private function prepararDatosContribuyente(&$Contribuyente)
     {
@@ -366,6 +366,50 @@ class Controller_Contribuyentes extends \Controller_App
             unset($_POST['config_app_contacto_comercial_telefono']);
         } else {
             $_POST['config_app_contacto_comercial'] = null;
+        }
+        // crear arreglo con mapa contable para ventas
+        if (!empty($_POST['config_contabilidad_mapeo_ventas_sucursal'])) {
+            $n_cuentas = count($_POST['config_contabilidad_mapeo_ventas_sucursal']);
+            for ($i=0; $i<$n_cuentas; $i++) {
+                if (!empty($_POST['config_contabilidad_mapeo_ventas_neto'][$i]) and !empty($_POST['config_contabilidad_mapeo_ventas_total'])) {
+                    $_POST['config_contabilidad_mapeo_ventas'][] = [
+                        'sucursal' => $_POST['config_contabilidad_mapeo_ventas_sucursal'][$i],
+                        'medio' => $_POST['config_contabilidad_mapeo_ventas_medio'][$i],
+                        'neto' => $_POST['config_contabilidad_mapeo_ventas_neto'][$i],
+                        'iva' => !empty($_POST['config_contabilidad_mapeo_ventas_iva'][$i]) ? $_POST['config_contabilidad_mapeo_ventas_iva'][$i] : null,
+                        'total' => $_POST['config_contabilidad_mapeo_ventas_total'][$i],
+                    ];
+                }
+            }
+            unset($_POST['config_contabilidad_mapeo_ventas_sucursal']);
+            unset($_POST['config_contabilidad_mapeo_ventas_medio']);
+            unset($_POST['config_contabilidad_mapeo_ventas_neto']);
+            unset($_POST['config_contabilidad_mapeo_ventas_iva']);
+            unset($_POST['config_contabilidad_mapeo_ventas_total']);
+        } else {
+            $_POST['config_contabilidad_mapeo_ventas'] = null;
+        }
+        // crear arreglo con mapa contable para compras
+        if (!empty($_POST['config_contabilidad_mapeo_compras_sucursal'])) {
+            $n_cuentas = count($_POST['config_contabilidad_mapeo_compras_sucursal']);
+            for ($i=0; $i<$n_cuentas; $i++) {
+                if (!empty($_POST['config_contabilidad_mapeo_compras_neto'][$i]) and !empty($_POST['config_contabilidad_mapeo_compras_total'])) {
+                    $_POST['config_contabilidad_mapeo_compras'][] = [
+                        'sucursal' => $_POST['config_contabilidad_mapeo_compras_sucursal'][$i],
+                        'medio' => $_POST['config_contabilidad_mapeo_compras_medio'][$i],
+                        'neto' => $_POST['config_contabilidad_mapeo_compras_neto'][$i],
+                        'iva' => !empty($_POST['config_contabilidad_mapeo_compras_iva'][$i]) ? $_POST['config_contabilidad_mapeo_compras_iva'][$i] : null,
+                        'total' => $_POST['config_contabilidad_mapeo_compras_total'][$i],
+                    ];
+                }
+            }
+            unset($_POST['config_contabilidad_mapeo_compras_sucursal']);
+            unset($_POST['config_contabilidad_mapeo_compras_medio']);
+            unset($_POST['config_contabilidad_mapeo_compras_neto']);
+            unset($_POST['config_contabilidad_mapeo_compras_iva']);
+            unset($_POST['config_contabilidad_mapeo_compras_total']);
+        } else {
+            $_POST['config_contabilidad_mapeo_compras'] = null;
         }
         // poner valores por defecto
         foreach (Model_Contribuyente::$defaultConfig as $key => $value) {

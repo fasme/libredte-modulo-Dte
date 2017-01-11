@@ -22,6 +22,7 @@ $(function() {
         <li role="presentation"><a href="#ambientes" aria-controls="ambientes" role="tab" data-toggle="tab">Ambientes</a></li>
         <li role="presentation"><a href="#correos" aria-controls="correos" role="tab" data-toggle="tab">Correos</a></li>
         <li role="presentation"><a href="#facturacion" aria-controls="facturacion" role="tab" data-toggle="tab">Facturación</a></li>
+<?php if (isset($Contribuyente)) : ?>
 <?php if (\sowerphp\core\Module::loaded('Lce')) : ?>
         <li role="presentation"><a href="#contabilidad" aria-controls="contabilidad" role="tab" data-toggle="tab">Contabilidad</a></li>
 <?php endif; ?>
@@ -33,6 +34,7 @@ $(function() {
 <?php endif; ?>
         <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API</a></li>
         <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
+<?php endif; ?>
     </ul>
     <div class="tab-content">
 
@@ -710,48 +712,82 @@ echo $f->input([
 </div>
 <!-- FIN CONFIGURACIÓN FACTURACIÓN -->
 
+<?php if (isset($Contribuyente)) : ?>
+
 <?php if (\sowerphp\core\Module::loaded('Lce')) : ?>
 <!-- INICIO CONTABILIDAD -->
 <div role="tabpanel" class="tab-pane" id="contabilidad">
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-map-o"></i>
-            Mapa de cuentas contables para DTEs
+            Mapa de cuentas contables para ventas
         </div>
         <div class="panel-body">
 <?php
+$p_sucursales = ['*'=>'*'] + (array)$Contribuyente->getSucursales();
+$p_medios = ['*'=>'*'] + (\sowerphp\core\Module::loaded('Pagos') ? (new \website\Pagos\Model_MedioPagos())->getList() : []);
+$config_contabilidad_mapeo_ventas = [];
+foreach ((array)$Contribuyente->config_contabilidad_mapeo_ventas as $m) {
+    $config_contabilidad_mapeo_ventas[] = [
+        'config_contabilidad_mapeo_ventas_sucursal' => $m->sucursal,
+        'config_contabilidad_mapeo_ventas_medio' => $m->medio,
+        'config_contabilidad_mapeo_ventas_neto' => $m->neto,
+        'config_contabilidad_mapeo_ventas_iva' => $m->iva,
+        'config_contabilidad_mapeo_ventas_total' => $m->total,
+    ];
+}
+$f->setStyle(false);
 echo $f->input([
-    'type' => 'select',
-    'name' => 'config_contabilidad_mapeo_ventas',
-    'label' => 'Ventas',
-    'options' => [''=>'Cuenta sin definir'] + $cuentas,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_ventas : false,
-    'help' => 'Cuenta contable para el monto neto y exento de las ventas (puede ser una cuenta transitoria)',
+    'type' => 'js',
+    'id' => 'config_contabilidad_mapeo_ventas',
+    'label' => 'Comercial',
+    'titles' => ['Sucursal', 'Medio de pago', 'Neto', 'IVA', 'Total'],
+    'inputs' => [
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_ventas_sucursal', 'options'=>$p_sucursales],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_ventas_medio', 'options'=>$p_medios, 'attr'=>'style="width:12em"'],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_ventas_neto', 'options'=>[''=>'Cuenta sin definir']+$cuentas],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_ventas_iva', 'options'=>[''=>'Cuenta sin definir']+$cuentas],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_ventas_total', 'options'=>[''=>'Cuenta sin definir']+$cuentas],
+    ],
+    'values' => $config_contabilidad_mapeo_ventas,
 ]);
+$f->setStyle('horizontal');
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-map-o"></i>
+            Mapa de cuentas contables para compras
+        </div>
+        <div class="panel-body">
+<?php
+$config_contabilidad_mapeo_compras = [];
+foreach ((array)$Contribuyente->config_contabilidad_mapeo_compras as $m) {
+    $config_contabilidad_mapeo_compras[] = [
+        'config_contabilidad_mapeo_compras_sucursal' => $m->sucursal,
+        'config_contabilidad_mapeo_compras_medio' => $m->medio,
+        'config_contabilidad_mapeo_compras_neto' => $m->neto,
+        'config_contabilidad_mapeo_compras_iva' => $m->iva,
+        'config_contabilidad_mapeo_compras_total' => $m->total,
+    ];
+}
+$f->setStyle(false);
 echo $f->input([
-    'type' => 'select',
-    'name' => 'config_contabilidad_mapeo_compras',
-    'label' => 'Compras',
-    'options' => [''=>'Cuenta sin definir'] + $cuentas,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_compras : false,
-    'help' => 'Cuenta contable para el monto neto y exento de las compras (puede ser una cuenta transitoria)',
+    'type' => 'js',
+    'id' => 'config_contabilidad_mapeo_compras',
+    'label' => 'Comercial',
+    'titles' => ['Sucursal', 'Medio de pago', 'Neto', 'IVA', 'Total'],
+    'inputs' => [
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_compras_sucursal', 'options'=>$p_sucursales],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_compras_medio', 'options'=>$p_medios, 'attr'=>'style="width:12em"'],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_compras_neto', 'options'=>[''=>'Cuenta sin definir']+$cuentas],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_compras_iva', 'options'=>[''=>'Cuenta sin definir']+$cuentas],
+        ['type'=>'select', 'name' => 'config_contabilidad_mapeo_compras_total', 'options'=>[''=>'Cuenta sin definir']+$cuentas],
+    ],
+    'values' => $config_contabilidad_mapeo_compras,
 ]);
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_contabilidad_mapeo_iva_debito',
-    'label' => 'IVA débito',
-    'options' => [''=>'Cuenta sin definir'] + $cuentas,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_iva_debito : false,
-    'help' => 'Cuenta contable del IVA débito',
-]);
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_contabilidad_mapeo_iva_credito',
-    'label' => 'IVA crédito',
-    'options' => [''=>'Cuenta sin definir'] + $cuentas,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_mapeo_iva_credito : false,
-    'help' => 'Cuenta contable del IVA crédito',
-]);
+$f->setStyle('horizontal');
 ?>
         </div>
     </div>
@@ -765,22 +801,20 @@ echo $f->input([
 $config_contabilidad_mapeo_dinero = [];
 $config_contabilidad_mapeo_por_cobrar = [];
 $config_contabilidad_mapeo_por_pagar = [];
-if (isset($Contribuyente)) {
-    foreach ((array)$Contribuyente->config_contabilidad_mapeo_dinero as $cuenta) {
-        $config_contabilidad_mapeo_dinero[] = [
-            'config_contabilidad_mapeo_dinero' => $cuenta,
-        ];
-    }
-    foreach ((array)$Contribuyente->config_contabilidad_mapeo_por_cobrar as $cuenta) {
-        $config_contabilidad_mapeo_por_cobrar[] = [
-            'config_contabilidad_mapeo_por_cobrar' => $cuenta,
-        ];
-    }
-    foreach ((array)$Contribuyente->config_contabilidad_mapeo_por_pagar as $cuenta) {
-        $config_contabilidad_mapeo_por_pagar[] = [
-            'config_contabilidad_mapeo_por_pagar' => $cuenta,
-        ];
-    }
+foreach ((array)$Contribuyente->config_contabilidad_mapeo_dinero as $cuenta) {
+    $config_contabilidad_mapeo_dinero[] = [
+        'config_contabilidad_mapeo_dinero' => $cuenta,
+    ];
+}
+foreach ((array)$Contribuyente->config_contabilidad_mapeo_por_cobrar as $cuenta) {
+    $config_contabilidad_mapeo_por_cobrar[] = [
+        'config_contabilidad_mapeo_por_cobrar' => $cuenta,
+    ];
+}
+foreach ((array)$Contribuyente->config_contabilidad_mapeo_por_pagar as $cuenta) {
+    $config_contabilidad_mapeo_por_pagar[] = [
+        'config_contabilidad_mapeo_por_pagar' => $cuenta,
+    ];
 }
 echo $f->input([
     'type' => 'js',
@@ -840,16 +874,16 @@ echo $f->input([
 echo $f->input([
     'name' => 'config_contabilidad_ppm',
     'label' => 'Porcentaje PPM',
-    'value' => isset($Contribuyente) ? (float)$Contribuyente->config_contabilidad_ppm : 0,
+    'value' => (float)$Contribuyente->config_contabilidad_ppm,
     'help' => 'Porcentaje que se pagará mensualmente como PPM obligatorio',
-    'check' => 'notempty real',
+    'check' => 'real',
 ]);
 echo $f->input([
     'type' => 'select',
     'name' => 'config_contabilidad_f29_48',
     'label' => 'Cuenta código 48',
     'options' => [''=>'Cuenta sin definir'] + $cuentas,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_f29_48 : false,
+    'value' => $Contribuyente->config_contabilidad_f29_48,
     'help' => 'Cuenta contable del impuesto de 2da categoría para contratos',
 ]);
 echo $f->input([
@@ -857,7 +891,7 @@ echo $f->input([
     'name' => 'config_contabilidad_f29_151',
     'label' => 'Cuenta código 151',
     'options' => [''=>'Cuenta sin definir'] + $cuentas,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_f29_151 : false,
+    'value' => $Contribuyente->config_contabilidad_f29_151,
     'help' => 'Cuenta contable de la retención de impuesto del 10% sobre rentas',
 ]);
 ?>
@@ -873,13 +907,13 @@ echo $f->input([
     echo $f->input([
     'name' => 'config_contabilidad_contador_rut',
     'label' => 'RUT contador',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_contador_rut : null,
+    'value' => $Contribuyente->config_contabilidad_contador_rut,
     'check' => 'rut',
 ]);
 echo $f->input([
     'name' => 'config_contabilidad_contador_nombre',
     'label' => 'Nombre contador',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_contabilidad_contador_nombre : null,
+    'value' => $Contribuyente->config_contabilidad_contador_nombr,
 ]);
 ?>
         </div>
@@ -902,8 +936,8 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_pos_item_clasificacion_defecto',
     'label' => 'Clasificación por defecto',
-    'options' => isset($Contribuyente) ? (new \website\Dte\Admin\Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList() : [],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pos_item_clasificacion_defecto : false,
+    'options' => (new \website\Dte\Admin\Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList(),
+    'value' => $Contribuyente->config_pos_item_clasificacion_defecto,
     'help' => 'Clasificación que aparecerá abierta por defecto en el punto de venta',
 ]);
 ?>
@@ -928,13 +962,13 @@ echo $f->input([
     'name' => 'config_pagos_habilitado',
     'label' => '¿Habilitado?',
     'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_habilitado : false,
+    'value' => $Contribuyente->config_pagos_habilitado,
     'help' => '¿Está disponible el sistema de pagos para los clientes de la empresa?',
 ]);
 echo $f->input([
     'name' => 'config_pagos_email',
     'label' => 'Email',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_email : false,
+    'value' => $Contribuyente->config_pagos_email,
     'help' => 'Correo electrónico donde se informarán los pagos realizados por clientes',
     'check' => 'email',
 ]);
@@ -943,7 +977,7 @@ echo $f->input([
     'name' => 'config_cobros_temporal_automatico',
     'label' => 'Cobro de cotización automático',
     'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_cobros_temporal_automatico : false,
+    'value' => $Contribuyente->config_cobros_temporal_automatico,
     'help' => '¿Se debe generar automáticamente un cobro para el pago de una cotización (DTE temporal)?',
 ]);
 echo $f->input([
@@ -951,14 +985,14 @@ echo $f->input([
     'name' => 'config_cobros_emitido_automatico',
     'label' => 'Cobro de DTE automático',
     'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_cobros_emitido_automatico : false,
+    'value' => $Contribuyente->config_cobros_emitido_automatico,
     'help' => '¿Se debe generar automáticamente un cobro para el pago de un DTE emitido?',
 ]);
 echo $f->input([
     'type' => 'textarea',
     'name' => 'config_pagos_observacion',
     'label' => 'Observación',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_observacion : false,
+    'value' => $Contribuyente->config_pagos_observacio,
 ]);
 ?>
         </div>
@@ -975,37 +1009,37 @@ echo $f->input([
     'name' => 'config_pagos_cuenta_banco',
     'label' => 'Banco',
     'options' => [''=>''] + (new \website\Sistema\General\Model_Bancos())->getList(),
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_banco : false,
+    'value' => $Contribuyente->config_pagos_cuenta_banco,
 ]);
 echo $f->input([
     'type' => 'select',
     'name' => 'config_pagos_cuenta_tipo',
     'label' => 'Tipo cuenta',
     'options' => [''=>'', 'C'=>'Corriente', 'V'=>'Vista', 'A'=>'Ahorro'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_tipo : 'C',
+    'value' => $Contribuyente->config_pagos_cuenta_tipo,
 ]);
 echo $f->input([
     'name' => 'config_pagos_cuenta_numero',
     'label' => 'Número cuenta',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_numero : false,
+    'value' => $Contribuyente->config_pagos_cuenta_numero,
     'check' => 'integer',
 ]);
 echo $f->input([
     'name' => 'config_pagos_cuenta_rut',
     'label' => 'RUT titular',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_rut : false,
+    'value' => $Contribuyente->config_pagos_cuenta_rut,
     'check' => 'rut',
 ]);
 echo $f->input([
     'name' => 'config_pagos_cuenta_titular',
     'label' => 'Nombre titular',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_titular : false,
+    'value' => $Contribuyente->config_pagos_cuenta_titular,
 ]);
 echo $f->input([
     'type' => 'textarea',
     'name' => 'config_pagos_cuenta_observacion',
     'label' => 'Observación',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_cuenta_observacion : false,
+    'value' => $Contribuyente->config_pagos_cuenta_observacion,
 ]);
 ?>
         </div>
@@ -1020,20 +1054,20 @@ echo $f->input([
 echo $f->input([
     'name' => 'config_pagos_khipu_id',
     'label' => 'ID cobrador',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_khipu_id : false,
+    'value' => $Contribuyente->config_pagos_khipu_id,
     'check' => 'integer',
 ]);
 echo $f->input([
     'name' => 'config_pagos_khipu_key',
     'label' => 'Llave',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pagos_khipu_key : false,
+    'value' => $Contribuyente->config_pagos_khipu_key,
 ]);
 $url_pagos = $_url.'/api/pagos/khipu/notificar_pago/'.$Contribuyente->rut;
 echo $f->input([
     'type' => 'div',
     'name' => 'config_pagos_khipu_url_pagos',
     'label' => 'URL pagos',
-    'value' => isset($Contribuyente) ? ('<a href="'.$url_pagos.'">'.$url_pagos.'</a>') : false,
+    'value' => '<a href="'.$url_pagos.'">'.$url_pagos.'</a>',
     'help' => 'URL para la notificación instantánea de pagos',
 ]);
 $url_rendiciones = $_url.'/api/pagos/khipu/notificar_rendicion/'.$Contribuyente->rut;
@@ -1041,7 +1075,7 @@ echo $f->input([
     'type' => 'div',
     'name' => 'config_pagos_khipu_url_rendiciones',
     'label' => 'URL rendiciones',
-    'value' => isset($Contribuyente) ? ('<a href="'.$url_rendiciones.'">'.$url_rendiciones.'</a>') : false,
+    'value' => '<a href="'.$url_rendiciones.'">'.$url_rendiciones.'</a>',
     'help' => 'URL para la notificación instantánea de rendiciones',
 ]);
 ?>
@@ -1056,7 +1090,7 @@ echo $f->input([
             ¡Próximamente!
         </div>
     </div>
-    <div class="panel panel-default">
+    <!--<div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-credit-card-alt"></i>
             Servipag
@@ -1064,7 +1098,7 @@ echo $f->input([
         <div class="panel-body">
             ¡Próximamente!
         </div>
-    </div>
+    </div>-->
 </div>
 <!-- FIN PAGOS -->
 <?php endif; ?>
@@ -1082,14 +1116,14 @@ echo $f->input([
 echo $f->input([
     'name' => 'config_api_auth_user',
     'label' => 'Usuario o token',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_api_auth_user : null,
+    'value' => $Contribuyente->config_api_auth_user,
     'help' => 'Usuario o token opcional para autenticación a través de <em>HTTP Basic Auth</em>',
     'attr' => 'maxlength="255"',
 ]);
 echo $f->input([
     'name' => 'config_api_auth_pass',
     'label' => 'Contraseña',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_api_auth_pass : null,
+    'value' => $Contribuyente->config_api_auth_pass,
     'help' => 'Si no se especifíca la contraseña se enviará al servicio web el usuario/token y una X como contraseña',
     'attr' => 'maxlength="255"',
 ]);
@@ -1106,7 +1140,7 @@ echo $f->input([
 echo $f->input([
     'name' => 'config_api_url_items',
     'label' => 'Items',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_api_url_items : null,
+    'value' => $Contribuyente->config_api_url_items,
     'help' => 'URL para consultar los items a través de su código (<a href="https://wiki.libredte.cl/doku.php/sowerphp/integracion/url_items">documentación</a>).',
     'attr' => 'maxlength="255"',
 ]);
@@ -1114,7 +1148,7 @@ if (\sowerphp\core\Module::loaded('Pagos')) {
     echo $f->input([
         'name' => 'config_api_pagos_notificar',
         'label' => 'Notificar pagos',
-        'value' => isset($Contribuyente) ? $Contribuyente->config_api_pagos_notificar : null,
+        'value' => $Contribuyente->config_api_pagos_notificar,
         'help' => 'URL para notificar los pagos recibidos (<a href="https://wiki.libredte.cl/doku.php/sowerphp/integracion/pagos_notificar">documentación</a>).',
         'attr' => 'maxlength="255"',
     ]);
@@ -1137,9 +1171,9 @@ if (\sowerphp\core\Module::loaded('Pagos')) {
 echo $f->input([
     'type' => 'div',
     'label' => 'Administrador',
-    'value' => isset($Contribuyente) ? ($Contribuyente->getUsuario()->nombre.' ('.$Contribuyente->getUsuario()->usuario.')') : null,
+    'value' => $Contribuyente->getUsuario()->nombre.' ('.$Contribuyente->getUsuario()->usuario.')',
 ]);
-if (isset($Contribuyente) and $Contribuyente->config_libredte_ingreso) {
+if ($Contribuyente->config_libredte_ingreso) {
     echo $f->input([
         'type' => 'div',
         'label' => 'Fecha ingreso',
@@ -1150,17 +1184,17 @@ if (\sowerphp\core\Configure::read('dte.cuota')) {
     echo $f->input([
         'type' => 'div',
         'label' => 'Cuota',
-        'value' => num(isset($Contribuyente) ? $Contribuyente->getCuota() : 0),
+        'value' => num($Contribuyente->getCuota()),
     ]);
 }
 if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
     echo $f->input([
         'type' => 'div',
         'label' => 'Saldo',
-        'value' => '$'.num(isset($Contribuyente) ? (int)$Contribuyente->config_libredte_saldo : 0).'.-',
+        'value' => '$'.num((int)$Contribuyente->config_libredte_saldo).'.-',
     ]);
 }
-if (isset($Contribuyente) and $Contribuyente->config_libredte_siguiente_cobro) {
+if ($Contribuyente->config_libredte_siguiente_cobro) {
     echo $f->input([
         'type' => 'div',
         'label' => 'Siguiente cobro',
@@ -1170,7 +1204,7 @@ if (isset($Contribuyente) and $Contribuyente->config_libredte_siguiente_cobro) {
 echo $f->input([
     'type' => 'div',
     'label' => 'Modificado',
-    'value' => isset($Contribuyente) ? $Contribuyente->modificado : null,
+    'value' => $Contribuyente->modificado,
 ]);
 ?>
         </div>
@@ -1183,14 +1217,12 @@ echo $f->input([
         <div class="panel-body">
 <?php
 $config_app_contacto_comercial = [];
-if (isset($Contribuyente)) {
-    foreach ((array)$Contribuyente->config_app_contacto_comercial as $c) {
-        $config_app_contacto_comercial[] = [
-            'config_app_contacto_comercial_nombre' => $c->nombre,
-            'config_app_contacto_comercial_email' => $c->email,
-            'config_app_contacto_comercial_telefono' => $c->telefono,
-        ];
-    }
+foreach ((array)$Contribuyente->config_app_contacto_comercial as $c) {
+    $config_app_contacto_comercial[] = [
+        'config_app_contacto_comercial_nombre' => $c->nombre,
+        'config_app_contacto_comercial_email' => $c->email,
+        'config_app_contacto_comercial_telefono' => $c->telefono,
+    ];
 }
 echo $f->input([
     'type' => 'js',
@@ -1220,7 +1252,7 @@ echo $f->input([
     'name' => 'config_app_soporte',
     'label' => 'Permitir soporte',
     'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_app_soporte : 0,
+    'value' => $Contribuyente->config_app_soporte,
     'help' => 'Se permite al equipo de soporte de LibreDTE trabajar con el contribuyente',
 ]);
 ?>
@@ -1228,6 +1260,8 @@ echo $f->input([
     </div>
 </div>
 <!-- FIN CONFIGURACIÓN GENERAL -->
+
+<?php endif; ?>
 
     </div>
 </div>
