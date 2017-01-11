@@ -913,7 +913,7 @@ echo $f->input([
 echo $f->input([
     'name' => 'config_contabilidad_contador_nombre',
     'label' => 'Nombre contador',
-    'value' => $Contribuyente->config_contabilidad_contador_nombr,
+    'value' => $Contribuyente->config_contabilidad_contador_nombre,
 ]);
 ?>
         </div>
