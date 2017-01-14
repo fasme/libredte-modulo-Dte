@@ -963,7 +963,7 @@ echo $f->input([
     'label' => '¿Habilitado?',
     'options' => ['No', 'Si'],
     'value' => $Contribuyente->config_pagos_habilitado,
-    'help' => '¿Está disponible el sistema de pagos para los clientes de la empresa?',
+    'help' => '¿Está disponible el sistema de cobros y pagos?',
 ]);
 echo $f->input([
     'name' => 'config_pagos_email',
