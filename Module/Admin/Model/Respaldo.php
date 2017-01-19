@@ -27,7 +27,7 @@ namespace website\Dte\Admin;
 /**
  * Modelo para generar respaldo de datos de un contribuyente
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-11-04
+ * @version 2017-01-19
  */
 class Model_Respaldo
 {
@@ -107,28 +107,20 @@ class Model_Respaldo
         'item_clasificacion' => [
             'rut' => 'contribuyente',
         ],
-        'lce_asiento' => [
-            'rut' => 'contribuyente',
-        ],
-        'lce_asiento_detalle' => [
-            'rut' => 'contribuyente',
-        ],
-        'lce_cuenta' => [
-            'rut' => 'contribuyente',
-        ],
-        'lce_cuenta_clasificacion' => [
-            'rut' => 'contribuyente',
-        ],
     ]; ///< Información de las tabla que se exportarán
 
     /**
      * Constructor del modelo de respaldos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-29
+     * @version 2017-01-19
      */
     public function __construct()
     {
         $this->db = &\sowerphp\core\Model_Datasource_Database::get();
+        $extra = \sowerphp\core\Configure::read('app.respaldo.tablas');
+        if ($extra) {
+            $this->tablas += $extra;
+        }
     }
 
     /**
