@@ -70,7 +70,7 @@ echo $f->input([
     'help' => 'Indique la actividad económica principal de la empresa',
     'options' => [''=>'Seleccionar una actividad económica'] + $actividades_economicas,
     'check' => 'notempty',
-    'attr'=>'onchange="document.getElementById(\'giroField\').value = this.options[this.selectedIndex].text.substr(this.options[this.selectedIndex].text.indexOf(\'-\')+2, 80)"',
+    'attr'=>'onchange="document.getElementById(\'giroField\').value = this.options[this.selectedIndex].text.substr(this.options[this.selectedIndex].text.indexOf(\'-\')+1, 80)"',
 ]);
 echo $f->input([
     'name' => 'giro',
