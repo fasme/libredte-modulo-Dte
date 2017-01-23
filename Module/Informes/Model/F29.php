@@ -37,7 +37,7 @@ class Model_F29
     /**
      * Constructor del modelo F29
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-16
+     * @version 2017-01-23
      */
     public function __construct(\website\Dte\Model_Contribuyente $Emisor, $periodo)
     {
@@ -78,18 +78,20 @@ class Model_F29
             '06' => $this->Emisor->direccion,
             '08' => $this->Emisor->getComuna()->comuna,
             '09' => $this->Emisor->telefono,
-            '15' => substr($periodo, 4).'/'.substr($periodo, 0, 4),
-            '48' => (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_48))->getHaber($this->periodo),
+            '15' => substr($periodo, 4).'/'.substr($periodo, 0, 4),            
             '55' => $this->Emisor->email,
             '110' => $boletas['total'],
             '111' => $boletas['iva'],
             '115' => $this->Emisor->config_contabilidad_ppm / 100,
-            '151' => (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_151))->getHaber($this->periodo),
             '313' => $this->Emisor->config_extra_contador_rut,
             '314' => $this->Emisor->config_extra_representante_rut,
             '758' => $pagos_electronicos['total'],
             '759' => $pagos_electronicos['iva'],
         ];
+        if (\sowerphp\core\Module::loaded('Lce')) {
+            $this->datos['48'] = (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_48))->getHaber($this->periodo);
+            $this->datos['151'] = (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_151))->getHaber($this->periodo);
+        }
     }
 
     public function setCompras($compras)
