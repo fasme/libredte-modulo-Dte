@@ -197,7 +197,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite modificar contribuyente previamente registrado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-27
+     * @version 2017-01-23
      */
     public function modificar($rut)
     {
@@ -224,13 +224,17 @@ class Controller_Contribuyentes extends \Controller_App
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
             'impuestos_adicionales' => $impuestos_adicionales,
             'impuestos_adicionales_tasa' => $impuestos_adicionales_tasa,
-            'cuentas' => (new \website\Lce\Model_LceCuentas())->setContribuyente($Contribuyente)->getList(),
             'titulo' => 'Modificar empresa '.$Contribuyente->razon_social,
             'descripcion' => 'Aquí podrá modificar los datos de la empresa '.$Contribuyente->razon_social.' RUT '.num($Contribuyente->rut).'-'.$Contribuyente->dv.', para la cual usted es el usuario administrador.',
             'form_id' => 'modificarContribuyente',
             'boton' => 'Modificar empresa',
             'tipos_dte' => $Contribuyente->getDocumentosAutorizados(),
         ]);
+        if (\sowerphp\core\Module::loaded('Lce')) {
+            $this->set([
+                'cuentas' => (new \website\Lce\Model_LceCuentas())->setContribuyente($Contribuyente)->getList(),
+            ]);
+        }
         // editar contribuyente
         if (isset($_POST['submit'])) {
             $this->prepararDatosContribuyente($Contribuyente);
