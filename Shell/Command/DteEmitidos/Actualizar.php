@@ -119,7 +119,15 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                     g.grupo = :grupo
                     AND e.dte NOT IN (39, 41)
                     AND e.certificacion = :certificacion
-                    AND (e.track_id IS NULL OR e.revision_estado IS NULL OR e.revision_estado = \'-11\')
+                    AND (
+                        -- no enviados al SII (sin track id)
+                        e.track_id IS NULL
+                        -- enviados al SII (con track ID válido != -1)
+                        OR (
+                            (e.revision_estado IS NULL OR e.revision_estado = \'-11\')
+                            AND e.track_id > 0
+                        )
+                    )
             ', [':certificacion'=>(int)$certificacion, ':grupo' => $grupo]);
         } else {
             return $this->db->getCol('
@@ -131,7 +139,15 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                     c.usuario IS NOT NULL
                     AND e.dte NOT IN (39, 41)
                     AND e.certificacion = :certificacion
-                    AND (e.track_id IS NULL OR e.revision_estado IS NULL OR e.revision_estado = \'-11\')
+                    AND (
+                        -- no enviados al SII (sin track id)
+                        e.track_id IS NULL
+                        -- enviados al SII (con track ID válido != -1)
+                        OR (
+                            (e.revision_estado IS NULL OR e.revision_estado = \'-11\')
+                            AND e.track_id > 0
+                        )
+                    )
             ', [':certificacion'=>(int)$certificacion]);
         }
     }
