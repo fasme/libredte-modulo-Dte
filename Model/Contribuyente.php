@@ -207,7 +207,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-06
+     * @version 2017-01-26
      */
     public function __construct($rut = null)
     {
@@ -216,7 +216,7 @@ class Model_Contribuyente extends \Model_App
         if (!is_numeric($rut) and strpos($rut, '-'))
             $rut = explode('-', str_replace('.', '', $rut))[0];
         parent::__construct(+$rut);
-        if ($this->rut and !$this->exists()) {
+        if (\sowerphp\core\Configure::read('libredte.props.contribuyentes') and $this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
             $response = \sowerphp\core\Network_Http_Socket::get(
                 'https://sasco.cl/api/servicios/enlinea/sii/actividad_economica/'.$this->rut.'/'.$this->dv
