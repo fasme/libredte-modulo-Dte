@@ -1122,7 +1122,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega las ventas de un período
      * @todo Corregir ID en Extranjero y asignar los NULL por los valores que corresponden (quizás haya que modificar tabla dte_emitido)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-01
+     * @version 2017-01-26
      */
     public function getVentas($periodo)
     {
@@ -1138,6 +1138,11 @@ class Model_Contribuyente extends \Model_App
             ], 'http://www.sii.cl/SiiDte');
         } else {
             $impuesto_codigo = $impuesto_tasa = $impuesto_monto = 'NULL';
+        }
+        if ($this->config_extra_constructora) {
+            $credito_constructoras = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/CredEC', 'http://www.sii.cl/SiiDte');
+        } else {
+            $credito_constructoras = 'NULL';
         }
         // campos para datos extranjeros
         list($extranjero_id, $extranjero_nacionalidad) = $this->db->xml('e.xml', [
@@ -1168,7 +1173,7 @@ class Model_Contribuyente extends \Model_App
                 NULL AS iva_retencion_parcial,
                 NULL AS iva_no_retenido,
                 NULL AS ley_18211,
-                NULL AS credito_constructoras,
+                '.$credito_constructoras.' AS credito_constructoras,
                 NULL AS referencia_tipo,
                 NULL AS referencia_folio,
                 NULL AS deposito_envases,

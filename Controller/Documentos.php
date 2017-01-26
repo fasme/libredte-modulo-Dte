@@ -358,7 +358,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-18
+     * @version 2017-01-26
      */
     public function previsualizacion()
     {
@@ -605,9 +605,9 @@ class Controller_Documentos extends \Controller_App
             $dte['Encabezado']['Totales']['ImptoReten'] = $ImptoReten;
         }
         // si la empresa es constructora se marca para obtener el cŕedito del 65%
-        /*if ($Emisor->config_extra_constructora and in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [33, 52, 56, 61])) {
+        if ($Emisor->config_extra_constructora and in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [33, 52, 56, 61]) and !empty($_POST['CredEC'])) {
             $dte['Encabezado']['Totales']['CredEC'] = true;
-        }*/
+        }
         // agregar descuento globales
         if (!empty($_POST['ValorDR_global']) and !empty($_POST['TpoValor_global'])) {
             $dte['DscRcgGlobal'] = [];

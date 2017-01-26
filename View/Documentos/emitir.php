@@ -247,6 +247,16 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
 ])?>
         </div>
     </div>
+    <!-- OPCIONES ADICIONALES DEL DOCUMENTO -->
+    <div class="row" id="documentoAdicional">
+<?php if ($Emisor->config_extra_constructora) : ?>
+<?php $f->setStyle('horizontal'); ?>
+        <div class="form-group col-md-12">
+            <?=$f->input(['type'=>'select', 'name'=>'CredEC', 'label'=>'Crédito 65%', 'options'=>['No', 'Si'], 'value'=>1, 'help'=>'Utilizar crédito 65% para empresas constructoras'])?>
+        </div>
+<?php $f->setStyle(false); ?>
+<?php endif; ?>
+    </div>
     <!-- BOTÓN PARA GENERAR DOCUMENTO -->
     <div class="row">
         <div class="form-group col-md-offset-4 col-md-4">
