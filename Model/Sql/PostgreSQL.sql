@@ -115,6 +115,7 @@ DROP TABLE IF EXISTS contribuyente_dte CASCADE;
 CREATE TABLE contribuyente_dte (
 	contribuyente INTEGER,
 	dte SMALLINT,
+	activo BOOLEAN NOT NULL DEFAULT true,
 	CONSTRAINT contribuyente_dte_pkey PRIMARY KEY (contribuyente, dte),
 	CONSTRAINT contribuyente_dte_contribuyente_fk FOREIGN KEY (contribuyente)
 		REFERENCES contribuyente (rut) MATCH FULL
