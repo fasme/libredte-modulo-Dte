@@ -1126,7 +1126,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción de la API que permite cargar el XML de un DTE como documento
      * emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-03
+     * @version 2017-01-28
      */
     public function _api_cargar_xml_POST()
     {
@@ -1143,12 +1143,21 @@ class Controller_DteEmitidos extends \Controller_App
         if (empty($this->Api->data)) {
             $this->Api->send('Debe enviar el XML del DTE emitido', 400);
         }
+        if ($this->Api->data[0]!='"') {
+            $this->Api->data = '"'.$this->Api->data.'"';
+        }
         $xml = base64_decode(json_decode($this->Api->data));
+        if (!$xml) {
+            $this->Api->send('No fue posible recibir el XML enviado', 400);
+        }
         $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
-        $EnvioDte->loadXML($xml);
+        if (!$EnvioDte->loadXML($xml)) {
+            $this->Api->send('No fue posible cargar el XML enviado', 400);
+        }
         $Documentos = $EnvioDte->getDocumentos();
-        if (count($Documentos)!=1) {
-            $this->Api->send('Sólo puede cargar XML que contengan un DTE', 400);
+        $n_docs = count($Documentos);
+        if ($n_docs!=1) {
+            $this->Api->send('Sólo puede cargar XML que contengan un DTE, envío '.num($n_docs), 400);
         }
         $Caratula = $EnvioDte->getCaratula();
         // verificar permisos del usuario autenticado sobre el emisor del DTE
@@ -1159,10 +1168,39 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/cargar_xml')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        // verificar que receptor exista
+        // si el receptor no existe, se crea con los datos del XML
         $Receptor = new Model_Contribuyente($Caratula['RutReceptor']);
         if (!$Receptor->exists()) {
-            $this->Api->send('Receptor no existe', 404);
+            $Receptor->dv = explode('-', $Caratula['RutReceptor'])[1];
+            $Receptor->razon_social = $Receptor->getRUT();
+            $datos = $Documentos[0]->getDatos();
+            if (!empty($datos['Encabezado']['Receptor']['RznSocRecep'])) {
+                $Receptor->razon_social = $datos['Encabezado']['Receptor']['RznSocRecep'];
+            }
+            if (!empty($datos['Encabezado']['Receptor']['GiroRecep'])) {
+                $Receptor->giro = $datos['Encabezado']['Receptor']['GiroRecep'];
+            }
+            if (!empty($datos['Encabezado']['Receptor']['Contacto'])) {
+                $Receptor->telefono = $datos['Encabezado']['Receptor']['Contacto'];
+            }
+            if (!empty($datos['Encabezado']['Receptor']['CorreoRecep'])) {
+                $Receptor->email = $datos['Encabezado']['Receptor']['CorreoRecep'];
+            }
+            if (!empty($datos['Encabezado']['Receptor']['DirRecep'])) {
+                $Receptor->direccion = $datos['Encabezado']['Receptor']['DirRecep'];
+            }
+            if (!empty($datos['Encabezado']['Receptor']['CmnaRecep'])) {
+                $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName($datos['Encabezado']['Receptor']['CmnaRecep']);
+                if ($comuna) {
+                    $Receptor->comuna = $comuna;
+                }
+            }
+            $Receptor->modificado = date('Y-m-d H:i:s');
+            try {
+                $Receptor->save();
+            } catch (\Exception $e) {
+                $this->Api->send('Receptor no pudo ser creado: '.$e->getMessage(), 507);
+            }
         }
         // crear Objeto del DteEmitido y verificar si ya existe
         $Dte = $Documentos[0];
