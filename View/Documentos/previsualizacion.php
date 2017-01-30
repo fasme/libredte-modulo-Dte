@@ -41,7 +41,11 @@ new \sowerphp\general\View_Helper_Table([
     </div>
 </div>
 <div style="float:right;margin-bottom:1em;margin-top:2em;font-size:0.8em">
-    <a href="<?=$_base?>/dte/dte_tmps/ver/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>">Ver página del documento temporal</a>
+<?php if ($DteTmp->getTipo()->permiteCobro()) : ?>
+    <a href="<?=$_base?>/pagos/cotizaciones/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>/<?=$DteTmp->emisor?>">Enlace público para pago</a> /
+<?php endif; ?>
+    <a href="<?=$_base?>/dte/dte_tmps/ver/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>">Ver página del documento temporal</a> /
+    <a href="<?=$_base?>/dte/dte_tmps/ver/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>#email">Enviar por correo</a>
 </div>
 <?php if ($DteTmp->getEmisor()->config_emision_previsualizacion_automatica) : ?>
 <div class="row" style="margin-top:2em">
