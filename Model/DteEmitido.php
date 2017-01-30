@@ -332,9 +332,8 @@ class Model_DteEmitido extends Model_Base_Envio
      */
     public function save()
     {
-        if ($this->anulado === null) {
-            $this->anulado = false;
-        }
+        $this->anulado = (int)$this->anulado;
+        $this->iva_fuera_plazo = (int)$this->iva_fuera_plazo;
         parent::save();
     }
 
