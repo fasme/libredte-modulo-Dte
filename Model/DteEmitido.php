@@ -326,6 +326,19 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que realiza verificaciones a campos antes de guardar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-01-30
+     */
+    public function save()
+    {
+        if ($this->anulado === null) {
+            $this->anulado = false;
+        }
+        parent::save();
+    }
+
+    /**
      * Método que entrega el objeto del tipo del dte
      * @return \website\Dte\Admin\Mantenedores\Model_DteTipo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
