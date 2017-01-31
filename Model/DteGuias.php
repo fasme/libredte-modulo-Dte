@@ -116,12 +116,12 @@ class Model_DteGuias extends \Model_Plural_App
      * es aquellas que tienen indicador de traslado "operación constituye venta"
      * y no poseen una referencia desde una factura electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-26
+     * @version 2017-01-31
      */
     public function getSinFacturar($desde, $hasta, $receptor = null)
     {
-        $where = ['e.fecha BETWEEN :desde AND :hasta'];
-        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        $where = ['e.fecha BETWEEN :desde AND :hasta AND anulado = :anulado'];
+        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta, ':anulado'=>0];
         if ($receptor) {
             $vars[':receptor'] = \sowerphp\app\Utility_Rut::normalizar($receptor);
             $where[] = 'e.receptor = :receptor';
