@@ -32,6 +32,9 @@ $(function() {
 <?php if (\sowerphp\core\Module::loaded('Pagos')) : ?>
         <li role="presentation"><a href="#pagos" aria-controls="pagos" role="tab" data-toggle="tab">Pagos</a></li>
 <?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Rrhh')) : ?>
+        <li role="presentation"><a href="#rrhh" aria-controls="rrhh" role="tab" data-toggle="tab">RRHH</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API</a></li>
         <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
 <?php endif; ?>
@@ -1101,6 +1104,36 @@ echo $f->input([
     </div>-->
 </div>
 <!-- FIN PAGOS -->
+<?php endif; ?>
+
+<?php if (\sowerphp\core\Module::loaded('Rrhh')) : ?>
+<!-- INICIO RRHH -->
+<div role="tabpanel" class="tab-pane" id="rrhh">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-list-alt"></i>
+            Mutual
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_rrhh_mutual_institucion',
+    'label' => 'Institución',
+    'options' => (new \website\Rrhh\Admin\Mantenedores\Model_Mutuales())->getList(),
+    'value' => $Contribuyente->config_rrhh_mutual_institucion,
+]);
+echo $f->input([
+    'name' => 'config_rrhh_mutual_tasa',
+    'label' => 'Tasa',
+    'check' => 'real',
+    'value' => $Contribuyente->config_rrhh_mutual_tasa,
+]);
+?>
+        </div>
+    </div>
+</div>
+<!-- FIN RRHH -->
 <?php endif; ?>
 
 <!-- INICIO API -->
