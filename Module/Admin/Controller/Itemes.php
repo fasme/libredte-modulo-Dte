@@ -154,7 +154,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción que permite importar los items desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-02
+     * @version 2017-02-01
      */
     public function importar()
     {
@@ -171,7 +171,7 @@ class Controller_Itemes extends \Controller_Maintainer
             $items = \sowerphp\general\Utility_Spreadsheet::read($_FILES['archivo']);
             array_shift($items);
             $resumen = ['nuevos'=>[], 'editados'=>[], 'error'=>[]];
-            $cols = ['codigo_tipo', 'codigo', 'item', 'descripcion', 'clasificacion', 'unidad', 'precio', 'moneda', 'exento', 'descuento', 'descuento_tipo', 'impuesto_adicional', 'activo'];
+            $cols = ['codigo_tipo', 'codigo', 'item', 'descripcion', 'clasificacion', 'unidad', 'precio', 'moneda', 'exento', 'descuento', 'descuento_tipo', 'impuesto_adicional', 'activo', 'bruto'];
             $n_cols = count($cols);
             foreach ($items as $item) {
                 // crear objeto
