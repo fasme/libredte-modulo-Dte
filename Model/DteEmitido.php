@@ -538,13 +538,13 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el estado del envío del DTE al SII
      * @return R: si es RSC, RCT, RCH, =null otros casos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-31
+     * @version 2017-02-07
      */
     public function getEstado()
     {
         $espacio = strpos($this->revision_estado, ' ');
         $estado = $espacio ? substr($this->revision_estado, 0, $espacio) : $this->revision_estado;
-        return in_array($estado, ['RSC', 'RCT', 'RCH', 'RFR']) ? 'R' : null;
+        return in_array($estado, Model_DteEmitidos::$revision_estados['rechazados']) ? 'R' : null;
     }
 
     /**

@@ -28,6 +28,11 @@ Configure::write('nav.module', array(
         'desc' => 'Reporte con documentos emitidos y recibidos por contribuyente',
         'icon' => 'fa fa-calculator',
     ],
+    '/documentos/rechazados' => [
+        'name' => 'Documentos rechazados',
+        'desc' => 'Reporte con listado de documentos rechazados',
+        'icon' => 'fa fa-file-text-o',
+    ],
     '/contribuyentes' => [
         'name' => 'Contribuyentes registrados',
         'desc' => 'Listado de contribuyentes registrados en LibreDTE',

@@ -38,6 +38,10 @@ class Model_DteEmitidos extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_emitido'; ///< Tabla del modelo
 
+    public static $revision_estados = [
+        'rechazados' => ['RSC', 'RCT', 'RCH', 'RFR'],
+    ]; ///< Posibles estados de revisión de envío al SII de los DTE
+
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -269,6 +273,27 @@ class Model_DteEmitidos extends \Model_Plural_App
             GROUP BY fecha
             ORDER BY fecha
         ', [':certificacion'=>(int)$certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    /**
+     * Método que entrega el listado de documentos rechazados
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-02-07
+     */
+    public function getRechazados($desde, $hasta, $certificacion = false)
+    {
+        return $this->db->getTable('
+            SELECT c.rut, c.razon_social, e.fecha, e.dte, t.tipo AS documento, e.folio, e.revision_estado, e.revision_detalle
+            FROM
+                dte_emitido AS e
+                JOIN contribuyente AS c ON e.emisor = c.rut
+                JOIN dte_tipo AS t ON e.dte = t.codigo
+            WHERE
+                e.fecha BETWEEN :desde AND :hasta
+                AND e.certificacion = :certificacion
+                AND SUBSTRING(e.revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', self::$revision_estados['rechazados']).'\')
+            ORDER BY c.razon_social, e.fecha, e.dte, e.folio
+        ', [':desde'=>$desde, ':hasta'=>$hasta, ':certificacion'=>(int)$certificacion]);
     }
 
 }

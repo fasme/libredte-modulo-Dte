@@ -27,7 +27,7 @@ namespace website\Dte\Admin\Informes;
 /**
  * Clase para informe asociado a la emisión o recepción de documentos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-03
+ * @version 2017-02-06
  */
 class Controller_Documentos extends \Controller_App
 {
@@ -55,6 +55,20 @@ class Controller_Documentos extends \Controller_App
             } else {
                 \sowerphp\core\Model_Datasource_Session::message('Búsqueda sin resultados', 'info');
             }
+        }
+    }
+
+    /**
+     * Acción que busca los documentos rechazados en un período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-02-07
+     */
+    public function rechazados()
+    {
+        if (isset($_POST['submit'])) {
+            $this->set([
+                'documentos' => (new \website\Dte\Model_DteEmitidos())->getRechazados($_POST['desde'], $_POST['hasta'], $_POST['ambiente']),
+            ]);
         }
     }
 
