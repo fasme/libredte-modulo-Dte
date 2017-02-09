@@ -1126,7 +1126,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción de la API que permite cargar el XML de un DTE como documento
      * emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-28
+     * @version 2017-02-09
      */
     public function _api_cargar_xml_POST()
     {
@@ -1168,12 +1168,16 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/cargar_xml')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
+        // verificar RUT carátula con RUT documento
+        $datos = $Documentos[0]->getDatos();
+        if ($Caratula['RutReceptor']!=$datos['Encabezado']['Receptor']['RUTRecep']) {
+            $this->Api->send('RUT del receptor en la carátula no coincide con el RUT del receptor del documento', 400);
+        }
         // si el receptor no existe, se crea con los datos del XML
-        $Receptor = new Model_Contribuyente($Caratula['RutReceptor']);
+        $Receptor = new Model_Contribuyente($datos['Encabezado']['Receptor']['RUTRecep']);
         if (!$Receptor->exists()) {
-            $Receptor->dv = explode('-', $Caratula['RutReceptor'])[1];
+            $Receptor->dv = explode('-', $datos['Encabezado']['Receptor']['RUTRecep'])[1];
             $Receptor->razon_social = $Receptor->getRUT();
-            $datos = $Documentos[0]->getDatos();
             if (!empty($datos['Encabezado']['Receptor']['RznSocRecep'])) {
                 $Receptor->razon_social = $datos['Encabezado']['Receptor']['RznSocRecep'];
             }
