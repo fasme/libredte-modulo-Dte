@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-10
+     * @version 2017-02-09
      */
     public function ver($dte, $folio)
     {
@@ -143,7 +143,7 @@ class Controller_DteEmitidos extends \Controller_App
             'emails' => $DteEmitido->getEmails(),
             'referencias' => $DteEmitido->getReferencias(),
             'referencia' => $DteEmitido->getPropuestaReferencia(),
-            'enviar_sii' => !(in_array($DteEmitido->dte, [39, 41]) or $DteEmitido->track_id == -1),
+            'enviar_sii' => !(in_array($DteEmitido->dte, [39, 41])),
             'Cobro' => (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S') ? $DteEmitido->getCobro(false) : false,
         ]);
     }
@@ -1112,7 +1112,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         // si el DTE no está rechazado no se puede eliminar
-        if ($DteEmitido->track_id and $DteEmitido->getEstado()!='R') {
+        if ($DteEmitido->track_id and $DteEmitido->track_id!=-1 and $DteEmitido->getEstado()!='R') {
             $this->Api->send('No es posible eliminar el DTE ya que no está rechazado', 400);
         }
         // eliminar DTE

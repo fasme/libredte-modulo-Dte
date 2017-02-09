@@ -74,17 +74,17 @@ new \sowerphp\general\View_Helper_Table([
             <p><?=$DteEmitido->revision_detalle?></p>
 <?php if ($DteEmitido->track_id) : ?>
             <p>
-                <a class="btn btn-info" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
+                <a class="btn btn-info<?=$DteEmitido->track_id==-1?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
                 <span style="font-size:0.8em">
-<?php if (!$Emisor->config_sii_estado_dte_webservice) : ?>
+<?php if (!$Emisor->config_sii_estado_dte_webservice and $DteEmitido->track_id!=-1) : ?>
                     <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII">solicitar nueva revisión</a>
-<?php endif; ?>
-<?php if (!$Emisor->config_sii_estado_dte_webservice) : ?>
                     <br/>
 <?php endif; ?>
+<?php if ($DteEmitido->track_id!=-1) : ?>
                     <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$DteEmitido->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
+<?php endif; ?>
                     <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
-<?php if ($DteEmitido->getEstado()=='R') : ?>
+<?php if ($DteEmitido->getEstado()=='R' or $DteEmitido->track_id==-1) : ?>
                     <br/>
                     <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
 <?php endif; ?>
