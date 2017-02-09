@@ -87,7 +87,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-06
+     * @version 2017-02-09
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
@@ -106,7 +106,7 @@ class Controller_DteTmps extends \Controller_App
         // generar PDF
         $pdf = new \sasco\LibreDTE\Sii\PDF\Dte();
         $pdf->setFooterText(\sowerphp\core\Configure::read('dte.pdf.footer'));
-        $logo = \sowerphp\core\Configure::read('dte.logos.dir').'/'.$Emisor->rut.'.png';
+        $logo = DIR_STATIC.'/contribuyentes/'.$Emisor->rut.'/logo.png';
         if (is_readable($logo)) {
             $pdf->setLogo($logo);
         }
@@ -226,7 +226,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Recurso de la API que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-28
+     * @version 2017-02-09
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -264,11 +264,6 @@ class Controller_DteTmps extends \Controller_App
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
         ];
-        // si hay un logo para la empresa se usa
-        $logo = \sowerphp\core\Configure::read('dte.logos.dir').'/'.$Emisor->rut.'.png';
-        if (is_readable($logo)) {
-            $data['logo'] = base64_encode(file_get_contents($logo));
-        }
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($User->hash);
@@ -497,7 +492,7 @@ class Controller_DteTmps extends \Controller_App
         }
         $this->redirect('/dte/dte_tmps');
     }
-    
+
     /**
      * Acción que permite crear el cobro para el DTE y enviar al formulario de pago
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

@@ -195,7 +195,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-21
+     * @version 2017-02-09
      */
     public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
@@ -226,11 +226,6 @@ class Controller_DteIntercambios extends \Controller_App
             'xml' => $xml,
             'cedible' => $cedible,
         ];
-        // si hay un logo para la empresa se usa
-        $logo = \sowerphp\core\Configure::read('dte.logos.dir').'/'.$DteIntercambio->emisor.'.png';
-        if (is_readable($logo)) {
-            $data['logo'] = base64_encode(file_get_contents($logo));
-        }
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : $this->token);

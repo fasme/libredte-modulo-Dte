@@ -540,7 +540,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Acción que entrega el logo del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-29
+     * @version 2016-02-09
      */
     public function logo($rut)
     {
@@ -551,10 +551,10 @@ class Controller_Contribuyentes extends \Controller_App
             );
             $this->redirect('/');
         }
-        $dir = \sowerphp\core\Configure::read('dte.logos.dir');
-        $logo = $dir.'/'.$Contribuyente->rut.'.png';
-        if (!is_readable($logo))
-            $logo = $dir.'/default.png';
+        $logo = DIR_STATIC.'/contribuyentes/'.$Contribuyente->rut.'/logo.png';
+        if (!is_readable($logo)) {
+            $logo = DIR_STATIC.'/contribuyentes/default/logo.png';
+        }
         header('Content-Type: image/png');
         header('Content-Length: '.filesize($logo));
         header('Content-Disposition: inline; filename="'.$Contribuyente->rut.'.png"');

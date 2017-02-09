@@ -143,7 +143,7 @@ class Model_Respaldo
      * @param tablas Arreglo con las tablas a respaldar
      * @return Ruta del directorio donde se dejó el respaldo recién creado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-29
+     * @version 2017-02-09
      */
     public function generar($rut, $tablas = [])
     {
@@ -236,9 +236,9 @@ class Model_Respaldo
             \sowerphp\general\Utility_Spreadsheet_CSV::save($datos, $dir.'/'.$tabla.'.csv');
         }
         // copiar logo si existe
-        $logos = \sowerphp\core\Configure::read('dte.logos.dir');
-        if (file_exists($logos.'/'.$rut.'.png')) {
-            copy($logos.'/'.$rut.'.png', $dir.'/'.$rut.'.png');
+        $logo = DIR_STATIC.'/contribuyentes/'.$rut.'/logo.png';
+        if (file_exists($logo)) {
+            copy($logo, $dir.'/logo.png');
         }
         // colocar información del respaldo realizado
         $msg = 'Respaldo de datos de LibreDTE'."\n";

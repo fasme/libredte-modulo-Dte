@@ -886,7 +886,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Recurso de la API que genera el PDF de los DTEs contenidos en un EnvioDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-02
+     * @version 2017-02-09
      */
     public function _api_generar_pdf_POST()
     {
@@ -929,7 +929,7 @@ class Controller_Documentos extends \Controller_App
         } else if (isset($_FILES['logo']) and !$_FILES['logo']['error']) {
             $logo = file_get_contents($_FILES['logo']['tmp_name']);
         } else {
-            $logo_file = \sowerphp\core\Configure::read('dte.logos.dir').'/'.substr($Caratula['RutEmisor'], 0, -2).'.png';
+            $logo_file = DIR_STATIC.'/contribuyentes/'.substr($Caratula['RutEmisor'], 0, -2).'/logo.png';
             if (is_readable($logo_file)) {
                 $logo = file_get_contents($logo_file);
             }
