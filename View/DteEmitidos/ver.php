@@ -504,6 +504,7 @@ echo $f->end('Modificar Track ID');
     </div>
 </div>
 <?php endif; ?>
+<p style="margin-top:2em;font-size:0.8em" class="text-right">Documento timbrado el <?=str_replace('T', ' ', $DteEmitido->getDte()->getDatos()['TED']['DD']['TSTED'])?></p>
 </div>
 <!-- FIN AVANZADO -->
 
