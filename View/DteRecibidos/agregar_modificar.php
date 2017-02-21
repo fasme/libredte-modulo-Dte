@@ -26,7 +26,7 @@ echo $f->input([
     'type' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'text' : 'date',
     'name' => 'fecha',
     'label' => 'Fecha documento',
-    'value' => isset($DteRecibido) ? $DteRecibido->fecha : date('Y-m-d'),
+    'value' => isset($DteRecibido) ? $DteRecibido->fecha : (!empty($_POST['fecha']) ? $_POST['fecha'] : date('Y-m-d')),
     'check' => 'notempty date',
     'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : '',
 ]);
