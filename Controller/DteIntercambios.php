@@ -229,7 +229,7 @@ class Controller_DteIntercambios extends \Controller_App
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : $this->token);
-        $response = $rest->post($this->request->url.'/api/dte/documentos/generar_pdf', $data);
+        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
         if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
             return;

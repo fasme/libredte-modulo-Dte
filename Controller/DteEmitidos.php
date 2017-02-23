@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de dte emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2015-09-26
+ * @version 2017-02-23
  */
 class Controller_DteEmitidos extends \Controller_App
 {
@@ -35,11 +35,11 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Método para permitir acciones sin estar autenticado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-12
+     * @version 2017-02-23
      */
     public function beforeFilter()
     {
-        $this->Auth->allow('pdf', 'xml');
+        $this->Auth->allow('pdf', 'xml', 'consultar');
         parent::beforeFilter();
     }
 
@@ -243,7 +243,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-15
+     * @version 2017-02-23
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -259,7 +259,7 @@ class Controller_DteEmitidos extends \Controller_App
                 \sowerphp\core\Model_Datasource_Session::message(
                     'Emisor no está registrado en la aplicación', 'error'
                 );
-                $this->redirect('/dte/documentos/consultar');
+                $this->redirect('/dte/dte_emitidos/consultar');
             }
         }
         // obtener DTE emitido
@@ -276,7 +276,7 @@ class Controller_DteEmitidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message(
                 'DTE existe, pero fecha y/o monto no coinciden con los registrados', 'error'
             );
-            $this->redirect('/dte/documentos/consultar');
+            $this->redirect('/dte/dte_emitidos/consultar');
         }
         // armar datos con archivo XML y flag para indicar si es cedible o no
         $webVerificacion = $this->request->url.'/boletas';
@@ -292,7 +292,7 @@ class Controller_DteEmitidos extends \Controller_App
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
-        $response = $rest->post($this->request->url.'/api/dte/documentos/generar_pdf', $data);
+        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_emitidos/listar');
@@ -313,7 +313,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el XML del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-12
+     * @version 2017-02-23
      */
     public function xml($dte, $folio, $emisor = null, $fecha = null, $total = null)
     {
@@ -329,7 +329,7 @@ class Controller_DteEmitidos extends \Controller_App
                 \sowerphp\core\Model_Datasource_Session::message(
                     'Emisor no está registrado en la aplicación', 'error'
                 );
-                $this->redirect('/dte/documentos/consultar');
+                $this->redirect('/dte/dte_emitidos/consultar');
             }
         }
         // obtener DTE emitido
@@ -346,7 +346,7 @@ class Controller_DteEmitidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message(
                 'DTE existe, pero fecha y/o monto no coinciden con los registrados', 'error'
             );
-            $this->redirect('/dte/documentos/consultar');
+            $this->redirect('/dte/dte_emitidos/consultar');
         }
         // entregar XML
         $file = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml';
@@ -841,7 +841,7 @@ class Controller_DteEmitidos extends \Controller_App
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($User->hash);
-        $response = $rest->post($this->request->url.'/api/dte/documentos/generar_pdf', $data);
+        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
         if ($response===false) {
             $this->Api->send(implode('<br/>', $rest->getErrors(), 500));
         }
@@ -1257,6 +1257,67 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // buscar documentos
         $this->Api->send($Emisor->getDocumentosEmitidos(json_decode($this->Api->data, true)), 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Acción que permite buscar y consultar un DTE emitido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-01-29
+     */
+    public function consultar($dte = null)
+    {
+        // asignar variables para el formulario
+        $this->set([
+            'dtes' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
+            'dte' => isset($_POST['dte']) ? $_POST['dte'] : $dte,
+        ]);
+        // si se solicitó un documento se busca
+        if (isset($_POST['submit'])) {
+            $r = $this->consume('/api/dte/dte_emitidos/consultar', $_POST);
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    str_replace("\n", '<br/>', $r['body']), 'error'
+                );
+                return;
+            }
+            // asignar DTE a la vista
+            $this->set('DteEmitido', (new Model_DteEmitido())->set($r['body']));
+        }
+    }
+
+    /**
+     * Función de la API para consultar por un DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-01-29
+     */
+    public function _api_consultar_POST()
+    {
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // verificar que se hayan pasado los índices básicos
+        foreach (['emisor', 'dte', 'folio', 'fecha', 'total'] as $key) {
+            if (!isset($this->Api->data[$key]))
+                $this->Api->send('Falta índice/variable '.$key.' por POST', 400);
+        }
+        // verificar si el emisor existe
+        $Emisor = new Model_Contribuyente($this->Api->data['emisor']);
+        if (!$Emisor->exists() or !$Emisor->usuario) {
+            $this->Api->send('Emisor no está registrado en la aplicación', 404);
+        }
+        // buscar si existe el DTE en el ambiente que el emisor esté usando
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $this->Api->data['dte'], $this->Api->data['folio'], (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            $this->Api->send($Emisor->razon_social.' no tiene emitido el DTE solicitado en el ambiente de '.$Emisor->getAmbiente(), 404);
+        }
+        // verificar que coincida fecha de emisión y monto total del DTE
+        if ($DteEmitido->fecha!=$this->Api->data['fecha'] or $DteEmitido->total!=$this->Api->data['total']) {
+            $this->Api->send('DTE existe, pero fecha y/o monto no coinciden con los registrados', 409);
+        }
+        // enviar DteEmitido
+        return $DteEmitido;
     }
 
 }
