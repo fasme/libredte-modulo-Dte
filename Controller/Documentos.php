@@ -707,44 +707,6 @@ class Controller_Documentos extends \Controller_App
     }
 
     /**
-     * Método que guarda los datos del Emisor
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-04
-     */
-    private function guardarEmisor($datos)
-    {
-        list($emisor, $dv) = explode('-', $datos['RUTEmisor']);
-        $Emisor = new Model_Contribuyente($emisor);
-        if ($Emisor->usuario)
-            return null;
-        $Emisor->dv = $dv;
-        $Emisor->razon_social = substr($datos['RznSoc'], 0, 100);
-        if (!empty($datos['GiroEmis']))
-            $Emisor->giro = substr($datos['GiroEmis'], 0, 80);
-        if (!empty($datos['Telefono']))
-            $Emisor->telefono = substr($datos['Telefono'], 0, 20);
-        if (!empty($datos['CorreoEmisor']))
-            $Emisor->email = substr($datos['CorreoEmisor'], 0, 80);
-        $Emisor->actividad_economica = (int)$datos['Acteco'];
-        if (!empty($datos['DirOrigen']))
-            $Emisor->direccion = substr($datos['DirOrigen'], 0, 70);
-        if (is_numeric($datos['CmnaOrigen'])) {
-            $Emisor->comuna = $datos['CmnaOrigen'];
-        } else {
-            $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName($datos['CmnaOrigen']);
-            if ($comuna) {
-                $Emisor->comuna = $comuna;
-            }
-        }
-        $Emisor->modificado = date('Y-m-d H:i:s');
-        try {
-            return $Emisor->save();
-        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            return false;
-        }
-    }
-
-    /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-09
