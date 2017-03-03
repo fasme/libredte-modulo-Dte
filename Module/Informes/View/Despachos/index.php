@@ -111,7 +111,6 @@ $(function(){
     map_despachos_mostrar(map, JSON.parse('<?=json_encode($despachos_mapa)?>'));
 });
 function map_despachos_mostrar(map, despachos) {
-    console.log(despachos);
     var title, desc, color;
     for (var i = 0; i<despachos.length; i = i+1)  {
         title = '';
