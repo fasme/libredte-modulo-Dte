@@ -24,7 +24,7 @@
 namespace website\Dte;
 
 /**
- * Comando para actualizar la bandeja de intercambio de los contribuyentes
+ * Comando para actualizar los documentos emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
  * @version 2017-01-06
  */
