@@ -101,7 +101,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-10
+     * @version 2017-03-08
      */
     public function _api_emitir_POST()
     {
@@ -140,9 +140,10 @@ class Controller_Documentos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // guardar datos del receptor
-        $Receptor = $this->guardarReceptor($this->Api->data['Encabezado']['Receptor']);
-        if (!$Receptor) {
-            $this->Api->send('No fue posible guardar los datos del receptor', 507);
+        try {
+            $Receptor = $this->guardarReceptor($this->Api->data['Encabezado']['Receptor']);
+        } catch (\Exception $e) {
+            $this->Api->send('No fue posible guardar los datos del receptor: '.$e->getMessage(), 507);
         }
         // construir arreglo con datos del DTE
         $default = [
@@ -709,13 +710,14 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-09
+     * @version 2017-03-08
      */
     private function guardarReceptor($datos)
     {
         $aux = explode('-', $datos['RUTRecep']);
-        if (!isset($aux[1]))
-            return false;
+        if (!isset($aux[1])) {
+            throw new \Exception('RUTRecep inválido');
+        }
         list($receptor, $dv) = $aux;
         $Receptor = new Model_Contribuyente($receptor);
         if ($Receptor->usuario)
@@ -742,11 +744,10 @@ class Controller_Documentos extends \Controller_App
             }
         }
         $Receptor->modificado = date('Y-m-d H:i:s');
-        try {
-            return $Receptor->save() ? $Receptor : false;
-        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            return false;
+        if (!$Receptor->save()) {
+            throw new \Exception('No fue posible guardar los datos del receptor');
         }
+        return $Receptor;
     }
 
     /**
