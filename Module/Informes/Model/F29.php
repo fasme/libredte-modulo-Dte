@@ -37,15 +37,15 @@ class Model_F29
     /**
      * Constructor del modelo F29
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-23
+     * @version 2017-03-09
      */
     public function __construct(\website\Dte\Model_Contribuyente $Emisor, $periodo)
     {
         $this->Emisor = $Emisor;
         $this->periodo = (int)$periodo;
         // si hay libro de ventas se sacan de ahí las boletas y pagos electrónicos
-        $boletas = ['total'=>0, 'iva'=>0];
-        $pagos_electronicos = ['total'=>0, 'iva'=>0];
+        $boletas = ['cantidad'=>0, 'exento'=>0, 'neto'=>0, 'iva'=>0];
+        $pagos_electronicos = ['cantidad'=>0, 'exento'=>0, 'neto'=>0, 'iva'=>0];
         $DteVenta = new \website\Dte\Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
         if ($DteVenta->exists()) {
             $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
@@ -54,19 +54,25 @@ class Model_F29
             $resumenBoletas = $Libro->getResumenBoletas();
             if (isset($resumenBoletas[39])) {
                 $boletas = [
-                    'total' => $resumenBoletas[39]['TotDoc'] - $resumenBoletas[39]['TotAnulado'],
+                    'cantidad' => $resumenBoletas[39]['TotDoc'] - $resumenBoletas[39]['TotAnulado'],
+                    'exento' => $resumenBoletas[39]['TotMntExe'],
+                    'neto' => $resumenBoletas[39]['TotMntNeto'],
                     'iva' => $resumenBoletas[39]['TotMntIVA'],
                 ];
             }
             // resumenes manuales (boletas y pagos electrónicos)
             $resumenManual = $Libro->getResumenManual();
             if (isset($resumenManual[35])) {
-                $boletas['total'] += $resumenManual[35]['TotDoc'] - $resumenManual[35]['TotAnulado'];
+                $boletas['cantidad'] += $resumenManual[35]['TotDoc'] - $resumenManual[35]['TotAnulado'];
+                $boletas['exento'] += $resumenManual[35]['TotMntExe'];
+                $boletas['neto'] += $resumenManual[35]['TotMntNeto'];
                 $boletas['iva'] += $resumenManual[35]['TotMntIVA'];
             }
             if (isset($resumenManual[48])) {
                 $pagos_electronicos = [
-                    'total' => $resumenManual[48]['TotDoc'] - $resumenManual[48]['TotAnulado'],
+                    'cantidad' => $resumenManual[48]['TotDoc'] - $resumenManual[48]['TotAnulado'],
+                    'exento' => $resumenManual[48]['TotMntExe'],
+                    'neto' => $resumenManual[48]['TotMntNeto'],
                     'iva' => $resumenManual[48]['TotMntIVA'],
                 ];
             }
@@ -80,13 +86,17 @@ class Model_F29
             '09' => $this->Emisor->telefono,
             '15' => substr($periodo, 4).'/'.substr($periodo, 0, 4),            
             '55' => $this->Emisor->email,
-            '110' => $boletas['total'],
+            '110' => $boletas['cantidad'],
             '111' => $boletas['iva'],
             '115' => $this->Emisor->config_contabilidad_ppm / 100,
             '313' => $this->Emisor->config_extra_contador_rut,
             '314' => $this->Emisor->config_extra_representante_rut,
-            '758' => $pagos_electronicos['total'],
+            '758' => $pagos_electronicos['cantidad'],
             '759' => $pagos_electronicos['iva'],
+            'boletas_exento' => $boletas['exento'],
+            'boletas_neto' => $boletas['neto'],
+            'pagos_electronicos_exento' => $pagos_electronicos['exento'],
+            'pagos_electronicos_neto' => $pagos_electronicos['neto'],
         ];
         if (\sowerphp\core\Module::loaded('Lce')) {
             $this->datos['48'] = (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_48))->getHaber($this->periodo);

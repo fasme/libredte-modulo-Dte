@@ -832,7 +832,7 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
      * Método que obtiene un dato del arreglo con los códigos y datos del
      * formulario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-02
+     * @version 2017-03-09
      */
     private function getDato($codigo)
     {
@@ -841,6 +841,14 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             foreach ($this->ubicaciones as $c => $u)
                 $ubicaciones[' '.$c.' '] = $u;
             return '='.str_replace(' ', '', (str_replace(array_keys($ubicaciones), $ubicaciones, $this->formulas[$codigo])));
+        }
+        if ($codigo == 563) {
+            $ppm = $this->datos[563];
+            $ppm .= '+'.$this->getDato('boletas_exento');
+            $ppm .= '+'.$this->getDato('boletas_neto');
+            $ppm .= '+'.$this->getDato('pagos_electronicos_exento');
+            $ppm .= '+'.$this->getDato('pagos_electronicos_neto');
+            return $ppm;
         }
         if (isset($this->datos[$codigo])) {
             return $this->datos[$codigo];
