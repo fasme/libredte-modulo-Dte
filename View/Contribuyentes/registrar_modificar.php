@@ -522,6 +522,30 @@ if (!empty($tipos_dte)) {
         'help' => 'Observación por defecto según tipo de DTE emitido',
     ]);
 }
+$config_extra_impuestos_sin_credito = [];
+if (isset($Contribuyente) and $Contribuyente->config_extra_impuestos_sin_credito) {
+    foreach ($Contribuyente->config_extra_impuestos_sin_credito as $impuesto) {
+        $config_extra_impuestos_sin_credito[] = [
+            'config_extra_impuestos_sin_credito_codigo' => $impuesto,
+        ];
+    }
+}
+echo $f->input([
+    'type' => 'js',
+    'id' => 'impuestos_sin_credito',
+    'label' => 'Impuestos sin crédito',
+    'titles' => ['Impuesto sin crédito'],
+    'inputs' => [
+        [
+            'type' => 'select',
+            'name' => 'config_extra_impuestos_sin_credito_codigo',
+            'options' => [''=>'Seleccionar un impuesto'] + $impuestos_adicionales_todos,
+            'check' => 'notempty',
+        ],
+    ],
+    'values' => $config_extra_impuestos_sin_credito,
+    'help' => 'Indique los impuestos que no dan derecho a ser usados como crédito (no son recuperables)',
+]);
 ?>
         </div>
     </div>

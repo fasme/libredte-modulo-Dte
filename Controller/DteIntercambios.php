@@ -271,7 +271,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-10
+     * @version 2017-03-08
      */
     public function responder($codigo)
     {
@@ -509,14 +509,24 @@ class Controller_DteIntercambios extends \Controller_App
                                 $datos['Encabezado']['Totales']['ImptoReten'] = [$datos['Encabezado']['Totales']['ImptoReten']];
                             }
                             $DteRecibido->impuesto_adicional = [];
+                            $impuesto_sin_credito = 0;
                             foreach ($datos['Encabezado']['Totales']['ImptoReten'] as $ia) {
-                                $DteRecibido->impuesto_adicional[] = [
-                                    'codigo' => $ia['TipoImp'],
-                                    'tasa' => !empty($ia['TasaImp']) ? $ia['TasaImp'] : null,
-                                    'monto' => $ia['MontoImp'],
-                                ];
+                                if ($Emisor->config_extra_impuestos_sin_credito and in_array($ia['TipoImp'], $Emisor->config_extra_impuestos_sin_credito)) {
+                                    $impuesto_sin_credito += $ia['MontoImp'];
+                                } else {
+                                    $DteRecibido->impuesto_adicional[] = [
+                                        'codigo' => $ia['TipoImp'],
+                                        'tasa' => !empty($ia['TasaImp']) ? $ia['TasaImp'] : null,
+                                        'monto' => $ia['MontoImp'],
+                                    ];
+                                }
                             }
-                            $DteRecibido->impuesto_adicional = json_encode($DteRecibido->impuesto_adicional);
+                            if ($DteRecibido->impuesto_adicional) {
+                                $DteRecibido->impuesto_adicional = json_encode($DteRecibido->impuesto_adicional);
+                            }
+                            if ($impuesto_sin_credito) {
+                                $DteRecibido->impuesto_sin_credito = $impuesto_sin_credito;
+                            }
                         }
                         // si es empresa exenta el IVA es no recuperable
                         if ($DteRecibido->iva and $Emisor->config_extra_exenta) {

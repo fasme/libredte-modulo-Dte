@@ -125,7 +125,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite registrar un nuevo contribuyente y asociarlo a un usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-01
+     * @version 2017-03-08
      */
     public function registrar()
     {
@@ -133,12 +133,14 @@ class Controller_Contribuyentes extends \Controller_App
         $ImpuestosAdicionales = new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales();
         $impuestos_adicionales = $ImpuestosAdicionales->getListConTasa();
         $impuestos_adicionales_tasa = $ImpuestosAdicionales->getTasas();
+        $impuestos_adicionales_todos = $ImpuestosAdicionales->getList();
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js', '/dte/js/contribuyente.js']],
             'actividades_economicas' => (new \website\Sistema\General\Model_ActividadEconomicas())->getList(),
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
             'impuestos_adicionales' => $impuestos_adicionales,
             'impuestos_adicionales_tasa' => $impuestos_adicionales_tasa,
+            'impuestos_adicionales_todos' => $impuestos_adicionales_todos,
             'cuentas' => [],
             'titulo' => 'Registrar nueva empresa',
             'descripcion' => 'Aquí podrá registrar una nueva empresa y ser su administrador. Deberá completar los datos obligatorios de las pestañas "Empresa", "Ambientes" y "Correos". Los datos de la pestaña "Facturación" pueden quedar por defecto.',
@@ -197,7 +199,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite modificar contribuyente previamente registrado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-31
+     * @version 2017-03-08
      */
     public function modificar($rut)
     {
@@ -217,6 +219,7 @@ class Controller_Contribuyentes extends \Controller_App
         $ImpuestosAdicionales = new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales();
         $impuestos_adicionales = $ImpuestosAdicionales->getListConTasa();
         $impuestos_adicionales_tasa = $ImpuestosAdicionales->getTasas();
+        $impuestos_adicionales_todos = $ImpuestosAdicionales->getList();
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/contribuyente.js']],
             'Contribuyente' => $Contribuyente,
@@ -224,6 +227,7 @@ class Controller_Contribuyentes extends \Controller_App
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
             'impuestos_adicionales' => $impuestos_adicionales,
             'impuestos_adicionales_tasa' => $impuestos_adicionales_tasa,
+            'impuestos_adicionales_todos' => $impuestos_adicionales_todos,
             'titulo' => 'Modificar empresa '.$Contribuyente->razon_social,
             'descripcion' => 'Aquí podrá modificar los datos de la empresa '.$Contribuyente->razon_social.' RUT '.num($Contribuyente->rut).'-'.$Contribuyente->dv.', para la cual usted es el usuario administrador.',
             'form_id' => 'modificarContribuyente',
@@ -258,7 +262,7 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-10
+     * @version 2017-03-08
      */
     private function prepararDatosContribuyente(&$Contribuyente)
     {
@@ -342,6 +346,21 @@ class Controller_Contribuyentes extends \Controller_App
             unset($_POST['config_emision_observaciones_glosa']);
         } else {
             $_POST['config_emision_observaciones'] = null;
+        }
+        // crear arreglo de impuestos sin crédito (no recuperables)
+        if (!empty($_POST['config_extra_impuestos_sin_credito_codigo'])) {
+            $_POST['config_extra_impuestos_sin_credito'] = [];
+            $n_codigos = count($_POST['config_extra_impuestos_sin_credito_codigo']);
+            for ($i=0; $i<$n_codigos; $i++) {
+                if (!empty($_POST['config_extra_impuestos_sin_credito_codigo'][$i])) {
+                    $_POST['config_extra_impuestos_sin_credito'][] =
+                        (int)$_POST['config_extra_impuestos_sin_credito_codigo'][$i]
+                    ;
+                }
+            }
+            unset($_POST['config_extra_impuestos_sin_credito_codigo']);
+        } else {
+            $_POST['config_extra_impuestos_sin_credito'] = null;
         }
         // crear arreglo con anchos de columnas del detalle del PDF
         $config_pdf_detalle_ancho = [];
