@@ -964,4 +964,17 @@ class Model_DteEmitido extends Model_Base_Envio
         return !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? $datos['Encabezado']['IdDoc']['FchVenc'] : null;
     }
 
+    /**
+     * Método que entrega el total real del DTE, si es documento de exportación
+     * se entrega el total en la moneda extranjera
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-03-11
+     */
+    public function getTotal()
+    {
+        if (!in_array($this->dte, [110, 111, 112]))
+            return $this->total;
+        return $this->getDatos()['Encabezado']['Totales']['MntTotal'];
+    }
+
 }
