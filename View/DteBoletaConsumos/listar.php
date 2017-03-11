@@ -87,7 +87,7 @@ foreach ($Objs as &$obj) {
     $actions = '<a href="'.$_base.$module_url.$controller.'/xml/'.$obj->dia.'" title="Descargar XML"><span class="fa fa-file-code-o btn btn-default"></span></a>';
     $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII"><span class="fa fa-refresh btn btn-default"></span></a>';
     $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII"><span class="fa fa-eye btn btn-default"></span></a>';
-    $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550)" title="Ver el estado del envío en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
+    $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
     //$actions .= ' <a href="'.$_base.$module_url.$controller.'/enviar_sii/'.$obj->dia.$listarFilterUrl.'" title="Reenviar al SII" onclick="return Form.checkSend(\'¿Confirmar el reenvío del reporte de consumo de folios al SII?\')"><span class="fa fa-send-o btn btn-default"></span></a>';
     $row[] = $actions;
     $data[] = $row;
