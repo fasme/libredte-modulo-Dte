@@ -27,7 +27,7 @@ namespace website\Dte;
  * Comando para respaldar los datos de los contribuyentes la cuenta asociada en
  * Dropbox
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-02-04
+ * @version 2017-03-15
  */
 class Shell_Command_Respaldos_Dropbox extends \Shell_App
 {
@@ -49,7 +49,7 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
         return 0;
     }
 
-    private function crearRespaldo($rut)
+    private function crearRespaldo($rut, $compress = 'tgz')
     {
         // crear respaldo para el contribuyente
         $Contribuyente = new Model_Contribuyente($rut);
@@ -60,22 +60,22 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
         }
         $dir = (new \website\Dte\Admin\Model_Respaldo())->generar($Contribuyente->rut);
         \sowerphp\general\Utility_File::compress(
-            $dir, ['format'=>'zip', 'delete'=>true, 'download'=>false]
+            $dir, ['format'=>$compress, 'delete'=>true, 'download'=>false]
         );
-        $zip = $dir.'.zip';
+        $output = $dir.'.'.$compress;
         // enviar respaldo a Dropbox
         try {
             $archivo = date('N').'_'.\sowerphp\general\Utility_Date::$dias[date('w')];
             $dbxClient = new \Dropbox\Client($Contribuyente->config_respaldos_dropbox->token, 'LibreDTE/1.0');
-            $f = fopen($zip, 'rb');
-            $result = $dbxClient->uploadFile('/'.$Contribuyente->razon_social.'/respaldos/'.$archivo.'.zip', \Dropbox\WriteMode::force(), $f);
+            $f = fopen($output, 'rb');
+            $result = $dbxClient->uploadFile('/'.$Contribuyente->razon_social.'/respaldos/'.$archivo.'.'.$compress, \Dropbox\WriteMode::force(), $f);
             fclose($f);
-            unlink($zip);
+            unlink($output);
         } catch (\Exception $e) {
             if ($this->verbose) {
                 $this->out('  No se pudo guardar: '.str_replace("\n", ' => ', $e->getMessage()));
             }
-            unlink($zip);
+            unlink($output);
             return false;
         }
     }
