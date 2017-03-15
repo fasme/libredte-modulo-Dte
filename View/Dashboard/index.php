@@ -277,7 +277,7 @@
         </div>
         <!-- firma electrónica -->
         <a class="btn btn-success btn-lg btn-block" href="admin/respaldos/exportar/all" role="button">
-            <span class="fa fa-download"> Descargar respaldo
+            <span class="fa fa-download"> Generar respaldo
         </a>
     </div>
     <!-- FIN PANEL DERECHA -->

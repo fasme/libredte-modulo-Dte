@@ -35,7 +35,7 @@ class Controller_Respaldos extends \Controller_App
     /**
      * Acción que permite exportar todos los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-03
+     * @version 2017-03-15
      */
     public function exportar($all = false)
     {
@@ -59,15 +59,31 @@ class Controller_Respaldos extends \Controller_App
             }
         }
         if (isset($_POST['tablas'])) {
-            try {
-                $dir = $Respaldo->generar($Emisor->rut, $_POST['tablas']);
-                \sowerphp\general\Utility_File::compress(
-                    $dir, ['format'=>'zip', 'delete'=>true]
-                );
-            } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'No fue posible exportar los datos: '.$e->getMessage(), 'error'
-                );
+            // si existe el comando para programar respaldo y avisar por email se usa
+            if (class_exists('\website\Dte\Shell_Command_Respaldos_Email')) {
+                if ($this->shell('Dte.Respaldos_Email '.$Emisor->rut)) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'No fue posible programar el respaldo', 'error'
+                    );
+                } else {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'El respaldo está siendo generado, se notificará vía correo electrónico cuando esté listo', 'ok'
+                    );
+                }
+                $this->redirect('/dte');
+            }
+            // respaldo normal, se descarga inmediatamente
+            else {
+                try {
+                    $dir = $Respaldo->generar($Emisor->rut, $_POST['tablas']);
+                    \sowerphp\general\Utility_File::compress(
+                        $dir, ['format'=>'zip', 'delete'=>true]
+                    );
+                } catch (\Exception $e) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'No fue posible exportar los datos: '.$e->getMessage(), 'error'
+                    );
+                }
             }
         }
     }
