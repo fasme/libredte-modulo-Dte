@@ -34,7 +34,7 @@ echo $f->input([
     'name' => 'emisor',
     'label' => 'RUT emisor',
     'value' => isset($DteRecibido) ? \sowerphp\app\Utility_Rut::addDV($DteRecibido->emisor) : '',
-    'placeholder' => '55.666.777-8',
+    'placeholder' => '60.805.000-0',
     'check' => 'notempty rut',
     'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : 'onblur="dte_recibido_check()"',
 ]);
@@ -62,7 +62,7 @@ echo $f->input([
     'label' => 'Folio',
     'value' => isset($DteRecibido) ? $DteRecibido->folio : '',
     'check' => 'notempty integer',
-    'attr' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : 'onblur="dte_recibido_check()"',
+    'attr' => 'maxlength="10" '.((isset($DteRecibido) and $DteRecibido->intercambio) ? 'readonly="readonly"' : 'onblur="dte_recibido_check()"'),
 ]);
 echo $f->input([
     'name' => 'exento',
