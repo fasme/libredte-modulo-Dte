@@ -66,6 +66,7 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
         if (is_numeric($desde)) {
             $desde = date('Y-m-d', strtotime('-'.$desde.' days'));
         }
+        $estados = \website\Dte\Model_DteEmitidos::$revision_estados['rechazados'];
         return $this->db->getTable('
             SELECT e.emisor, e.dte, e.folio
             FROM
@@ -84,6 +85,7 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
                 AND e.certificacion = :certificacion
                 AND e.track_id IS NOT NULL
                 AND e.revision_estado IS NOT NULL
+                AND SUBSTR(e.revision_estado,1,3) NOT IN (\''.implode('\', \'', $estados).'\')
                 AND ir.responde IS NULL
             ORDER BY e.emisor, e.fecha, e.dte, e.folio
         ', [':desde' => $desde, ':grupo' => $grupo, ':certificacion' => (int)$certificacion]);
