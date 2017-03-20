@@ -42,7 +42,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     /**
      * Acción que permite importar un libro desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-06
+     * @version 2017-03-20
      */
     public function importar()
     {
@@ -77,7 +77,7 @@ class Controller_DteCompras extends Controller_Base_Libros
                 // estado antes de poder guardar, esto evitará agregar documentos que no
                 // han sido recibidos en el SII o sus datos son incorrectos
                 $guardar = true;
-                if (!$DteRecibido->certificacion and $DteRecibido->getTipo()->electronico and !$Emisor->config_recepcion_omitir_verificacion_sii) {
+                if (!$DteRecibido->certificacion and $DteRecibido->getTipo()->electronico and !$Receptor->config_recepcion_omitir_verificacion_sii) {
                     // obtener firma
                     $Firma = $Receptor->getFirma($this->Auth->User->id);
                     if (!$Firma) {
