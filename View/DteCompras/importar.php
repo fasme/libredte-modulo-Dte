@@ -42,7 +42,7 @@ echo $f->input([
     'type' => 'file',
     'name' => 'archivo',
     'label' => 'Libro CSV',
-    'help' => 'Libro de compras en formato CSV. Puede consultar un <a href="https://raw.githubusercontent.com/LibreDTE/libredte-lib/master/examples/libros/libro_compras.csv">ejemplo del libro</a> o bien revisar la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/general/libro_compras_ventas#detalle_libro_compra">documentación de las columnas</a>.',
+    'help' => 'Libro de compras en formato CSV (separado por punto y coma, codificado en UTF-8). Puede consultar un <a href="https://raw.githubusercontent.com/LibreDTE/libredte-lib/master/examples/libros/libro_compras.csv">ejemplo del libro</a> o bien revisar la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/general/libro_compras_ventas#detalle_libro_compra">documentación de las columnas</a>.',
     'check' => 'notempty',
     'attr' => 'accept="csv"',
 ]);
