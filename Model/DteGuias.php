@@ -116,7 +116,7 @@ class Model_DteGuias extends \Model_Plural_App
      * es aquellas que tienen indicador de traslado "operación constituye venta"
      * y no poseen una referencia desde una factura electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-31
+     * @version 2017-03-30
      */
     public function getSinFacturar($desde, $hasta, $receptor = null)
     {
@@ -126,7 +126,7 @@ class Model_DteGuias extends \Model_Plural_App
             $vars[':receptor'] = \sowerphp\app\Utility_Rut::normalizar($receptor);
             $where[] = 'e.receptor = :receptor';
         }
-        $where[] = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/IdDoc/IndTraslado', 'http://www.sii.cl/SiiDte').'::INTEGER = 1';
+        $where[] = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/IdDoc/IndTraslado', 'http://www.sii.cl/SiiDte').' = \'1\'';
         return $this->db->getTable('
             SELECT e.folio, r.razon_social, e.fecha, e.total
             FROM
