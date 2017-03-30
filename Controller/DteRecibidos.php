@@ -111,14 +111,14 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite editar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-08
+     * @version 2017-03-30
      */
     public function modificar($emisor, $dte, $folio)
     {
         $Emisor = $this->getContribuyente();
         // obtener dte recibido
         $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteRecibido->exists()) {
+        if (!$DteRecibido->exists() or $DteRecibido->receptor!=$Emisor->rut) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'DTE recibido solicitado no existe', 'error'
             );
