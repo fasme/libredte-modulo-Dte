@@ -36,7 +36,7 @@ class Shell_Command_DteEmitidos_Migrar extends \Shell_App
     {
         $this->db = \sowerphp\core\Model_Datasource_Database::get();
         if (!$dia)
-            $da = date('Y-m-d');
+            $dia = date('Y-m-d');
         $documentos = $this->getDocumentos($dia, $certificacion);
         if (isset($documentos[0])) {
             foreach ($documentos as $dte) {
