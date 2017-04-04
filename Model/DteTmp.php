@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-17
+     * @version 2017-03-31
      */
     public function generar($user_id = null)
     {
@@ -265,7 +265,7 @@ class Model_DteTmp extends \Model_App
             throw new \Exception('No fue posible generar el objeto del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
         }
         $xml = $EnvioDte->generar();
-        if (!$xml) {
+        if (!$xml or !$EnvioDte->schemaValidate()) {
             throw new \Exception('No fue posible generar el XML del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
         }
         // guardar DTE

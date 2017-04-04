@@ -101,10 +101,13 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-08
+     * @version 2017-04-03
      */
     public function _api_emitir_POST()
     {
+        extract($this->Api->getQuery([
+            'normalizar' => true,
+        ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -145,35 +148,43 @@ class Controller_Documentos extends \Controller_App
         } catch (\Exception $e) {
             $this->Api->send('No fue posible guardar los datos del receptor: '.$e->getMessage(), 507);
         }
-        // construir arreglo con datos del DTE
-        $default = [
-            'Encabezado' => [
-                'IdDoc' => [
-                    'TipoDTE' => 33,
-                    'Folio' => 0,
-                    'FchEmis' => date('Y-m-d'),
-                ],
-                'Emisor' => [
-                    'RUTEmisor' => $Emisor->rut.'-'.$Emisor->dv,
-                    'RznSoc' => $Emisor->razon_social,
-                    'GiroEmis' => $Emisor->giro,
-                    'Telefono' => $Emisor->telefono ? $Emisor->telefono : false,
-                    'CorreoEmisor' => $Emisor->email ? $Emisor->email : false,
-                    'Acteco' => $Emisor->actividad_economica,
-                    'DirOrigen' => $Emisor->direccion,
-                    'CmnaOrigen' => $Emisor->getComuna()->comuna,
-                ],
-            ]
-        ];
+        // construir arreglo con datos del DTE por defecto si se normaliza
+        if ($normalizar) {
+            $default = [
+                'Encabezado' => [
+                    'IdDoc' => [
+                        'TipoDTE' => 33,
+                        'Folio' => 0,
+                        'FchEmis' => date('Y-m-d'),
+                    ],
+                    'Emisor' => [
+                        'RUTEmisor' => $Emisor->rut.'-'.$Emisor->dv,
+                        'RznSoc' => $Emisor->razon_social,
+                        'GiroEmis' => $Emisor->giro,
+                        'Telefono' => $Emisor->telefono ? $Emisor->telefono : false,
+                        'CorreoEmisor' => $Emisor->email ? $Emisor->email : false,
+                        'Acteco' => $Emisor->actividad_economica,
+                        'DirOrigen' => $Emisor->direccion,
+                        'CmnaOrigen' => $Emisor->getComuna()->comuna,
+                    ],
+                ]
+            ];
+        }
+        // arreglo vacio si no se normaliza (se debe enviar completo el DTE)
+        else {
+            $default = [];
+        }
         $dte = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default, $this->Api->data);
-        // corregir dirección sucursal si se indicó
-        if (!empty($dte['Encabezado']['Emisor']['CdgSIISucur'])) {
+        // corregir dirección sucursal si se indicó y se debe normalizar
+        if ($normalizar and !empty($dte['Encabezado']['Emisor']['CdgSIISucur'])) {
             $sucursal = $Emisor->getSucursal($dte['Encabezado']['Emisor']['CdgSIISucur']);
-            $dte['Encabezado']['Emisor']['Sucursal'] = $sucursal->sucursal;
+            if (!in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
+                $dte['Encabezado']['Emisor']['Sucursal'] = $sucursal->sucursal;
+            }
             $dte['Encabezado']['Emisor']['DirOrigen'] = $sucursal->direccion;
             $dte['Encabezado']['Emisor']['CmnaOrigen'] = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->get($sucursal->comuna)->comuna;
         }
-        // verificar tipo de documento
+        // verificar tipo de documento (evita facturas afectas con puros exetos o exentas con item afecto)
         $dte['Encabezado']['IdDoc']['TipoDTE'] = $this->getTipoDTE(
             $dte['Encabezado']['IdDoc']['TipoDTE'], $dte['Detalle']
         );
