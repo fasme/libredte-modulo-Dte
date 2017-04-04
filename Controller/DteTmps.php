@@ -523,4 +523,73 @@ class Controller_DteTmps extends \Controller_App
         $this->redirect('/pagos/cobros/pagar/'.$Cobro->codigo);
     }
 
+    /**
+     * Acción que permite editar el DTE temporal
+     * @todo Programar funcionalidad
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-03-31
+     */
+    public function editar($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // editar
+        \sowerphp\core\Model_Datasource_Session::message(
+            'Edición del DTE temporal aun no está disponible', 'warning'
+        );
+        $this->redirect(str_replace('/editar/', '/ver/', $this->request->request));
+    }
+
+    /**
+     * Acción que permite editar el JSON del DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-03-31
+     */
+    public function editar_json($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // sólo lo puede editar el equipo de soporte
+        if (!$this->Auth->User->inGroup('soporte')) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No está autorizado a editar el JSON del DTE temporal', 'error'
+            );
+            $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request));
+        }
+        // verificar que el JSON sea correcto tratando de leerlo
+        $datos = json_decode($_POST['datos']);
+        if (!$datos) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'JSON es inválido, no se editó', 'error'
+            );
+            $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request));
+        }
+        // guardar JSON
+        $DteTmp->datos = json_encode($datos);
+        if ($DteTmp->save()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'JSON guardado', 'ok'
+            );
+        } else {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible guardar el nuevo JSON', 'error'
+            );
+        }
+        $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request));
+    }
+
 }

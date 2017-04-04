@@ -26,6 +26,9 @@ $(function() {
         <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
 <?php endif; ?>
         <li role="presentation"><a href="#actualizar_fecha" aria-controls="actualizar_fecha" role="tab" data-toggle="tab">Actualizar fecha</a></li>
+<?php if ($_Auth->User->inGroup('soporte')): ?>
+        <li role="presentation"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab">Avanzado</a></li>
+<?php endif; ?>
     </ul>
     <div class="tab-content">
 
@@ -184,6 +187,30 @@ echo $f->end('Actualizar fecha');
 ?>
 </div>
 <!-- FIN ACTUALIZAR FECHA -->
+
+<?php if ($_Auth->User->inGroup('soporte')): ?>
+<!-- INICIO AVANZADO -->
+<div role="tabpanel" class="tab-pane" id="avanzado">
+<?php
+$f = new \sowerphp\general\View_Helper_Form();
+echo $f->begin([
+    'action' => $_base.'/dte/dte_tmps/editar_json/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo,
+    'id' => 'editarJsonForm',
+    'onsubmit' => 'Form.check(\'editarJsonForm\')'
+]);
+echo $f->input([
+    'type' => 'textarea',
+    'name' => 'datos',
+    'label' => 'JSON',
+    'value' => json_encode(json_decode($DteTmp->datos), JSON_PRETTY_PRINT),
+    'check' => 'notempty',
+    'rows' => 20,
+]);
+echo $f->end('Guardar JSON');
+?>
+</div>
+<!-- FIN AVANZADO -->
+<?php endif; ?>
 
     </div>
 </div>
