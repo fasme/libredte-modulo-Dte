@@ -26,22 +26,22 @@ namespace website\Dte;
 /**
  * Comando para actualizar la bandeja de intercambio de los contribuyentes
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-07-01
+ * @version 2017-03-31
  */
 class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
 {
 
-    public function main($grupo = null)
+    public function main($grupo = null, $dias = 7)
     {
         $contribuyentes = $this->getContribuyentes($grupo);
         foreach ($contribuyentes as $rut) {
-            $this->actualizarIntercambio($rut);
+            $this->actualizarIntercambio($rut, $dias);
         }
         $this->showStats();
         return 0;
     }
 
-    private function actualizarIntercambio($rut)
+    private function actualizarIntercambio($rut, $dias)
     {
         $Contribuyente = new Model_Contribuyente($rut);
         if (!$Contribuyente->exists() or !$Contribuyente->getEmailImap()) {
@@ -51,7 +51,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
             $this->out('Actualizando bandeja '.$Contribuyente->config_email_intercambio_user.' del contribuyente '.$Contribuyente->razon_social);
         }
         try {
-            $resultado = $Contribuyente->actualizarBandejaIntercambio();
+            $resultado = $Contribuyente->actualizarBandejaIntercambio($dias);
             if ($resultado['n_EnvioDTE']) {
                 $msg = $Contribuyente->razon_social.','."\n\n";
                 $msg .= 'Tiene '.$resultado['n_EnvioDTE'].' documento(s) nuevo(s) en su bandeja de intercambio.'."\n\n";

@@ -1806,9 +1806,9 @@ class Model_Contribuyente extends \Model_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-07
+     * @version 2016-03-31
      */
-    public function actualizarBandejaIntercambio()
+    public function actualizarBandejaIntercambio($dias = 7)
     {
         $Imap = $this->getEmailImap();
         if (!$Imap) {
@@ -1817,7 +1817,13 @@ class Model_Contribuyente extends \Model_App
             );
         }
         // obtener mensajes sin leer
-        $uids = $Imap->search();
+        if ($dias) {
+            $hoy = date('Y-m-d');
+            $since = \sowerphp\general\Utility_Date::getPrevious($hoy, 'D', (int)$dias);
+            $uids = $Imap->search('UNSEEN SINCE "'.$since.'"');
+        } else {
+            $uids = $Imap->search();
+        }
         if (!$uids) {
             throw new \sowerphp\core\Exception('No hay documentos nuevos que procesar', 204);
         }

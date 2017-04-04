@@ -168,13 +168,13 @@ class Controller_DteIntercambios extends \Controller_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-05
+     * @version 2017-03-31
      */
-    public function actualizar()
+    public function actualizar($dias = 7)
     {
         $Emisor = $this->getContribuyente();
         try {
-            $resultado = $Emisor->actualizarBandejaIntercambio();
+            $resultado = $Emisor->actualizarBandejaIntercambio($dias);
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
                 $e->getMessage(), ($e->getCode()==500 ? 'error' : 'info')
