@@ -216,7 +216,7 @@ echo $f->input([
 ]);
 ?>
 <?php if (isset($Contribuyente)) : ?>
-    <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="responsive thumbnail center" />
+    <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="img-responsive thumbnail center" />
 <?php endif; ?>
 </div>
 <!-- FIN DATOS EMPRESA -->
