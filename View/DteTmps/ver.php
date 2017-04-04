@@ -1,5 +1,10 @@
 <ul class="nav nav-pills pull-right">
     <li>
+        <a href="javascript:__.popup('<?=$_base?>/dte/dte_tmps/vale/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>', 280, 180)">
+            Ver vale
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/dte_tmps" title="Volver a los documentos temporales">
             Volver a documentos temporales
         </a>

@@ -494,6 +494,28 @@ class Controller_DteTmps extends \Controller_App
     }
 
     /**
+     * Acción que permite generar un vale para imprimir con la identificación
+     * del DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-04-04
+     */
+    public function vale($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // pasar datos a la vista
+        $this->layout = 'popup';
+        $this->set('DteTmp', $DteTmp);
+    }
+
+    /**
      * Acción que permite crear el cobro para el DTE y enviar al formulario de pago
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-01-10
