@@ -57,7 +57,7 @@ foreach ($intercambios as &$i) {
 }
 array_unshift($intercambios, [
     '',
-    '<input type="text" name="emisor" class="check integer form-control" placeholder="RUT emisor" autofocus="autofocus" />',
+    '<input type="text" name="emisor" class="check integer form-control" placeholder="RUT o razón social emisor" autofocus="autofocus" />',
     '',
     '',
     '<input type="text" name="folio" class="check integer form-control" placeholder="Folio del DTE" />',
