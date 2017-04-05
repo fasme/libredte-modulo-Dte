@@ -1376,6 +1376,9 @@ class Model_Contribuyente extends \Model_App
             $where[] = 'i.estado IS NULL';
         }
         if (!empty($filter['emisor'])) {
+            if (strpos($filter['emisor'], '-')) {
+                $filter['emisor'] = explode('-', str_replace('.', '', $filter['emisor']));
+            }
             $where[] = 'i.emisor = :emisor';
             $vars['emisor'] = $filter['emisor'];
         }
