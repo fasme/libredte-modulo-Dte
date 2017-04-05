@@ -40,10 +40,25 @@ class Controller_DteIntercambios extends \Controller_App
     public function listar($p = 1, $soloPendientes = false)
     {
         $Emisor = $this->getContribuyente();
-        $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
+        $filter = [
+            'soloPendientes' => $soloPendientes,
+            'p' => $p,
+        ];
+        if (!empty($_GET['search'])) {
+            $search = explode(',', $_GET['search']);
+            foreach ($search as $s) {
+                list($var, $val) = explode(':', $s);
+                $filter[$var] = $val;
+            }
+            $intercambios = $Emisor->getIntercambios($filter);
+            $n_intercambios = count($intercambios);
+        } else {
+            $intercambios = $Emisor->getIntercambios($filter);
+            $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
+        }
         $this->set([
             'Emisor' => $Emisor,
-            'intercambios' => $Emisor->getIntercambios($soloPendientes, $p),
+            'intercambios' => $intercambios,
             'n_intercambios' => $n_intercambios,
             'pages' => ceil($n_intercambios / \sowerphp\core\Configure::read('app.registers_per_page')),
             'p' => $p,

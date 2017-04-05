@@ -1361,14 +1361,32 @@ class Model_Contribuyente extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-04-05
      */
-    public function getIntercambios($soloPendientes = true, $page = 0)
+    public function getIntercambios(array $filter = [])
     {
+        $filter = array_merge([
+            'soloPendientes' => true,
+            'p' => 0,
+        ], $filter);
+        //$soloPendientes = true, $page = 0
         $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
-        $select = $soloPendientes ? '' : ', i.estado, u.usuario';
-        $where = $soloPendientes ? ' AND i.estado IS NULL' : '';
-        if ($page) {
+        $select = $filter['soloPendientes'] ? '' : ', i.estado, u.usuario';
+        $where = [];
+        $vars = [':receptor'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        if ($filter['soloPendientes']) {
+            $where[] = 'i.estado IS NULL';
+        }
+        if (!empty($filter['emisor'])) {
+            $where[] = 'i.emisor = :emisor';
+            $vars['emisor'] = $filter['emisor'];
+        }
+        if (!empty($filter['folio'])) {
+            $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
+            $where[] = $folio_where.' LIKE :folio';
+            $vars['folio'] = $filter['folio'];
+        }
+        if ($filter['p']) {
             $limit = \sowerphp\core\Configure::read('app.registers_per_page');
-            $offset = ($page - 1) * $limit;
+            $offset = ($filter['p'] - 1) * $limit;
             $limit = 'LIMIT '.$limit.' OFFSET '.$offset;
         } else {
             $limit = '';
@@ -1376,10 +1394,10 @@ class Model_Contribuyente extends \Model_App
         $intercambios = $this->db->getTable('
             SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos, i.documentos AS n_documentos'.$select.'
             FROM dte_intercambio AS i LEFT JOIN contribuyente AS e ON i.emisor = e.rut LEFT JOIN usuario AS u ON i.usuario = u.id
-            WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.$where.'
+            WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.($where?(' AND '.implode(' AND ',$where)):'').'
             ORDER BY i.fecha_hora_firma DESC
             '.$limit.'
-        ', [':receptor'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', $vars);
         foreach ($intercambios as &$i) {
             if (!empty($i['razon_social']))
                 $i['emisor'] = $i['razon_social'];
