@@ -35,14 +35,19 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para mostrar la bandeja de intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-15
+     * @version 2017-04-05
      */
-    public function listar()
+    public function listar($p = 1, $soloPendientes = false)
     {
         $Emisor = $this->getContribuyente();
+        $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
         $this->set([
             'Emisor' => $Emisor,
-            'intercambios' => $Emisor->getIntercambios(false),
+            'intercambios' => $Emisor->getIntercambios($soloPendientes, $p),
+            'n_intercambios' => $n_intercambios,
+            'pages' => ceil($n_intercambios / \sowerphp\core\Configure::read('app.registers_per_page')),
+            'p' => $p,
+            'soloPendientes' => $soloPendientes,
         ]);
     }
 

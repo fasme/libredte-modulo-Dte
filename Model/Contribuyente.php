@@ -1359,18 +1359,26 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-21
+     * @version 2017-04-05
      */
-    public function getIntercambios($soloPendientes = true)
+    public function getIntercambios($soloPendientes = true, $page = 0)
     {
         $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
         $select = $soloPendientes ? '' : ', i.estado, u.usuario';
         $where = $soloPendientes ? ' AND i.estado IS NULL' : '';
+        if ($page) {
+            $limit = \sowerphp\core\Configure::read('app.registers_per_page');
+            $offset = ($page - 1) * $limit;
+            $limit = 'LIMIT '.$limit.' OFFSET '.$offset;
+        } else {
+            $limit = '';
+        }
         $intercambios = $this->db->getTable('
             SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos, i.documentos AS n_documentos'.$select.'
             FROM dte_intercambio AS i LEFT JOIN contribuyente AS e ON i.emisor = e.rut LEFT JOIN usuario AS u ON i.usuario = u.id
             WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.$where.'
             ORDER BY i.fecha_hora_firma DESC
+            '.$limit.'
         ', [':receptor'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
         foreach ($intercambios as &$i) {
             if (!empty($i['razon_social']))
