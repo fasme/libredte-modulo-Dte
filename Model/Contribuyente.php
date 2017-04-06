@@ -1359,7 +1359,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-05
+     * @version 2017-04-06
      */
     public function getIntercambios(array $filter = [])
     {
@@ -1378,7 +1378,7 @@ class Model_Contribuyente extends \Model_App
         if (!empty($filter['emisor'])) {
             if (strpos($filter['emisor'], '-') or is_numeric($filter['emisor'])) {
                 if (strpos($filter['emisor'], '-')) {
-                    $filter['emisor'] = explode('-', str_replace('.', '', $filter['emisor']));
+                    $filter['emisor'] = explode('-', str_replace('.', '', $filter['emisor']))[0];
                 }
                 $where[] = 'i.emisor = :emisor';
                 $vars['emisor'] = $filter['emisor'];
