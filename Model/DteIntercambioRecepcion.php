@@ -175,7 +175,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
     /**
      * Método que guarda el XML de la Recepción de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-05
+     * @version 2017-04-07
      */
     public function saveXML($Emisor, $xml) {
 
@@ -196,7 +196,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
         $this->email = !empty($Resultado['Caratula']['MailContacto']) ? substr($Resultado['Caratula']['MailContacto'], 0, 80) : null;
         $this->fecha_hora = str_replace('T', ' ', $Resultado['Caratula']['TmstFirmaResp']);
         $this->estado = $Resultado['RecepcionEnvio']['EstadoRecepEnv'];
-        $this->glosa = substr($Resultado['RecepcionEnvio']['RecepEnvGlosa'], 0, 256);
+        $this->glosa = !empty($Resultado['RecepcionEnvio']['RecepEnvGlosa']) ? substr($Resultado['RecepcionEnvio']['RecepEnvGlosa'], 0, 256) : null;
         $this->xml = base64_encode($xml);
         if (!$this->save()) {
             $this->db->rollback();
