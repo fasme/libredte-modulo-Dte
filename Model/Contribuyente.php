@@ -1840,7 +1840,7 @@ class Model_Contribuyente extends \Model_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-31
+     * @version 2017-04-07
      */
     public function actualizarBandejaIntercambio($dias = 7)
     {
@@ -1866,8 +1866,9 @@ class Model_Contribuyente extends \Model_App
         foreach ($uids as &$uid) {
             $m = $Imap->getMessage($uid, ['subtype'=>['PLAIN', 'HTML', 'XML'], 'extension'=>['xml']]);
             if ($m and isset($m['attachments'][0])) {
+                $email_date = !empty($m['header']->date) ? date('Y-m-d H:i:s', strtotime($m['header']->date)) : date('Y-m-d H:i:s', $Imap->getHeaderInfo($uid)->udate);
                 $datos_email = [
-                    'fecha_hora_email' => date('Y-m-d H:i:s', strtotime($m['header']->date)),
+                    'fecha_hora_email' => $email_date,
                     'asunto' => !empty($m['header']->subject) ? substr($m['header']->subject, 0, 100) : 'Sin asunto',
                     'de' => substr($m['header']->from[0]->mailbox.'@'.$m['header']->from[0]->host, 0, 80),
                     'mensaje' => $m['body']['plain'] ? base64_encode($m['body']['plain']) : null,
