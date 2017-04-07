@@ -189,6 +189,8 @@ class Model_DteIntercambioRecepcion extends \Model_App
         // guardar recepción
         $this->db->beginTransaction();
         $this->responde = explode('-', $Resultado['Caratula']['RutResponde'])[0];
+        if (!is_numeric($this->responde)) // parche por SII que envía en RutResponde: DESCONOCIDO
+            return false;
         $this->recibe = $Emisor->rut;
         $this->codigo = md5($xml);
         $this->contacto = !empty($Resultado['Caratula']['NmbContacto']) ? substr($Resultado['Caratula']['NmbContacto'], 0, 40) : null;
