@@ -1288,10 +1288,13 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Función de la API para consultar por un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-29
+     * @version 2017-04-11
      */
     public function _api_consultar_POST()
     {
+        extract($this->Api->getQuery([
+            'getXML' => false,
+        ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -1316,6 +1319,9 @@ class Controller_DteEmitidos extends \Controller_App
         if ($DteEmitido->fecha!=$this->Api->data['fecha'] or $DteEmitido->total!=$this->Api->data['total']) {
             $this->Api->send('DTE existe, pero fecha y/o monto no coinciden con los registrados', 409);
         }
+        // quitar XML si no se pidió explícitamente
+        if (!$getXML)
+            $DteEmitido->xml = false;
         // enviar DteEmitido
         return $DteEmitido;
     }
