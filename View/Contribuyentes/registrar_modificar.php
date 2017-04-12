@@ -1114,7 +1114,7 @@ echo $f->input([
             Transbank
         </div>
         <div class="panel-body">
-            ¡Próximamente!
+            ¡Proximamente!
         </div>
     </div>
     <!--<div class="panel panel-default">
@@ -1123,9 +1123,43 @@ echo $f->input([
             Servipag
         </div>
         <div class="panel-body">
-            ¡Próximamente!
+            ¿Quieres recibir pagos con Servipag? <a href="<?=$_base?>/contacto/tecnico">Contáctanos si estás interesado en que habilitemos esta opción</a>
         </div>
     </div>-->
+    <!--<div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-paypal"></i>
+            PayPal
+        </div>
+        <div class="panel-body">
+            ¿Quieres recibir pagos con PayPal? <a href="<?=$_base?>/contacto/tecnico">Contáctanos si estás interesado en que habilitemos esta opción</a>
+        </div>
+    </div>-->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bitcoin"></i>
+            Criptomonedas
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'name' => 'config_pagos_btc_billetera',
+    'label' => 'Bitcoin',
+    'value' => $Contribuyente->config_pagos_btc_billetera,
+]);
+echo $f->input([
+    'name' => 'config_pagos_eth_billetera',
+    'label' => 'Etherum',
+    'value' => $Contribuyente->config_pagos_eth_billetera,
+]);
+echo $f->input([
+    'name' => 'config_pagos_xmr_billetera',
+    'label' => 'Monero',
+    'value' => $Contribuyente->config_pagos_xmr_billetera,
+]);
+?>
+        </div>
+    </div>
 </div>
 <!-- FIN PAGOS -->
 <?php endif; ?>
