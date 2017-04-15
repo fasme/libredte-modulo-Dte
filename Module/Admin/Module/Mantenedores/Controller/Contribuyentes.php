@@ -40,7 +40,7 @@ class Controller_Contribuyentes extends \Controller_Maintainer
     /**
      * Acción que permite cargar los datos de contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2016-06-18
+     * @version 2017-04-14
      */
     public function importar()
     {
@@ -50,25 +50,27 @@ class Controller_Contribuyentes extends \Controller_Maintainer
             $Comunas = new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas();
             $actualizados = 0;
             foreach ($data as $c) {
-                if (empty($c[0]))
+                if (empty($c[0])) {
                     continue;
+                }
                 $Contribuyente = new \website\Dte\Model_Contribuyente($c[0]);
-                if (!$Contribuyente->exists() or $Contribuyente->usuario)
+                if ($Contribuyente->usuario) {
                     continue;
+                }
                 $actualizado = false;
-                if (empty($Contribuyente->email) and !empty($c[1])) {
-                    $Contribuyente->email = substr(trim($c[1]), 0, 80);
+                if ((empty($Contribuyente->razon_social) or in_array($Contribuyente->razon_social, [$Contribuyente->getRUT(), $Contribuyente->rut.'-'.$Contribuyente->dv])) and !empty($c[1])) {
+                    $Contribuyente->razon_social = substr(trim($c[1]), 0, 100);
                     $actualizado = true;
                 }
-                if (empty($Contribuyente->telefono) and !empty($c[2])) {
-                    $Contribuyente->telefono = substr(trim($c[2]), 0, 20);
+                if (empty($Contribuyente->giro) and !empty($c[2])) {
+                    $Contribuyente->giro = substr(trim($c[2]), 0, 80);
                     $actualizado = true;
                 }
                 if (empty($Contribuyente->direccion) and !empty($c[3])) {
                     $Contribuyente->direccion = substr(trim($c[3]), 0, 70);
                     $actualizado = true;
                 }
-                if (empty($Contribuyente->comuna)) {
+                if (empty($Contribuyente->comuna) and !empty($c[4])) {
                     if (is_numeric($c[4])) {
                         $Contribuyente->comuna = trim($c[4]);
                         $actualizado = true;
@@ -80,11 +82,24 @@ class Controller_Contribuyentes extends \Controller_Maintainer
                         }
                     }
                 }
+                if (empty($Contribuyente->email) and !empty($c[5])) {
+                    $Contribuyente->email = substr(trim($c[5]), 0, 80);
+                    $actualizado = true;
+                }
+                if (empty($Contribuyente->telefono) and !empty($c[6])) {
+                    $Contribuyente->telefono = substr(trim($c[6]), 0, 20);
+                    $actualizado = true;
+                }
+                if (empty($Contribuyente->actividad_economica) and !empty($c[7])) {
+                    $Contribuyente->actividad_economica = (int)($c[7]);
+                    $actualizado = true;
+                }
                 if ($actualizado) {
                     $Contribuyente->modificado = date('Y-m-d H:i:s');
                     try {
-                        if ($Contribuyente->save())
+                        if ($Contribuyente->save()) {
                             $actualizados++;
+                        }
                     } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                     }
                 }
