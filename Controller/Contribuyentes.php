@@ -262,7 +262,7 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-08
+     * @version 2017-04-24
      */
     private function prepararDatosContribuyente(&$Contribuyente)
     {
@@ -434,6 +434,22 @@ class Controller_Contribuyentes extends \Controller_App
             unset($_POST['config_contabilidad_mapeo_compras_total']);
         } else {
             $_POST['config_contabilidad_mapeo_compras'] = null;
+        }
+        // guardar datos de módulo Pagos
+        if (\sowerphp\core\Module::loaded('Pagos')) {
+            // guardar archivos transbank
+            $dir = DIR_STATIC.'/contribuyentes/'.$Contribuyente->rut.'/transbank';
+            if (is_dir($dir) or (!is_dir($dir) and is_writable (dirname($dir)) and mkdir($dir))) {
+                foreach (['key'=>'application/x-iwork-keynote-sffkey', 'crt'=>'application/pkix-cert'] as $archivo => $mimetype) {
+                    $a = 'config_pagos_transbank_'.$archivo;
+                    if (!empty($_FILES[$a]) and !$_FILES[$a]['error'] and $_FILES[$a]['type']==$mimetype) {
+                        $md5 = md5(file_get_contents($_FILES[$a]['tmp_name'])).'.'.$archivo;
+                        if (move_uploaded_file($_FILES[$a]['tmp_name'], $dir.'/'.$md5)) {
+                            $_POST[$a] = $md5;
+                        }
+                    }
+                }
+            }
         }
         // poner valores por defecto
         foreach (Model_Contribuyente::$defaultConfig as $key => $value) {

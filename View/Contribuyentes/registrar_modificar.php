@@ -1114,7 +1114,27 @@ echo $f->input([
             Transbank
         </div>
         <div class="panel-body">
-            ¡Proximamente!
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pagos_transbank_activo',
+    'label' => '¿Activo?',
+    'options' => ['No', 'Integración', 'Producción'],
+    'value' => $Contribuyente->config_pagos_transbank_activo,
+]);
+echo $f->input([
+    'type' => 'file',
+    'name' => 'config_pagos_transbank_key',
+    'label' => 'Llave',
+    'help' => 'Archivo actual: '.$Contribuyente->config_pagos_transbank_key,
+]);
+echo $f->input([
+    'type' => 'file',
+    'name' => 'config_pagos_transbank_crt',
+    'label' => 'Certificado',
+    'help' => 'Archivo actual: '.$Contribuyente->config_pagos_transbank_crt,
+]);
+?>
         </div>
     </div>
     <!--<div class="panel panel-default">
@@ -1149,7 +1169,7 @@ echo $f->input([
 ]);
 echo $f->input([
     'name' => 'config_pagos_eth_billetera',
-    'label' => 'Etherum',
+    'label' => 'Ethereum',
     'value' => $Contribuyente->config_pagos_eth_billetera,
 ]);
 echo $f->input([
