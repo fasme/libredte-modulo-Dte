@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Facturación electrónica <small>dashboard <?=$Emisor->razon_social?></small></h1></div>
+<div class="page-header"><h1>Facturación electrónica <small>dashboard <?=$Emisor->getNombre()?></small></h1></div>
 
 <div class="row">
     <div class="col-md-3 col-sm-6">

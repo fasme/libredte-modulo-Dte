@@ -449,6 +449,16 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el nombre del contribuyente: nombre de fantasía si existe o razón social
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-04-24
+     */
+    public function getNombre()
+    {
+        return $this->config_extra_nombre_fantasia ? $this->config_extra_nombre_fantasia : $this->razon_social;
+    }
+
+    /**
      * Método que envía un correo electrónico al contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-16
@@ -953,13 +963,12 @@ class Model_Contribuyente extends \Model_App
      */
     public function getEmailSmtp($email = 'intercambio')
     {
-	$name = $this->config_extra_nombre_fantasia ? $this->config_extra_nombre_fantasia : $this->razon_social;
         return new \sowerphp\core\Network_Email([
             'type' => 'smtp',
             'host' => $this->{'config_email_'.$email.'_smtp'},
             'user' => $this->{'config_email_'.$email.'_user'},
             'pass' => $this->{'config_email_'.$email.'_pass'},
-            'from' => ['email'=>$this->{'config_email_'.$email.'_user'}, 'name'=>str_replace(',', '', $name)],
+            'from' => ['email'=>$this->{'config_email_'.$email.'_user'}, 'name'=>str_replace(',', '', $this->getNombre())],
         ]);
     }
 
