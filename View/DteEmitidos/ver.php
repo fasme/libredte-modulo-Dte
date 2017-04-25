@@ -134,33 +134,30 @@ echo $f->end('Descargar PDF');
 <div role="tabpanel" class="tab-pane" id="email">
 <?php
 $enlace_pagar_dte = $_url.'/pagos/documentos/pagar/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$Emisor->rut.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total;
+$asunto = 'EnvioDTE: '.num($Emisor->rut).'-'.$Emisor->dv.' - '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio;
+$mensaje = $Receptor->razon_social.','."\n\n";
+$mensaje .= 'Se adjunta '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha).' por un monto total de $'.num($DteEmitido->total).'.-'."\n\n";
+if ($Emisor->config_pagos_habilitado and $DteEmitido->getTipo()->operacion=='S') {
+    $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+} else {
+    $mensaje .= 'Enlace directo: '.$pdf_publico."\n\n";
+}
+$mensaje .= 'Saluda atentamente,'."\n\n";
+$mensaje .= '-- '."\n";
+$mensaje .= $Emisor->getNombre()."\n";
+$mensaje .= $Emisor->giro."\n";
+$contacto = [];
+if (!empty($Emisor->telefono))
+    $contacto[] = $Emisor->telefono;
+if (!empty($Emisor->email))
+    $contacto[] = $Emisor->email;
+if ($Emisor->config_extra_web)
+    $contacto[] = $Emisor->config_extra_web;
+if ($contacto)
+    $mensaje .= implode(' - ', $contacto)."\n";
+$mensaje .= $Emisor->direccion.', '.$Emisor->getComuna()->comuna."\n";
+echo $f->begin(['action'=>$_base.'/dte/dte_emitidos/enviar_email/'.$DteEmitido->dte.'/'.$DteEmitido->folio, 'id'=>'emailForm', 'onsubmit'=>'Form.check(\'emailForm\')']);
 if ($emails) {
-    $asunto = 'EnvioDTE: '.num($Emisor->rut).'-'.$Emisor->dv.' - '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio;
-    $mensaje = $Receptor->razon_social.','."\n\n";
-    $mensaje .= 'Se adjunta '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha).' por un monto total de $'.num($DteEmitido->total).'.-'."\n\n";
-    if ($Emisor->config_pagos_habilitado and $DteEmitido->getTipo()->operacion=='S') {
-        $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
-    } else {
-        $mensaje .= 'Enlace directo: '.$pdf_publico."\n\n";
-    }
-    $mensaje .= 'Saluda atentamente,'."\n\n";
-    $mensaje .= '-- '."\n";
-    if ($Emisor->config_extra_nombre_fantasia) {
-        $mensaje .= $Emisor->config_extra_nombre_fantasia.' ('.$Emisor->razon_social.')'."\n";
-    } else {
-        $mensaje .= $Emisor->razon_social."\n";
-    }
-    $mensaje .= $Emisor->giro."\n";
-    $contacto = [];
-    if (!empty($Emisor->telefono))
-        $contacto[] = $Emisor->telefono;
-    if (!empty($Emisor->email))
-        $contacto[] = $Emisor->email;
-    if ($Emisor->config_extra_web)
-        $contacto[] = $Emisor->config_extra_web;
-    if ($contacto)
-        $mensaje .= implode(' - ', $contacto)."\n";
-    $mensaje .= $Emisor->direccion.', '.$Emisor->getComuna()->comuna."\n";
     $table = [];
     $checked = [];
     foreach ($emails as $k => $e) {
@@ -168,7 +165,6 @@ if ($emails) {
         if ($k=='Email intercambio')
             $checked = [$e];
     }
-    echo $f->begin(['action'=>$_base.'/dte/dte_emitidos/enviar_email/'.$DteEmitido->dte.'/'.$DteEmitido->folio, 'id'=>'emailForm', 'onsubmit'=>'Form.check(\'emailForm\')']);
     echo $f->input([
         'type' => 'tablecheck',
         'name' => 'emails',
@@ -178,13 +174,12 @@ if ($emails) {
         'checked' => $checked,
         'help' => 'Seleccionar emails a los que se enviará el documento',
     ]);
-    echo $f->input(['name'=>'asunto', 'label'=>'Asunto', 'value'=>$asunto, 'check'=>'notempty']);
-    echo $f->input(['type'=>'textarea', 'name'=>'mensaje', 'label'=>'Mensaje', 'value'=>$mensaje, 'rows'=>10, 'check'=>'notempty']);
-    echo $f->input(['type'=>'checkbox', 'name'=>'cedible', 'label'=>'¿Copia cedible?', 'checked'=>$Emisor->config_pdf_dte_cedible]);
-    echo $f->end('Enviar PDF y XML por email');
-} else {
-    echo '<p>No hay emails registrados para el receptor ni el documento.</p>',"\n";
 }
+echo $f->input(['name'=>'para_extra', 'label'=>'Para (extra)', 'check'=>'emails', 'placeholder'=>'correo@empresa.cl, otro@empresa.cl']);
+echo $f->input(['name'=>'asunto', 'label'=>'Asunto', 'value'=>$asunto, 'check'=>'notempty']);
+echo $f->input(['type'=>'textarea', 'name'=>'mensaje', 'label'=>'Mensaje', 'value'=>$mensaje, 'rows'=>10, 'check'=>'notempty']);
+echo $f->input(['type'=>'checkbox', 'name'=>'cedible', 'label'=>'¿Copia cedible?', 'checked'=>$Emisor->config_pdf_dte_cedible]);
+echo $f->end('Enviar PDF y XML por email');
 ?>
 </div>
 <!-- FIN ENVIAR POR EMAIL -->

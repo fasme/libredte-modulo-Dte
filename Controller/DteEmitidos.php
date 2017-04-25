@@ -389,18 +389,27 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que envía por email el PDF y el XML del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-04-25
      */
     public function enviar_email($dte, $folio)
     {
         if (isset($_POST['submit'])) {
+            // armar emails a enviar
+            $emails = [];
+            if (!empty($_POST['emails'])) {
+                $emails = $_POST['emails'];
+            }
+            if (!empty($_POST['para_extra'])) {
+                $emails = array_merge($emails, explode(',', str_replace(' ', '', $_POST['para_extra'])));
+            }
+            // enviar correo
             $Emisor = $this->getContribuyente();
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->Auth->User->hash);
             $response = $rest->post(
                 $this->request->url.'/api/dte/dte_emitidos/enviar_email/'.$dte.'/'.$folio.'/'.$Emisor->rut,
                 [
-                    'emails' => $_POST['emails'],
+                    'emails' => $emails,
                     'asunto' => $_POST['asunto'],
                     'mensaje' => $_POST['mensaje'],
                     'pdf' => 1,
@@ -416,7 +425,7 @@ class Controller_DteEmitidos extends \Controller_App
             }
             else {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Se envió el DTE a: '.implode(', ', $_POST['emails']), 'ok'
+                    'Se envió el DTE a: '.implode(', ', $emails), 'ok'
                 );
             }
         }
