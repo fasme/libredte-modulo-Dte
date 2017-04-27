@@ -802,12 +802,12 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que propone una referencia para el documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-04-27
      */
     public function getPropuestaReferencia()
     {
         // si es factura o boleta se anula con nota crédito
-        if (in_array($this->dte, [33, 34, 39, 41, 56])) {
+        if (in_array($this->dte, [33, 34, 39, 41, 46, 56])) {
             return [
                 'titulo' => 'Anular documento',
                 'color' => 'danger',
