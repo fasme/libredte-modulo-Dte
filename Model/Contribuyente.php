@@ -1134,7 +1134,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega las ventas de un período
      * @todo Corregir ID en Extranjero y asignar los NULL por los valores que corresponden (quizás haya que modificar tabla dte_emitido)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-26
+     * @version 2017-04-28
      */
     public function getVentas($periodo)
     {
@@ -1206,7 +1206,15 @@ class Model_Contribuyente extends \Model_App
                 NULL AS emisor_nc_nd_fc,
                 e.total
             FROM dte_tipo AS t, dte_emitido AS e, contribuyente AS r
-            WHERE t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
+            WHERE
+                t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
+                AND (e.emisor, e.dte, e.folio, e.certificacion) NOT IN (
+                    SELECT e.emisor, e.dte, e.folio, e.certificacion
+                    FROM
+                        dte_emitido AS e
+                        JOIN dte_referencia AS r ON r.emisor = e.emisor AND r.dte = e.dte AND r.folio = e.folio AND r.certificacion = e.certificacion
+                        WHERE '.$periodo_col.' = :periodo AND r.referencia_dte = 46
+                )
             ORDER BY e.fecha, e.dte, e.folio
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
     }
@@ -1583,7 +1591,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-04-28
      */
     public function getCompras($periodo)
     {
@@ -1666,10 +1674,21 @@ class Model_Contribuyente extends \Model_App
                     NULL AS impuesto_vehiculos,
                     NULL AS sucursal_sii,
                     NULL AS numero_interno,
-                    NULL AS emisor_nc_nd_fc,
+                    CASE WHEN r.dte IN (56, 61) THEN 1 ELSE NULL END AS emisor_nc_nd_fc,
                     r.total
                 FROM dte_emitido AS r, contribuyente AS e
-                WHERE r.receptor = e.rut AND r.emisor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND r.dte = 46
+                WHERE
+                    r.receptor = e.rut AND r.emisor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
+                    AND (
+                        r.dte = 46
+                        OR (r.emisor, r.dte, r.folio, r.certificacion) IN (
+                            SELECT r.emisor, r.dte, r.folio, r.certificacion
+                            FROM
+                                dte_emitido AS r
+                                JOIN dte_referencia AS re ON re.emisor = r.emisor AND re.dte = r.dte AND re.folio = r.folio AND re.certificacion = r.certificacion
+                                WHERE '.$periodo_col.' = :periodo AND re.referencia_dte = 46
+                        )
+                    )
             )
             ORDER BY fecha, dte, folio
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
