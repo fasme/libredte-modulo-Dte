@@ -100,7 +100,8 @@ Morris.Line({
     xkey: 'dia',
     ykeys: ['total'],
     labels: ['DTEs'],
-    resize: true
+    resize: true,
+    parseTime: false
 });
 Morris.Line({
     element: 'grafico-por_hora',
@@ -108,7 +109,8 @@ Morris.Line({
     xkey: 'hora',
     ykeys: ['total'],
     labels: ['DTEs'],
-    resize: true
+    resize: true,
+    parseTime: false
 });
 Morris.Bar({
     element: 'grafico-por_sucursal',
