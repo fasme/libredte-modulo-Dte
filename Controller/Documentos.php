@@ -298,7 +298,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-26
+     * @version 2017-05-09
      */
     public function previsualizacion()
     {
@@ -355,18 +355,6 @@ class Controller_Documentos extends \Controller_App
         $Receptor->direccion = $_POST['DirRecep'];
         if (!empty($_POST['CmnaRecep'])) {
             $Receptor->comuna = $_POST['CmnaRecep'];
-        }
-        // guardar receptor si no tiene usuario asociado
-        if (!$Receptor->usuario) {
-            $Receptor->modificado = date('Y-m-d H:i:s');
-            try {
-                $Receptor->save();
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'No fue posible guardar el receptor: '.$e->getMessage()
-                );
-                $this->redirect('/dte/documentos/emitir');
-            }
         }
         // generar datos del encabezado para el dte
         $dte = [
