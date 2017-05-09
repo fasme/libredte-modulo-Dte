@@ -26,7 +26,7 @@ namespace website\Dte\Informes;
 /**
  * Helper para generar la propuesta del formulario 29
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-10
+ * @version 2017-05-09
  */
 class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
 {
@@ -55,6 +55,30 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             'subtotal' => [
                 'documentos' => 524,
                 'iva' => 525,
+            ],
+        ],
+        'supermercado' => [
+            'nombre' => 'Supermercado',
+            'tipos' => [],
+            'subtotal' => [
+                'documentos' => 761,
+                'iva' => 762,
+            ],
+        ],
+        'importaciones' => [
+            'nombre' => 'Importaciones del giro',
+            'tipos' => [914],
+            'subtotal' => [
+                'documentos' => 534,
+                'iva' => 535,
+            ],
+        ],
+        'importaciones_activo' => [
+            'nombre' => 'Importaciones de activo fijo',
+            'tipos' => [],
+            'subtotal' => [
+                'documentos' => 536,
+                'iva' => 553,
             ],
         ],
         'debito' => [
