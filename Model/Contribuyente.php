@@ -2035,7 +2035,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getDteEmitidosSinEnviar($certificacion = null)
     {
-	$certificacion = (int)($certificacion !== null ? $certificacion : $this->config_ambiente_en_certificacion);
+        $certificacion = (int)($certificacion !== null ? $certificacion : $this->config_ambiente_en_certificacion);
         return $this->db->getTable('
             SELECT dte, folio
             FROM dte_emitido
@@ -2055,7 +2055,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getDteEmitidosSinEstado($certificacion = null)
     {
-	$certificacion = (int)($certificacion !== null ? $certificacion : $this->config_ambiente_en_certificacion);
+        $certificacion = (int)($certificacion !== null ? $certificacion : $this->config_ambiente_en_certificacion);
         return $this->db->getTable('
             SELECT dte, folio
             FROM dte_emitido
