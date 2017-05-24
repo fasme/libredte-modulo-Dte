@@ -83,6 +83,7 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
                 AND t.enviar = true
                 AND e.fecha >= :desde
                 AND e.certificacion = :certificacion
+                AND e.emisor != e.receptor
                 AND e.track_id IS NOT NULL
                 AND e.revision_estado IS NOT NULL
                 AND SUBSTR(e.revision_estado,1,3) NOT IN (\''.implode('\', \'', $estados).'\')
