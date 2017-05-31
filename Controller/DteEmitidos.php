@@ -640,7 +640,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite actualizar el track_id del DteEmitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-16
+     * @version 2017-05-31
      */
     public function avanzado_track_id($dte, $folio)
     {
@@ -654,7 +654,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/listar');
         }
         // sólo administrador puede cambiar track id
-        if ($DteEmitido->usuario != $this->Auth->User->id  and (!$Emisor->config_app_soporte or !$this->Auth->User->inGroup(['soporte']))) {
+        if ($Emisor->usuario != $this->Auth->User->id and (!$Emisor->config_app_soporte or !$this->Auth->User->inGroup(['soporte']))) {
             \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el Track ID', 'error');
             $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request));
         }
