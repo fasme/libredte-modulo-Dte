@@ -259,19 +259,25 @@ class Model_Item extends \Model_App
      * @param fecha Permite solicitar el precio para una fecha en particular (sirve cuando el precio no está en CLP)
      * @param bruto =false se obtendrá el valor neto del item, =true se obtendrá el valor bruto (con impuestos)
      * @param moneda Tipo de moneda en la que se desea obtener el precio del item
+     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtnener el precio
      * @todo Implementar obtención de precio en moneda diferente a CLP y montos neto/bruto cuando hay impuestos específicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-25
+     * @version 2017-06-02
      */
-    public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP')
+    public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = 0)
     {
-        $precio = $this->bruto ? round($this->precio/1.19, $this->moneda!='CLP'?3:0) : $this->precio;
-        if ($this->moneda=='CLP')
-            return $precio;
+        if ($moneda == 'CLP') {
+            $precio = $this->bruto ? $this->precio/1.19 : $this->precio;
+            if ($this->moneda=='CLP') {
+                return $precio;
+            }
+        } else {
+            $precio = $this->bruto ? round($this->precio/1.19, $this->moneda!='CLP'?3:0) : $this->precio;
+        }
         if (!$fecha)
             $fecha = date('Y-m-d');
-        $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, 'CLP', $fecha))->valor;
-        return round($precio * $cambio);
+        $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, $moneda, $fecha))->valor;
+        return round($precio * $cambio, $decimales);
     }
 
 }
