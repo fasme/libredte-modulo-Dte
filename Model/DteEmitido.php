@@ -552,7 +552,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * restaura el folio para que se volver a utilizar.
      * Sólo se pueden eliminar DTE que estén rechazados o no enviados al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2017-06-01
      */
     public function delete()
     {
@@ -578,7 +578,7 @@ class Model_DteEmitido extends Model_Base_Envio
             $this->db->rollback();
             return false;
         }
-        if ($this->getEmisor()->config_pagos_habilitado) {
+        if (\sowerphp\core\Module::loaded('Pagos')) {
             $Cobro = $this->getCobro(false);
             if ($Cobro->exists()) {
                 if (!$Cobro->delete()) {
