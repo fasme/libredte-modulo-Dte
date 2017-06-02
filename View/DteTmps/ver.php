@@ -1,4 +1,11 @@
 <ul class="nav nav-pills pull-right">
+<?php if (\sowerphp\core\Module::loaded('Crm')) :?>
+    <li>
+        <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>">
+            Ir al CRM
+        </a>
+    </li>
+<?php endif; ?>
     <li>
         <a href="javascript:__.popup('<?=$_base?>/dte/dte_tmps/vale/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>', 280, 180)">
             Ver vale

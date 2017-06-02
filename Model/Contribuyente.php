@@ -423,9 +423,8 @@ class Model_Contribuyente extends \Model_App
      * usuario administrador y se elimina la configuración.
      * Los datos del contribuyente de documentos emitidos, recibidos, etc no se
      * eliminan por defecto, se debe solicitar específicamente.
-     * @todo Eliminar datos de DTE emitidos, recibidos, consumos, folios, etc (no el contribuyente en si)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-16
+     * @version 2017-06-02
      */
     public function delete($all = false)
     {
@@ -440,11 +439,65 @@ class Model_Contribuyente extends \Model_App
             $this->db->rollback();
             return false;
         }
-        $this->db->commit();
         // eliminar todos los registros de la empresa de la base de datos
         if ($all) {
-            // TODO
+            // módulo Dte
+            $this->db->query('DELETE FROM cobranza WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM contribuyente_dte WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM contribuyente_usuario WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_boleta_consumo WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_caf WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_compra WHERE receptor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_emitido WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_folio WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_guia WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio WHERE receptor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio_recepcion WHERE recibe = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio_recepcion_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio_recibo WHERE recibe = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio_recibo_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio_resultado WHERE recibe = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_intercambio_resultado_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_recibido WHERE receptor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_referencia WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_tmp WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_venta WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM item_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            // módulo Lce
+            if (\sowerphp\core\Module::loaded('Lce')) {
+                $this->db->query('DELETE FROM lce_asiento WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM lce_asiento_detalle WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM lce_cuenta WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM lce_cuenta_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            }
+            // módulo Pagos
+            if (\sowerphp\core\Module::loaded('Pagos')) {
+                $this->db->query('DELETE FROM cobro WHERE emisor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cobro_masivo WHERE emisor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cobro_masivo_emitido WHERE emisor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cobro_masivo_item WHERE emisor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cobro_masivo_programado WHERE emisor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cobro_masivo_programado_item WHERE emisor = :rut', [':rut'=>$this->rut]);
+            }
+            // módulo Rrhh
+            if (\sowerphp\core\Module::loaded('Rrhh')) {
+                $this->db->query('DELETE FROM area WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM empleado WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM empleado_asignacion WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM empleado_carga WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM empleado_contrato WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM empleado_descuento WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM empleado_liquidacion WHERE empresa = :rut', [':rut'=>$this->rut]);
+            }
+            // módulo Crm
+            if (\sowerphp\core\Module::loaded('Crm')) {
+                $this->db->query('DELETE FROM cliente WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cliente_contacto WHERE empresa = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM cliente_direccion WHERE empresa = :rut', [':rut'=>$this->rut]);
+            }
         }
+        $this->db->commit();
         return true;
     }
 
@@ -2143,18 +2196,30 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de clientes del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-18
+     * @version 2017-06-01
      */
-    public function getClientes()
+    public function getClientes(array $filtros = [])
     {
-        return $this->db->getTable('
-            SELECT c.rut, c.dv, c.razon_social, c.telefono, c.email, c.direccion, co.comuna
-            FROM
-                contribuyente AS c
-                LEFT JOIN comuna AS co ON co.codigo = c.comuna
-            WHERE c.rut IN (SELECT receptor FROM dte_emitido WHERE emisor = :emisor)
-            ORDER BY c.razon_social
-        ', [':emisor'=>$this->rut]);
+        // si no hay módulo CRM se sacan los clientes de los DTE emitidos
+        if (!\sowerphp\core\Module::loaded('Crm')) {
+            return $this->db->getTable('
+                SELECT c.rut, c.dv, c.razon_social, c.telefono, c.email, c.direccion, co.comuna
+                FROM
+                    contribuyente AS c
+                    LEFT JOIN comuna AS co ON co.codigo = c.comuna
+                WHERE
+                    c.rut IN (
+                        SELECT receptor
+                        FROM dte_emitido
+                        WHERE emisor = :emisor AND receptor NOT IN (55555555, 66666666)
+                    )
+                ORDER BY c.razon_social
+            ', [':emisor'=>$this->rut]);
+        }
+        // si hay módulo CRM se sacan los clientes desde el módulo
+        else {
+            return (new \website\Crm\Model_Clientes())->setContribuyente($this)->getListado($filtros);
+        }
     }
 
     /**

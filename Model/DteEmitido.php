@@ -402,7 +402,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el listado de correos a los que se debería enviar el
      * DTE (correo receptor, correo intercambio y correo del dte)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-09
+     * @version 2017-06-02
      */
     public function getEmails()
     {
@@ -428,6 +428,19 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'], $emails)) {
             $emails['DTE T'.$this->dte.'F'.$this->folio] = $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'];
+        }
+        if (\sowerphp\core\Module::loaded('Crm')) {
+            try {
+                $Cliente = new \website\Crm\Model_Cliente($this->getEmisor(), $this->getReceptor()->rut);
+                $contactos = $Cliente->getContactos();
+                $i = 1;
+                foreach ($contactos as $c) {
+                    if (!in_array($c['email'], $emails)) {
+                        $emails['Correo CRM #'.$i++] = $c['email'];
+                    }
+                }
+            } catch (\Exception $e) {
+            }
         }
         return $emails;
     }
