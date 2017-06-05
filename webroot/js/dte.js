@@ -13,8 +13,10 @@ Contribuyente.setDatos = function (form) {
     f.comuna.value = "";
     f.telefono.value = "";
     f.email.value = "";
-    f.config_ambiente_produccion_fecha.value = "";
-    f.config_ambiente_produccion_numero.value = "";
+    if (f.config_ambiente_produccion_fecha != undefined) {
+        f.config_ambiente_produccion_fecha.value = "";
+        f.config_ambiente_produccion_numero.value = "";
+    }
     // si no se indicó el rut no se hace nada más
     if (__.empty(f.rut.value))
         return;
@@ -39,8 +41,10 @@ Contribuyente.setDatos = function (form) {
             f.comuna.value = c.comuna;
             f.telefono.value = c.telefono;
             f.email.value = c.email;
-            f.config_ambiente_produccion_fecha.value = c.config_ambiente_produccion_fecha !== undefined ? c.config_ambiente_produccion_fecha : null;
-            f.config_ambiente_produccion_numero.value = c.config_ambiente_produccion_numero !== undefined ? c.config_ambiente_produccion_numero : null ;
+            if (f.config_ambiente_produccion_fecha != undefined) {
+                f.config_ambiente_produccion_fecha.value = c.config_ambiente_produccion_fecha !== undefined ? c.config_ambiente_produccion_fecha : null;
+                f.config_ambiente_produccion_numero.value = c.config_ambiente_produccion_numero !== undefined ? c.config_ambiente_produccion_numero : null ;
+            }
         },
         error: function (jqXHR) {
             console.log(jqXHR.responseJSON);
