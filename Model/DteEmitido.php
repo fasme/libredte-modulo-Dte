@@ -990,4 +990,15 @@ class Model_DteEmitido extends Model_Base_Envio
         return $this->getDatos()['Encabezado']['Totales']['MntTotal'];
     }
 
+    /**
+     * Método que entrega el detalle del DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-06
+     */
+    public function getDetalle()
+    {
+        $Detalle = $this->getDatos()['Detalle'];
+        return isset($Detalle[0]) ? $Detalle : [$Detalle];
+    }
+
 }
