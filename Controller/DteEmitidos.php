@@ -605,7 +605,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite actualizar el tipo de cambio de un documento de exportación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-18
+     * @version 2017-06-10
      */
     public function avanzado_tipo_cambio($dte, $folio)
     {
@@ -626,7 +626,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request).'#avanzado');
         }
         // sólo administrador puede cambiar el tipo de cambio
-        if ($Emisor->usuario != $this->Auth->User->id) {
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el tipo de cambio', 'error');
             $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request));
         }
@@ -640,7 +640,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite actualizar el track_id del DteEmitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-05-31
+     * @version 2017-06-10
      */
     public function avanzado_track_id($dte, $folio)
     {
@@ -654,7 +654,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/listar');
         }
         // sólo administrador puede cambiar track id
-        if ($Emisor->usuario != $this->Auth->User->id and (!$Emisor->config_app_soporte or !$this->Auth->User->inGroup(['soporte']))) {
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el Track ID', 'error');
             $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request));
         }

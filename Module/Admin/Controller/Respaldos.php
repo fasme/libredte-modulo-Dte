@@ -35,12 +35,12 @@ class Controller_Respaldos extends \Controller_App
     /**
      * Acción que permite exportar todos los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-15
+     * @version 2017-06-10
      */
     public function exportar($all = false)
     {
         $Emisor = $this->getContribuyente();
-        if ($Emisor->usuario != $this->Auth->User->id) {
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Sólo el administrador de la empresa puede descargar un respaldo', 'error'
             );
@@ -91,12 +91,12 @@ class Controller_Respaldos extends \Controller_App
     /**
      * Acción que permite exportar todos los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-04
+     * @version 2017-06-10
      */
     public function dropbox($desconectar = false)
     {
         $Emisor = $this->getContribuyente();
-        if ($Emisor->usuario != $this->Auth->User->id) {
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Sólo el administrador de la empresa puede configurar Dropbox', 'error'
             );

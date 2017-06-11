@@ -270,12 +270,12 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite descargar el XML del archivo CAF
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-24
+     * @version 2017-06-10
      */
     public function xml($dte, $desde)
     {
         $Emisor = $this->getContribuyente();
-        if ($Emisor->usuario != $this->Auth->User->id) {
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Sólo el administrador de la empresa puede descargar los archivos CAF', 'error'
             );

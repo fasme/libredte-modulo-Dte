@@ -211,7 +211,7 @@ class Controller_Contribuyentes extends \Controller_App
             $this->redirect('/dte/contribuyentes/seleccionar');
         }
         // verificar que el usuario sea el administrador o de soporte autorizado
-        if ($Contribuyente->usuario!=$this->Auth->User->id and (!$Contribuyente->config_app_soporte or !$this->Auth->User->inGroup(['soporte']))) {
+        if (!$Contribuyente->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
             $this->redirect('/dte/contribuyentes/seleccionar');
         }
@@ -462,7 +462,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite editar los usuarios autorizados de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-12
+     * @version 2017-06-10
      */
     public function usuarios($rut)
     {
@@ -474,7 +474,7 @@ class Controller_Contribuyentes extends \Controller_App
             $this->redirect('/dte/contribuyentes/seleccionar');
         }
         // verificar que el usuario sea el administrador o sea soporte autorizado
-        if ($Contribuyente->usuario!=$this->Auth->User->id and (!$Contribuyente->config_app_soporte or !$this->Auth->User->inGroup(['soporte']))) {
+        if (!$Contribuyente->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
             $this->redirect('/dte/contribuyentes/seleccionar');
         }

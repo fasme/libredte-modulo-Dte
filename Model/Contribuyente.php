@@ -658,13 +658,18 @@ class Model_Contribuyente extends \Model_App
      * @param permisos Permisos que se desean verificar que tenga el usuario
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-12
+     * @version 2017-06-10
      */
     public function usuarioAutorizado(\sowerphp\app\Sistema\Usuarios\Model_Usuario $Usuario, $permisos = [])
     {
-        // si es el administrador de la empresa se le autoriza
-        if ($Usuario->id == $this->usuario)
+        // si es el usuario que registró la empresa se le autoriza
+        if ($this->usuario == $Usuario->id) {
             return true;
+        }
+        // si se pide usuario administrador sólo se permite al que registró empresa (parche hasta tener los permisos andando)
+        if ($permisos == 'admin') {
+            return false; ///< No se debería llegar acá, pq si era el administrador se retorno true antes
+        }
         // normalizar permisos
         if (!is_array($permisos))
             $permisos = [$permisos];
