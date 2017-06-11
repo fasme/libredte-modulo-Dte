@@ -597,7 +597,7 @@ class Model_Contribuyente extends \Model_App
      * Método que asigna los usuarios autorizados a operar con el contribuyente
      * @param usuarios Arreglo con índice nombre de usuario y valores un arreglo con los permisos a asignar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-20
+     * @version 2017-06-11
      */
     public function setUsuarios(array $usuarios) {
         $this->db->beginTransaction();
@@ -606,6 +606,8 @@ class Model_Contribuyente extends \Model_App
             [':rut'=>$this->rut]
         );
         foreach ($usuarios as $usuario => $permisos) {
+            if (!$permisos)
+                continue;
             $Usuario = new \sowerphp\app\Sistema\Usuarios\Model_Usuario($usuario);
             if (!$Usuario->exists()) {
                 $this->db->rollback();
@@ -625,15 +627,21 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el listado de usuarios autorizados y sus permisos
      * @return Tabla con los usuarios y sus permisos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-20
+     * @version 2017-06-11
      */
     public function getUsuarios()
     {
-        return $this->db->getTable('
+        $usuarios = $this->db->getAssociativeArray('
             SELECT u.usuario, c.permiso
             FROM usuario AS u, contribuyente_usuario AS c
             WHERE u.id = c.usuario AND c.contribuyente = :rut
         ', [':rut'=>$this->rut]);
+        foreach ($usuarios as &$permisos) {
+            if (!is_array($permisos)) {
+                $permisos = [$permisos];
+            }
+        }
+        return $usuarios;
     }
 
     /**
@@ -658,17 +666,13 @@ class Model_Contribuyente extends \Model_App
      * @param permisos Permisos que se desean verificar que tenga el usuario
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2017-06-11
      */
     public function usuarioAutorizado(\sowerphp\app\Sistema\Usuarios\Model_Usuario $Usuario, $permisos = [])
     {
         // si es el usuario que registró la empresa se le autoriza
         if ($this->usuario == $Usuario->id) {
             return true;
-        }
-        // si se pide usuario administrador sólo se permite al que registró empresa (parche hasta tener los permisos andando)
-        if ($permisos == 'admin') {
-            return false; ///< No se debería llegar acá, pq si era el administrador se retorno true antes
         }
         // normalizar permisos
         if (!is_array($permisos))
@@ -677,32 +681,43 @@ class Model_Contribuyente extends \Model_App
         // permisos normales (basados en grupos) de sowerphp
         if (\sowerphp\core\Configure::read('dte.empresa')) {
             foreach ($permisos as $permiso) {
-                if ($Usuario->auth($permiso))
+                if ($Usuario->auth($permiso)) {
                     return true;
+                }
             }
             return false;
         }
-        // se busca si el usuario es parte de los que pueden trabajar con el
-        // contribuyente, se valida el permiso en particular que se esté
-        // pidiendo y el permiso 'todos' (es como validar a sysadmin en Auth)
-        if (!in_array('todos', $permisos))
-            $permisos[] = 'todos';
-        $vars = [':rut'=>$this->rut, ':usuario'=>$Usuario->id];
-        $permisos_bind = [];
-        foreach ($permisos as $i => $permiso) {
-            $permisos_bind[] = ':permiso'.$i;
-            $vars[':permiso'.$i] = $permiso;
+        // si se está buscando por un recurso en particular entonces se
+        // valida contra los permisos del sistema
+        if (isset($permisos[0]) and $permisos[0][0]=='/') {
+            foreach ($permisos as $permiso) {
+                if ($Usuario->auth($permiso)) {
+                    return true;
+                }
+            }
         }
-        $autorizado = (bool)$this->db->getValue('
-            SELECT COUNT(*)
-            FROM contribuyente_usuario
-            WHERE
-                contribuyente = :rut
-                AND usuario = :usuario
-                AND permiso IN ('.implode(', ', $permisos_bind).')
-        ', $vars);
-        if ($autorizado) {
-            return true;
+        // se está pidiendo un permiso por tipo de permiso (agrupación, se verifica si pertenece)
+        else {
+            $usuario_permisos = $this->db->getCol('
+                SELECT permiso
+                FROM contribuyente_usuario
+                WHERE contribuyente = :rut AND usuario = :usuario
+            ', [':rut'=>$this->rut, ':usuario'=>$Usuario->id]);
+            // si no se está pidiendo ningún permiso en particular, sólo se
+            // quiere saber si el usuario tiene acceso a la empresa
+            if (!$permisos) {
+                if ($usuario_permisos) {
+                    return true;
+                }
+            }
+            // si se está pidiendo algún permiso en particular se verifica si existe
+            else {
+                foreach ($permisos as $p) {
+                    if (in_array($p, $usuario_permisos)) {
+                        return true;
+                    }
+                }
+            }
         }
         // ver si el usuario es del grupo de soporte
         if ($this->config_app_soporte and $Usuario->inGroup(['soporte'])) {
@@ -710,6 +725,42 @@ class Model_Contribuyente extends \Model_App
         }
         // si no se logró determinar el permiso no se autoriza
         return false;
+    }
+
+    /**
+     * Método que asigna los permisos al usuario
+     * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario al que se asignarán permisos
+     * @return =true si está autorizado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-11
+     */
+    public function setPermisos(\sowerphp\app\Sistema\Usuarios\Model_Usuario &$Usuario)
+    {
+        // si el usuario es el administrador de la empresa se colocan sus permisos estándares (tambien si es de soporte)
+        if ($this->usuario == $Usuario->id or $Usuario->inGroup(['soporte'])) {
+            $Usuario->auths(true);
+            $Usuario->groups(true);
+        }
+        // si es un usuario autorizado, entonces se copian los permisos asignados de los disponibles en el
+        // administrador
+        else {
+            $permisos = \sowerphp\core\Configure::read('empresa.permisos');
+            $usuario_permisos = $this->db->getCol('
+                SELECT permiso
+                FROM contribuyente_usuario
+                WHERE contribuyente = :rut AND usuario = :usuario
+            ', [':rut'=>$this->rut, ':usuario'=>$Usuario->id]);
+            $grupos = [];
+            foreach ($usuario_permisos as $p) {
+                foreach ($permisos[$p]['grupos'] as $g) {
+                    if (!in_array($g, $grupos)) {
+                        $grupos[] = $g;
+                    }
+                }
+            }
+            $Usuario->setAuths($this->getUsuario()->getAuths($grupos));
+            $Usuario->setGroups(array_flip((new \sowerphp\app\Sistema\Usuarios\Model_Grupos())->getIDs($grupos)));
+        }
     }
 
     /**

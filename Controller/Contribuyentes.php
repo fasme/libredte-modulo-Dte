@@ -28,19 +28,10 @@ namespace website\Dte;
  * Clase para el controlador asociado a la tabla contribuyente de la base de
  * datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2015-09-19
+ * @version 2017-06-10
  */
 class Controller_Contribuyentes extends \Controller_App
 {
-
-    private $permisos_usuarios = [
-        'todos' => 'Todos los permisos',
-        /*'folios' => 'Cargar folios',
-        'emitir' => 'Emitir documentos tributarios electrónicos',
-        'libros' => 'Generar y consultar libros de compra y venta',
-        'intercambio' => 'Intercambio entre contribuyentes',
-        'respaldos' => 'Realizar respaldos de los datos',*/
-    ];
 
     /**
      * Método que permite entrar a las opciones de cualquier empresa para dar
@@ -70,7 +61,7 @@ class Controller_Contribuyentes extends \Controller_App
      * @param rut Si se pasa un RUT se tratará de seleccionar
      * @param url URL a la que redirigir después de seleccionar el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-17
+     * @version 2017-06-11
      */
     public function seleccionar($rut = null, $url = null)
     {
@@ -105,13 +96,15 @@ class Controller_Contribuyentes extends \Controller_App
         // si se llegó acá con un emisor se guarda en la sesión
         if (isset($Emisor)) {
             $this->setContribuyente($Emisor);
+            $Emisor->setPermisos($this->Auth->User);
+            $this->Auth->saveCache();
             // redireccionar
             if ($referer)
                 \sowerphp\core\Model_Datasource_Session::delete('referer');
             else if ($url)
                 $referer = base64_decode($url);
             else
-                $referer = '/dte';
+                $referer = $this->Auth->check('/dte') ? '/dte' : '/';
             $this->redirect($referer);
         }
         // asignar variables para la vista
@@ -462,7 +455,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite editar los usuarios autorizados de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2017-06-11
      */
     public function usuarios($rut)
     {
@@ -479,9 +472,10 @@ class Controller_Contribuyentes extends \Controller_App
             $this->redirect('/dte/contribuyentes/seleccionar');
         }
         // asignar variables para editar
+        $permisos_usuarios = \sowerphp\core\Configure::read('empresa.permisos');
         $this->set([
             'Contribuyente' => $Contribuyente,
-            'permisos_usuarios' => $this->permisos_usuarios,
+            'permisos_usuarios' => $permisos_usuarios,
         ]);
         // editar usuarios autorizados
         if (isset($_POST['submit'])) {
@@ -489,21 +483,23 @@ class Controller_Contribuyentes extends \Controller_App
             if (isset($_POST['usuario'])) {
                 $n_usuarios = count($_POST['usuario']);
                 for ($i=0; $i<$n_usuarios; $i++) {
-                    if (!empty($_POST['usuario'][$i]) and !empty($_POST['permiso'][$i])) {
-                        if (!isset($usuarios[$_POST['usuario'][$i]]))
+                    if (!empty($_POST['usuario'][$i])) {
+                        if (!isset($usuarios[$_POST['usuario'][$i]])) {
                             $usuarios[$_POST['usuario'][$i]] = [];
-                        if (!array_key_exists($_POST['permiso'][$i], $this->permisos_usuarios)) {
-                            \sowerphp\core\Model_Datasource_Session::message(
-                                'El permiso <em>'.$_POST['permiso'][$i].'</em> no existe', 'warning'
-                            );
-                            return;
                         }
-                        $usuarios[$_POST['usuario'][$i]][] = $_POST['permiso'][$i];
+                        foreach ($permisos_usuarios as $permiso => $info) {
+                            if (!empty($_POST['permiso_'.$permiso][$i])) {
+                                $usuarios[$_POST['usuario'][$i]][] = $permiso;
+                            }
+                        }
+                        if (!$usuarios[$_POST['usuario'][$i]]) {
+                            unset($usuarios[$_POST['usuario'][$i]]);
+                        }
                     }
                 }
                 if (!$usuarios) {
                     \sowerphp\core\Model_Datasource_Session::message(
-                        'No indicó ningún usuario autorizado para agregar', 'warning'
+                        'No indicaron permisos para ningún usuario', 'warning'
                     );
                     return;
                 }
@@ -529,7 +525,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite transferir una empresa a un nuevo usuario administrador
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-22
+     * @version 2017-06-11
      */
     public function transferir($rut)
     {
@@ -546,7 +542,7 @@ class Controller_Contribuyentes extends \Controller_App
         }
         // verificar que el usuario sea el administrador
         if ($Contribuyente->usuario!=$this->Auth->User->id) {
-            \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
+            \sowerphp\core\Model_Datasource_Session::message('Sólo el usuario que tiene la empresa registrada puede cambiar el administrador', 'error');
             $this->redirect('/dte/contribuyentes/seleccionar');
         }
         // transferir al nuevo usuario administrador
