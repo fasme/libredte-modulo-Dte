@@ -732,7 +732,7 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario al que se asignarán permisos
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-11
+     * @version 2017-06-14
      */
     public function setPermisos(\sowerphp\app\Sistema\Usuarios\Model_Usuario &$Usuario)
     {
@@ -759,7 +759,7 @@ class Model_Contribuyente extends \Model_App
                 }
             }
             $Usuario->setAuths($this->getUsuario()->getAuths($grupos));
-            $Usuario->setGroups(array_flip((new \sowerphp\app\Sistema\Usuarios\Model_Grupos())->getIDs($grupos)));
+            $Usuario->setGroups($this->getUsuario()->getGroups($grupos));
         }
     }
 
