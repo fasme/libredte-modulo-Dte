@@ -87,11 +87,15 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2017-06-15
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
         $Emisor = $emisor===null ? $this->getContribuyente() : new Model_Contribuyente($emisor);
+        // datos por defecto
+        extract($this->Api->getQuery([
+            'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+        ]));
         // obtener datos JSON del DTE
         $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
         if (!$DteTmp->exists()) {
@@ -104,7 +108,7 @@ class Controller_DteTmps extends \Controller_App
         $datos['Encabezado']['IdDoc']['TipoDTE'] = 0;
         $datos['Encabezado']['IdDoc']['Folio'] = $DteTmp->getFolio();
         // generar PDF
-        $pdf = new \sasco\LibreDTE\Sii\PDF\Dte();
+        $pdf = new \sasco\LibreDTE\Sii\PDF\Dte($papelContinuo);
         $pdf->setFooterText(\sowerphp\core\Configure::read('dte.pdf.footer'));
         $logo = DIR_STATIC.'/contribuyentes/'.$Emisor->rut.'/logo.png';
         if (is_readable($logo)) {
@@ -119,15 +123,19 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-08
+     * @version 2017-06-15
      */
     public function pdf($receptor, $dte, $codigo, $disposition = 'attachment')
     {
         $Emisor = $this->getContribuyente();
+        // datos por defecto
+        extract($this->Api->getQuery([
+            'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+        ]));
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
-        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut);
+        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?papelContinuo='.$papelContinuo);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_tmps');
@@ -226,7 +234,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Recurso de la API que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2017-06-15
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -257,12 +265,17 @@ class Controller_DteTmps extends \Controller_App
                 'No fue posible crear el PDF para previsualización:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 507
             );
         }
+        // datos por defecto
+        extract($this->Api->getQuery([
+            'papelContinuo' => $Emisor->config_pdf_dte_papel,
+            'compress' => false,
+        ]));
         // armar datos con archivo XML y flag para indicar si es cedible o no
         $data = [
             'xml' => base64_encode($xml),
             'cedible' => false,
-            'papelContinuo' => $Emisor->config_pdf_dte_papel,
-            'compress' => false,
+            'papelContinuo' => $papelContinuo,
+            'compress' => $compress,
         ];
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();

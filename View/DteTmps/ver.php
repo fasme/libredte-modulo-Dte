@@ -33,6 +33,7 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
+        <li role="presentation"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab">PDF</a></li>
         <li role="presentation"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Enviar por email</a></li>
 <?php if ($DteTmp->getTipo()->permiteCobro()): ?>
         <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
@@ -89,6 +90,42 @@ new \sowerphp\general\View_Helper_Table([
     </div>
 </div>
 <!-- FIN DATOS BÁSICOS -->
+
+<!-- INICIO PDF -->
+<div role="tabpanel" class="tab-pane" id="pdf">
+<script>
+function pdf_set_action(documento) {
+    var action = '<?=$_url.'/dte/dte_tmps/{documento}/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor?>';
+    document.getElementById('pdfForm').action = action.replace('{documento}', documento);
+}
+</script>
+<?php
+$pdf_publico = $_url.'/dte/dte_tmps/cotizacion/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor;
+$f = new \sowerphp\general\View_Helper_Form();
+echo $f->begin(['action'=>$_base.'/dte/dte_tmps/cotizacion/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo, 'id'=>'pdfForm', 'onsubmit'=>'Form.check(\'pdfForm\')']);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'documento',
+    'label' => 'Documento',
+    'options' => ['cotizacion'=>'Cotización', 'pdf'=>'Previsualización'],
+    'check' => 'notempty',
+    'attr' => 'onblur="pdf_set_action(this.value)"',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'papelContinuo',
+    'label' => 'Tipo papel',
+    'options' => \sasco\LibreDTE\Sii\PDF\Dte::$papel,
+    'value' => $Emisor->config_pdf_dte_papel,
+    'check' => 'notempty',
+]);
+echo $f->end('Descargar PDF');
+?>
+    <a class="btn btn-primary btn-lg btn-block" href="<?=$pdf_publico?>" role="button">
+        Enlace público a la cotización
+    </a>
+</div>
+<!-- FIN PDF -->
 
 <!-- INICIO ENVIAR POR EMAIL -->
 <div role="tabpanel" class="tab-pane" id="email">
