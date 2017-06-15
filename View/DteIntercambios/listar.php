@@ -1,4 +1,12 @@
 <ul class="nav nav-pills pull-right">
+<?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
+    <li>
+        <a href="https://www4.sii.cl/registrorechazodteInternet" title="Ir al registro de aceptación o reclamos de un DTE en el SII" target="_blank">
+            <span class="fa fa-list"></span>
+            Aceptar/rechazar en SII
+        </a>
+    </li>
+<?php endif; ?>
 <?php if ($soloPendientes) : ?>
     <li>
         <a href="<?=$_base?>/dte/dte_intercambios/listar" title="Listar todos los intercambios paginados">
@@ -10,7 +18,7 @@
     <li>
         <a href="<?=$_base?>/dte/dte_intercambios/listar/0/1" title="Ver todos los documentos pendientes de procesar">
             <span class="fa fa-list-alt"></span>
-            Ver todo lo pendiente
+            Ver pendientes
         </a>
     </li>
 <?php endif; ?>
@@ -23,7 +31,7 @@
     <li>
         <a href="<?=$_base?>/dte/dte_intercambios/actualizar" title="Actualizar bandeja de intercambio <?=$Emisor->config_email_intercambio_user?>">
             <span class="fa fa-refresh"></span>
-            Actualizar bandeja
+            Actualizar
         </a>
     </li>
 </ul>
