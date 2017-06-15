@@ -35,8 +35,8 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
     public function main($grupo = null)
     {
         // verificar que exista soporta para usar Dropbox
-        $config = \sowerphp\core\Configure::read('backup.dropbox');
-        if (!$config or !class_exists('\Dropbox\AppInfo')) {
+        $this->config = \sowerphp\core\Configure::read('backup.dropbox');
+        if (!$this->config or !class_exists('\Kunnu\Dropbox\DropboxApp')) {
             $this->out('<error>Respaldos en Dropbox no están disponibles</error>');
             return 1;
         }
@@ -65,15 +65,21 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
         $output = $dir.'.'.$compress;
         // enviar respaldo a Dropbox
         try {
+            $app = new \Kunnu\Dropbox\DropboxApp($this->config['key'], $this->config['secret'], $Contribuyente->config_respaldos_dropbox->token);
+            $dropbox = new \Kunnu\Dropbox\Dropbox($app);
             $archivo = date('N').'_'.\sowerphp\general\Utility_Date::$dias[date('w')];
-            $dbxClient = new \Dropbox\Client($Contribuyente->config_respaldos_dropbox->token, 'LibreDTE/1.0');
-            $f = fopen($output, 'rb');
-            $result = $dbxClient->uploadFile('/'.$Contribuyente->razon_social.'/respaldos/'.$archivo.'.'.$compress, \Dropbox\WriteMode::force(), $f);
-            fclose($f);
+            $file = $dropbox->upload(
+                $output,
+                '/'.$Contribuyente->razon_social.'/respaldos/'.$archivo.'.'.$compress,
+                ['mode' => ['.tag' => 'overwrite']]
+            );
+            if ($this->verbose>=2) {
+              $this->out('  Se subió el archivo: '.$file->getName());
+            }
             unlink($output);
         } catch (\Exception $e) {
             if ($this->verbose) {
-                $this->out('  No se pudo guardar: '.str_replace("\n", ' => ', $e->getMessage()));
+                $this->out('  No se pudo subir el archivo: '.str_replace("\n", ' => ', $e->getMessage()));
             }
             unlink($output);
             return false;

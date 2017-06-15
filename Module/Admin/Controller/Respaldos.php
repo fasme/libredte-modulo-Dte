@@ -91,7 +91,7 @@ class Controller_Respaldos extends \Controller_App
     /**
      * Acción que permite exportar todos los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2017-06-14
      */
     public function dropbox($desconectar = false)
     {
@@ -104,66 +104,79 @@ class Controller_Respaldos extends \Controller_App
         }
         // verificar que exista soporta para usar Dropbox
         $config = \sowerphp\core\Configure::read('backup.dropbox');
-        if (!$config or !class_exists('\Dropbox\AppInfo')) {
+        if (!$config or !class_exists('\Kunnu\Dropbox\DropboxApp')) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Respaldos en Dropbox no están disponibles', 'error'
             );
             $this->redirect('/dte/admin');
         }
-        // conectar a API de dropbox
-        $appInfo = new \Dropbox\AppInfo($config['key'], $config['secret']);
-        $csrfTokenStore = new \Dropbox\ArrayEntryStore($_SESSION, 'dropbox-auth-csrf-token');
-        $webAuth = new \Dropbox\WebAuth($appInfo, 'LibreDTE/1.0', $this->request->url.$this->request->request, $csrfTokenStore);
-        // procesar código si fue pasado
-        if (!empty($_GET['state']) and !empty($_GET['code'])) {
-            try {
-                list($accessToken, $userId, $urlState) = $webAuth->finish($_GET);
-                assert($urlState === null);
-                $dbxClient = new \Dropbox\Client($accessToken, 'LibreDTE/1.0');
-                $accountInfo = $dbxClient->getAccountInfo();
-                $Emisor->set([
-                    'config_respaldos_dropbox' => (object)[
-                        'uid'=> $accountInfo['uid'],
-                        'display_name' => $accountInfo['display_name'],
-                        'email' => $accountInfo['email'],
-                        'token'=>$accessToken,
-                    ]
+        // si no existe configuración para dropbox se muestra enlace
+        if (!$Emisor->config_respaldos_dropbox) {
+            $app = new \Kunnu\Dropbox\DropboxApp($config['key'], $config['secret']);
+            $dropbox = new \Kunnu\Dropbox\Dropbox($app);
+            $authHelper = $dropbox->getAuthHelper();
+            $callbackUrl = $this->request->url.$this->request->request;
+            // procesar codigo y estado de Dropbox para obtener token
+            if (isset($_GET['code']) and isset($_GET['state'])) {
+                $code = $_GET['code'];
+                $state = $_GET['state'];
+                try {
+                    $accessToken = $authHelper->getAccessToken($code, $state, $callbackUrl);
+                    $token = $accessToken->getToken();
+                    $app = new \Kunnu\Dropbox\DropboxApp($config['key'], $config['secret'], $token);
+                    $dropbox = new \Kunnu\Dropbox\Dropbox($app);
+                    $account = $dropbox->getCurrentAccount();
+                    $Emisor->set([
+                        'config_respaldos_dropbox' => (object)[
+                            'uid'=> $account->getAccountId(),
+                            'display_name' => $account->getDisplayName(),
+                            'email' => $account->getEmail(),
+                            'token' => $token,
+                        ]
+                    ]);
+                    $Emisor->save();
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Dropbox se ha conectado correctamente', 'ok'
+                    );
+                } catch (\Exception $e) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'No fue posible conectar a Dropbox: '.$e->getMessage(), 'error'
+                    );
+                }
+                $this->redirect('/dte/admin/respaldos/dropbox');
+            }
+            // mostrar enlace para conectar a Dropbox
+            else {
+                $authUrl = $authHelper->getAuthUrl($callbackUrl);
+                $this->set([
+                    'Emisor' => $Emisor,
+                    'authUrl' => $authUrl,
                 ]);
+            }
+        }
+        // si existe configuración de dropbox se obtiene info del usuario y se valida si se quiere desconectar
+        else {
+            $app = new \Kunnu\Dropbox\DropboxApp($config['key'], $config['secret'], $Emisor->config_respaldos_dropbox->token);
+            $dropbox = new \Kunnu\Dropbox\Dropbox($app);
+            // desconectar LibreDTE de Dropbox
+            if ($desconectar) {
+                $authHelper = $dropbox->getAuthHelper();
+                $authHelper->revokeAccessToken();
+                $Emisor->set(['config_respaldos_dropbox' => null]);
                 $Emisor->save();
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Dropbox se ha conectado correctamente', 'ok'
+                    'Dropbox se ha desconectado correctamente', 'ok'
                 );
                 $this->redirect('/dte/admin/respaldos/dropbox');
-            } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    $e->getMessage(), 'error'
-                );
             }
-        }
-        // tratar de obtener datos del usuario si es que existe token
-        if ($Emisor->config_respaldos_dropbox) {
-            try {
-                $dbxClient = new \Dropbox\Client($Emisor->config_respaldos_dropbox->token, 'LibreDTE/1.0');
-                $accountInfo = $dbxClient->getAccountInfo();
-            } catch (\Dropbox\Exception_InvalidAccessToken $e) {
-                $desconectar = true;
+            // info usuario
+            else {
+                $this->set([
+                    'Emisor' => $Emisor,
+                    'account' => $dropbox->getCurrentAccount(),
+                    'accountSpace' => $dropbox->getSpaceUsage(),
+                ]);
             }
-        }
-        // desconectar LibreDTE de Dropbox
-        if ($desconectar) {
-            $Emisor->set(['config_respaldos_dropbox' => null]);
-            $Emisor->save();
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Dropbox se ha desconectado correctamente', 'ok'
-            );
-            $this->redirect('/dte/admin/respaldos/dropbox');
-        }
-        // asignar variables para la vista
-        $this->set('Emisor', $Emisor);
-        if (!$Emisor->config_respaldos_dropbox) {
-            $this->set('authorizeUrl', $webAuth->start());
-        } else {
-            $this->set('accountInfo', $accountInfo);
         }
     }
 
