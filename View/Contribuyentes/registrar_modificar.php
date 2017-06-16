@@ -1180,6 +1180,22 @@ echo $f->input([
 ?>
         </div>
     </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-gears"></i>
+            Cobros masivos (opciones globales)
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'name' => 'config_pagos_cobros_masivos_interes_diario',
+    'label' => '% interés diario',
+    'value' => $Contribuyente->config_pagos_cobros_masivos_interes_diario,
+    'check' => 'real',
+]);
+?>
+        </div>
+    </div>
 </div>
 <!-- FIN PAGOS -->
 <?php endif; ?>
