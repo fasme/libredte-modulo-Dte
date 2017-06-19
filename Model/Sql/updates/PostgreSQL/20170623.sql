@@ -1,10 +1,11 @@
 --
--- Actualización al día 30 de junio de 2017
+-- Actualización al día 23 de junio de 2017
 --
 
 BEGIN;
 
 ALTER TABLE dte_intercambio_recepcion ALTER glosa DROP NOT NULL;
+UPDATE contribuyente_usuario SET permiso = 'dte';
 
 -- fix track_id de INTEGER a BIGINT
 ALTER TABLE dte_emitido ALTER track_id TYPE BIGINT;
