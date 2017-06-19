@@ -1,10 +1,11 @@
 --
--- Actualización al día 30 de junio de 2017
+-- Actualización al día 23 de junio de 2017
 --
 
 START TRANSACTION;
 
 ALTER TABLE dte_intercambio_recepcion MODIFY glosa VARCHAR(256) NULL;
+UPDATE contribuyente_usuario SET permiso = 'dte';
 
 -- fix track_id de INTEGER a BIGINT
 ALTER TABLE dte_emitido MODIFY track_id BIGINT;
