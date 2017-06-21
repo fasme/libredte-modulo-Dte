@@ -428,6 +428,11 @@ class Model_DteRecibido extends \Model_App
         'Model_ImpuestoAdicional' => 'website\Dte\Admin\Mantenedores'
     ); ///< Namespaces que utiliza esta clase
 
+    // cachés
+    private $DteIntercambio; ///< Objeto con el DTE de intercambio
+    public $xml; ///< XML asociado del intercambio
+    public $detalle; ///< Detalle del documento del intercambio
+
     /**
      * Método que asigna los campos iva_no_recuperable e impuesto_adicional si
      * se pasaron separados en varios campos
@@ -595,6 +600,66 @@ class Model_DteRecibido extends \Model_App
             $iva_no_recuperable[] = $fila;
         }
         return $iva_no_recuperable;
+    }
+
+    /**
+     * Método que entrega el objeto del DTE de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-21
+     */
+    public function getDteIntercambio()
+    {
+        if (!isset($this->DteIntercambio) and $this->intercambio) {
+            $this->DteIntercambio = (new Model_DteIntercambios())->get($this->receptor, $this->intercambio, $this->certificacion);
+        }
+        return $this->DteIntercambio;
+    }
+
+    /**
+     * Método que entrega el XML del documento recibido si existe intercambio asociado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-21
+     */
+    public function getXML()
+    {
+        // si no está asignado el XML se busca
+        if (!isset($this->xml)) {
+            // no hay documento intercambio
+            if (!$this->intercambio) {
+                $this->xml = false;
+            }
+            // hay documento intercambio
+            else {
+                $this->xml = base64_encode($this->getDteIntercambio()->getDocumento($this->emisor, $this->dte, $this->folio)->saveXML());
+            }
+        }
+        // entregar documento intercambio
+        return $this->xml;
+    }
+
+    /**
+     * Método que entrega el detalle del documento recibido si existe intercambio asociado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-21
+     */
+    public function getDetalle()
+    {
+        // si no está asignado el Detalle se busca
+        if (!isset($this->detalle)) {
+            // no hay documento intercambio
+            if (!$this->intercambio) {
+                $this->detalle = false;
+            }
+            // hay documento intercambio
+            else {
+                $this->detalle = $this->getDteIntercambio()->getDocumento($this->emisor, $this->dte, $this->folio)->getDatos()['Detalle'];
+                if (!isset($this->detalle[0])) {
+                    $this->detalle = [$this->detalle];
+                }
+            }
+        }
+        // entregar documento intercambio
+        return $this->detalle;
     }
 
 }

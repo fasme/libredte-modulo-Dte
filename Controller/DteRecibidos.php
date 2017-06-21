@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de dte recibidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-12
+ * @version 2017-06-21
  */
 class Controller_DteRecibidos extends \Controller_App
 {
@@ -284,7 +284,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción de la API que permite obtener la información de un documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-03
+     * @version 2017-06-21
      */
     public function _api_info_GET($emisor, $dte, $folio, $receptor)
     {
@@ -312,6 +312,16 @@ class Controller_DteRecibidos extends \Controller_App
         }
         if ($DteRecibido->receptor!=$Receptor->rut) {
             $this->Api->send('RUT del receptor no corresponde al DTE T'.$dte.'F'.$folio, 400);
+        }
+        extract($this->Api->getQuery([
+            'getXML' => false,
+            'getDetalle' => false,
+        ]));
+        if ($getXML and $DteRecibido->intercambio) {
+            $DteRecibido->getXML();
+        }
+        if ($getDetalle and $DteRecibido->intercambio) {
+            $DteRecibido->getDetalle();
         }
         $this->Api->send($DteRecibido, 200, JSON_PRETTY_PRINT);
     }
