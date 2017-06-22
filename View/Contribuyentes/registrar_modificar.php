@@ -1180,6 +1180,7 @@ echo $f->input([
 ?>
         </div>
     </div>
+<?php /*
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-gears"></i>
@@ -1196,6 +1197,7 @@ echo $f->input([
 ?>
         </div>
     </div>
+*/ ?>
 </div>
 <!-- FIN PAGOS -->
 <?php endif; ?>
