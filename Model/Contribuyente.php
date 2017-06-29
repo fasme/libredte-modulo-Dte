@@ -666,7 +666,7 @@ class Model_Contribuyente extends \Model_App
      * @param permisos Permisos que se desean verificar que tenga el usuario
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-11
+     * @version 2017-06-25
      */
     public function usuarioAutorizado(\sowerphp\app\Sistema\Usuarios\Model_Usuario $Usuario, $permisos = [])
     {
@@ -687,6 +687,19 @@ class Model_Contribuyente extends \Model_App
             }
             return false;
         }
+        // ver si el usuario es del grupo de soporte
+        if ($this->config_app_soporte and $Usuario->inGroup(['soporte'])) {
+            return true;
+        }
+        // ver si el usuario tiene acceso a la empresa
+        $usuario_permisos = $this->db->getCol('
+            SELECT permiso
+            FROM contribuyente_usuario
+            WHERE contribuyente = :rut AND usuario = :usuario
+        ', [':rut'=>$this->rut, ':usuario'=>$Usuario->id]);
+        if (!$usuario_permisos) {
+            return false;
+        }
         // si se está buscando por un recurso en particular entonces se
         // valida contra los permisos del sistema
         if (isset($permisos[0]) and $permisos[0][0]=='/') {
@@ -698,11 +711,6 @@ class Model_Contribuyente extends \Model_App
         }
         // se está pidiendo un permiso por tipo de permiso (agrupación, se verifica si pertenece)
         else {
-            $usuario_permisos = $this->db->getCol('
-                SELECT permiso
-                FROM contribuyente_usuario
-                WHERE contribuyente = :rut AND usuario = :usuario
-            ', [':rut'=>$this->rut, ':usuario'=>$Usuario->id]);
             // si no se está pidiendo ningún permiso en particular, sólo se
             // quiere saber si el usuario tiene acceso a la empresa
             if (!$permisos) {
@@ -718,10 +726,6 @@ class Model_Contribuyente extends \Model_App
                     }
                 }
             }
-        }
-        // ver si el usuario es del grupo de soporte
-        if ($this->config_app_soporte and $Usuario->inGroup(['soporte'])) {
-            return true;
         }
         // si no se logró determinar el permiso no se autoriza
         return false;
@@ -788,20 +792,92 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega los documentos que el contribuyente tiene autorizados
+     * a emitir en la aplicación por cada usuario autorizado que tiene
+     * @return Listado de documentos autorizados por usuario
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-25
+     */
+    public function getDocumentosAutorizadosPorUsuario()
+    {
+        $autorizados = $this->db->getAssociativeArray('
+            SELECT u.usuario, d.dte
+            FROM usuario AS u JOIN contribuyente_usuario_dte AS d ON d.usuario = u.id
+            WHERE d.contribuyente = :contribuyente
+        ', [':contribuyente' => $this->rut]);
+        foreach ($autorizados as &$a) {
+            if (!isset($a[0])) {
+                $a = [$a];
+            }
+        }
+        return $autorizados;
+    }
+
+    /**
+     * Método que asigna los documentos autorizados por cada usuario del contribuyente
+     * @param usuarios Arreglo con índice nombre de usuario y valores un arreglo con los documentos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-25
+     */
+    public function setDocumentosAutorizadosPorUsuario(array $usuarios) {
+        $this->db->beginTransaction();
+        $this->db->query(
+            'DELETE FROM contribuyente_usuario_dte WHERE contribuyente = :rut',
+            [':rut'=>$this->rut]
+        );
+        foreach ($usuarios as $usuario => $documentos) {
+            if (!$documentos)
+                continue;
+            $Usuario = new \sowerphp\app\Sistema\Usuarios\Model_Usuario($usuario);
+            if (!$Usuario->exists()) {
+                $this->db->rollback();
+                throw new \Exception('Usuario '.$usuario.' no existe');
+                return false;
+            }
+            foreach ($documentos as $dte) {
+                $ContribuyenteUsuarioDte = new Model_ContribuyenteUsuarioDte($this->rut, $Usuario->id, $dte);
+                $ContribuyenteUsuarioDte->save();
+            }
+        }
+        $this->db->commit();
+        return true;
+    }
+
+    /**
      * Método que determina si el documento puede o no ser emitido por el
      * contribuyente a través de la aplicación
      * @param dte Código del DTE que se quiere saber si está autorizado
+     * @param Usuario Permite determinar el permiso para un usuario autorizado
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-06
+     * @version 2017-06-25
      */
-    public function documentoAutorizado($dte)
+    public function documentoAutorizado($dte, $Usuario = null)
     {
-        return (bool)$this->db->getValue('
+        $dte_autorizado = (bool)$this->db->getValue('
             SELECT COUNT(*)
             FROM contribuyente_dte
             WHERE contribuyente = :rut AND dte = :dte AND activo = :activo
         ', [':rut'=>$this->rut, ':dte'=>$dte, ':activo'=>1]);
+        if (!$dte_autorizado) {
+            return false;
+        }
+        if ($Usuario) {
+            if ($Usuario->id == $this->usuario) {
+                return true;
+            }
+            $dtes = $this->db->getCol(
+                'SELECT dte FROM contribuyente_usuario_dte WHERE contribuyente = :contribuyente AND usuario = :usuario',
+                [':contribuyente'=>$this->rut, ':usuario'=>$Usuario->id]
+            );
+            if (!$dtes) {
+                return true;
+            }
+            if (!in_array($dte, $dtes)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

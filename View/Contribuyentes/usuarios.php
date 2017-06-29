@@ -13,6 +13,7 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#usuarios" aria-controls="usuarios" role="tab" data-toggle="tab">Usuarios autorizados</a></li>
+        <li role="presentation"><a href="#dtes" aria-controls="dtes" role="tab" data-toggle="tab">Documentos por usuario</a></li>
         <li role="presentation"><a href="#administrador" aria-controls="administrador" role="tab" data-toggle="tab">Administrador</a></li>
     </ul>
     <div class="tab-content">
@@ -62,9 +63,65 @@ echo $f->end('Modificar usuarios autorizados');
 </div>
 <!-- FIN USUARIOS AUTORIZADOS -->
 
+<!-- INICIO DOCUMENTOS POR USUARIOS -->
+<div role="tabpanel" class="tab-pane" id="dtes">
+<p>Aquí puede restringir los documentos que un usuario puede emitir. Por defecto, si todo está en "No", se permite cualquier documento que la empresa tenga autorizado. Para limitar los documentos, seleccionar a lo menos uno.</p>
+<?php
+echo $f->begin([
+    'action' => '../usuarios_dtes/'.$Contribuyente->rut,
+    'id' => 'usuarios_dtes',
+    'onsubmit' => 'Form.check(\'usuarios_dtes\')',
+]);
+$usuarios_dtes = [];
+$aux = $Contribuyente->getDocumentosAutorizados();
+$documentos_autorizados = [];
+foreach ($aux as $d) {
+    $documentos_autorizados[$d['codigo']] = $d['tipo'];
+}
+$inputs = [['name'=>'usuario', 'check'=>'notempty', 'attr'=>'readonly="readonly"']];
+foreach ($documentos_autorizados as $codigo => $tipo) {
+    $inputs[] = ['type'=>'select', 'name'=>'dte_'.$codigo, 'options'=>['No', 'Si']];
+}
+$autorizados = $Contribuyente->getDocumentosAutorizadosPorUsuario();
+foreach ($Contribuyente->getUsuarios() as $u => $p) {
+    $documentos = [];
+    foreach ($documentos_autorizados as $codigo => $tipo) {
+        if (!empty($autorizados[$u])) {
+            $documentos['dte_'.$codigo] = (int)in_array($codigo, $autorizados[$u]);
+        } else {
+            $documentos['dte_'.$codigo] = 0;
+        }
+    }
+    $usuarios_dtes[] = array_merge(['usuario'=>$u], $documentos);
+}
+$f = new \sowerphp\general\View_Helper_Form();
+$f->setStyle(false);
+echo $f->input([
+    'type' => 'table',
+    'id' => 'usuarios_dtes',
+    'label' => 'DTEs x usuarios',
+    'titles' => array_merge(['Usuario'], array_keys($documentos_autorizados)),
+    'inputs' => $inputs,
+    'values' => $usuarios_dtes,
+]);
+$f->setStyle('horizontal');
+echo $f->end('Guardar documentos por usuarios');
+?>
+<div class="well">
+<p>Documentos que la empresa tiene autorizados en LibreDTE:</p>
+<ul>
+<?php foreach ($documentos_autorizados as $codigo => $tipo) : ?>
+    <li><strong><?=$codigo?></strong>: <?=$tipo?></li>
+<?php endforeach; ?>
+</ul>
+</div>
+</div>
+<!-- FIN DOCUMENTOS POR USUARIOS -->
+
 <!-- INICIO ADMINISTRADOR -->
 <div role="tabpanel" class="tab-pane" id="administrador">
 <?php
+$f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([
     'action' => '../transferir/'.$Contribuyente->rut,
     'id' => 'transferir',

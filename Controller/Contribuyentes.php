@@ -523,6 +523,72 @@ class Controller_Contribuyentes extends \Controller_App
     }
 
     /**
+     * Método que permite editar los documentos autorizados por usuario
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-06-25
+     */
+    public function usuarios_dtes($rut)
+    {
+        // crear objeto del contribuyente
+        try {
+            $Contribuyente = new Model_Contribuyente($rut);
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            \sowerphp\core\Model_Datasource_Session::message('No se encontró la empresa solicitada', 'error');
+            $this->redirect('/dte/contribuyentes/seleccionar');
+        }
+        // verificar que el usuario sea el administrador o sea soporte autorizado
+        if (!$Contribuyente->usuarioAutorizado($this->Auth->User, 'admin')) {
+            \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
+            $this->redirect('/dte/contribuyentes/seleccionar');
+        }
+        // editar documentos de usuario
+        if (isset($_POST['submit'])) {
+            $documentos_autorizados = $Contribuyente->getDocumentosAutorizados();
+            $usuarios = [];
+            if (isset($_POST['usuario'])) {
+                $n_usuarios = count($_POST['usuario']);
+                for ($i=0; $i<$n_usuarios; $i++) {
+                    if (!empty($_POST['usuario'][$i])) {
+                        if (!isset($usuarios[$_POST['usuario'][$i]])) {
+                            $usuarios[$_POST['usuario'][$i]] = [];
+                        }
+                        foreach ($documentos_autorizados as $dte) {
+                            if (!empty($_POST['dte_'.$dte['codigo']][$i])) {
+                                $usuarios[$_POST['usuario'][$i]][] = $dte['codigo'];
+                            }
+                        }
+                        if (!$usuarios[$_POST['usuario'][$i]]) {
+                            unset($usuarios[$_POST['usuario'][$i]]);
+                        }
+                    }
+                }
+            }
+            try {
+                $Contribuyente->setDocumentosAutorizadosPorUsuario($usuarios);
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Se editaron los documentos autorizados por usuario de la empresa '.$Contribuyente->razon_social, 'ok'
+                );
+                $this->redirect('/dte/contribuyentes/seleccionar');
+            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible editar los usuarios autorizados<br/>'.$e->getMessage(), 'error'
+                );
+                $this->redirect(str_replace('/usuarios_dtes/', '/usuarios/', $this->request->request).'#dtes');
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    $e->getMessage(), 'error'
+                );
+                $this->redirect(str_replace('/usuarios_dtes/', '/usuarios/', $this->request->request).'#dtes');
+            }
+        } else {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No puede acceder directamente a la página '.$this->request->request, 'error'
+            );
+            $this->redirect(str_replace('/usuarios_dtes/', '/usuarios/', $this->request->request).'#dtes');
+        }
+    }
+
+    /**
      * Método que permite transferir una empresa a un nuevo usuario administrador
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-06-11

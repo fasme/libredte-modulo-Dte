@@ -101,7 +101,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-03
+     * @version 2017-06-25
      */
     public function _api_emitir_POST()
     {
@@ -188,7 +188,7 @@ class Controller_Documentos extends \Controller_App
         $dte['Encabezado']['IdDoc']['TipoDTE'] = $this->getTipoDTE(
             $dte['Encabezado']['IdDoc']['TipoDTE'], $dte['Detalle']
         );
-        if (!$Emisor->documentoAutorizado($dte['Encabezado']['IdDoc']['TipoDTE'])) {
+        if (!$Emisor->documentoAutorizado($dte['Encabezado']['IdDoc']['TipoDTE'], $User)) {
             $this->Api->send('No está autorizado a emitir el tipo de documento '.$dte['Encabezado']['IdDoc']['TipoDTE'], 403);
         }
         // crear objeto Dte y documento temporal
