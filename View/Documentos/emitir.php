@@ -41,7 +41,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
             <script>$(function(){$('#RUTRecepField').focus()});</script>
 <?php else: ?>
             <input type="text" name="RUTRecep" id="RUTRecepField" class="check notempty rut form-control" placeholder="RUT del receptor" maxlength="12" readonly="readonly" value="<?=$DteReceptor['RUTRecep']?>" />
-            <input type="hidden" name="dte_referencia_defecto" id="dte_referencia" value="1" />
+            <input type="hidden" name="dte_referencia_defecto" id="dte_referencia_defecto" value="1" />
             <script>$(function(){$('#RznSocRecepField').focus()});</script>
 <?php endif; ?>
         </div>
