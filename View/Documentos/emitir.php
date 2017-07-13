@@ -6,7 +6,7 @@
 <?php
 endif;
 $f = new \sowerphp\general\View_Helper_Form(false);
-echo $f->begin(['id'=>'emitir_dte', 'focus'=>'RUTRecepField', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check()']);
+echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check()']);
 ?>
     <!-- DATOS DEL DOCUMENTO -->
     <div class="row">
@@ -37,8 +37,12 @@ echo $f->begin(['id'=>'emitir_dte', 'focus'=>'RUTRecepField', 'action'=>$_base.'
                 <div class="input-group-addon"><a href="#" title="Buscar RUT del receptor [B]" data-toggle="modal" data-target=".modal-buscar-receptor" accesskey="B" id="modalBuscar">buscar</a></div>
                 <input type="text" name="RUTRecep" id="RUTRecepField" class="check notempty rut form-control" placeholder="RUT del receptor" maxlength="12" onblur="Receptor.setDatos('emitir_dte')" />
             </div>
+            <input type="hidden" name="dte_referencia_defecto" id="dte_referencia_defecto" value="0" />
+            <script>$(function(){$('#RUTRecepField').focus()});</script>
 <?php else: ?>
             <input type="text" name="RUTRecep" id="RUTRecepField" class="check notempty rut form-control" placeholder="RUT del receptor" maxlength="12" readonly="readonly" value="<?=$DteReceptor['RUTRecep']?>" />
+            <input type="hidden" name="dte_referencia_defecto" id="dte_referencia" value="1" />
+            <script>$(function(){$('#RznSocRecepField').focus()});</script>
 <?php endif; ?>
         </div>
         <div class="form-group col-md-9"><?=$f->input(['name' => 'RznSocRecep', 'placeholder' => 'Razón social del receptor', 'check' => 'notempty', 'attr' => 'maxlength="100"', 'value'=>(isset($DteReceptor['RznSocRecep'])?$DteReceptor['RznSocRecep']:'')])?></div>

@@ -202,8 +202,10 @@ DTE.setTipo = function (tipo) {
         }
     } else {
         $('#modalBuscar').show();
-        $('#RUTRecepField').attr('onblur', 'Receptor.setDatos(\'emitir_dte\')');
-        $('#RUTRecepField').removeAttr('readonly');
+        if (!document.getElementById('#dte_referencia_defecto').value) {
+            $('#RUTRecepField').attr('onblur', 'Receptor.setDatos(\'emitir_dte\')');
+            $('#RUTRecepField').removeAttr('readonly');
+        }
         $('#GiroRecepField').removeAttr('disabled');
         $('#CmnaRecepField').removeAttr('disabled');
         $('#TpoMonedaField').attr('disabled', 'disabled');
