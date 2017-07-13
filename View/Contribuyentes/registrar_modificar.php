@@ -35,6 +35,9 @@ $(function() {
 <?php if (\sowerphp\core\Module::loaded('Rrhh')) : ?>
         <li role="presentation"><a href="#rrhh" aria-controls="rrhh" role="tab" data-toggle="tab">RRHH</a></li>
 <?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Crm')) : ?>
+        <li role="presentation"><a href="#crm" aria-controls="crm" role="tab" data-toggle="tab">CRM</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API</a></li>
         <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
 <?php endif; ?>
@@ -280,7 +283,6 @@ $f->setColsLabel(3);
 echo $f->input([
     'name' => 'config_email_sii_user',
     'label' => 'Correo',
-    'check' => 'email',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_user : null,
     'attr' => 'maxlength="50" onblur="config_email_set(this, \'sii\')"',
     'check' => 'notempty email',
@@ -322,7 +324,6 @@ echo $f->input([
 echo $f->input([
     'name' => 'config_email_intercambio_user',
     'label' => 'Correo',
-    'check' => 'email',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_user : null,
     'attr' => 'maxlength="50" onblur="config_email_set(this, \'intercambio\')"',
     'check' => 'notempty email',
@@ -1230,6 +1231,56 @@ echo $f->input([
     </div>
 </div>
 <!-- FIN RRHH -->
+<?php endif; ?>
+
+<?php if (\sowerphp\core\Module::loaded('Crm')) : ?>
+<!-- INICIO CRM -->
+<div role="tabpanel" class="tab-pane" id="crm">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-envelope-o"></i>
+            Correo electrónico mensajes a clientes
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'name' => 'config_email_crm_user',
+    'label' => 'Correo',
+    'check' => 'email',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_email_crm_user : null,
+    'attr' => 'maxlength="50" onblur="config_email_set(this, \'crm\')"',
+]);
+echo $f->input([
+    'name' => 'config_email_crm_pass',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_email_crm_pass : null,
+    'label' => 'Contraseña',
+]);
+echo $f->input([
+    'name' => 'config_email_crm_smtp',
+    'label' => 'Servidor SMTP',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_email_crm_smtp : null,
+    'help' => 'Ejemplo: ssl://smtp.gmail.com:465',
+    'attr' => 'maxlength="50"',
+]);
+echo $f->input([
+    'name' => 'config_email_crm_imap',
+    'label' => 'Mailbox IMAP',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_email_crm_imap : null,
+    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX',
+    'attr' => 'maxlength="100"',
+]);
+echo $f->input([
+    'name' => 'config_email_crm_replyto',
+    'label' => 'Responder a',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_email_crm_replyto : null,
+    'check' => 'email',
+    'help' => '¿A qué correo deben responder los clientes?',
+]);
+?>
+        </div>
+    </div>
+</div>
+<!-- FIN CRM -->
 <?php endif; ?>
 
 <!-- INICIO API -->
