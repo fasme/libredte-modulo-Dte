@@ -202,7 +202,7 @@ DTE.setTipo = function (tipo) {
         }
     } else {
         $('#modalBuscar').show();
-        if (!document.getElementById('dte_referencia_defecto').value) {
+        if (document.getElementById('dte_referencia_defecto').value==0) {
             $('#RUTRecepField').attr('onblur', 'Receptor.setDatos(\'emitir_dte\')');
             $('#RUTRecepField').removeAttr('readonly');
         }
