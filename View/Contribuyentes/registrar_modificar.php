@@ -231,9 +231,9 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_ambiente_en_certificacion',
     'label' => 'Ambiente',
-    'options' => ['Producción', 'Certificación'],
+    'options' => ['Producción (documentos válidos)', 'Certificación / Pruebas (documentos no válidos)'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_ambiente_en_certificacion : 1,
-    'help' => 'Si está seleccionado el sistema funcionará en ambiente de certificación',
+    'help' => 'Permite elegir entre un ambiente de pruebas o uno real para la emisión de los DTE',
     'check' => 'notempty',
     'attr' => 'onchange="ambiente_set(this.value)"',
 ]);
@@ -242,7 +242,7 @@ echo $f->input([
     'name' => 'config_ambiente_produccion_fecha',
     'label' => 'Fecha resolución',
     'value' => isset($Contribuyente) ? $Contribuyente->config_ambiente_produccion_fecha : null,
-    'help' => 'Fecha de la resolución que autoriza la emisión de DTE en ambiente de producción',
+    'help' => 'Fecha de la resolución que autoriza la emisión de DTE en ambiente de producción. Se obtiene <a href="https://palena.sii.cl/cvc/dte/ee_empresas_dte.html" target="_blank">aquí</a>.',
     'check' => 'notempty date',
     'attr' => isset($Contribuyente) ? ($Contribuyente->config_ambiente_en_certificacion?'disabled="disabled"':'') : 'disabled="disabled"',
 ]);
@@ -250,7 +250,7 @@ echo $f->input([
     'name' => 'config_ambiente_produccion_numero',
     'label' => 'Número resolución',
     'value' => isset($Contribuyente) ? $Contribuyente->config_ambiente_produccion_numero : null,
-    'help' => 'Número de la resolución que autoriza la emisión de DTE en ambiente de producción',
+    'help' => 'Número de la resolución que autoriza la emisión de DTE en ambiente de producción. Se obtiene en mismo lugar que fecha resolución producción.',
     'check' => 'notempty integer',
     'attr' => isset($Contribuyente) ? ($Contribuyente->config_ambiente_en_certificacion?'disabled="disabled"':'') : 'disabled="disabled"',
 ]);
@@ -259,7 +259,7 @@ echo $f->input([
     'name' => 'config_ambiente_certificacion_fecha',
     'label' => 'Fecha certificación',
     'value' => isset($Contribuyente) ? $Contribuyente->config_ambiente_certificacion_fecha : null,
-    'help' => 'Fecha de la autorización para emisión de DTE en ambiente de certificación',
+    'help' => 'Fecha de la autorización para emisión de DTE en ambiente de certificación. Se obtiene <a href="https://maullin.sii.cl/cvc/dte/ee_empresas_dte.html" target="_blank">aquí</a>.',
     'check' => 'notempty date',
     'attr' => isset($Contribuyente) ? ($Contribuyente->config_ambiente_en_certificacion?'':'disabled="disabled"') : '',
 ]);
