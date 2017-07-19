@@ -1125,15 +1125,15 @@ echo $f->input([
 ]);
 echo $f->input([
     'type' => 'file',
-    'name' => 'config_pagos_transbank_key',
-    'label' => 'Llave',
-    'help' => 'Archivo actual: '.$Contribuyente->config_pagos_transbank_key,
+    'name' => 'config_pagos_transbank_crt',
+    'label' => 'Certificado',
+    'help' => 'Archivo actual: <a href="https://static.libredte.cl/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_crt.'">'.$Contribuyente->config_pagos_transbank_crt.'</a>',
 ]);
 echo $f->input([
     'type' => 'file',
-    'name' => 'config_pagos_transbank_crt',
-    'label' => 'Certificado',
-    'help' => 'Archivo actual: '.$Contribuyente->config_pagos_transbank_crt,
+    'name' => 'config_pagos_transbank_key',
+    'label' => 'Llave',
+    'help' => 'Archivo actual: <a href="https://static.libredte.cl/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_key.'">'.$Contribuyente->config_pagos_transbank_key.'</a>',
 ]);
 ?>
         </div>
