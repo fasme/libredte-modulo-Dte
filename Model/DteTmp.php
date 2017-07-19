@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-31
+     * @version 2017-07-19
      */
     public function generar($user_id = null)
     {
@@ -250,6 +250,10 @@ class Model_DteTmp extends \Model_App
         if (!$FolioInfo) {
             throw new \Exception('No fue posible obtener un folio para el DTE de tipo '.$this->dte, 508);
         }
+        // si el CAF no está vigente se alerta al usuario
+        /*if (\sowerphp\general\Utility_Date::countMonths($FolioInfo->Caf->getFechaAutorizacion()) > 18) {
+            throw new \Exception('Se obtuvo el CAF para el folio T'.$FolioInfo->DteFolio->dte.'F'.$FolioInfo->folio.', sin embargo el CAF no está vigente (autorizado hace más de 18 meses)', 508);
+        }*/
         // si quedan pocos folios y se debe alertar al usuario admnistrador de la empresa se hace
         if ($FolioInfo->DteFolio->disponibles<=$FolioInfo->DteFolio->alerta and !$FolioInfo->DteFolio->alertado) {
             $asunto = 'Alerta de folios tipo '.$FolioInfo->DteFolio->dte;

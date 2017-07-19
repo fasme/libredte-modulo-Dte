@@ -202,16 +202,36 @@ class Model_DteFolio extends \Model_App
      * Método que entrega el listado de archivos CAF que existen cargados para
      * el tipo de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-24
+     * @version 2017-07-19
      */
     public function getCafs()
     {
-        return $this->db->getTable('
-            SELECT desde, hasta
+        $cafs = $this->db->getTable('
+            SELECT desde, hasta, xml
             FROM dte_caf
             WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
             ORDER BY desde
         ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
+        foreach ($cafs as &$caf) {
+            $xml = \website\Dte\Utility_Data::decrypt($caf['xml']);
+            if (!$xml)
+                return false;
+            $Caf = new \sasco\LibreDTE\Sii\Folios($xml);
+            $caf['fecha_autorizacion'] = $Caf->getFechaAutorizacion();
+            $caf['meses_autorizacion'] = \sowerphp\general\Utility_Date::countMonths($caf['fecha_autorizacion']);
+            unset($caf['xml']);
+        }
+        return $cafs;
+    }
+
+    /**
+     * Método que entrega el objeto del tipo de DTE asociado al folio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-19
+     */
+    public function getTipo()
+    {
+        return (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($this->dte);
     }
 
 }
