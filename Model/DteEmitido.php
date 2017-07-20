@@ -368,7 +368,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el objeto del receptor del DTE
      * @return \website\Dte\Model_Contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-29
+     * @version 2017-07-20
      */
     public function getReceptor()
     {
@@ -377,7 +377,7 @@ class Model_DteEmitido extends Model_Base_Envio
             if (in_array($this->dte, [110, 111, 112])) {
                 $datos = $this->getDte()->getDatos()['Encabezado']['Receptor'];
                 $this->Receptor->razon_social = $datos['RznSocRecep'];
-                $this->Receptor->direccion = $datos['DirRecep'];
+                $this->Receptor->direccion = !empty($datos['DirRecep']) ? $datos['DirRecep'] : null;
                 $this->Receptor->comuna = null;
             }
         }
