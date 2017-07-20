@@ -511,4 +511,15 @@ class Model_DteTmp extends \Model_App
         return !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? $datos['Encabezado']['IdDoc']['FchVenc'] : null;
     }
 
+    /**
+     * Método que entrega el detalle del DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-20
+     */
+    public function getDetalle()
+    {
+        $Detalle = $this->getDatos()['Detalle'];
+        return isset($Detalle[0]) ? $Detalle : [$Detalle];
+    }
+
 }
