@@ -1,3 +1,10 @@
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/dte_compras" title="Ir al libro de compras">
+            <span class="fa fa-book"></span> Libro de compras
+        </a>
+    </li>
+</ul>
 <h1>Libro de ventas (IEV)</h1>
 <?php
 foreach ($periodos as &$p) {

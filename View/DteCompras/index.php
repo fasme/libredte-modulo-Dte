@@ -4,6 +4,11 @@
             <span class="fa fa-upload"></span> Importar CSV
         </a>
     </li>
+    <li>
+        <a href="<?=$_base?>/dte/dte_ventas" title="Ir al libro de ventas">
+            <span class="fa fa-book"></span> Libro de ventas
+        </a>
+    </li>
 </ul>
 <h1>Libro de compras (IEC)</h1>
 <?php
