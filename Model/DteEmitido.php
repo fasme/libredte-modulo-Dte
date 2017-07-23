@@ -328,12 +328,22 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que realiza verificaciones a campos antes de guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-30
+     * @version 2017-07-22
      */
     public function save()
     {
+        // corregir datos
         $this->anulado = (int)$this->anulado;
         $this->iva_fuera_plazo = (int)$this->iva_fuera_plazo;
+        // procesar inventario si corresponde
+        if ($this->getEmisor()->config_inventario_procesar_emitido and $this->getEmisor()->config_inventario_procesar_emitido == \website\Inventario\Utility_Inventario::PROCESAR_EMITIDO_EMITIR and !$this->exists()) {
+            try {
+                (new \website\Inventario\Utility_Inventario())->procesar($this);
+            } catch (\Exception $e) {
+                //throw new \Exception($e->getMessage());
+            }
+        }
+        // guardar DTE emitido
         parent::save();
     }
 

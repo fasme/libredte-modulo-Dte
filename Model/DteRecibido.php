@@ -477,7 +477,7 @@ class Model_DteRecibido extends \Model_App
     /**
      * Método para guardar el documento recibido, se hacen algunas validaciones previo a guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-28
+     * @version 2017-07-22
      */
     public function save()
     {
@@ -486,7 +486,23 @@ class Model_DteRecibido extends \Model_App
         // campo emisor solo en nc y nd
         if (!in_array($this->dte, [55, 56, 60, 61]))
             $this->emisor_nc_nd_fc = null;
-        // se guarda el receptor
+        // procesar inventario si corresponde
+        if ($this->getReceptor()->config_inventario_procesar_recibido and $this->getReceptor()->config_inventario_procesar_recibido == \website\Inventario\Utility_Inventario::PROCESAR_RECIBIDO_RECIBIR and !$this->exists()) {
+            try {
+                (new \website\Inventario\Utility_Inventario())->procesar($this);
+            } catch (\Exception $e) {
+                //throw new \Exception($e->getMessage());
+            }
+        }
+        // procesar contabilidad si corresponde
+        if ($this->getReceptor()->config_contabilidad_mapeo_compras and !$this->exists()) {
+            try {
+                $Asiento = (new \website\Lce\Utility_Asiento())->setContribuyente($this->getReceptor())->procesar($this);
+            } catch (\Exception $e) {
+                //throw new \Exception($e->getMessage());
+            }
+        }
+        // se guarda el documento
         return parent::save();
     }
 

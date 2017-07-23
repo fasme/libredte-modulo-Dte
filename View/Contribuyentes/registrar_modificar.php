@@ -35,6 +35,9 @@ $(function() {
 <?php if (\sowerphp\core\Module::loaded('Rrhh')) : ?>
         <li role="presentation"><a href="#rrhh" aria-controls="rrhh" role="tab" data-toggle="tab">RRHH</a></li>
 <?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Inventario')) : ?>
+        <li role="presentation"><a href="#inventario" aria-controls="inventario" role="tab" data-toggle="tab">Inventario</a></li>
+<?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Crm')) : ?>
         <li role="presentation"><a href="#crm" aria-controls="crm" role="tab" data-toggle="tab">CRM</a></li>
 <?php endif; ?>
@@ -1231,6 +1234,45 @@ echo $f->input([
     </div>
 </div>
 <!-- FIN RRHH -->
+<?php endif; ?>
+
+<?php if (\sowerphp\core\Module::loaded('Inventario')) : ?>
+<!-- INICIO INVENTARIO -->
+<div role="tabpanel" class="tab-pane" id="inventario">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-exchange"></i>
+            Mover inventario
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_inventario_procesar_emitido',
+    'label' => 'Procesar emitido',
+    'options' => [
+        '' => 'Nunca',
+        \website\Inventario\Utility_Inventario::PROCESAR_EMITIDO_EMITIR => 'Al emitir el DTE real',
+    ],
+    'value' => $Contribuyente->config_inventario_procesar_emitido,
+    'help' => '¿En qué momento se debe mover el inventario con los DTE emitidos?',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_inventario_procesar_recibido',
+    'label' => 'Procesar recibido',
+    'options' => [
+        '' => 'Nunca',
+        \website\Inventario\Utility_Inventario::PROCESAR_RECIBIDO_RECIBIR => 'Al hacer el acuse de recibo del DTE por primera vez en la bandeja de intercambio',
+    ],
+    'value' => $Contribuyente->config_inventario_procesar_recibido,
+    'help' => '¿En qué momento se debe mover el inventario con los DTE recibidos?',
+]);
+?>
+        </div>
+    </div>
+</div>
+<!-- FIN INVENTARIO -->
 <?php endif; ?>
 
 <?php if (\sowerphp\core\Module::loaded('Crm')) : ?>
