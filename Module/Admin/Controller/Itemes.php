@@ -154,7 +154,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción que permite importar los items desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-01
+     * @version 2017-07-24
      */
     public function importar()
     {
@@ -180,8 +180,6 @@ class Controller_Itemes extends \Controller_Maintainer
                 for ($i=0; $i<$n_cols; $i++) {
                     $Item->{$cols[$i]} = $item[$i];
                 }
-                // corregir codigo
-                $Item->codigo = str_replace('/', '_', $Item->codigo);
                 // guardar
                 try {
                     $existia = $Item->exists();

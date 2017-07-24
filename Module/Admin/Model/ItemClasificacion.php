@@ -158,4 +158,19 @@ class Model_ItemClasificacion extends \Model_App
         ', [':contribuyente'=>$this->contribuyente, ':clasificacion'=>$this->codigo]);
     }
 
+    /**
+     * Método que entrega el listado de items de la clasificación
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-03-23
+     */
+    public function getItems()
+    {
+        $Itemes = new Model_Itemes();
+        $Itemes->setWhereStatement(
+            ['contribuyente = :contribuyente', 'clasificacion = :clasificacion'],
+            [':contribuyente'=>$this->contribuyente, ':clasificacion'=>$this->codigo]
+        );
+        return $Itemes->getObjects();
+    }
+
 }

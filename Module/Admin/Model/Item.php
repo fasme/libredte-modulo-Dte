@@ -235,6 +235,17 @@ class Model_Item extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     /**
+     * Método que guarda el item del inventario
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-24
+     */
+    public function save()
+    {
+        $this->codigo = str_replace('/', '_', $this->codigo);
+        parent::save();
+    }
+
+    /**
      * Método que entrega la clasificación del item
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-02-24
