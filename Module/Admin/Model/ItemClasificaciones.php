@@ -90,4 +90,19 @@ class Model_ItemClasificaciones extends \Model_Plural_App
         ', [':rut'=>$this->getContribuyente()->rut]), 2, 'items'));
     }
 
+    /**
+     * Método que exporta todas las clasificaciones de items de un contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-23
+     */
+    public function exportar()
+    {
+        return $this->db->getTable('
+            SELECT codigo, clasificacion, superior, activa
+            FROM item_clasificacion
+            WHERE contribuyente = :contribuyente
+            ORDER BY superior, codigo
+        ', [':contribuyente'=>$this->getContribuyente()->rut]);
+    }
+
 }

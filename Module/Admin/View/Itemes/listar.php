@@ -5,8 +5,13 @@
         </a>
     </li>
     <li>
+        <a href="<?=$_base?>/dte/admin/itemes/exportar" title="Exportar items desde archivo CSV">
+            <span class="fa fa-download"></span> Exportar
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/admin/itemes/importar" title="Importar items desde archivo CSV">
-            <span class="fa fa-upload"></span> Importar CSV
+            <span class="fa fa-upload"></span> Importar
         </a>
     </li>
 </ul>

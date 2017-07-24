@@ -166,4 +166,24 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
         }
     }
 
+    /**
+     * Acción que permite exportar todas las clasificaciones de items a un archivo CSV
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-23
+     */
+    public function exportar()
+    {
+        $Contribuyente = $this->getContribuyente();
+        $clasificaciones = (new Model_ItemClasificaciones())->setContribuyente($Contribuyente)->exportar();
+        if (!$clasificaciones) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay clasificaciones de items que exportar', 'warning'
+            );
+            $this->redirect('/dte/admin/item_clasificaciones/listar');
+        }
+        array_unshift($clasificaciones, array_keys($clasificaciones[0]));
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($clasificaciones, 'item_clasificaciones_'.$Contribuyente->rut);
+        exit;
+    }
+
 }

@@ -5,8 +5,13 @@
         </a>
     </li>
     <li>
+        <a href="<?=$_base?>/dte/admin/item_clasificaciones/exportar" title="Exportar clasificaciones desde archivo CSV">
+            <span class="fa fa-download"></span> Exportar
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/admin/item_clasificaciones/importar" title="Importar clasificaciones desde archivo CSV">
-            <span class="fa fa-upload"></span> Importar CSV
+            <span class="fa fa-upload"></span> Importar
         </a>
     </li>
 </ul>

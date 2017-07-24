@@ -214,4 +214,24 @@ class Controller_Itemes extends \Controller_Maintainer
         }
     }
 
+    /**
+     * Acción que permite exportar todos los items a un archivo CSV
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-23
+     */
+    public function exportar()
+    {
+        $Contribuyente = $this->getContribuyente();
+        $items = (new Model_Itemes())->setContribuyente($Contribuyente)->exportar();
+        if (!$items) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay items que exportar', 'warning'
+            );
+            $this->redirect('/dte/admin/itemes/listar');
+        }
+        array_unshift($items, array_keys($items[0]));
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($items, 'items_'.$Contribuyente->rut);
+        exit;
+    }
+
 }
