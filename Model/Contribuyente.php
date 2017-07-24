@@ -850,7 +850,7 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Permite determinar el permiso para un usuario autorizado
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-25
+     * @version 2017-07-24
      */
     public function documentoAutorizado($dte, $Usuario = null)
     {
@@ -871,7 +871,7 @@ class Model_Contribuyente extends \Model_App
                 [':contribuyente'=>$this->rut, ':usuario'=>$Usuario->id]
             );
             if (!$dtes) {
-                return true;
+                return false; // si nada está autorizado se rechaza el DTE (=true si nada está autorizado se acepta cualquier DTE)
             }
             if (!in_array($dte, $dtes)) {
                 return false;
