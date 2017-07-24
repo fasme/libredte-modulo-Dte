@@ -1,3 +1,20 @@
+<?php if (isset($Contribuyente)) : ?>
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/contribuyentes/usuarios/<?=$Contribuyente->rut?>" title="Usuarios autorizados">
+            <span class="fa fa-users"></span>
+            Usuarios
+        </a>
+    </li>
+    <li>
+        <a href="<?=$_base?>/dte/contribuyentes/seleccionar/<?=$Contribuyente->rut?>" title="Seleccionar empresa">
+            <span class="fa fa-check"></span>
+            Seleccionar
+        </a>
+    </li>
+</ul>
+<?php endif; ?>
+
 <h1><?=$titulo?></h1>
 <p><?=$descripcion?></p>
 

@@ -1,3 +1,17 @@
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Contribuyente->rut?>" title="Modificar empresa">
+            <span class="fa fa-edit"></span>
+            Modificar
+        </a>
+    </li>
+    <li>
+        <a href="<?=$_base?>/dte/contribuyentes/seleccionar/<?=$Contribuyente->rut?>" title="Seleccionar empresa">
+            <span class="fa fa-check"></span>
+            Seleccionar
+        </a>
+    </li>
+</ul>
 <h1>Usuarios empresa <?=$Contribuyente->razon_social?></h1>
 <p>Aquí podrá modificar los usuarios autorizados a operar con la empresa <?=$Contribuyente->razon_social?> RUT <?=num($Contribuyente->rut).'-'.$Contribuyente->dv?>, para la cual usted es el usuario administrador.</p>
 
