@@ -1,3 +1,12 @@
+<?php if (\sowerphp\core\Module::loaded('Inventario') and isset($Obj)) : ?>
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/inventario/inventario_itemes/editar/<?=$Obj->codigo_tipo?>/<?=$Obj->codigo?>" title="Editar item en el inventario">
+            <span class="fa fa-cubes"></span> Editar en inventario
+        </a>
+    </li>
+</ul>
+<?php endif; ?>
 <h1><?=$accion?> producto o servicio</h1>
 <?php
 $f = new \sowerphp\general\View_Helper_Form ();
