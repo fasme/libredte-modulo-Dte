@@ -79,7 +79,7 @@ echo $f->end('Modificar usuarios autorizados');
 
 <!-- INICIO DOCUMENTOS POR USUARIOS -->
 <div role="tabpanel" class="tab-pane" id="dtes">
-<p>Aquí puede restringir los documentos que un usuario puede emitir. Por defecto, si todo está en "No", se permite cualquier documento que la empresa tenga autorizado. Para limitar los documentos, seleccionar a lo menos uno.</p>
+<p>Aquí puede asignar los documentos que un usuario puede emitir.</p>
 <?php
 echo $f->begin([
     'action' => '../usuarios_dtes/'.$Contribuyente->rut,
