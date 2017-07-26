@@ -239,7 +239,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-05-18
+     * @version 2017-07-25
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -292,6 +292,7 @@ class Controller_Documentos extends \Controller_App
             'dte_defecto' => $dte_defecto ? $dte_defecto : $Emisor->config_emision_dte_defecto,
             'referencia_codigo' => (int)$referencia_codigo,
             'referencia_razon' => substr(urldecode($referencia_razon), 0, 90),
+            'RUTRecep' => !empty($_GET['RUTRecep']) ? $_GET['RUTRecep'] : false,
         ]);
     }
 
