@@ -424,7 +424,7 @@ class Model_Contribuyente extends \Model_App
      * Los datos del contribuyente de documentos emitidos, recibidos, etc no se
      * eliminan por defecto, se debe solicitar específicamente.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-02
+     * @version 2017-07-26
      */
     public function delete($all = false)
     {
@@ -449,6 +449,7 @@ class Model_Contribuyente extends \Model_App
             $this->db->query('DELETE FROM dte_caf WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_compra WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_emitido WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_emitido_email WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_folio WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_guia WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio WHERE receptor = :rut', [':rut'=>$this->rut]);

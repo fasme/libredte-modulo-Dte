@@ -900,7 +900,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-16
+     * @version 2017-07-25
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -958,12 +958,52 @@ class Model_DteEmitido extends Model_Base_Envio
         // enviar email
         $status = $email->send($msg);
         if ($status===true) {
+            // registrar envío del email
+            $fecha_hora = date('Y-m-d H:i:s');
+            foreach ($to as $dest) {
+                try {
+                    $this->db->query('
+                        INSERT INTO dte_emitido_email
+                        VALUES (:emisor, :dte, :folio, :certificacion, :email, :fecha_hora)
+                    ', [
+                        ':emisor' => $this->emisor,
+                        ':dte' => $this->dte,
+                        ':folio' => $this->folio,
+                        ':certificacion' => (int)$this->certificacion,
+                        ':email' => $dest,
+                        ':fecha_hora' => $fecha_hora,
+                    ]);
+                } catch (\Exception $e) {
+                }
+            }
+            // todo ok
             return true;
         } else {
             throw new \Exception(
                 'No fue posible enviar el email: '.$status['message']
             );
         }
+    }
+
+    /**
+     * Método que entrega el resumen de los correos enviados
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-26
+     */
+    public function getEmailEnviadosResumen()
+    {
+        return $this->db->getTable('
+            SELECT email, COUNT(*) AS enviados, MIN(fecha_hora) AS primer_envio, MAX(fecha_hora) AS ultimo_envio
+            FROM dte_emitido_email
+            WHERE emisor = :emisor AND dte = :dte AND folio = :folio AND certificacion = :certificacion
+            GROUP BY email
+            ORDER BY ultimo_envio DESC, primer_envio ASC
+        ', [
+            ':emisor' => $this->emisor,
+            ':dte' => $this->dte,
+            ':folio' => $this->folio,
+            ':certificacion' => (int)$this->certificacion,
+        ]);
     }
 
     /**

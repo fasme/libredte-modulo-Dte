@@ -187,6 +187,17 @@ echo $f->input(['name'=>'asunto', 'label'=>'Asunto', 'value'=>$asunto, 'check'=>
 echo $f->input(['type'=>'textarea', 'name'=>'mensaje', 'label'=>'Mensaje', 'value'=>$mensaje, 'rows'=>10, 'check'=>'notempty']);
 echo $f->input(['type'=>'checkbox', 'name'=>'cedible', 'label'=>'¿Copia cedible?', 'checked'=>$Emisor->config_pdf_dte_cedible]);
 echo $f->end('Enviar PDF y XML por email');
+$email_enviados = $DteEmitido->getEmailEnviadosResumen();
+if ($email_enviados) {
+    echo '<hr/>';
+    foreach ($email_enviados as &$e) {
+        $e['enviados'] = num($e['enviados']);
+        $e['primer_envio'] = \sowerphp\general\Utility_Date::format($e['primer_envio'], 'H:i \e\l d/m/Y');
+        $e['ultimo_envio'] = \sowerphp\general\Utility_Date::format($e['ultimo_envio'], 'H:i \e\l d/m/Y');
+    }
+    array_unshift($email_enviados, ['Email', 'Cantidad de envíos', 'Primer envío', 'Último envío']);
+    new \sowerphp\general\View_Helper_Table($email_enviados);
+}
 ?>
 </div>
 <!-- FIN ENVIAR POR EMAIL -->
