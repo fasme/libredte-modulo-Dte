@@ -497,6 +497,21 @@ class Model_Contribuyente extends \Model_App
                 $this->db->query('DELETE FROM cliente_contacto WHERE empresa = :rut', [':rut'=>$this->rut]);
                 $this->db->query('DELETE FROM cliente_direccion WHERE empresa = :rut', [':rut'=>$this->rut]);
             }
+            // modulo Inventario
+            if (\sowerphp\core\Module::loaded('Inventario')) {
+                $this->db->query('DELETE FROM inventario_ubicacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM inventario_item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM inventario_item_insumo WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM inventario_ubicacion_item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM inventario_item_proveedor WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            }
+            // módulo Tienda
+            if (\sowerphp\core\Module::loaded('Tienda')) {
+                $this->db->query('DELETE FROM tienda WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM tienda_item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM tienda_etiqueta WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM tienda_item_etiqueta WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            }
         }
         $this->db->commit();
         return true;
