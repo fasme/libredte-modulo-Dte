@@ -58,10 +58,10 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     }
 
     /**
-     * Método que carga actualiza los datos de los contribuyentes desde el
-     * listado de contribuyentes del SII
+     * Método que descarga el listado de contribuyentes desde el SII y luego los pasa
+     * el método que los procesa y actualiza en la BD
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-06
+     * @version 2017-07-26
      */
     private function sii($ambiente, $dia)
     {
@@ -78,6 +78,50 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
             return 2;
         }
+        $this->procesarContribuyentes($contribuyentes);
+    }
+
+    /**
+     * Método que carga el listado de contribuyentes desde un archivo CSV y luego los pasa
+     * al método que los procesa y actualiza en la BD
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-26
+     */
+    private function csv($archivo)
+    {
+        // verificar si archivo existe
+        if (!is_readable($archivo)) {
+            $this->out('<error>No fue posible leer el archivo CSV: '.$archivo.'</error>');
+            return 3;
+        }
+        // obtener datos del archivo
+        ini_set('memory_limit', '1024M');
+        $datos = file_get_contents($archivo);
+        $lines = explode("\n", $datos);
+        $n_lines = count($lines);
+        $data = [];
+        for ($i=1; $i<$n_lines; $i++) {
+            $row = str_getcsv($lines[$i], ';', '');
+            unset($lines[$i]);
+            if (!isset($row[5]))
+                continue;
+            for ($j=0; $j<6; $j++)
+                $row[$j] = trim($row[$j]);
+            $row[1] = utf8_decode($row[1]);
+            $row[4] = strtolower($row[4]);
+            $row[5] = strtolower($row[5]);
+            $data[] = $row;
+        }
+        $this->procesarContribuyentes($data);
+    }
+
+    /**
+     * Método que procesa los datos de los contribuyentes y los actualiza en la base de datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-07-26
+     */
+    private function procesarContribuyentes($contribuyentes)
+    {
         // procesar cada uno de los contribuyentes
         $registros = num(count($contribuyentes));
         $procesados = 0;
