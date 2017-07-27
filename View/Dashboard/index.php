@@ -16,7 +16,7 @@
             </div>
             <a href="dte_tmps">
                 <div class="panel-footer">
-                    <span class="pull-left">Ver documentos</span>
+                    <span class="pull-left">Ir a los documentos temporales</span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -32,13 +32,13 @@
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_emitidos)?></div>
-                        <div>Documentos emitidos</div>
+                        <div>Libro de ventas <?=$periodo?></div>
                     </div>
                 </div>
             </div>
             <a href="dte_ventas/ver/<?=$periodo?>">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir al libro de ventas</span>
+                    <span class="pull-left">Ir al libro de ventas <?=$periodo?></span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -54,13 +54,13 @@
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_recibidos)?></div>
-                        <div>Documentoss recibidos</div>
+                        <div>Libro de compras <?=$periodo?></div>
                     </div>
                 </div>
             </div>
             <a href="dte_compras/ver/<?=$periodo?>">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir al libro de compras</span>
+                    <span class="pull-left">Ir al libro de compras <?=$periodo?></span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -82,7 +82,7 @@
             </div>
             <a href="dte_intercambios/listar">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir a la bandeja</span>
+                    <span class="pull-left">Ir a la bandeja de intercambio</span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
