@@ -1147,13 +1147,13 @@ echo $f->input([
     'type' => 'file',
     'name' => 'config_pagos_transbank_crt',
     'label' => 'Certificado',
-    'help' => 'Archivo actual: <a href="https://static.libredte.cl/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_crt.'">'.$Contribuyente->config_pagos_transbank_crt.'</a>',
+    'help' => 'Archivo actual: <a href="'.\sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_crt.'">'.$Contribuyente->config_pagos_transbank_crt.'</a>',
 ]);
 echo $f->input([
     'type' => 'file',
     'name' => 'config_pagos_transbank_key',
     'label' => 'Llave',
-    'help' => 'Archivo actual: <a href="https://static.libredte.cl/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_key.'">'.$Contribuyente->config_pagos_transbank_key.'</a>',
+    'help' => 'Archivo actual: <a href="'.\sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_key.'">'.$Contribuyente->config_pagos_transbank_key.'</a>',
 ]);
 ?>
         </div>
