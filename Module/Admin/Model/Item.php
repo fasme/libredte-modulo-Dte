@@ -273,14 +273,14 @@ class Model_Item extends \Model_App
      * @param decimales Cantidad de decimales para la moneda que se está solicitando obtnener el precio
      * @todo Implementar obtención de precio en moneda diferente a CLP y montos neto/bruto cuando hay impuestos específicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-02
+     * @version 2017-07-31
      */
     public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = 0)
     {
         if ($moneda == 'CLP') {
             $precio = $this->bruto ? $this->precio/1.19 : $this->precio;
             if ($this->moneda=='CLP') {
-                return $precio;
+                return round($precio, $decimales);
             }
         } else {
             $precio = $this->bruto ? round($this->precio/1.19, $this->moneda!='CLP'?3:0) : $this->precio;
