@@ -299,7 +299,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-05-09
+     * @version 2017-08-01
      */
     public function previsualizacion()
     {
@@ -483,7 +483,7 @@ class Controller_Documentos extends \Controller_App
                     }
                 }
             }
-            // si es boleta se y el item no es exento se le agrega el IVA al precio y el impuesto adicional si existe
+            // si es boleta y el item no es exento se le agrega el IVA al precio y el impuesto adicional si existe
             if ($dte['Encabezado']['IdDoc']['TipoDTE']==39 and (!isset($detalle['IndExe']) or !$detalle['IndExe'])) {
                 // IVA
                 $iva = round($detalle['PrcItem'] * (\sasco\LibreDTE\Sii::getIVA()/100));
@@ -502,10 +502,16 @@ class Controller_Documentos extends \Controller_App
             }
             // descuento
             if (!empty($_POST['ValorDR'][$i]) and !empty($_POST['TpoValor'][$i])) {
-                if ($_POST['TpoValor'][$i]=='%')
+                if ($_POST['TpoValor'][$i]=='%') {
                     $detalle['DescuentoPct'] = $_POST['ValorDR'][$i];
-                else
+                } else {
                     $detalle['DescuentoMonto'] = $_POST['ValorDR'][$i];
+                    // si es boleta y el item no es exento se le agrega el IVA al descuento
+                    if ($dte['Encabezado']['IdDoc']['TipoDTE']==39 and (!isset($detalle['IndExe']) or !$detalle['IndExe'])) {
+                        $iva_descuento = round($detalle['DescuentoMonto'] * (\sasco\LibreDTE\Sii::getIVA()/100));
+                        $detalle['DescuentoMonto'] += $iva_descuento;
+                    }
+                }
             }
             // agregar detalle al listado
             $dte['Detalle'][] = $detalle;
