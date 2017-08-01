@@ -288,6 +288,9 @@ class Model_Item extends \Model_App
         } else {
             $precio = $this->bruto ? round($this->precio/1.19, $this->moneda!='CLP'?3:0) : $this->precio;
         }
+        if ($moneda == $this->moneda) {
+            return $precio;
+        }
         if (!$fecha)
             $fecha = date('Y-m-d');
         $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, $moneda, $fecha))->valor;
