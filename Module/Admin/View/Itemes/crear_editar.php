@@ -1,10 +1,19 @@
-<?php if (\sowerphp\core\Module::loaded('Inventario') and isset($Obj)) : ?>
+<?php if (isset($Obj)) : ?>
 <ul class="nav nav-pills pull-right">
+<?php if (\sowerphp\core\Module::loaded('Inventario')) : ?>
     <li>
         <a href="<?=$_base?>/inventario/inventario_itemes/editar/<?=$Obj->codigo?>/<?=$Obj->codigo_tipo?>" title="Editar item en el inventario">
             <span class="fa fa-cubes"></span> Editar en inventario
         </a>
     </li>
+<?php endif; ?>
+<?php if (\sowerphp\core\Module::loaded('Tienda')) : ?>
+    <li>
+        <a href="<?=$_base?>/tienda/admin/tienda_itemes/editar/<?=$Obj->codigo?>/<?=$Obj->codigo_tipo?>" title="Editar item la tienda">
+            <span class="fa fa-shopping-cart"></span> Editar en la tienda
+        </a>
+    </li>
+<?php endif; ?>
 </ul>
 <?php endif; ?>
 <h1><?=$accion?> producto o servicio</h1>
