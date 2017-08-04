@@ -6,6 +6,12 @@
             Consultar en web del SII
         </a>
     </li>
+    <li>
+        <a href="https://www4.sii.cl/registrorechazodteInternet" title="Ir al registro de aceptación o reclamos de un DTE en el SII" target="_blank">
+            <span class="fa fa-bank"></span>
+            Aceptar/rechazar en SII
+        </a>
+    </li>
 <?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_recibidos/listar">
