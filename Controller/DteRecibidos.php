@@ -420,7 +420,7 @@ class Controller_DteRecibidos extends \Controller_App
         extract($this->Api->getQuery([
             'formato' => 'csv',
         ]));
-        $certificacion = (int)!$Receptor->config_ambiente_en_certificacion;
+        $certificacion = (int)$Receptor->config_ambiente_en_certificacion;
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
         $response = $rest->post(
