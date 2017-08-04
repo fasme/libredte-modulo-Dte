@@ -216,13 +216,15 @@ class Model_Contribuyente extends \Model_App
         if (!is_numeric($rut) and strpos($rut, '-'))
             $rut = explode('-', str_replace('.', '', $rut))[0];
         parent::__construct(+$rut);
-        if (\sowerphp\core\Configure::read('proveedores.api.sasco') and $this->rut and !$this->exists()) {
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte') and $this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
-            $response = \sowerphp\core\Network_Http_Socket::get(
-                'https://sasco.cl/api/servicios/enlinea/sii/actividad_economica/'.$this->rut.'/'.$this->dv
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
+            $response = $rest->get(
+                'https://libredte.cl/api/utilidades/sii/situacion_tributaria/'.$this->getRUT()
             );
             if ($response['status']['code']==200) {
-                $info = json_decode($response['body'], true);
+                $info = $response['body'];
                 $this->razon_social = substr($info['razon_social'], 0, 100);
                 if (!empty($info['actividades'][0]['codigo']))
                     $this->actividad_economica = $info['actividades'][0]['codigo'];

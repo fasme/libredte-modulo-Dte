@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando para actualizar los contribuyentes desde el SII
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-07-01
+ * @version 2017-08-04
  */
 class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
 {
@@ -34,7 +34,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-26
+     * @version 2017-08-04
      */
     public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
     {
@@ -48,9 +48,11 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 return 1;
             }
         } else {
-            $this->sii($ambiente, $dia);
-            if (\sowerphp\core\Configure::read('libredte.props.contribuyentes')) {
+            if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+                $this->libredte($ambiente, $dia);
                 $this->corregir();
+            } else {
+                $this->sii($ambiente, $dia);
             }
         }
         $this->showStats();
@@ -69,16 +71,38 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         try {
             $Firma = new \sasco\LibreDTE\FirmaElectronica();
         } catch (\sowerphp\core\Exception $e) {
-            $this->out('<error>No fue posible obtener la firma electrónica</error>');
+            $this->out('<error>No fue posible obtener la firma electrónica: '.$e->getMessage().'</error>');
             return 1;
         }
-        // obtener contribuyentes de ambiente de producción
+        // obtener contribuyentes desde el SII
         $contribuyentes = \sasco\LibreDTE\Sii::getContribuyentes($Firma, $ambiente, $dia);
         if (!$contribuyentes) {
             $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
             return 2;
         }
         $this->procesarContribuyentes($contribuyentes);
+    }
+
+    /**
+     * Método que descarga el listado de contribuyentes desde el servicio web de LibreDTE (versión oficial)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-04
+     */
+    private function libredte($ambiente, $dia)
+    {
+        if (!$dia)
+            $dia = date('Y-m-d');
+        // obtener contribuyentes desde el servicio web de LibreDTE
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
+        $response = $rest->get(
+            'https://libredte.cl/api/utilidades/sii/contribuyentes/'.$dia.'?certificacion='.$ambiente.'&formato=json'
+        );
+        if ($response['status']['code']!=200 or empty($response['body'])) {
+            $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
+            return 2;
+        }
+        $this->procesarContribuyentes($response['body']);
     }
 
     /**
@@ -172,7 +196,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
      *  - giro
      *  - actividad económica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-31
+     * @version 2017-08-04
      */
     private function corregir()
     {
@@ -193,11 +217,13 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         $actualizados = 0;
         foreach ($contribuyentes as $rut) {
             $Contribuyente = new \website\Dte\Model_Contribuyente($rut);
-            $response = \sowerphp\core\Network_Http_Socket::get(
-                'https://sasco.cl/api/servicios/enlinea/sii/actividad_economica/'.$Contribuyente->rut.'/'.$Contribuyente->dv
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
+            $response = $rest->get(
+                'https://libredte.cl/api/utilidades/sii/situacion_tributaria/'.$Contribuyente->getRUT()
             );
             if ($response['status']['code']==200) {
-                $info = json_decode($response['body'], true);
+                $info = $response['body'];
                 $procesados++;
                 if ($this->verbose) {
                     $this->out('Procesando '.num($procesados).'/'.$registros.': contribuyente '.$Contribuyente->rut.'-'.$Contribuyente->dv);
