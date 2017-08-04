@@ -330,11 +330,10 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite solicitar un CAF al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-17
+     * @version 2017-08-04
      */
-    public function _api_timbrar_GET($dte, $emisor)
+    public function _api_solicitar_GET($dte, $cantidad, $emisor)
     {
-        extract($this->Api->getQuery(['cantidad']));
         // crear usuario, emisor y verificar permisos
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -353,17 +352,18 @@ class Controller_DteFolios extends \Controller_App
             $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de timbrar', 506);
         }
         // solicitar timbraje
-        if (!class_exists('\sasco\LibreDTE\Sii\Timbraje')) {
-            $this->Api->send('Timbraje no disponible', 500);
+        if (!class_exists('\sasco\LibreDTE\Sii\Navegador')) {
+            $this->Api->send('Solicitud de folios no está disponible en esta versión de LibreDTE', 500);
         }
-        \sasco\LibreDTE\Sii::setAmbiente((int)$Emisor->config_ambiente_en_certificacion);
-        $Timbraje = new \sasco\LibreDTE\Sii\Timbraje($Firma, $Emisor->getRUT());
         try {
-            $caf = $Timbraje->getCAF($dte, $cantidad);
-        } catch (\Exception $e) {
+            $Navegador = new \sasco\LibreDTE\Sii\Navegador(
+                $Firma, (int)$Emisor->config_ambiente_en_certificacion
+            );
+            $caf = $Navegador->solicitarCAF($Emisor->getRUT(), $dte, $cantidad);
+        } catch (\sasco\LibreDTE\Sii\Navegador_Exception $e) {
             $this->Api->send($e->getMessage(), 500);
         }
-        return $caf;
+        return base64_encode($caf);
     }
 
 }
