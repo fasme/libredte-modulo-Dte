@@ -1426,7 +1426,7 @@ if (\sowerphp\core\Configure::read('dte.cuota')) {
         'value' => num($Contribuyente->getCuota()),
     ]);
 }
-if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
+if (\sowerphp\core\Module::loaded('Sistema.Libredte')) {
     echo $f->input([
         'type' => 'div',
         'label' => 'Saldo',

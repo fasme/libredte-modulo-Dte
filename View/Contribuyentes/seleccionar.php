@@ -5,7 +5,7 @@ foreach ($empresas as &$e) {
     // agregar acciones
     $acciones = '';
     if ($e['administrador']) {
-        if (\sowerphp\core\Configure::read('libredte.props.pagos')) {
+        if (\sowerphp\core\Module::loaded('Sistema.Libredte')) {
             $acciones .= '<a href="'.$_base.'/sistema/libredte/cobros/contribuyente/'.$e['rut'].'" title="Cobros, pagos y facturación empresa '.$e['razon_social'].'"><span class="fa fa-dollar btn btn-default"></span></a> ';
         }
         $acciones .= '<a href="modificar/'.$e['rut'].'" title="Editar empresa '.$e['razon_social'].'"><span class="fa fa-edit btn btn-default"></span></a>';
