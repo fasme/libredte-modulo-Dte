@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de dte recibidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-06-21
+ * @version 2017-08-04
  */
 class Controller_DteRecibidos extends \Controller_App
 {
@@ -282,6 +282,32 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
+     * Acción que permite buscar documentos recibidos en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-04
+     */
+    public function sii()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+            'hoy' => date('Y-m-d'),
+        ]);
+        if (isset($_POST['submit'])) {
+            $r = $this->consume('/api/dte/dte_recibidos/sii/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$Emisor->rut.'?formato=json');
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener los documentos desde el SII, intente nuevamente', 'error');
+                return;
+            }
+            if (empty($r['body'])) {
+                \sowerphp\core\Model_Datasource_Session::message('No se encontraron documentos, se recomienda reintentar la consulta ya que a veces no se obtiene la respuesta correcta desde el SII', 'warning');
+                return;
+            }
+            $this->set('documentos', $r['body']);
+        }
+    }
+
+    /**
      * Acción de la API que permite obtener la información de un documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-06-21
@@ -361,6 +387,59 @@ class Controller_DteRecibidos extends \Controller_App
             $this->Api->send('No se encontraron documentos', 404);
         }
         $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Acción de la API que permite buscar en el SII los documentos recibidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-04
+     */
+    public function _api_sii_GET($desde, $hasta, $receptor)
+    {
+        // crear receptor y verificar autorización
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_emitidos/listar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // armar datos con firma
+        $Firma = $Receptor->getFirma($User->id);
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        // buscar documentos
+        extract($this->Api->getQuery([
+            'formato' => 'csv',
+        ]));
+        $certificacion = (int)!$Receptor->config_ambiente_en_certificacion;
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
+        $response = $rest->post(
+            'https://libredte.cl/api/utilidades/sii/dte_recibidos/'.$Receptor->getRUT().'/'.$desde.'/'.$hasta.'?formato='.$formato.'&certificacion='.$certificacion,
+            $data
+        );
+        if ($response['status']['code']!=200) {
+            $this->Api->send($response['body'], $response['status']['code']);
+        }
+        if ($formato=='json') {
+            $this->Api->send($response['body'], 200, JSON_PRETTY_PRINT);
+        } else {
+            header('Content-type: text/csv');
+            header('Content-Disposition: attachment; filename=dte_recibidos_'.($certificacion?'certificacion':'produccion').'_'.$receptor.'_'.$desde.'_'.$hasta.'.csv');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+            echo $response['body'];
+            exit;
+        }
     }
 
 }

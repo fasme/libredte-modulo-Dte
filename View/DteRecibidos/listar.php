@@ -1,4 +1,11 @@
 <ul class="nav nav-pills pull-right">
+<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
+    <li>
+        <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII">
+            <span class="fa fa-bank"></span> Recibidos en SII
+        </a>
+    </li>
+<?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_compras/importar" title="Importar libro IEC desde archivo CSV">
             <span class="fa fa-upload"></span> Importar CSV
