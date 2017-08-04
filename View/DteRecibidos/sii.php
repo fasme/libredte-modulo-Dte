@@ -58,4 +58,9 @@ if (isset($documentos)) {
     }
     array_unshift($documentos, ['RUT', 'Razón social', 'Documento', 'Folio', 'Fecha emisión', 'Total', 'Fecha recepción', 'Track ID', 'Días', 'Acciones']);
     new \sowerphp\general\View_Helper_Table($documentos, 'dte_recibidos_sii_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta'], true);
+?>
+<link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
+<script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
+<script type="text/javascript"> $(document).ready(function(){ dataTable("#dte_recibidos_sii_<?=$Emisor->rut?>_<?=$_POST['desde']?>_<?=$_POST['hasta']?>"); }); </script>
+<?php
 }
