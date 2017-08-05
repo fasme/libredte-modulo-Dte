@@ -35,11 +35,34 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-08-05
      */
     public function estado_envio($track_id)
     {
-        $this->query('QEstadoEnvio2', ['TrackId' => $track_id, 'NPagina' => 1]);
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            $Emisor = $this->getContribuyente();
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            $data = [
+                'firma' => [
+                    'cert-data' => $Firma->getCertificate(),
+                    'key-data' => $Firma->getPrivateKey(),
+                ],
+            ];
+            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
+            $response = $rest->post(
+                'https://libredte.cl/api/utilidades/sii/dte_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
+                $data
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se crea enlace directo al SII
+        else {
+            $this->query('QEstadoEnvio2', ['TrackId' => $track_id, 'NPagina' => 1]);
+        }
     }
 
     /**
