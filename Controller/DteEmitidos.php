@@ -1138,6 +1138,35 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción de la API que entrega el cobro asociado al documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-05
+     */
+    public function _api_cobro_GET($dte, $folio, $emisor)
+    {
+        // verificar permisos y crear DteEmitido
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
+        // entregar cobro (se agrega URL)
+        $Cobro = $DteEmitido->getCobro();
+        $Cobro->url = $this->request->url.'/pagos/documentos/pagar/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$Emisor->rut.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total;
+        return $this->Api->send($Cobro, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
      * Acción de la API que permite cargar el XML de un DTE como documento
      * emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
