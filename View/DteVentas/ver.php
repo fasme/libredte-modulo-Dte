@@ -16,6 +16,11 @@ $(function() {
         $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
     }
 });
+function get_codigo_reemplazo() {
+    $.get(_base+'/api/dte/dte_ventas/codigo_reemplazo/<?=$Libro->periodo?>/<?=$Emisor->rut?>', function(codigo) {
+        document.getElementById('CodAutRecField').value = codigo;
+    }).fail(function(error){alert(error.responseJSON)});
+}
 </script>
 
 <?php $n_ventas = count($detalle); ?>
@@ -173,7 +178,7 @@ $f->setStyle('horizontal');
 echo $f->input([
     'name' => 'CodAutRec',
     'label'=>'Autorización rectificación',
-    'help' => 'Código de autorización de rectificación obtenido desde el SII (sólo si es rectificación)',
+    'help' => 'Código de autorización de rectificación obtenido desde el SII (sólo si es rectificación) <a href="#" onclick="get_codigo_reemplazo()">[solicitar código aquí]</a>',
     'check' => ($Libro->track_id and $Libro->getEstado()!='LRH')?'notempty':'',
 ]);
 ?>

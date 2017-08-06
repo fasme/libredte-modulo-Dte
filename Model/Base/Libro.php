@@ -72,4 +72,16 @@ abstract class Model_Base_Libro extends Model_Base_Envio
         return substr($this->revision_estado, 0, 3);
     }
 
+    /**
+     * Método que entrega el arreglo con los datos del libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-13
+     */
+    public function getDatos()
+    {
+        $LibroCompraVenta = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+        $LibroCompraVenta->loadXML(base64_decode($this->xml));
+        return $LibroCompraVenta->toArray();
+    }
+
 }

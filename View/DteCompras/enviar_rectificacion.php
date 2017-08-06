@@ -5,6 +5,13 @@
         </a>
     </li>
 </ul>
+<script>
+function get_codigo_reemplazo() {
+    $.get(_base+'/api/dte/dte_compras/codigo_reemplazo/<?=$periodo?>/<?=$Emisor->rut?>', function(codigo) {
+        document.getElementById('CodAutRecField').value = codigo;
+    }).fail(function(error){alert(error.responseJSON)});
+}
+</script>
 <h1>Rectificación IEC para el período <?=$periodo?></h1>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
@@ -15,7 +22,7 @@ echo $f->begin([
 echo $f->input([
     'name' => 'CodAutRec',
     'label'=>'Autorización rectificación',
-    'help' => 'Código de autorización de rectificación obtenido desde el SII',
+    'help' => 'Código de autorización de rectificación obtenido desde el SII <a href="#" onclick="get_codigo_reemplazo()">[solicitar código aquí]</a>',
     'check'=>'notempty',
 ]);
 echo $f->end('Enviar rectificación');

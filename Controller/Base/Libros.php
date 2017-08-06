@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador base para libros
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-14
+ * @version 2017-08-06
  */
 abstract class Controller_Base_Libros extends \Controller_App
 {
@@ -386,6 +386,50 @@ abstract class Controller_Base_Libros extends \Controller_App
             $this->config['model']['plural'].' diarias período '.$periodo,
             [$this->config['model']['plural']=>$detalle]
         );
+    }
+
+    /**
+     * Recurso de la API que entrega el código de reemplazo de libro para cierto período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function _api_codigo_reemplazo_GET($periodo, $contribuyente)
+    {
+        // crear receptor y verificar autorización
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Contribuyente = new Model_Contribuyente($contribuyente);
+        if (!$Contribuyente->exists()) {
+            $this->Api->send('Contribuyente no existe', 404);
+        }
+        if (!$Contribuyente->usuarioAutorizado($User, '/dte')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // crear libro
+        $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
+        $Libro = new $class($Contribuyente->rut, $periodo, (int)$Contribuyente->config_ambiente_en_certificacion);
+        if (!$Libro->track_id) {
+            $this->Api->send('Libro no tiene Track ID', 500);
+        }
+        // consultar código reemplazo libro
+        $Firma = $Contribuyente->getFirma($User->id);
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        $datos = $Libro->getDatos();
+        $operacion = $datos['LibroCompraVenta']['EnvioLibro']['Caratula']['TipoOperacion'];
+        $tipo_libro = $datos['LibroCompraVenta']['EnvioLibro']['Caratula']['TipoLibro'];
+        $url = '/sii/iecv_codigo_reemplazo/'.$Contribuyente->getRUT().'/'.$periodo.'/'.$operacion.'/'.$tipo_libro.'/'.$Libro->track_id.'?certificacion='.(int)$Contribuyente->config_ambiente_en_certificacion;
+        $response = libredte_consume($url, $data);
+        if ($response['status']['code']!=200) {
+            $this->Api->send('No fue posible obtener el código de reemplazo del libro: '.$response['body'], $response['status']['code']);
+        }
+        return $response['body'];
     }
 
 }
