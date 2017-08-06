@@ -227,7 +227,7 @@ class Model_DteVenta extends Model_Base_Libro
         return $resumen;
     }
 
-     /**
+    /**
      * Método que entrega el resumen manual, de los totales registrados al
      * enviar el libro al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
