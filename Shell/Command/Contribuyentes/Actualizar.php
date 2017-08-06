@@ -86,18 +86,14 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método que descarga el listado de contribuyentes desde el servicio web de LibreDTE (versión oficial)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-06
      */
     private function libredte($ambiente, $dia)
     {
         if (!$dia)
             $dia = date('Y-m-d');
         // obtener contribuyentes desde el servicio web de LibreDTE
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
-        $response = $rest->get(
-            'https://libredte.cl/api/utilidades/sii/contribuyentes/'.$dia.'?certificacion='.$ambiente.'&formato=json'
-        );
+        $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=json');
         if ($response['status']['code']!=200 or empty($response['body'])) {
             $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
             return 2;
@@ -196,7 +192,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
      *  - giro
      *  - actividad económica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-06
      */
     private function corregir()
     {
@@ -217,11 +213,8 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         $actualizados = 0;
         foreach ($contribuyentes as $rut) {
             $Contribuyente = new \website\Dte\Model_Contribuyente($rut);
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
-            $response = $rest->get(
-                'https://libredte.cl/api/utilidades/sii/situacion_tributaria/'.$Contribuyente->getRUT()
-            );
+            $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$Contribuyente->getRUT());
+            $this->out($response['body']);
             if ($response['status']['code']==200) {
                 $info = $response['body'];
                 $procesados++;

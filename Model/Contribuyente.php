@@ -207,7 +207,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-06
      */
     public function __construct($rut = null)
     {
@@ -218,11 +218,7 @@ class Model_Contribuyente extends \Model_App
         parent::__construct(+$rut);
         if (\sowerphp\core\Configure::read('proveedores.api.libredte') and $this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
-            $response = $rest->get(
-                'https://libredte.cl/api/utilidades/sii/situacion_tributaria/'.$this->getRUT()
-            );
+            $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$this->getRUT());
             if ($response['status']['code']==200) {
                 $info = $response['body'];
                 $this->razon_social = substr($info['razon_social'], 0, 100);

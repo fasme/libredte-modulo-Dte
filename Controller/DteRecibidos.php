@@ -392,7 +392,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción de la API que permite buscar en el SII los documentos recibidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-06
      */
     public function _api_sii_GET($desde, $hasta, $receptor)
     {
@@ -421,10 +421,8 @@ class Controller_DteRecibidos extends \Controller_App
             'formato' => 'csv',
         ]));
         $certificacion = (int)$Receptor->config_ambiente_en_certificacion;
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
-        $response = $rest->post(
-            'https://libredte.cl/api/utilidades/sii/dte_recibidos/'.$Receptor->getRUT().'/'.$desde.'/'.$hasta.'?formato='.$formato.'&certificacion='.$certificacion,
+        $response = libredte_consume(
+            '/sii/dte_recibidos/'.$Receptor->getRUT().'/'.$desde.'/'.$hasta.'?formato='.$formato.'&certificacion='.$certificacion,
             $data
         );
         if ($response['status']['code']!=200) {

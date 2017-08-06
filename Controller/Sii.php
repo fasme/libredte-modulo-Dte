@@ -35,7 +35,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-05
+     * @version 2017-08-06
      */
     public function estado_envio($track_id)
     {
@@ -50,10 +50,8 @@ class Controller_Sii extends \Controller_App
                 ],
             ];
             $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth(\sowerphp\core\Configure::read('proveedores.api.libredte'));
-            $response = $rest->post(
-                'https://libredte.cl/api/utilidades/sii/dte_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
+            $response = libredte_consume(
+                '/sii/dte_emitido_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
                 $data
             );
             echo $response['body'];
