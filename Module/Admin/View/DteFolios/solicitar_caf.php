@@ -8,6 +8,7 @@ echo $f->input([
     'name' => 'dte',
     'label' => 'Tipo de DTE',
     'options' => [''=>'Seleccione un tipo de DTE'] + $dte_tipos,
+    'value' => $dte,
     'check' => 'notempty',
 ]);
 echo $f->input([

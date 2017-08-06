@@ -1,3 +1,13 @@
+<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/admin/dte_folios/solicitar_caf/<?=$DteFolio->dte?>" title="Solicitar timbraje electrónico al SII">
+            <span class="fa fa-download"></span> Solicitar timbraje al SII
+        </a>
+    </li>
+</ul>
+<?php endif; ?>
+
 <h1>Mantenedor folios <?=$DteFolio->getTipo()->tipo?> <small>código <?=$DteFolio->dte?></small></h1>
 
 <div class="row">
@@ -27,6 +37,8 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#caf" aria-controls="caf" role="tab" data-toggle="tab">Archivos CAF</a></li>
+        <li role="presentation"><a href="#uso_mensual" aria-controls="caf" role="tab" data-toggle="tab">Folios usados mensualmente</a></li>
+        <li role="presentation"><a href="#sin_uso" aria-controls="caf" role="tab" data-toggle="tab">Folios sin uso</a></li>
     </ul>
     <div class="tab-content">
 
@@ -47,6 +59,24 @@ echo $t->generate($cafs);
 ?>
 </div>
 <!-- FIN ARCHIVOS CAF -->
+
+<!-- INICIO ESTADISTICA -->
+<div role="tabpanel" class="tab-pane" id="uso_mensual">
+<?php
+$foliosMensuales = $DteFolio->getUsoMensual(24);
+array_unshift($foliosMensuales, ['Período', 'Cantidad usada']);
+new \sowerphp\general\View_Helper_Table($foliosMensuales, 'uso_mensual_folios_'.$DteFolio->emisor.'_'.$DteFolio->dte, true);
+?>
+</div>
+<!-- FIN ESTADISTICA -->
+
+<!-- INICIO ESTADISTICA -->
+<div role="tabpanel" class="tab-pane" id="sin_uso">
+<p class="lead">Los folios a continuación son menores al folio siguiente <?=$DteFolio->siguiente?> y no existen en LibreDTE:</p>
+<p class="lead"><?=implode(', ', $DteFolio->getSinUso())?></p>
+<p class="lead">Si estos folios no existen en otro sistema de facturación y no los recuperará, debe anularlos en el SII.</p>
+</div>
+<!-- FIN ESTADISTICA -->
 
     </div>
 </div>

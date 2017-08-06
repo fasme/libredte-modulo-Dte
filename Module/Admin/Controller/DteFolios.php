@@ -254,11 +254,12 @@ class Controller_DteFolios extends \Controller_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-08-06
      */
-    public function solicitar_caf()
+    public function solicitar_caf($dte = null)
     {
         $Emisor = $this->getContribuyente();
         $this->set([
             'dte_tipos' => $Emisor->getDocumentosAutorizados(),
+            'dte' => $dte,
         ]);
         // procesar solicitud de folios
         if (isset($_POST['submit'])) {

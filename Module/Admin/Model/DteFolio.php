@@ -294,4 +294,56 @@ class Model_DteFolio extends \Model_App
         }
     }
 
+    /**
+     * Método que entrega el uso mensual de los folios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function getUsoMensual($limit = 12)
+    {
+        $periodo_col = $this->db->date('Ym', 'fecha');
+        return $this->db->getTable('
+            SELECT * FROM (
+                SELECT '.$periodo_col.' AS mes, COUNT(*) AS folios
+                FROM dte_emitido
+                WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
+                GROUP BY '.$periodo_col.'
+                ORDER BY '.$periodo_col.' DESC
+                LIMIT '.(int)$limit.'
+            ) AS t ORDER BY mes
+        ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
+    }
+
+    /**
+     * Método que entrega los folios que están antes del folio siguiente, para
+     * los cuales hay CAF y no se han usado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function getSinUso()
+    {
+        $rangos_aux = $this->db->getTable('
+            SELECT desde, hasta
+            FROM dte_caf
+            WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
+            ORDER BY desde
+        ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
+        $folios = [];
+        foreach ($rangos_aux as $r) {
+            for ($folio=$r['desde']; $folio<=$r['hasta']; $folio++) {
+                $folios[] = $folio;
+            }
+        }
+        return $this->db->getCol('
+            SELECT folio
+            FROM UNNEST(ARRAY['.implode(', ', $folios).']) AS folio
+            WHERE
+                folio NOT IN (
+                    SELECT folio FROM dte_emitido WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
+                )
+                AND folio < (SELECT siguiente FROM dte_folio WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion)
+            ORDER BY folio
+        ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
+    }
+
 }
