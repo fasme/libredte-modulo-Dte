@@ -145,7 +145,11 @@ $asunto = 'EnvioDTE: '.num($Emisor->rut).'-'.$Emisor->dv.' - '.$DteEmitido->getT
 $mensaje = $Receptor->razon_social.','."\n\n";
 $mensaje .= 'Se adjunta '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha).' por un monto total de $'.num($DteEmitido->total).'.-'."\n\n";
 if ($Emisor->config_pagos_habilitado and $DteEmitido->getTipo()->operacion=='S') {
-    $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+    if (!$Cobro->pagado) {
+        $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+    } else {
+        $mensaje .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->medio_pago."\n\n";
+    }
 } else {
     $mensaje .= 'Enlace directo: '.$pdf_publico."\n\n";
 }

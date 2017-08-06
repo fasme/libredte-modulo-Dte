@@ -917,8 +917,13 @@ class Model_DteEmitido extends Model_Base_Envio
         if (!$msg) {
             $msg = 'Se adjunta '.$this->getTipo()->tipo.' N° '.$this->folio.' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-'."\n\n";
             if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->operacion=='S') {
-                $enlace_pagar_dte = $Request->url.'/pagos/documentos/pagar/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
-                $msg .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+                $Cobro = $this->getCobro(false);
+                if (!$Cobro->pagado) {
+                    $enlace_pagar_dte = $Request->url.'/pagos/documentos/pagar/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
+                    $msg .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+                } else {
+                    $msg .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->medio_pago."\n\n";
+                }
             }
         }
         if ($papelContinuo===null) {
