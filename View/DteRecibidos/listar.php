@@ -1,6 +1,11 @@
 <ul class="nav nav-pills pull-right">
 <?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li>
+        <a href="<?=$_base?>/dte/dte_recibidos/bhe" title="Buscar las boletas de honorarios electrónicas recibidas en el SII">
+            <span class="fa fa-user"></span> Boletas honorarios en SII
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII">
             <span class="fa fa-bank"></span> Recibidos en SII
         </a>
@@ -13,7 +18,7 @@
     </li>
     <li>
         <a href="<?=$_base?>/dte/dte_recibidos/agregar">
-            <span class="fa fa-plus"></span> Agregar documento recibido
+            <span class="fa fa-plus"></span> Agregar documento
         </a>
     </li>
 </ul>

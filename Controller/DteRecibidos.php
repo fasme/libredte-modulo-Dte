@@ -308,6 +308,65 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
+     * Acción que permite buscar boletas de honorario electrónicas recibidas en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function bhe()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+        ]);
+        if (isset($_POST['submit'])) {
+            $r = libredte_consume('/sii/boletas_honorarios_recibidas/'.$Emisor->getRUT().'/'.$_POST['periodo'].'?formato=json', [
+                'auth'=>[
+                    'rut' => $Emisor->getRUT(),
+                    'clave' => $Emisor->config_sii_pass,
+                ],
+            ]);
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener las boletas de honorarios desde el SII, intente nuevamente: '.$r['body'], 'error');
+                return;
+            }
+            if (empty($r['body'])) {
+                \sowerphp\core\Model_Datasource_Session::message('No se encontraron boletas, se recomienda reintentar la consulta ya que a veces no se obtiene la respuesta correcta desde el SII', 'warning');
+                return;
+            }
+            $this->set('boletas', $r['body']);
+        }
+    }
+
+    /**
+     * Acción que permite descargar el PDF de una boleta de honorarios electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function bhe_pdf($codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+        ]);
+        $r = libredte_consume('/sii/boleta_honorarios_pdf/'.$codigo, [
+            'auth'=>[
+                'rut' => $Emisor->getRUT(),
+                'clave' => $Emisor->config_sii_pass,
+            ],
+        ]);
+        if ($r['status']['code']!=200 or empty($r['body'])) {
+            \sowerphp\core\Model_Datasource_Session::message('No fue posible descargar el PDF de la boleta de honorarios desde el SII', 'error');
+            return;
+        }
+        header('Content-type: application/pdf');
+        header('Content-Disposition: attachment; filename=bhe_'.$codigo.'.pdf');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        echo $r['body'];
+        exit;
+    }
+
+    /**
      * Acción de la API que permite obtener la información de un documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-06-21
