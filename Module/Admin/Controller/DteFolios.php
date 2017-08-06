@@ -97,7 +97,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite subir un caf para un tipo de folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-22
+     * @version 2017-08-06
      */
     public function subir_caf()
     {
@@ -120,17 +120,9 @@ class Controller_DteFolios extends \Controller_App
                 );
                 return;
             }
-            // cargar caf
             $caf = file_get_contents($_FILES['caf']['tmp_name']);
             $Folios = new \sasco\LibreDTE\Sii\Folios($caf);
-            // si no se pudo validar el caf error
-            if (!$Folios->getTipo()) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'No fue posible cargar el CAF '.$_FILES['caf']['name'].':<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
-                );
-                return;
-            }
-            // verificar que el caf tenga previamente cargado un mantenedor de folio
+            // buscar el mantenedor de folios del CAF
             $DteFolio = new Model_DteFolio($Emisor->rut, $Folios->getTipo(), (int)$Folios->getCertificacion());
             if (!$DteFolio->exists()) {
                 \sowerphp\core\Model_Datasource_Session::message(
@@ -138,57 +130,16 @@ class Controller_DteFolios extends \Controller_App
                 );
                 return;
             }
-            // verificar que el caf sea del emisor
-            if ($Folios->getEmisor()!=$Emisor->rut.'-'.$Emisor->dv) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'RUT del CAF '.$Folios->getEmisor().' no corresponde con el RUT de la empresa '.$Emisor->razon_social.' '.$Emisor->rut.'-'.$Emisor->dv, 'error'
-                );
-                return;
-            }
-            // verificar que el folio que se está subiendo sea para el ambiente actual de la empresa
-            $ambiente_empresa = $Emisor->config_ambiente_en_certificacion ? 'certificación' : 'producción';
-            $ambiente_caf = $Folios->getCertificacion() ? 'certificación' : 'producción';
-            if ($ambiente_empresa!=$ambiente_caf) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'Empresa está en ambiente de '.$ambiente_empresa.' pero folios son de '.$ambiente_caf, 'error'
-                );
-                return;
-            }
-            // crear caf para el folio
-            $DteCaf = new Model_DteCaf($DteFolio->emisor, $DteFolio->dte, (int)$Folios->getCertificacion(), $Folios->getDesde());
-            if ($DteCaf->exists()) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'El CAF para el documento de tipo '.$DteCaf->dte.' que inicia en '.$Folios->getDesde().' en ambiente de '.$ambiente_caf.' ya estaba cargado', 'warning'
-                );
-                return;
-            }
-            $DteCaf->hasta = $Folios->getHasta();
-            $DteCaf->xml = \website\Dte\Utility_Data::encrypt($caf);
+            // guardar el CAF
             try {
-                $DteCaf->save();
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                $DteFolio->guardarFolios($caf);
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'No fue posible guardar el CAF: '.$e->getMessage(), 'error'
-                );
-                return;
-            }
-            // actualizar mantenedor de folios
-            if (!$DteFolio->disponibles) {
-                $DteFolio->siguiente = $Folios->getDesde();
-                $DteFolio->disponibles = $Folios->getHasta() - $Folios->getDesde() + 1;
-            } else {
-                $DteFolio->disponibles += $Folios->getHasta() - $Folios->getDesde() + 1;
-            }
-            $DteFolio->alertado = 'f';
-            try {
-                $DteFolio->save();
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'El CAF para el documento de tipo '.$DteCaf->dte.' que inicia en '.$Folios->getDesde().' en ambiente de '.$ambiente_caf.' fue cargado, el siguiente folio disponible es '.$DteFolio->siguiente, 'ok'
+                    'El CAF para el documento de tipo '.$Folios->getTipo().' que inicia en '.$Folios->getDesde().' fue cargado, el siguiente folio disponible es '.$DteFolio->siguiente, 'ok'
                 );
                 $this->redirect('/dte/admin/dte_folios');
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'El CAF se guardó, pero no fue posible actualizar el mantenedor de folios, deberá actualizar manualmente. '.$e->getMessage(), 'error'
+                    $e->getMessage(), 'error'
                 );
                 return;
             }
@@ -299,6 +250,52 @@ class Controller_DteFolios extends \Controller_App
     }
 
     /**
+     * Acción que permite solicitar un archivo CAF al SII y cargarlo en LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function solicitar_caf()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'dte_tipos' => $Emisor->getDocumentosAutorizados(),
+        ]);
+        // procesar solicitud de folios
+        if (isset($_POST['submit'])) {
+            // solicitar CAF al SII (se usa servicio web local como wrapper del real)
+            $r = $this->consume('/api/dte/admin/dte_folios/solicitar_caf/'.$_POST['dte'].'/'.$_POST['cantidad'].'/'.$Emisor->rut);
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el archivo CAF desde el SII, intente nuevamente: '.$r['body'], 'error');
+                return;
+            }
+            // cargar caf
+            $caf = base64_decode($r['body']);
+            $Folios = new \sasco\LibreDTE\Sii\Folios($caf);
+            // buscar el mantenedor de folios del CAF
+            $DteFolio = new Model_DteFolio($Emisor->rut, $Folios->getTipo(), (int)$Folios->getCertificacion());
+            if (!$DteFolio->exists()) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Primero debe crear el mantenedor de los folios de tipo '.$Folios->getTipo(), 'error'
+                );
+                return;
+            }
+            // guardar el CAF
+            try {
+                $DteFolio->guardarFolios($caf);
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'El CAF para el documento de tipo '.$Folios->getTipo().' que inicia en '.$Folios->getDesde().' fue cargado, el siguiente folio disponible es '.$DteFolio->siguiente, 'ok'
+                );
+                $this->redirect('/dte/admin/dte_folios');
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    $e->getMessage(), 'error'
+                );
+                return;
+            }
+        }
+    }
+
+    /**
      * Recurso que entrega el la información de cierto mantenedor de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-08-02
@@ -330,9 +327,9 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite solicitar un CAF al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-06
      */
-    public function _api_solicitar_GET($dte, $cantidad, $emisor)
+    public function _api_solicitar_caf_GET($dte, $cantidad, $emisor)
     {
         // crear usuario, emisor y verificar permisos
         $User = $this->Api->getAuthUser();
@@ -346,24 +343,28 @@ class Controller_DteFolios extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/admin/dte_folios/subir_caf')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
+        // verificar que exista un mantenedor de folios
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteFolio->exists()) {
+            $this->Api->send('Primero debe crear el mantenedor de los folios de tipo '.$dte, 500);
+        }
         // recuperar firma electrónica
         $Firma = $Emisor->getFirma($User->id);
         if (!$Firma) {
             $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de timbrar', 506);
         }
         // solicitar timbraje
-        if (!class_exists('\sasco\LibreDTE\Sii\Navegador')) {
-            $this->Api->send('Solicitud de folios no está disponible en esta versión de LibreDTE', 500);
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        $r = libredte_consume('/sii/caf_solicitar/'.$Emisor->getRUT().'/'.$dte.'/'.$cantidad.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, $data);
+        if ($r['status']['code']!=200) {
+            $this->Api->send('No fue posible timbrar: '.$r['body'], 500);
         }
-        try {
-            $Navegador = new \sasco\LibreDTE\Sii\Navegador(
-                $Firma, (int)$Emisor->config_ambiente_en_certificacion
-            );
-            $caf = $Navegador->solicitarCAF($Emisor->getRUT(), $dte, $cantidad);
-        } catch (\sasco\LibreDTE\Sii\Navegador_Exception $e) {
-            $this->Api->send($e->getMessage(), 500);
-        }
-        return base64_encode($caf);
+        return base64_encode($r['body']);
     }
 
 }

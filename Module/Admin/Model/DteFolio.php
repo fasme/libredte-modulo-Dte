@@ -234,4 +234,64 @@ class Model_DteFolio extends \Model_App
         return (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($this->dte);
     }
 
+    /**
+     * Método que entrega el objeto del contribuyente asociado al mantenedor de folios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-05
+     */
+    public function getEmisor()
+    {
+        return (new \website\Dte\Model_Contribuyentes())->get($this->emisor);
+    }
+
+    /**
+     * Método que guardar un archivo de folios en la base de datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-05
+     */
+    public function guardarFolios($xml)
+    {
+        $Emisor = $this->getEmisor();
+        $Folios = new \sasco\LibreDTE\Sii\Folios($xml);
+        // si no se pudo validar el caf error
+        if (!$Folios->getTipo()) {
+            throw new \Exception('No fue posible cargar el CAF:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+        }
+        // verificar que el caf sea del emisor
+        if ($Folios->getEmisor()!=$Emisor->rut.'-'.$Emisor->dv) {
+            throw new \Exception('RUT del CAF '.$Folios->getEmisor().' no corresponde con el RUT de la empresa '.$Emisor->razon_social.' '.$Emisor->rut.'-'.$Emisor->dv);
+        }
+        // verificar que el folio que se está subiendo sea para el ambiente actual de la empresa
+        $ambiente_empresa = $Emisor->config_ambiente_en_certificacion ? 'certificación' : 'producción';
+        $ambiente_caf = $Folios->getCertificacion() ? 'certificación' : 'producción';
+        if ($ambiente_empresa!=$ambiente_caf) {
+            throw new \Exception('Empresa está en ambiente de '.$ambiente_empresa.' pero folios son de '.$ambiente_caf);
+        }
+        // crear caf para el folio
+        $DteCaf = new Model_DteCaf($this->emisor, $this->dte, (int)$Folios->getCertificacion(), $Folios->getDesde());
+        if ($DteCaf->exists()) {
+            throw new \Exception('El CAF para el documento de tipo '.$DteCaf->dte.' que inicia en '.$Folios->getDesde().' en ambiente de '.$ambiente_caf.' ya estaba cargado');
+        }
+        $DteCaf->hasta = $Folios->getHasta();
+        $DteCaf->xml = \website\Dte\Utility_Data::encrypt($xml);
+        try {
+            $DteCaf->save();
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            throw new \Exception('No fue posible guardar el CAF: '.$e->getMessage());
+        }
+        // actualizar mantenedor de folios
+        if (!$this->disponibles) {
+            $this->siguiente = $Folios->getDesde();
+            $this->disponibles = $Folios->getHasta() - $Folios->getDesde() + 1;
+        } else {
+            $this->disponibles += $Folios->getHasta() - $Folios->getDesde() + 1;
+        }
+        $this->alertado = 'f';
+        try {
+            return $this->save();
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            throw new \Exception('El CAF se guardó, pero no fue posible actualizar el mantenedor de folios, deberá actualizar manualmente. '.$e->getMessage());
+        }
+    }
+
 }

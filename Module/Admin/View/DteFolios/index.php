@@ -10,13 +10,19 @@ array_unshift($folios, ['Código', 'Documento', 'Siguiente folio', 'Total dispon
 new \sowerphp\general\View_Helper_Table($folios);
 ?>
 <div class="row">
-    <div class="col-xs-6">
+    <div class="col-xs-4">
         <a class="btn btn-default btn-lg btn-block" href="dte_folios/agregar" role="button">
             <span class="fa fa-edit"></span>
             Crear mantenedor de folio
         </a>
     </div>
-    <div class="col-xs-6">
+    <div class="col-xs-4">
+        <a class="btn btn-default btn-lg btn-block <?=!\sowerphp\core\Configure::read('proveedores.api.libredte')?'disabled':''?>" href="dte_folios/solicitar_caf" role="button">
+            <span class="fa fa-download"></span>
+            Solicitar CAF
+        </a>
+    </div>
+    <div class="col-xs-4">
         <a class="btn btn-default btn-lg btn-block" href="dte_folios/subir_caf" role="button">
             <span class="fa fa-upload"></span>
             Subir archivo CAF
