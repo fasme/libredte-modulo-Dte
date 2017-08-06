@@ -185,6 +185,7 @@ class Model_Contribuyente extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     public static $encriptar = [
+        'sii_pass',
         'email_sii_pass',
         'email_intercambio_pass',
         'api_auth_user',

@@ -241,6 +241,15 @@ echo $f->input([
 <?php if (isset($Contribuyente)) : ?>
     <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="img-responsive thumbnail center" />
 <?php endif; ?>
+<?php
+echo $f->input([
+    'type' => 'text',
+    'name' => 'config_sii_pass',
+    'label' => 'Contraseña SII',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_sii_pass : null,
+    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
+]);
+?>
 </div>
 <!-- FIN DATOS EMPRESA -->
 
@@ -312,6 +321,7 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_pass : null,
     'label' => 'Contraseña',
     'check' => 'notempty',
+    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
 ]);
 echo $f->input([
     'name' => 'config_email_sii_smtp',
@@ -353,6 +363,7 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_pass : null,
     'label' => 'Contraseña',
     'check' => 'notempty',
+    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
 ]);
 echo $f->input([
     'name' => 'config_email_intercambio_smtp',
@@ -1313,6 +1324,7 @@ echo $f->input([
     'name' => 'config_email_crm_pass',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_crm_pass : null,
     'label' => 'Contraseña',
+    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
 ]);
 echo $f->input([
     'name' => 'config_email_crm_smtp',
@@ -1364,7 +1376,7 @@ echo $f->input([
     'label' => 'Contraseña',
     'value' => $Contribuyente->config_api_auth_pass,
     'help' => 'Si no se especifíca la contraseña se enviará al servicio web el usuario/token y una X como contraseña',
-    'attr' => 'maxlength="255"',
+    'attr' => 'maxlength="255" onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
 ]);
 ?>
         </div>
@@ -1507,3 +1519,13 @@ echo $f->input([
 
 <?php
 echo $f->end($boton);
+?>
+<script>
+$(function() {
+    $('#config_sii_passField').attr('type', 'password');
+    $('#config_email_sii_passField').attr('type', 'password');
+    $('#config_email_intercambio_passField').attr('type', 'password');
+    $('#config_email_crm_passField').attr('type', 'password');
+    $('#config_api_auth_passField').attr('type', 'password');
+});
+</script>
