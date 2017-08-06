@@ -284,7 +284,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite buscar documentos recibidos en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-06
      */
     public function sii()
     {
@@ -303,7 +303,18 @@ class Controller_DteRecibidos extends \Controller_App
                 \sowerphp\core\Model_Datasource_Session::message('No se encontraron documentos, se recomienda reintentar la consulta ya que a veces no se obtiene la respuesta correcta desde el SII', 'warning');
                 return;
             }
-            $this->set('documentos', $r['body']);
+            $documentos = $r['body'];
+            if ($_POST['excluir_en_libro']) {
+                $n_documentos = count($documentos);
+                for ($i=0; $i<$n_documentos; $i++) {
+                    list($rut, $dv) = explode('-', $documentos[$i]['rut']);
+                    $DteRecibido = new Model_DteRecibido($rut, $documentos[$i]['dte'], $documentos[$i]['folio'], (int)$Emisor->config_ambiente_en_certificacion);
+                    if ($DteRecibido->usuario) {
+                        unset($documentos[$i]);
+                    }
+                }
+            }
+            $this->set('documentos', $documentos);
         }
     }
 

@@ -40,6 +40,13 @@ echo $f->input([
     'check' => 'notempty date',
     'help' => 'Hasta qué fecha de recepción en el SII buscar',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'excluir_en_libro',
+    'label' => '¿Buscar todo?',
+    'options' => ['Buscar todos los documentos recibidos en el SII', 'Buscar sólo los documentos que no están en el libro de compras'],
+    'help' => '¿Excluir de la búsqueda lo que ya está ingresado al libro de compras?',
+]);
 echo $f->end('Buscar documentos');
 
 if (isset($documentos)) {
