@@ -670,7 +670,10 @@ class Controller_Documentos extends \Controller_App
         }
         // enviar por correo el DTE si así se solicitó
         if ($email) {
-            $DteEmitido->email($DteEmitido->getEmails());
+            try {
+                $DteEmitido->email($DteEmitido->getEmails());
+            } catch (\Exception $e) {
+            }
         }
         // entregar DTE emitido al cliente de la API
         if (!$getXML) {
