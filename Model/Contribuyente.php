@@ -783,6 +783,27 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que determina si el usuario está o no autorizado a asignar manualmente el Folio de un DTE
+     * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario con el usuario a verificar
+     * @return =true si está autorizado a cambiar el folio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-06
+     */
+    public function puedeAsignarFolio(\sowerphp\app\Sistema\Usuarios\Model_Usuario $Usuario)
+    {
+        if (!$this->config_emision_asignar_folio) {
+            return false;
+        }
+        if ($this->config_emision_asignar_folio==1) {
+            return $this->usuarioAutorizado($Usuario, 'admin');
+        }
+        if ($this->config_emision_asignar_folio==2) {
+            return $this->usuarioAutorizado($Usuario, ['admin', 'dte']);
+        }
+        return false;
+    }
+
+    /**
      * Método que entrega los documentos que el contribuyente tiene autorizados
      * a emitir en la aplicación
      * @return Listado de documentos autorizados
@@ -911,13 +932,12 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
-     * Método que entrega el folio siguiente del tipo de documento solicitado
-     * para el ambiente que la empresa está operando
+     * Método que entrega los datos del folio del documento solicitado
      * @param dte Tipo de documento para el cual se quiere su folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-22
+     * @version 2017-08-06
      */
-    public function getFolio($dte)
+    public function getFolio($dte, $folio_manual = 0)
     {
         if (!$this->db->beginTransaction(true))
             return false;
@@ -926,17 +946,24 @@ class Model_Contribuyente extends \Model_App
             $this->db->rollback();
             return false;
         }
-        $folio = $DteFolio->siguiente;
-        $DteFolio->siguiente++;
-        $DteFolio->disponibles--;
-        try {
-            if (!$DteFolio->save(false)) {
+        if ($folio_manual==$DteFolio->siguiente) {
+            $folio_manual = 0;
+        }
+        if (!$folio_manual) {
+            $folio = $DteFolio->siguiente;
+            $DteFolio->siguiente++;
+            $DteFolio->disponibles--;
+            try {
+                if (!$DteFolio->save(false)) {
+                    $this->db->rollback();
+                    return false;
+                }
+            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 $this->db->rollback();
                 return false;
             }
-        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            $this->db->rollback();
-            return false;
+        } else {
+            $folio = $folio_manual;
         }
         $Caf = $this->getCaf($dte, $folio);
         if (!$Caf) {

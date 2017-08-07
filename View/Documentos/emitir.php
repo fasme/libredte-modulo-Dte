@@ -9,6 +9,16 @@ $f = new \sowerphp\general\View_Helper_Form(false);
 echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check()']);
 ?>
     <!-- DATOS DEL DOCUMENTO -->
+<?php if ($Emisor->puedeAsignarFolio($_Auth->User)) : ?>
+    <div class="row">
+        <div class="form-group col-md-offset-9 col-md-3">
+            <div class="input-group">
+                <div class="input-group-addon">Folio</div>
+                <?=$f->input(['name' => 'Folio', 'placeholder'=>0, 'popover'=>'Puede asignar manualmente un folio para el DTE. Si lo deja en 0 se usará el siguiente disponible en el sistema.', 'check' => 'integer'])?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
     <div class="row">
         <div class="form-group col-md-3"><?=$f->input(['name'=>'TpoDoc', 'type'=>'select', 'options'=> $tipos_dte_autorizados, 'value'=>$dte_defecto, 'attr'=>'onblur="DTE.setTipo(this.value)"'])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'date', 'name' => 'FchEmis', 'placeholder'=>'Fecha emisión DTE', 'popover'=>'Día en que se emite el documento', 'value'=>date('Y-m-d'), 'check' => 'notempty date'])?></div>

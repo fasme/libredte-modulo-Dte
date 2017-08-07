@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-19
+     * @version 2017-08-06
      */
     public function generar($user_id = null)
     {
@@ -246,7 +246,15 @@ class Model_DteTmp extends \Model_App
             throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE', 506);
         }
         // solicitar folio
-        $FolioInfo = $Emisor->getFolio($this->dte);
+        $datos_dte = $this->getDatos();
+        $folio_dte = !empty($datos_dte['Encabezado']['IdDoc']['Folio']) ? (int)$datos_dte['Encabezado']['IdDoc']['Folio'] : 0;
+        if ($folio_dte) {
+            $Usuario = new \sowerphp\app\Sistema\Usuarios\Model_Usuario($user_id);
+            if (!$Emisor->puedeAsignarFolio($Usuario)) {
+                $folio_dte = 0;
+            }
+        }
+        $FolioInfo = $Emisor->getFolio($this->dte, $folio_dte);
         if (!$FolioInfo) {
             throw new \Exception('No fue posible obtener un folio para el DTE de tipo '.$this->dte, 508);
         }

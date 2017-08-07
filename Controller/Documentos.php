@@ -299,7 +299,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-01
+     * @version 2017-08-06
      */
     public function previsualizacion()
     {
@@ -362,7 +362,7 @@ class Controller_Documentos extends \Controller_App
             'Encabezado' => [
                 'IdDoc' => [
                     'TipoDTE' => $_POST['TpoDoc'],
-                    'Folio' => 0, // en previsualización no se asigna folio
+                    'Folio' => !empty($_POST['Folio']) ? $_POST['Folio'] : 0,
                     'FchEmis' => $_POST['FchEmis'],
                     'FmaPago' => !empty($_POST['FmaPago']) ? $_POST['FmaPago'] : false,
                     'FchCancel' => $_POST['FchVenc'] < $_POST['FchEmis'] ? $_POST['FchVenc'] : false,

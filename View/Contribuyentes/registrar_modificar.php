@@ -443,6 +443,18 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_extra_indicador_servicio : 0,
     'help' => '¿Se debe usar un indicador de servicio por defecto?',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_emision_asignar_folio',
+    'label' => '¿Folio manual?',
+    'options' => [
+        'Ningún usuario puede asignar manualmente el folio',
+        'Sólo administradores pueden asignar manualmente el folio',
+        'Cualquier usuario con rol \'dte\' puede asignar manualmente el folio',
+    ],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_asignar_folio : 0,
+    'help' => '¿Es posible elegir manualmente qué folio se desea utilizar en un documento que se emitirá?',
+]);
 ?>
                 </div>
                 <div class="col-md-6">
