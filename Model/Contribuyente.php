@@ -935,13 +935,21 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega los datos del folio del documento solicitado
      * @param dte Tipo de documento para el cual se quiere su folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-08-07
      */
     public function getFolio($dte, $folio_manual = 0)
     {
         if (!$this->db->beginTransaction(true))
             return false;
         $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->rut, $dte, (int)$this->config_ambiente_en_certificacion);
+        if (!$DteFolio->disponibles and $this->config_sii_timbraje_automatico) {
+            try {
+                $DteFolio->timbrar($DteFolio->alerta*$this->config_sii_timbraje_multiplicador);
+                $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->rut, $dte, (int)$this->config_ambiente_en_certificacion); // actualiza info del mantenedor de folios
+            } catch (\Exception $e) {
+                //file_put_contents(TMP.'/contribuyentes.log', $this->rut.' TIMBRAJE '.$e->getMessage()."\n", FILE_APPEND);
+            }
+        }
         if (!$DteFolio->exists() or !$DteFolio->disponibles) {
             $this->db->rollback();
             return false;

@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-08-07
      */
     public function generar($user_id = null)
     {
@@ -262,13 +262,25 @@ class Model_DteTmp extends \Model_App
         /*if (\sowerphp\general\Utility_Date::countMonths($FolioInfo->Caf->getFechaAutorizacion()) > 18) {
             throw new \Exception('Se obtuvo el CAF para el folio T'.$FolioInfo->DteFolio->dte.'F'.$FolioInfo->folio.', sin embargo el CAF no está vigente (autorizado hace más de 18 meses)', 508);
         }*/
-        // si quedan pocos folios y se debe alertar al usuario admnistrador de la empresa se hace
-        if ($FolioInfo->DteFolio->disponibles<=$FolioInfo->DteFolio->alerta and !$FolioInfo->DteFolio->alertado) {
-            $asunto = 'Alerta de folios tipo '.$FolioInfo->DteFolio->dte;
-            $msg = 'Se ha alcanzado el límite de folios del tipo de DTE '.$FolioInfo->DteFolio->dte.' para el contribuyente '.$Emisor->razon_social.', quedan '.$FolioInfo->DteFolio->disponibles.'. Por favor, solicite un nuevo archivo CAF y súbalo a LibreDTE.';
-            if ($Emisor->notificar($asunto, $msg)) {
-                $FolioInfo->DteFolio->alertado = 1;
-                $FolioInfo->DteFolio->save();
+        // si quedan pocos folios timbrar o alertar según corresponda
+        if ($FolioInfo->DteFolio->disponibles<=$FolioInfo->DteFolio->alerta) {
+            $timbrado = false;
+            // timbrar automáticmente
+            if ($Emisor->config_sii_timbraje_automatico==1) {
+                try {
+                    $FolioInfo->DteFolio->timbrar($FolioInfo->DteFolio->alerta*$Emisor->config_sii_timbraje_multiplicador);
+                    $timbrado = true;
+                } catch (\Exception $e) {
+                }
+            }
+            // notificar al usuario administrador
+            if (!$timbrado and !$FolioInfo->DteFolio->alertado) {
+                $asunto = 'Alerta de folios tipo '.$FolioInfo->DteFolio->dte;
+                $msg = 'Se ha alcanzado el límite de folios del tipo de DTE '.$FolioInfo->DteFolio->dte.' para el contribuyente '.$Emisor->razon_social.', quedan '.$FolioInfo->DteFolio->disponibles.'. Por favor, solicite un nuevo archivo CAF y súbalo a LibreDTE en '.\sowerphp\core\Configure::read('app.url').'/dte/admin/dte_folios';
+                if ($Emisor->notificar($asunto, $msg)) {
+                    $FolioInfo->DteFolio->alertado = 1;
+                    $FolioInfo->DteFolio->save();
+                }
             }
         }
         // armar xml a partir del DTE temporal

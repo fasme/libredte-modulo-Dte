@@ -245,6 +245,50 @@ class Model_DteFolio extends \Model_App
     }
 
     /**
+     * Método que permite realizar el timbraje de manera automática
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-07
+     */
+    public function timbrar($cantidad = null)
+    {
+        // si no hay API de LibreDTE no se puede timbrar
+        if (!\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            throw new \Exception('No hay API de LibreDTE');
+        }
+        // corregir cantidad si no se pasó
+        if (!$cantidad) {
+            if (!$this->alerta) {
+                throw new \Exception('No hay alerta configurada');
+            }
+            $cantidad = $this->alerta * 5;
+        }
+        // recuperar firma electrónica
+        $Emisor = $this->getEmisor();
+        $Firma = $Emisor->getFirma();
+        if (!$Firma) {
+            throw new \Exception('No hay firma electrónica');
+        }
+        // solicitar timbraje
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        $r = libredte_consume('/sii/caf_solicitar/'.$Emisor->getRUT().'/'.$this->dte.'/'.$cantidad.'?certificacion='.(int)$this->certificacion, $data);
+        if ($r['status']['code']!=200) {
+            throw new \Exception('No se pudo obtener el CAF desde el SII: '.$r['body']);
+        }
+        // cargar caf
+        try {
+            $this->guardarFolios($r['body']);
+            return true;
+        } catch (\Exception $e) {
+            throw new \Exception('No fue posible guardar el CAF obtenido desde el SII');
+        }
+    }
+
+    /**
      * Método que guardar un archivo de folios en la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-08-05

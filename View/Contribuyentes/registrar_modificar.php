@@ -771,6 +771,20 @@ echo $f->input([
 <?php
 echo $f->input([
     'type' => 'select',
+    'name' => 'config_sii_timbraje_automatico',
+    'label' => '¿Timbraje automático?',
+    'options' => ['Nunca timbrar automáticamente', 'Timbrar automáticamente cuando se llegue a la alerta de folios'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_sii_timbraje_automatico : 0,
+    'help' => '¿Se debe timbrar automáticamente folios cuando se alcance la alerta? Si se activa, debe asignar multiplicador (abajo)',
+]);
+echo $f->input([
+    'name' => 'config_sii_timbraje_multiplicador',
+    'label' => 'Multiplicador de timbraje',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_sii_timbraje_multiplicador : 5,
+    'help' => 'Se solicitará como cantidad de timbraje automático máximo: [alerta folio] x [multiplicador]',
+]);
+echo $f->input([
+    'type' => 'select',
     'name' => 'config_sii_estado_dte_webservice',
     'label' => 'Estado DTE',
     'options' => ['Correo electrónico (más lento pero con detalles)', 'Servicio web (más rápido pero sin detalles)'],
