@@ -19,4 +19,6 @@ CREATE TABLE dte_emitido_email (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+ALTER TABLE item_clasificacion ALTER superior TYPE VARCHAR(35);
+
 COMMIT;
