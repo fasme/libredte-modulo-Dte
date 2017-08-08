@@ -660,6 +660,28 @@ class Controller_Contribuyentes extends \Controller_App
     }
 
     /**
+     * Acción que descarga algo del directorio estático del cliente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-07
+     */
+    public function descargar($what, $eliminar = false)
+    {
+        $Emisor = $this->getContribuyente();
+        if ($what == 'transbank_logs_certificacion') {
+            $dir = DIR_STATIC.'/contribuyentes/'.$Emisor->rut.'/transbank/logs/certificacion';
+            if (!is_dir($dir)) {
+                $dir = null;
+            }
+        }
+        if (!isset($dir)) {
+            \sowerphp\core\Model_Datasource_Session::message('No es posible descargar lo solicitado', 'error');
+            $this->redirect('/');
+        }
+        \sowerphp\general\Utility_File::compress($dir, ['delete'=>$eliminar]);
+        exit;
+    }
+
+    /**
      * Método de la API que permite obtener los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-03-18

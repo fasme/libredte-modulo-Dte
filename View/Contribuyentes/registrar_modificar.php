@@ -1192,6 +1192,14 @@ echo $f->input([
     'label' => 'Llave',
     'help' => 'Archivo actual: <a href="'.\sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$Contribuyente->rut.'/transbank/'.$Contribuyente->config_pagos_transbank_key.'">'.$Contribuyente->config_pagos_transbank_key.'</a>',
 ]);
+if (is_dir(DIR_STATIC.'/contribuyentes/'.$Contribuyente->rut.'/transbank/logs/certificacion')) {
+    echo $f->input([
+        'type' => 'div',
+        'label' => 'Logs',
+        'value' => '<a href="'.$_base.'/dte/contribuyentes/descargar/transbank_logs_certificacion/1" class="btn btn-default">Descargar registros de transacciones</a>',
+        'help' => 'Registros del proceso de cada pago en ambiente de certificación para evidencia (se eliminan al descargar)',
+    ]);
+}
 ?>
         </div>
     </div>
