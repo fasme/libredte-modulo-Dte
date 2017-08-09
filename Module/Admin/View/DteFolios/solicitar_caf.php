@@ -22,3 +22,4 @@ echo $f->end('Solicitar folios al SII y cargar en LibreDTE');
 <div style="float:right;margin-bottom:1em;font-size:0.8em">
     <a href="<?=$_base?>/dte/admin/dte_folios">Volver al mantenedor de folios</a>
 </div>
+<p><strong>Importante</strong>: si no ha timbrado folios para este tipo de documento en el SII, o sea, es el primer CAF a generar, debe hacerlo en el sitio del SII, no acá. Timbrajes futuros se pueden realizar acá o de manera automática.</p>
