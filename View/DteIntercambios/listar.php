@@ -1,4 +1,23 @@
 <ul class="nav nav-pills pull-right">
+<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-bank"></span> Recibidos en SII <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII">
+                     DTE recibidos en SII
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_recibidos/bhe" title="Buscar las boletas de honorarios electrónicas recibidas en el SII">
+                    Boletas honorarios en SII
+                </a>
+            </li>
+        </ul>
+    </li>
+<?php endif; ?>
 <?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
         <a href="https://www4.sii.cl/registrorechazodteInternet" title="Ir al registro de aceptación o reclamos de un DTE en el SII" target="_blank">
@@ -18,14 +37,14 @@
     <li>
         <a href="<?=$_base?>/dte/dte_intercambios/listar/0/1" title="Ver todos los documentos pendientes de procesar">
             <span class="fa fa-list-alt"></span>
-            Ver pendientes
+            Pendientes
         </a>
     </li>
 <?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_intercambios/pendientes" title="Descargar los documentos pendientes de procesar">
             <span class="fa fa-download"></span>
-            Descargar pendientes
+            Descargar
         </a>
     </li>
     <li>
