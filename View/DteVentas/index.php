@@ -1,5 +1,10 @@
 <ul class="nav nav-pills pull-right">
     <li>
+        <a href="<?=$_base?>/dte/dte_emitidos/buscar" title="Búsqueda avanzada de documentos emitidos">
+            <span class="fa fa-search"></span> Buscar
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/dte_compras" title="Ir al libro de compras">
             <span class="fa fa-book"></span> Libro de compras
         </a>
