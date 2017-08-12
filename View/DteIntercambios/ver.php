@@ -167,8 +167,10 @@ echo $f->input([
 echo $f->input([
     'name' => 'periodo',
     'label' => 'Período',
-    'check' => 'integer',
-    'help' => 'Periodo del libro del documento. Si se deja en blanco se usa la fecha de emisión. Ejemplo: '.date('Ym'),
+    'value' => date('Ym'),
+    'check' => 'notempty integer',
+    'help' => 'Período del libro en que se asignará el documento.',
+    //'attr' => 'readonly="readonly"',
 ]);
 echo '</div>',"\n";
 echo '</div>',"\n";

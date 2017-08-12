@@ -291,7 +291,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-08
+     * @version 2017-08-12
      */
     public function responder($codigo)
     {
@@ -490,6 +490,7 @@ class Controller_DteIntercambios extends \Controller_App
             $Documentos = $DteIntercambio->getDocumentos();
             foreach ($Documentos as $Dte) {
                 if (in_array($Dte->getID(true), $EnvioRecibos_r)) {
+                    // procesar DTE recibido
                     $resumen = $Dte->getResumen();
                     $DteRecibido = new Model_DteRecibido($DteIntercambio->getEmisor()->rut, $resumen['TpoDoc'], $resumen['NroDoc'], (int)$DteIntercambio->certificacion);
                     if (!$DteRecibido->exists()) {
@@ -506,7 +507,8 @@ class Controller_DteIntercambios extends \Controller_App
                         $DteRecibido->usuario = $this->Auth->User->id;
                         $DteRecibido->intercambio = $DteIntercambio->codigo;
                         $DteRecibido->impuesto_tipo = 1; // se asume siempre que es IVA
-                        if (!empty($_POST['periodo'])) {
+                        $periodo_dte = (int)substr(str_replace('-', '', $DteRecibido->fecha), 0, 6);
+                        if (!empty($_POST['periodo']) and $_POST['periodo']>$periodo_dte) {
                             $DteRecibido->periodo = $_POST['periodo'];
                         }
                         if (!empty($_POST['sucursal'])) {
@@ -514,7 +516,6 @@ class Controller_DteIntercambios extends \Controller_App
                         }
                         // si hay IVA y esta fuera de plazo se marca como no recuperable
                         if ($DteRecibido->iva and $DteRecibido->periodo) {
-                            $periodo_dte = (int)substr(str_replace('-', '', $DteRecibido->fecha),0, 6);
                             $meses = \sowerphp\general\Utility_Date::countMonths($periodo_dte, $DteRecibido->periodo);
                             if ($meses > 2) {
                                 $DteRecibido->iva_no_recuperable = json_encode([
@@ -555,7 +556,9 @@ class Controller_DteIntercambios extends \Controller_App
                             ]);
                         }
                         $DteRecibido->save();
-                    } else if (!$DteRecibido->intercambio) {
+                    }
+                    // si ya estaba recibido y no existe intercambio se asigna
+                    else if (!$DteRecibido->intercambio) {
                         $DteRecibido->intercambio = $DteIntercambio->codigo;
                         $DteRecibido->save();
                     }
