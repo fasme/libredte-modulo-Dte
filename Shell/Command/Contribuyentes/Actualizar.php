@@ -34,10 +34,11 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-08-12
      */
     public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
     {
+        ini_set('memory_limit', '1024M');
         if ($opcion != 'all') {
             if (method_exists($this, $opcion)) {
                 $this->$opcion($ambiente, $dia);
@@ -84,28 +85,51 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     }
 
     /**
+     * Método que convierte el string de datos CSV del archivo a un arreglo PHP
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-12
+     */
+    private function csv2array(&$csv)
+    {
+        $lines = str_getcsv($csv, "\n");
+        $n_lines = count($lines);
+        $data = [];
+        for ($i=1; $i<$n_lines; $i++) {
+            $lines[$i] = utf8_encode($lines[$i]);
+            $row = array_map('trim', str_getcsv($lines[$i], ';', ''));
+            unset($lines[$i]);
+            if (!isset($row[5]))
+                continue;
+            $row[4] = strtolower($row[4]);
+            $row[5] = strtolower($row[5]);
+            $data[] = $row;
+        }
+        return $data;
+    }
+
+    /**
      * Método que descarga el listado de contribuyentes desde el servicio web de LibreDTE (versión oficial)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-08-12
      */
     private function libredte($ambiente, $dia)
     {
         if (!$dia)
             $dia = date('Y-m-d');
         // obtener contribuyentes desde el servicio web de LibreDTE
-        $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=json');
+        $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=csv');
         if ($response['status']['code']!=200 or empty($response['body'])) {
             $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
             return 2;
         }
-        $this->procesarContribuyentes($response['body']);
+        $this->procesarContribuyentes($this->csv2array($response['body']));
     }
 
     /**
      * Método que carga el listado de contribuyentes desde un archivo CSV y luego los pasa
      * al método que los procesa y actualiza en la BD
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-26
+     * @version 2017-08-12
      */
     private function csv($archivo)
     {
@@ -115,24 +139,8 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             return 3;
         }
         // obtener datos del archivo
-        ini_set('memory_limit', '1024M');
         $datos = file_get_contents($archivo);
-        $lines = explode("\n", $datos);
-        $n_lines = count($lines);
-        $data = [];
-        for ($i=1; $i<$n_lines; $i++) {
-            $row = str_getcsv($lines[$i], ';', '');
-            unset($lines[$i]);
-            if (!isset($row[5]))
-                continue;
-            for ($j=0; $j<6; $j++)
-                $row[$j] = trim($row[$j]);
-            $row[1] = utf8_decode($row[1]);
-            $row[4] = strtolower($row[4]);
-            $row[5] = strtolower($row[5]);
-            $data[] = $row;
-        }
-        $this->procesarContribuyentes($data);
+        $this->procesarContribuyentes($this->csv2array($datos));
     }
 
     /**
