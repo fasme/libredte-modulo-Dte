@@ -200,7 +200,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
      *  - giro
      *  - actividad económica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-08-17
      */
     private function corregir()
     {
@@ -222,7 +222,6 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         foreach ($contribuyentes as $rut) {
             $Contribuyente = new \website\Dte\Model_Contribuyente($rut);
             $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$Contribuyente->getRUT());
-            $this->out($response['body']);
             if ($response['status']['code']==200) {
                 $info = $response['body'];
                 $procesados++;
