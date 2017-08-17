@@ -680,7 +680,7 @@ class Controller_Documentos extends \Controller_App
         // enviar por correo el DTE si así se solicitó
         if ($email) {
             try {
-                $DteEmitido->email($DteEmitido->getEmails());
+                $DteEmitido->email($DteEmitido->getEmails(), null, null, true);
             } catch (\Exception $e) {
             }
         }
