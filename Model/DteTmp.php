@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-07
+     * @version 2017-08-17
      */
     public function generar($user_id = null)
     {
@@ -318,7 +318,7 @@ class Model_DteTmp extends \Model_App
             if (!isset($datos['Referencia'][0]))
                 $datos['Referencia'] = [$datos['Referencia']];
             foreach ($datos['Referencia'] as $referencia) {
-                if (is_numeric($referencia['TpoDocRef']) and $referencia['TpoDocRef']<200) {
+                if (!empty($referencia['TpoDocRef']) and is_numeric($referencia['TpoDocRef']) and $referencia['TpoDocRef']<200) {
                     $DteReferencia = new Model_DteReferencia();
                     $DteReferencia->emisor = $DteEmitido->emisor;
                     $DteReferencia->dte = $DteEmitido->dte;
