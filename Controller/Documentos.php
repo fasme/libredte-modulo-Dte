@@ -101,12 +101,13 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-25
+     * @version 2017-08-17
      */
     public function _api_emitir_POST()
     {
         extract($this->Api->getQuery([
             'normalizar' => true,
+            'email' => false,
         ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
@@ -222,18 +223,26 @@ class Controller_Documentos extends \Controller_App
                 if ($DteTmp->getTipo()->operacion=='S' and $Emisor->config_pagos_habilitado and $Emisor->config_cobros_temporal_automatico) {
                     $DteTmp->getCobro();
                 }
-                return [
-                    'emisor' => $DteTmp->emisor,
-                    'receptor' => $DteTmp->receptor,
-                    'dte' => $DteTmp->dte,
-                    'codigo' => $DteTmp->codigo,
-                ];
             } else {
                 $this->Api->send('No fue posible guardar el DTE temporal', 507);
             }
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             $this->Api->send('No fue posible guardar el DTE temporal: '.$e->getMessage(), 507);
         }
+        // enviar por correo el DTE temporal si así se solicitó
+        if ($email) {
+            try {
+                $DteTmp->email($DteTmp->getEmails());
+            } catch (\Exception $e) {
+            }
+        }
+        // entregar los datos del DTE temporal creado
+        return [
+            'emisor' => $DteTmp->emisor,
+            'receptor' => $DteTmp->receptor,
+            'dte' => $DteTmp->dte,
+            'codigo' => $DteTmp->codigo,
+        ];
     }
 
     /**
