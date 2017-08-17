@@ -240,6 +240,7 @@ echo $f->input([
 ?>
 <?php if (isset($Contribuyente)) : ?>
     <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="img-responsive thumbnail center" />
+    <br/>
 <?php endif; ?>
 <?php
 echo $f->input([
@@ -1441,6 +1442,50 @@ if (\sowerphp\core\Module::loaded('Pagos')) {
 ?>
         </div>
     </div>
+<?php if (\sowerphp\core\Module::loaded('Webhooks')) : ?>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-exchange"></i>
+            Webhooks
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_webhooks_dte_real',
+    'label' => '¿Tipo documento?',
+    'options' => ['Generar cotización' ,'Generar DTE real'],
+    'value' => $Contribuyente->config_webhooks_dte_real,
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_webhooks_enviar_email',
+    'label' => '¿Enviar email?',
+    'options' => ['No enviar documento por correo electrónico' ,'Enviar documento automáticamente por correo electrónico'],
+    'value' => $Contribuyente->config_webhooks_enviar_email,
+]);
+echo '<hr/>'."\n";
+echo $f->input([
+    'name' => 'config_webhooks_jumpseller_token',
+    'label' => 'Jumpseller token',
+    'value' => $Contribuyente->config_webhooks_jumpseller_token,
+    'help' => 'Token de la tienda en <a href="https://jumpseller.com" target="_blank">Jumpseller</a>. Se obtiene en: Configuración &raquo; Notificaciones',
+    'attr' => 'maxlength="255"',
+]);
+$jumpseller_webhooks = [
+    'Pedido actualizado: <a href="'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'</a>',
+];
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Jumpseller webhook',
+    'value' => implode('<br/>', $jumpseller_webhooks),
+    'help' => 'URL a configurar en <a href="https://jumpseller.com" target="_blank">Jumpseller</a>. Se configura en: Configuración &raquo; Notificaciones',
+    'attr' => 'maxlength="255"',
+]);
+?>
+        </div>
+    </div>
+<?php endif; ?>
 </div>
 <!-- FIN API -->
 
