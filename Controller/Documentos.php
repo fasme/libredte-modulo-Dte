@@ -195,7 +195,7 @@ class Controller_Documentos extends \Controller_App
         // asignar giro si no fue entregado y existe en la base de datos,
         // no se recomienda confiar en que exista el giro en la base de datos, pero ayuda
         // a reducir reparos leves del DTE
-        if (empty($dte['Encabezado']['Receptor']['GiroRecep']) and $Receptor->giro) {
+        if ($normalizar and empty($dte['Encabezado']['Receptor']['GiroRecep']) and $Receptor->giro) {
             $dte['Encabezado']['Receptor']['GiroRecep'] = $Receptor->giro;
         }
         // crear objeto Dte y documento temporal
