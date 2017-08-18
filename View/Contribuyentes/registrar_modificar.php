@@ -1470,7 +1470,6 @@ echo $f->input([
     'label' => 'Jumpseller token',
     'value' => $Contribuyente->config_webhooks_jumpseller_token,
     'help' => 'Token de la tienda en <a href="https://jumpseller.com" target="_blank">Jumpseller</a>. Se obtiene en: Configuración &raquo; Notificaciones',
-    'attr' => 'maxlength="255"',
 ]);
 $jumpseller_webhooks = [
     'Pedido actualizado: <a href="'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'</a>',
@@ -1480,7 +1479,28 @@ echo $f->input([
     'label' => 'Jumpseller webhook',
     'value' => implode('<br/>', $jumpseller_webhooks),
     'help' => 'URL a configurar en <a href="https://jumpseller.com" target="_blank">Jumpseller</a>. Se configura en: Configuración &raquo; Notificaciones',
-    'attr' => 'maxlength="255"',
+]);
+echo '<hr/>'."\n";
+echo $f->input([
+    'name' => 'config_webhooks_alegra_user',
+    'label' => 'Alegra usuario',
+    'value' => $Contribuyente->config_webhooks_alegra_user,
+    'help' => 'Se obtiene <a href="https://app.alegra.com/configuration/api" target="_blank">aquí</a>',
+]);
+echo $f->input([
+    'name' => 'config_webhooks_alegra_token',
+    'label' => 'Alegra token',
+    'value' => $Contribuyente->config_webhooks_alegra_token,
+    'help' => 'Se obtiene <a href="https://app.alegra.com/configuration/api" target="_blank">aquí</a>',
+]);
+$alegra_webhooks = [
+    'Nueva factura: <a href="'.$_url.'/api/webhooks/alegra/nueva_factura/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/alegra/nueva_factura/'.$Contribuyente->rut.'</a>',
+];
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Alegra webhook',
+    'value' => implode('<br/>', $alegra_webhooks),
+    'help' => 'Para integrar con Alegra se debe usar <a href="https://zapier.com" target="_blank">Zapier</a>',
 ]);
 ?>
         </div>
