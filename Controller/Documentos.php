@@ -101,7 +101,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-17
+     * @version 2017-08-18
      */
     public function _api_emitir_POST()
     {
@@ -191,6 +191,12 @@ class Controller_Documentos extends \Controller_App
         );
         if (!$Emisor->documentoAutorizado($dte['Encabezado']['IdDoc']['TipoDTE'], $User)) {
             $this->Api->send('No está autorizado a emitir el tipo de documento '.$dte['Encabezado']['IdDoc']['TipoDTE'], 403);
+        }
+        // asignar giro si no fue entregado y existe en la base de datos,
+        // no se recomienda confiar en que exista el giro en la base de datos, pero ayuda
+        // a reducir reparos leves del DTE
+        if (empty($dte['Encabezado']['Receptor']['GiroRecep']) and $Receptor->giro) {
+            $dte['Encabezado']['Receptor']['GiroRecep'] = $Receptor->giro;
         }
         // crear objeto Dte y documento temporal
         $Dte = new \sasco\LibreDTE\Sii\Dte($dte, isset($_GET['normalizar'])?(bool)$_GET['normalizar']:true);
