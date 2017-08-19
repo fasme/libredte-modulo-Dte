@@ -1494,7 +1494,7 @@ echo $f->input([
     'help' => 'Se obtiene <a href="https://app.alegra.com/configuration/api" target="_blank">aquí</a>',
 ]);
 $alegra_webhooks = [
-    'Nueva factura: <a href="'.$_url.'/api/webhooks/alegra/nueva_factura/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/alegra/nueva_factura/'.$Contribuyente->rut.'</a>',
+    'Nueva factura: <a href="'.$_url.'/api/webhooks/alegra/zapier_nueva_factura/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/alegra/zapier_nueva_factura/'.$Contribuyente->rut.'</a>',
 ];
 echo $f->input([
     'type' => 'div',
