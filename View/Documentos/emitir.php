@@ -127,7 +127,7 @@ $input_detalle = [
     'titles'=>$titles,
     'inputs'=>$inputs,
     'accesskey' => 'D',
-    'callback' => 'item_codigo_typeahead',
+    'callback' => 'item_nuevo',
 ];
 if (isset($DteEmitido)) {
     $Detalle = $DteEmitido->getDatos()['Detalle'];
@@ -306,7 +306,22 @@ function emisor_set_actividad() {
 function emisor_set_giro() {
     document.getElementById("GiroEmisField").value = giros[document.getElementById("ActecoField").value];
 }
-function item_codigo_typeahead(tr) {
+function item_nuevo(tr) {
+    TpoDoc = document.getElementById("TpoDocField").value;
+    n_items = $('input[name="QtyItem[]"]').length;
+    if (TpoDoc == 39 || TpoDoc == 41) {
+        if (n_items > 1000) {
+            alert('Boletas no pueden tener más de 1000 items en su detalle');
+            Form.delJS(tr.childNodes[0].childNodes[0]);
+            return false;
+        }
+    } else {
+        if (n_items > 60) {
+            alert('Documentos no pueden tener más de 60 items en su detalle');
+            Form.delJS(tr.childNodes[0].childNodes[0]);
+            return false;
+        }
+    }
     $(tr.childNodes[0].childNodes[0].childNodes[0]).typeahead(codigo_typeahead[0], codigo_typeahead[1]);
 }
 $(function() {
