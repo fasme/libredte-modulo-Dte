@@ -1466,13 +1466,28 @@ echo $f->input([
 ]);
 echo '<hr/>'."\n";
 echo $f->input([
+    'type' => 'div',
+    'label' => 'WooCommerce secret',
+    'value' => 'Es el hash del usuario administrador de la empresa en LibreDTE',
+]);
+$woocommerce_webhooks = [
+    'Orden actualizada: <a href="'.$_url.'/api/webhooks/woocommerce/orden_actualizada/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/woocommerce/orden_actualizada/'.$Contribuyente->rut.'</a>',
+];
+echo $f->input([
+    'type' => 'div',
+    'label' => 'WooCommerce webhook',
+    'value' => implode('<br/>', $woocommerce_webhooks),
+    'help' => 'URL a configurar en WooCommerce. Se configura en: WooCommerce &raquo; Settings &raquo; API &raquo; Webhooks',
+]);
+echo '<hr/>'."\n";
+echo $f->input([
     'name' => 'config_webhooks_jumpseller_token',
     'label' => 'Jumpseller token',
     'value' => $Contribuyente->config_webhooks_jumpseller_token,
     'help' => 'Token de la tienda en <a href="https://jumpseller.com" target="_blank">Jumpseller</a>. Se obtiene en: Configuración &raquo; Notificaciones',
 ]);
 $jumpseller_webhooks = [
-    'Pedido actualizado: <a href="'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'</a>',
+    'Pedido pagado: <a href="'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/jumpseller/pedido_actualizado/'.$Contribuyente->rut.'</a>',
 ];
 echo $f->input([
     'type' => 'div',
