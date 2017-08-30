@@ -1,4 +1,16 @@
 <ul class="nav nav-pills pull-right">
+<?php if (isset($DteRecibido) and in_array($DteRecibido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
+    <li>
+        <a href="<?=$_base?>/dte/dte_intercambios/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII">
+            Ingresar RCV
+        </a>
+    </li>
+    <li>
+        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>', 750, 550)" title="Ver datos del registro de compra/venta en el SII">
+            Ver RCV
+        </a>
+    </li>
+<?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_recibidos/listar" title="Volver a los documentos recibidos">
             Volver a documentos recibidos

@@ -99,7 +99,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que muestra la página de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-24
+     * @version 2017-08-29
      */
     public function ver($codigo)
     {
@@ -122,7 +122,6 @@ class Controller_DteIntercambios extends \Controller_App
         }
         // asignar variables para la vista
         $this->set([
-            '_header_extra' => ['js'=>['/dte/js/intercambio.js']],
             'Emisor' => $Emisor,
             'DteIntercambio' => $DteIntercambio,
             'EnvioDte' => $DteIntercambio->getEnvioDte(),
@@ -291,7 +290,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-12
+     * @version 2017-08-29
      */
     public function responder($codigo)
     {
@@ -324,7 +323,15 @@ class Controller_DteIntercambios extends \Controller_App
         //
         $RecepcionDTE = [];
         $n_dtes = count($_POST['TipoDTE']);
+        $guardar_dte = [];
         for ($i=0; $i<$n_dtes; $i++) {
+            if (in_array($_POST['rcv_accion_codigo'][$i], ['ACD', 'ERM'])) {
+                $_POST['acuse'][$i] = (int)($_POST['rcv_accion_codigo'][$i]=='ERM');
+                $guardar_dte[] = 'T'.$_POST['TipoDTE'][$i].'F'.$_POST['Folio'][$i];
+                $EstadoRecepDTE = 0;
+            } else {
+                $EstadoRecepDTE = 99;
+            }
             $RecepcionDTE[] = [
                 'TipoDTE' => $_POST['TipoDTE'][$i],
                 'Folio' => $_POST['Folio'][$i],
@@ -332,8 +339,8 @@ class Controller_DteIntercambios extends \Controller_App
                 'RUTEmisor' => $_POST['RUTEmisor'][$i],
                 'RUTRecep' => $_POST['RUTRecep'][$i],
                 'MntTotal' => $_POST['MntTotal'][$i],
-                'EstadoRecepDTE' => $_POST['EstadoRecepDTE'][$i],
-                'RecepDTEGlosa' => $_POST['RecepDTEGlosa'][$i],
+                'EstadoRecepDTE' => $EstadoRecepDTE,
+                'RecepDTEGlosa' => $_POST['rcv_accion_glosa'][$i],
             ];
         }
         // armar respuesta de envío
@@ -348,8 +355,8 @@ class Controller_DteIntercambios extends \Controller_App
             'Digest' => $EnvioDte->getDigest(),
             'RutEmisor' => $EnvioDte->getEmisor(),
             'RutReceptor' => $EnvioDte->getReceptor(),
-            'EstadoRecepEnv' => $_POST['EstadoRecepEnv'],
-            'RecepEnvGlosa' => $_POST['RecepEnvGlosa'],
+            'EstadoRecepEnv' => $guardar_dte ? 0 : 99,
+            'RecepEnvGlosa' => $guardar_dte ? 'EnvioDTE recibido' : 'No se aceptaron los DTE del EnvioDTE',
             'NroDTE' => count($RecepcionDTE),
             'RecepcionDTE' => $RecepcionDTE,
         ]);
@@ -415,7 +422,7 @@ class Controller_DteIntercambios extends \Controller_App
         $RespuestaEnvio = new \sasco\LibreDTE\Sii\RespuestaEnvio();
         // procesar cada DTE
         for ($i=0; $i<$n_dtes; $i++) {
-            $estado = !$_POST['EstadoRecepDTE'][$i] ? 0 : 2;
+            $estado = in_array($_POST['rcv_accion_codigo'][$i], ['ACD', 'ERM']) ? 0 : 2;
             $RespuestaEnvio->agregarRespuestaDocumento([
                 'TipoDTE' => $_POST['TipoDTE'][$i],
                 'Folio' => $_POST['Folio'][$i],
@@ -446,9 +453,25 @@ class Controller_DteIntercambios extends \Controller_App
             $this->redirect(str_replace('responder', 'ver', $this->request->request));
         }
         //
+        // Ingresar acciones (respuestas) al registro de compra/venta del SII
+        //
+        $rcv_estado = [];
+        $rcv_accion = [];
+        $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        for ($i=0; $i<$n_dtes; $i++) {
+            if (in_array($_POST['TipoDTE'][$i], array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) {
+                list($emisor_rut, $emisor_dv) = explode('-', $_POST['RUTEmisor'][$i]);
+                $r = $RCV->ingresarAceptacionReclamoDoc($emisor_rut, $emisor_dv, $_POST['TipoDTE'][$i], $_POST['Folio'][$i], $_POST['rcv_accion_codigo'][$i]);
+                $rcv_estado[] = 'T'.$_POST['TipoDTE'][$i].'F'.$_POST['Folio'][$i].': '.$r['glosa'];
+                if (!$r['codigo']) {
+                    $rcv_accion['T'.$_POST['TipoDTE'][$i].'F'.$_POST['Folio'][$i]] = $_POST['rcv_accion_codigo'][$i];
+                }
+            }
+        }
+        //
         // guardar estado del intercambio y usuario que lo procesó
         //
-        $DteIntercambio->estado = (int)$_POST['EstadoRecepEnv'];
+        $DteIntercambio->estado = $guardar_dte ? 0 : 99;
         $DteIntercambio->recepcion_xml = base64_encode($RecepcionDTE_xml);
         if (isset($EnvioRecibos_xml))
             $DteIntercambio->recibos_xml = base64_encode($EnvioRecibos_xml);
@@ -457,9 +480,9 @@ class Controller_DteIntercambios extends \Controller_App
         $DteIntercambio->usuario = $this->Auth->User->id;
         $DteIntercambio->save();
         //
-        // guardar documentos que han sido aceptados con acuse de recibo
+        // guardar documentos que han sido aceptados (con o sin acuse de recibo)
         //
-        if (isset($EnvioRecibos_xml)) {
+        if ($guardar_dte) {
             // actualizar datos del emisor si no tine usuario asociado
             $EmisorIntercambio = $DteIntercambio->getEmisor();
             if (!$EmisorIntercambio->usuario) {
@@ -486,13 +509,17 @@ class Controller_DteIntercambios extends \Controller_App
                 } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 }
             }
-            // guardar documentos que tienen acuse de recibo como dte recibidos
+            // guardar documentos que han sido aceptados como dte recibidos
             $Documentos = $DteIntercambio->getDocumentos();
             foreach ($Documentos as $Dte) {
-                if (in_array($Dte->getID(true), $EnvioRecibos_r)) {
+                $dte_id = $Dte->getID(true);
+                if (in_array($dte_id, $guardar_dte)) {
                     // procesar DTE recibido
                     $resumen = $Dte->getResumen();
                     $DteRecibido = new Model_DteRecibido($DteIntercambio->getEmisor()->rut, $resumen['TpoDoc'], $resumen['NroDoc'], (int)$DteIntercambio->certificacion);
+                    if (!empty($rcv_accion[$dte_id])) {
+                        $DteRecibido->rcv_accion = $rcv_accion[$dte_id];
+                    }
                     if (!$DteRecibido->exists()) {
                         $DteRecibido->receptor = $Emisor->rut;
                         $DteRecibido->tasa = (int)$resumen['TasaImp'];
@@ -555,13 +582,13 @@ class Controller_DteIntercambios extends \Controller_App
                                 ['codigo'=>1, 'monto'=>$DteRecibido->iva]
                             ]);
                         }
-                        $DteRecibido->save();
                     }
                     // si ya estaba recibido y no existe intercambio se asigna
                     else if (!$DteRecibido->intercambio) {
                         $DteRecibido->intercambio = $DteIntercambio->codigo;
-                        $DteRecibido->save();
                     }
+                    // guardar DTE recibido (actualiza acción RCV si existe)
+                    $DteRecibido->save();
                 }
             }
         }
@@ -583,13 +610,17 @@ class Controller_DteIntercambios extends \Controller_App
         // enviar email
         $status = $email->send('Se adjuntan XMLs de respuesta a intercambio de DTE.');
         if ($status===true) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Se procesaron DTEs de intercambio y se envió la respuesta a: '.$_POST['responder_a'], 'ok'
-            );
+            $msg = 'Se procesaron DTEs de intercambio y se envió la respuesta a: '.$_POST['responder_a'];
+            if ($rcv_estado) {
+                $msg .= '<br/><br/>- '.implode('<br/> -', $rcv_estado);
+            }
+            \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
         } else {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Se procesaron DTEs de intercambio, pero no fue posible enviar el email, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>', 'error'
-            );
+            $msg = 'Se procesaron DTEs de intercambio, pero no fue posible enviar el email, por favor intente nuevamente.<br /><em>'.$status['message'].'</em>';
+            if ($rcv_estado) {
+                $msg .= '<br/><br/>- '.implode('<br/> -', $rcv_estado);
+            }
+            \sowerphp\core\Model_Datasource_Session::message($msg, 'warning');
         }
         $this->redirect(str_replace('responder', 'ver', $this->request->request));
     }
@@ -635,6 +666,43 @@ class Controller_DteIntercambios extends \Controller_App
             file_put_contents($dir.'/ResultadoDTE.xml', base64_decode($DteIntercambio->resultado_xml));
         \sowerphp\general\Utility_File::compress($dir, ['format'=>'zip', 'delete'=>true]);
         exit;
+    }
+
+    /**
+     * Acción que permite ingresar una acción del registro a un DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-29
+     */
+    public function dte_rcv($emisor, $dte, $folio)
+    {
+        list($emisor_rut, $emisor_dv) = explode('-', str_replace('.', '', $emisor));
+        $Contribuyente = $this->getContribuyente();
+        $Firma = $Contribuyente->getFirma($this->Auth->User->id);
+        if (!$Firma) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe firma asociada', 'error'
+            );
+            $this->redirect('/dte/dte_intercambios/listar');
+        }
+        $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        try {
+            $this->set([
+                'Emisor' => new \website\Dte\Model_Contribuyente($emisor_rut),
+                'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
+                'folio' => $folio,
+                'eventos' => $RCV->listarEventosHistDoc($emisor_rut, $emisor_dv, $dte, $folio),
+                'cedible' => $RCV->consultarDocDteCedible($emisor_rut, $emisor_dv, $dte, $folio),
+                'fecha_recepcion' => $RCV->consultarFechaRecepcionSii($emisor_rut, $emisor_dv, $dte, $folio),
+            ]);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            $this->redirect('/dte/dte_intercambios/listar');
+        }
+        if (isset($_POST['submit'])) {
+            list($emisor_rut, $emisor_dv) = explode('-', $emisor);
+            $r = $RCV->ingresarAceptacionReclamoDoc($emisor_rut, $emisor_dv, $dte, $folio, $_POST['accion']);
+            \sowerphp\core\Model_Datasource_Session::message($r['glosa'], !$r['codigo']?'ok':'error');
+        }
     }
 
 }

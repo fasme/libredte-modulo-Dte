@@ -70,6 +70,7 @@ class Model_DteRecibido extends \Model_App
     public $numero_interno; ///< integer(32) NULL DEFAULT ''
     public $emisor_nc_nd_fc; ///< smallint(16) NULL DEFAULT ''
     public $sucursal_sii_receptor; ///< integer(32) NULL DEFAULT ''
+    public $rcv_accion; ///< character(3) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -408,6 +409,17 @@ class Model_DteRecibido extends \Model_App
             'comment'   => '',
             'type'      => 'integer',
             'length'    => 32,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'rcv_accion' => array(
+            'name'      => 'Acción RCV',
+            'comment'   => '',
+            'type'      => 'character',
+            'length'    => 3,
             'null'      => true,
             'default'   => '',
             'auto'      => false,

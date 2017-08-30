@@ -35,6 +35,27 @@ $(function() {
         $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
     }
 });
+function intercambio_aceptar() {
+    $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
+        $('select[name="rcv_accion_codigo[]"]').get(i).value = 'ACD';
+        $('input[name="rcv_accion_glosa[]"]').get(i).value = 'Acepta contenido del documento';
+    });
+    $('#btnRespuesta').click();
+}
+function intercambio_recibir() {
+    $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
+        $('select[name="rcv_accion_codigo[]"]').get(i).value = 'ERM';
+        $('input[name="rcv_accion_glosa[]"]').get(i).value = 'Otorga recibo de mercaderías o servicios';
+    });
+    $('#btnRespuesta').click();
+}
+function intercambio_reclamar() {
+    $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
+        $('select[name="rcv_accion_codigo[]"]').get(i).value = 'RCD';
+        $('input[name="rcv_accion_glosa[]"]').get(i).value = 'Reclamo al contenido del documento';
+    });
+    $('#btnRespuesta').click();
+}
 </script>
 
 <div role="tabpanel">
@@ -91,15 +112,18 @@ new \sowerphp\general\View_Helper_Table([
 <!-- INICIO DOCUMENTOS -->
 <div role="tabpanel" class="tab-pane" id="documentos">
 <div class="row" style="margin-bottom:1em">
-    <div class="col-sm-8">
+    <div class="col-sm-7">
         <p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
     </div>
-    <div class="col-sm-4 text-right">
-        <a class="btn btn-success btn-lg" href="#" onclick="intercambio_aceptar(); return false" role="button">
+    <div class="col-sm-5 text-right">
+        <a class="btn btn-primary btn-lg" href="#" onclick="intercambio_aceptar(); return false" role="button" title="Aceptar el contenido de los documentos (sin acuse de recibo)">
             Aceptar
         </a>
-        <a class="btn btn-danger btn-lg" href="#" onclick="intercambio_rechazar(); return false" role="button">
-            Rechazar
+        <a class="btn btn-success btn-lg" href="#" onclick="intercambio_recibir(); return false" role="button" title="Generar el acuse de recido para los documentos">
+            Recibir
+        </a>
+        <a class="btn btn-danger btn-lg" href="#" onclick="intercambio_reclamar(); return false" role="button" title="Rechazar los documentos">
+            Reclamar
         </a>
     </div>
 </div>
@@ -131,13 +155,6 @@ echo $f->input([
     'attr' => 'maxlength="80"',
     'help' => 'Lugar donde se recibieron los productos o prestaron los servicios',
 ]);
-echo $f->input([
-    'type' => 'select',
-    'name' => 'sucursal',
-    'label' => 'Sucursal',
-    'options' => $Emisor->getSucursales(),
-    'help' => 'Sucursal a la que corresponden los documentos',
-]);
 echo '</div>',"\n";
 echo '<div class="col-md-6">',"\n";
 echo $f->input([
@@ -147,7 +164,7 @@ echo $f->input([
     'check' => 'notempty email',
 ]);
 $estado_enviodte = $EnvioDte->getEstadoValidacion(['RutReceptor'=>$Emisor->rut.'-'.$Emisor->dv]);
-echo $f->input([
+/*echo $f->input([
     'type' => 'select',
     'name' => 'EstadoRecepEnv',
     'label' => 'Estado',
@@ -163,7 +180,7 @@ echo $f->input([
     'check' => 'notempty',
     'attr' => 'maxlength="256"',
     'help' => 'Detalles del estado del envío (sobre todo si se está rechazando)',
-]);
+]);*/
 echo $f->input([
     'name' => 'periodo',
     'label' => 'Período',
@@ -172,6 +189,13 @@ echo $f->input([
     'help' => 'Período del libro en que se asignará el documento.',
     //'attr' => 'readonly="readonly"',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'sucursal',
+    'label' => 'Sucursal',
+    'options' => $Emisor->getSucursales(),
+    'help' => 'Sucursal a la que corresponden los documentos',
+]);
 echo '</div>',"\n";
 echo '</div>',"\n";
 
@@ -179,21 +203,12 @@ echo '</div>',"\n";
 $RecepcionDTE = [];
 foreach ($Documentos as $Dte) {
     $DteRecibido = new \website\Dte\Model_DteRecibido(substr($Dte->getEmisor(), 0, -2), $Dte->getTipo(), $Dte->getFolio(), (int)$Dte->getCertificacion());
-    // si el enviodte no está recibido no se reciben los documentos
-    if ($estado_enviodte) {
-        $estado = 99;
-    }
-    // si ya está recibido el documento se marca con estado repetido
-    else if ($DteRecibido->exists()) {
-        $estado = 4;
-    }
-    // si no está recibido se trata de determinar su estado
-    else {
-        $estado = $Dte->getEstadoValidacion([
-            'RUTEmisor' => $DteIntercambio->getEmisor()->rut.'-'.$DteIntercambio->getEmisor()->dv,
-            'RUTRecep'=>$Emisor->rut.'-'.$Emisor->dv
-        ]);
-    }
+    //$evento = $Dte->getUltimaAccionRCV($Firma);
+    //$accion = ($evento and isset(\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$evento['codigo']]))? $evento['codigo'] : '';
+    $accion = '';
+    $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
+    $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII"><span class="fa fa-eye btn btn-default"></span></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
     $RecepcionDTE[] = [
         'TipoDTE' => $Dte->getTipo(),
         'Folio' => $Dte->getFolio(),
@@ -201,10 +216,9 @@ foreach ($Documentos as $Dte) {
         'RUTEmisor' => $Dte->getEmisor(),
         'RUTRecep' => $Dte->getReceptor(),
         'MntTotal' => $Dte->getMontoTotal(),
-        'EstadoRecepDTE' => $estado,
-        'RecepDTEGlosa' => \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'][$estado],
-        'acuse' => (int)(bool)!$estado,
-        'acciones' => '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550)" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a> <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>',
+        'rcv_accion_codigo' => $accion,
+        'rcv_accion_glosa' => $accion ? \sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$accion] : '',
+        'acciones' => $acciones,
     ];
 }
 $f->setStyle(false);
@@ -212,7 +226,7 @@ echo $f->input([
     'type' => 'table',
     'id' => 'documentos',
     'label' => 'Documentos',
-    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', 'Acuse', 'Acciones'],
+    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', 'Acciones'],
     'inputs' => [
         ['name'=>'TipoDTE', 'attr'=>'readonly="readonly" size="3"'],
         ['name'=>'Folio', 'attr'=>'readonly="readonly" size="10"'],
@@ -220,14 +234,13 @@ echo $f->input([
         ['name'=>'RUTEmisor', 'type'=>'hidden'],
         ['name'=>'RUTRecep', 'type'=>'hidden'],
         ['name'=>'MntTotal', 'attr'=>'readonly="readonly" size="10"'],
-        ['name'=>'EstadoRecepDTE', 'type'=>'select', 'options'=>\sasco\LibreDTE\Sii\RespuestaEnvio::$estados['documento'], 'attr'=>'style="width:12em" onchange="this.parentNode.parentNode.parentNode.childNodes[7].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
-        ['name'=>'RecepDTEGlosa'],
-        ['name'=>'acuse', 'type'=>'select', 'options'=>[1=>'Si', 0=>'No'], 'attr'=>'style="width:5em"'],
+        ['name'=>'rcv_accion_codigo', 'type'=>'select', 'options'=>[''=>'']+\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones, 'check' => 'notempty', 'attr'=>'onchange="this.parentNode.parentNode.parentNode.childNodes[7].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
+        ['name'=>'rcv_accion_glosa', 'check' => 'notempty'],
         ['type'=>'div', 'name'=>'acciones'],
     ],
     'values' => $RecepcionDTE,
 ]);
-echo '<p>Si el estado es diferente a "DTE Recibido OK" entonces el documento será rechazado (no hay aceptado con reparos). Aquellos documentos con acuse de recibo serán agregados a los documentos recibidos de ',$Emisor->razon_social,'</p>',"\n";
+echo '<p>Aquellos documentos <strong>aceptados o con acuse de recibo serán agregados</strong> a los documentos recibidos de ',$Emisor->razon_social,'. Documentos <strong>con reclamo no serán agregados</strong> a los documentos recibidos y no podrán ser agregados en el futuro ya que serán informados como rechazados al SII.</p>',"\n";
 echo '<div class="text-center">';
 echo $f->input([
     'type' => 'submit',

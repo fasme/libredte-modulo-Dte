@@ -21,4 +21,6 @@ CREATE TABLE dte_emitido_email (
 
 ALTER TABLE item_clasificacion ALTER superior TYPE VARCHAR(35);
 
+ALTER TABLE dte_recibido ADD rcv_accion CHAR(3);
+
 COMMIT;

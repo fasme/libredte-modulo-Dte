@@ -53,6 +53,8 @@ if (isset($documentos)) {
     $DteTipos = new \website\Dte\Admin\Mantenedores\Model_DteTipos();
     foreach ($documentos as &$d) {
         $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Emisor->getRUT().'/'.$d['dte'].'/'.$d['folio'].'/'.$d['emision'].'/'.$d['total'].'/'.$d['rut'].'\', 750, 550)" title="Verificar datos del documento en la web del SII" class="btn btn-default"><span class="fa fa-search"></span></a>';
+        $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-default"><span class="fa fa-eye"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-default"><span class="fa fa-check"></span></a>';
         $d[] = \sowerphp\general\Utility_Date::count(\sowerphp\general\Utility_Date::format($d['recepcion'], 'Y-m-d'));
         $d[] = $acciones;
         if (is_numeric($d['dte'])) {
@@ -64,7 +66,11 @@ if (isset($documentos)) {
         unset($d['dte']);
     }
     array_unshift($documentos, ['RUT', 'Razón social', 'Documento', 'Folio', 'Fecha emisión', 'Total', 'Fecha recepción', 'Track ID', 'Días', 'Acciones']);
-    new \sowerphp\general\View_Helper_Table($documentos, 'dte_recibidos_sii_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta'], true);
+    $t = new \sowerphp\general\View_Helper_Table();
+    $t->setID('dte_recibidos_sii_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta']);
+    $t->setExport(true);
+    $t->setColsWidth([null, null, null, null, null, null, null, null, null, 120]);
+    echo $t->generate($documentos);
 ?>
 <link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
 <script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>

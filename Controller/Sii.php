@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador para acciones del SII
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-10-12
+ * @version 2017-08-28
  */
 class Controller_Sii extends \Controller_App
 {
@@ -114,6 +114,42 @@ class Controller_Sii extends \Controller_App
         $this->layout = null;
         $this->autoRender = false;
         $this->render('Sii/query');
+    }
+
+    /**
+     * Método que muestra el estado de un DTE en el registro de compras y ventas
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-08-29
+     */
+    public function dte_rcv($emisor, $dte, $folio)
+    {
+        list($emisor_rut, $emisor_dv) = explode('-', str_replace('.', '', $emisor));
+        $Contribuyente = $this->getContribuyente();
+        $Firma = $Contribuyente->getFirma($this->Auth->User->id);
+        if (!$Firma) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe firma asociada', 'error'
+            );
+            $this->redirect('/dte');
+        }
+        $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        $this->layout = 'popup';
+        $this->set([
+            'Emisor' => new \website\Dte\Model_Contribuyente($emisor_rut),
+            'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
+            'folio' => $folio,
+        ]);
+        try {
+            $this->set([
+                'eventos' => $RCV->listarEventosHistDoc($emisor_rut, $emisor_dv, $dte, $folio),
+                'cedible' => $RCV->consultarDocDteCedible($emisor_rut, $emisor_dv, $dte, $folio),
+                'fecha_recepcion' => $RCV->consultarFechaRecepcionSii($emisor_rut, $emisor_dv, $dte, $folio),
+            ]);
+        } catch (\Exception $e) {
+            $this->set('error', $e->getMessage());
+            $this->autoRender = false;
+            $this->render('Sii/dte_rcv_error');
+        }
     }
 
 }
