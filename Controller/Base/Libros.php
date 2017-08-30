@@ -35,12 +35,13 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que muestra el resumen de los períodos del libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-25
+     * @version 2017-08-30
      */
     public function index()
     {
         $Emisor = $this->getContribuyente();
         $this->set([
+            'Emisor' => $Emisor,
             'periodos' => $Emisor->{'getResumen'.$this->config['model']['plural'].'Periodos'}(),
         ]);
     }

@@ -1,4 +1,12 @@
 <ul class="nav nav-pills pull-right">
+<?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
+    <li>
+        <a href="https://www4.sii.cl/consdcvinternetui/#/home" title="Ir al registro de compra y venta en el SII" target="_blank">
+            <span class="fa fa-bank"></span>
+            Ver RCV en SII
+        </a>
+    </li>
+<?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_compras/importar" title="Importar libro IEC desde archivo CSV">
             <span class="fa fa-upload"></span> Importar CSV
