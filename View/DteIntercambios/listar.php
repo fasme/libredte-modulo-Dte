@@ -20,9 +20,9 @@
 <?php endif; ?>
 <?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
-        <a href="https://www4.sii.cl/registrorechazodteInternet" title="Ir al registro de aceptación o reclamos de un DTE en el SII" target="_blank">
+        <a href="https://www4.sii.cl/consdcvinternetui/#/home" title="Ir al registro de compra y venta en el SII" target="_blank">
             <span class="fa fa-bank"></span>
-            Aceptar/rechazar en SII
+            Ver RCV en SII
         </a>
     </li>
 <?php endif; ?>
