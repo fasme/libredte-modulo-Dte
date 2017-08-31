@@ -164,23 +164,6 @@ echo $f->input([
     'check' => 'notempty email',
 ]);
 $estado_enviodte = $EnvioDte->getEstadoValidacion(['RutReceptor'=>$Emisor->rut.'-'.$Emisor->dv]);
-/*echo $f->input([
-    'type' => 'select',
-    'name' => 'EstadoRecepEnv',
-    'label' => 'Estado',
-    'options' => \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'],
-    'value' => $estado_enviodte,
-    'check' => 'notempty',
-    'attr' => 'onchange="document.getElementById(\'RecepEnvGlosaField\').value=this.selectedOptions[0].textContent"'
-]);
-echo $f->input([
-    'name' => 'RecepEnvGlosa',
-    'label' => 'Glosa',
-    'value' => \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'][$estado_enviodte],
-    'check' => 'notempty',
-    'attr' => 'maxlength="256"',
-    'help' => 'Detalles del estado del envío (sobre todo si se está rechazando)',
-]);*/
 echo $f->input([
     'name' => 'periodo',
     'label' => 'Período',
@@ -218,6 +201,7 @@ foreach ($Documentos as $Dte) {
         'MntTotal' => $Dte->getMontoTotal(),
         'rcv_accion_codigo' => $accion,
         'rcv_accion_glosa' => $accion ? \sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$accion] : '',
+        'recibido' => $DteRecibido->exists() ? 'Si' : 'No',
         'acciones' => $acciones,
     ];
 }
@@ -226,7 +210,7 @@ echo $f->input([
     'type' => 'table',
     'id' => 'documentos',
     'label' => 'Documentos',
-    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', 'Acciones'],
+    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', '¿En libro?', 'Acciones'],
     'inputs' => [
         ['name'=>'TipoDTE', 'attr'=>'readonly="readonly" size="3"'],
         ['name'=>'Folio', 'attr'=>'readonly="readonly" size="10"'],
@@ -236,6 +220,7 @@ echo $f->input([
         ['name'=>'MntTotal', 'attr'=>'readonly="readonly" size="10"'],
         ['name'=>'rcv_accion_codigo', 'type'=>'select', 'options'=>[''=>'']+\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones, 'check' => 'notempty', 'attr'=>'onchange="this.parentNode.parentNode.parentNode.childNodes[7].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
         ['name'=>'rcv_accion_glosa', 'check' => 'notempty'],
+        ['type'=>'div', 'name'=>'recibido'],
         ['type'=>'div', 'name'=>'acciones'],
     ],
     'values' => $RecepcionDTE,
