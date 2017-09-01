@@ -26,7 +26,7 @@ namespace website\Dte\Informes;
 /**
  * Helper para generar la propuesta del formulario 29
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-05-09
+ * @version 2017-09-01
  */
 class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
 {
@@ -37,6 +37,7 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             'tipos' => [30, 33, 46],
             'subtotal' => [
                 'documentos' => 519,
+                'exento' => 562,
                 'impuesto_adicional' => 742,
                 'iva' => 520,
             ],
@@ -105,6 +106,7 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             'tipos' => [30, 33],
             'subtotal' => [
                 'documentos' => 503,
+                'exento' => 142,
                 'iva' => 502,
             ],
         ],
@@ -276,7 +278,11 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             // recorder subtotales
             foreach (['E'=>'documentos', 'F'=>'neto', 'G'=>'exento', 'H'=>'impuesto_adicional', 'I'=>'iva', 'J'=>'total'] as $col => $monto) {
                 if (isset($this->compras[$grupo]['subtotal'][$monto])) {
-                    $this->datos[$this->compras[$grupo]['subtotal'][$monto]] = '=\'Compras\'!'.$col.$this->y;
+                    if (empty($this->datos[$this->compras[$grupo]['subtotal'][$monto]])) {
+                        $this->datos[$this->compras[$grupo]['subtotal'][$monto]] = '=\'Compras\'!'.$col.$this->y;
+                    } else {
+                        $this->datos[$this->compras[$grupo]['subtotal'][$monto]] .= '+\'Compras\'!'.$col.$this->y;
+                    }
                 }
             }
             // pasar fila
@@ -382,7 +388,11 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             // recorder subtotales
             foreach (['E'=>'documentos', 'F'=>'neto', 'G'=>'exento', 'H'=>'iva', 'I'=>'total'] as $col => $monto) {
                 if (isset($this->ventas[$grupo]['subtotal'][$monto])) {
-                    $this->datos[$this->ventas[$grupo]['subtotal'][$monto]] = '=\'Ventas\'!'.$col.$this->y;
+                    if (empty($this->datos[$this->ventas[$grupo]['subtotal'][$monto]])) {
+                        $this->datos[$this->ventas[$grupo]['subtotal'][$monto]] = '=\'Ventas\'!'.$col.$this->y;
+                    } else {
+                        $this->datos[$this->ventas[$grupo]['subtotal'][$monto]] .= '+\'Ventas\'!'.$col.$this->y;
+                    }
                 }
             }
             // pasar fila
