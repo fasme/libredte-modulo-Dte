@@ -327,7 +327,9 @@ class Controller_DteIntercambios extends \Controller_App
         for ($i=0; $i<$n_dtes; $i++) {
             if (in_array($_POST['rcv_accion_codigo'][$i], ['ACD', 'ERM'])) {
                 $_POST['acuse'][$i] = (int)($_POST['rcv_accion_codigo'][$i]=='ERM');
-                $guardar_dte[] = 'T'.$_POST['TipoDTE'][$i].'F'.$_POST['Folio'][$i];
+                if ($_POST['rcv_accion_codigo'][$i]=='ERM') {
+                    $guardar_dte[] = 'T'.$_POST['TipoDTE'][$i].'F'.$_POST['Folio'][$i];
+                }
                 $EstadoRecepDTE = 0;
             } else {
                 $EstadoRecepDTE = 99;

@@ -35,13 +35,13 @@ $(function() {
         $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
     }
 });
-function intercambio_aceptar() {
+/*function intercambio_aceptar() {
     $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
         $('select[name="rcv_accion_codigo[]"]').get(i).value = 'ACD';
         $('input[name="rcv_accion_glosa[]"]').get(i).value = 'Acepta contenido del documento';
     });
     $('#btnRespuesta').click();
-}
+}*/
 function intercambio_recibir() {
     $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
         $('select[name="rcv_accion_codigo[]"]').get(i).value = 'ERM';
@@ -116,9 +116,9 @@ new \sowerphp\general\View_Helper_Table([
         <p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
     </div>
     <div class="col-sm-5 text-right">
-        <a class="btn btn-primary btn-lg" href="#" onclick="intercambio_aceptar(); return false" role="button" title="Aceptar el contenido de los documentos (sin acuse de recibo)">
+        <!--<a class="btn btn-primary btn-lg" href="#" onclick="intercambio_aceptar(); return false" role="button" title="Aceptar el contenido de los documentos (sin acuse de recibo)">
             Aceptar
-        </a>
+        </a>-->
         <a class="btn btn-success btn-lg" href="#" onclick="intercambio_recibir(); return false" role="button" title="Generar el acuse de recido para los documentos">
             Recibir
         </a>
@@ -225,7 +225,7 @@ echo $f->input([
     ],
     'values' => $RecepcionDTE,
 ]);
-echo '<p>Aquellos documentos <strong>aceptados o con acuse de recibo serán agregados</strong> a los documentos recibidos de ',$Emisor->razon_social,'. Documentos <strong>con reclamo no serán agregados</strong> a los documentos recibidos y no podrán ser agregados en el futuro ya que serán informados como rechazados al SII.</p>',"\n";
+echo '<p>Sólo aquellos documentos <strong>con acuse de recibo serán agregados</strong> a los documentos recibidos de ',$Emisor->razon_social,'. Documentos <strong>aceptados no serán agregados</strong> a los documentos recibidos, pero podrán ser agregados en el futuro si se hace el recibo de mercaderías o servicios. Documentos <strong>con reclamo no serán agregados</strong> a los documentos recibidos y no podrán ser agregados en el futuro ya que serán informados como rechazados al SII.</p>',"\n";
 echo '<div class="text-center">';
 echo $f->input([
     'type' => 'submit',
