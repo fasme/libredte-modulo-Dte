@@ -43,14 +43,14 @@ class Controller_DteVentas extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de ventas al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-06
+     * @version 2017-09-01
      */
     public function enviar_sii($periodo)
     {
         $Emisor = $this->getContribuyente();
         // si el libro fue enviado y no es rectifica error
         $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
-        if ($DteVenta->track_id and empty($_POST['CodAutRec']) and $DteVenta->getEstado()!='LRH') {
+        if ($DteVenta->track_id and empty($_POST['CodAutRec']) and $DteVenta->getEstado()!='LRH' and $DteVenta->track_id!=-1) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro del período '.$periodo.' ya fue enviado, ahora sólo puede  hacer rectificaciones', 'error'
             );
@@ -128,24 +128,36 @@ class Controller_DteVentas extends Controller_Base_Libros
             );
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
-        // enviar al SII
-        $track_id = $Libro->enviar();
-        if (!$track_id) {
+        // enviar al SII sólo si el libro es de un período menor o igual al 201707
+        // esto ya que desde 201708 se reemplaza por RCV
+        if ($periodo <= 201707) {
+            $track_id = $Libro->enviar();
+            $revision_estado = null;
+            $revision_detalle = null;
+            if (!$track_id) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible enviar el libro de ventas al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
+                );
+                $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+            }
             \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible enviar el libro de ventas al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
+                'Libro de ventas período '.$periodo.' envíado', 'ok'
             );
-            $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+        } else {
+            $track_id = -1;
+            $revision_estado = 'Libro generado';
+            $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Libro de ventas período '.$periodo.' generado, pero no se envió al SII, ya que se reemplazó por RCV', 'ok'
+            );
         }
         // guardar libro de ventas
         $DteVenta->documentos = $Libro->cantidad();
         $DteVenta->xml = base64_encode($xml);
         $DteVenta->track_id = $track_id;
-        $DteVenta->revision_estado = null;
-        $DteVenta->revision_detalle = null;
+        $DteVenta->revision_estado = $revision_estado;
+        $DteVenta->revision_detalle = $revision_detalle;
         $DteVenta->save();
-        \sowerphp\core\Model_Datasource_Session::message(
-            'Libro de ventas período '.$periodo.' envíado', 'ok'
-        );
         $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
     }
 

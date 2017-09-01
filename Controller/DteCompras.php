@@ -125,14 +125,14 @@ class Controller_DteCompras extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de compras al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-05
+     * @version 2017-09-01
      */
     public function enviar_sii($periodo)
     {
         $Emisor = $this->getContribuyente();
         // si el libro fue enviado y no es rectifica error
         $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
-        if ($DteCompra->track_id and empty($_POST['CodAutRec']) and $DteCompra->getEstado()!='LRH') {
+        if ($DteCompra->track_id and empty($_POST['CodAutRec']) and $DteCompra->getEstado()!='LRH' and $DteCompra->track_id!=-1) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro del período '.$periodo.' ya fue enviado, ahora sólo puede  hacer rectificaciones', 'error'
             );
@@ -179,24 +179,36 @@ class Controller_DteCompras extends Controller_Base_Libros
             );
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }
-        // enviar al SII
-        $track_id = $Libro->enviar();
-        if (!$track_id) {
+        // enviar al SII sólo si el libro es de un período menor o igual al 201707
+        // esto ya que desde 201708 se reemplaza por RCV
+        if ($periodo <= 201707) {
+            $track_id = $Libro->enviar();
+            $revision_estado = null;
+            $revision_detalle = null;
+            if (!$track_id) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible enviar el libro de compras al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
+                );
+                $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+            }
             \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible enviar el libro de compras al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
+                'Libro de compras período '.$periodo.' envíado', 'ok'
             );
-            $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+        } else {
+            $track_id = -1;
+            $revision_estado = 'Libro generado';
+            $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Libro de compras período '.$periodo.' generado, pero no se envió al SII, ya que se reemplazó por RCV', 'ok'
+            );
         }
         // guardar libro de compras
         $DteCompra->documentos = $Libro->cantidad();
         $DteCompra->xml = base64_encode($xml);
         $DteCompra->track_id = $track_id;
-        $DteCompra->revision_estado = null;
-        $DteCompra->revision_detalle = null;
+        $DteCompra->revision_estado = $revision_estado;
+        $DteCompra->revision_detalle = $revision_detalle;
         $DteCompra->save();
-        \sowerphp\core\Model_Datasource_Session::message(
-            'Libro de compras período '.$periodo.' envíado', 'ok'
-        );
         $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
     }
 
