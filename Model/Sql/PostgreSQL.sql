@@ -363,6 +363,9 @@ CREATE TABLE dte_recibido (
 		ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT dte_recibido_usuario_fk FOREIGN KEY (usuario)
 		REFERENCES usuario (id) MATCH FULL
+		ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT dte_recibido_intercambio_fk FOREIGN KEY (receptor, intercambio, certificacion)
+		REFERENCES dte_intercambio (receptor, codigo, certificacion)
 		ON UPDATE CASCADE ON DELETE RESTRICT
 );
 CREATE INDEX dte_recibido_fecha_emisor_idx ON dte_recibido (fecha, emisor);
