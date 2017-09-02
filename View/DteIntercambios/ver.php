@@ -186,10 +186,15 @@ echo '</div>',"\n";
 $RecepcionDTE = [];
 foreach ($Documentos as $Dte) {
     $DteRecibido = new \website\Dte\Model_DteRecibido(substr($Dte->getEmisor(), 0, -2), $Dte->getTipo(), $Dte->getFolio(), (int)$Dte->getCertificacion());
+    $dte_existe = $DteRecibido->exists();
     //$evento = $Dte->getUltimaAccionRCV($Firma);
     //$accion = ($evento and isset(\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$evento['codigo']]))? $evento['codigo'] : '';
     $accion = '';
-    $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
+    $acciones = '';
+    if ($dte_existe) {
+        $acciones .= '<a href="'.$_base.'/dte/dte_recibidos/modificar/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio.'" title="Editar el DTE recibido"><span class="fa fa-edit btn btn-default"></span></a> ';
+    }
+    $acciones .= '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
     $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII"><span class="fa fa-eye btn btn-default"></span></a>';
     $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
     $RecepcionDTE[] = [
@@ -201,7 +206,7 @@ foreach ($Documentos as $Dte) {
         'MntTotal' => $Dte->getMontoTotal(),
         'rcv_accion_codigo' => $accion,
         'rcv_accion_glosa' => $accion ? \sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$accion] : '',
-        'recibido' => $DteRecibido->exists() ? 'Si' : 'No',
+        'recibido' => $dte_existe ? 'Si' : 'No',
         'acciones' => $acciones,
     ];
 }
@@ -210,7 +215,7 @@ echo $f->input([
     'type' => 'table',
     'id' => 'documentos',
     'label' => 'Documentos',
-    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', '¿En libro?', 'Acciones'],
+    'titles' => ['DTE', 'Folio', 'Total', 'Estado', 'Glosa', '¿En IC?', 'Acciones'],
     'inputs' => [
         ['name'=>'TipoDTE', 'attr'=>'readonly="readonly" size="3"'],
         ['name'=>'Folio', 'attr'=>'readonly="readonly" size="10"'],

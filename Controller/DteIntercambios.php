@@ -290,7 +290,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-29
+     * @version 2017-09-02
      */
     public function responder($codigo)
     {
@@ -624,7 +624,7 @@ class Controller_DteIntercambios extends \Controller_App
             }
             \sowerphp\core\Model_Datasource_Session::message($msg, 'warning');
         }
-        $this->redirect(str_replace('responder', 'ver', $this->request->request));
+        $this->redirect(str_replace('responder', 'ver', $this->request->request).'#documentos');
     }
 
     /**
