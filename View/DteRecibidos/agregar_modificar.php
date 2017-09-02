@@ -129,6 +129,13 @@ echo $f->input([
 echo '</div>',"\n";
 echo '<div class="col-md-6">',"\n";
 echo $f->input([
+    'type' => 'select',
+    'options' => [''=>''] + $tipo_transacciones,
+    'name' => 'tipo_transaccion',
+    'label' => 'Tipo transacción',
+    'value' => isset($DteRecibido) ? $DteRecibido->tipo_transaccion : '',
+]);
+echo $f->input([
     'name' => 'iva_uso_comun',
     'label' => 'Monto IVA uso común',
     'check' => 'integer',

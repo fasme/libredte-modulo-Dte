@@ -86,12 +86,13 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite agregar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-08
+     * @version 2017-09-02
      */
     public function agregar()
     {
         $Emisor = $this->getContribuyente();
         // asignar variables para la vista
+        $tipo_transacciones = \sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones;
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,
@@ -100,6 +101,7 @@ class Controller_DteRecibidos extends \Controller_App
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getList(),
             'iva_tasa' => \sasco\LibreDTE\Sii::getIVA(),
             'sucursales' => $Emisor->getSucursales(),
+            'tipo_transacciones' => $tipo_transacciones,
         ]);
         // procesar formulario si se pasó
         if (isset($_POST['submit']))
@@ -111,7 +113,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite editar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-30
+     * @version 2017-09-02
      */
     public function modificar($emisor, $dte, $folio)
     {
@@ -125,6 +127,7 @@ class Controller_DteRecibidos extends \Controller_App
             $this->redirect('/dte/dte_recibidos/listar');
         }
         // agregar variables para la vista
+        $tipo_transacciones = \sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones;
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,
@@ -134,6 +137,7 @@ class Controller_DteRecibidos extends \Controller_App
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getList(),
             'iva_tasa' => \sasco\LibreDTE\Sii::getIVA(),
             'sucursales' => $Emisor->getSucursales(),
+            'tipo_transacciones' => $tipo_transacciones,
         ]);
         // procesar formulario si se pasó
         if (isset($_POST['submit']))
@@ -145,7 +149,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Método que agrega o modifica un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-14
+     * @version 2017-09-02
      */
     private function save()
     {
@@ -169,7 +173,8 @@ class Controller_DteRecibidos extends \Controller_App
         $DteRecibido->neto = !empty($_POST['neto']) ? $_POST['neto'] : null;
         $DteRecibido->iva = !empty($_POST['iva']) ? $_POST['iva'] : round((int)$DteRecibido->neto * ($DteRecibido->tasa/100));
         $DteRecibido->usuario = $this->Auth->User->id;
-        // iva uso común, no recuperable e impuesto adicional
+        // tipo transaccion, iva uso común, no recuperable e impuesto adicional
+        $DteRecibido->tipo_transaccion = !empty($_POST['tipo_transaccion']) ? $_POST['tipo_transaccion'] : null;
         $DteRecibido->iva_uso_comun = !empty($_POST['iva_uso_comun']) ? $_POST['iva_uso_comun'] : null;
         if ($DteRecibido->iva and !empty($_POST['iva_no_recuperable_codigo'])) {
             $DteRecibido->iva_no_recuperable = [];

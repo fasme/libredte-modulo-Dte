@@ -21,10 +21,10 @@ CREATE TABLE dte_emitido_email (
 
 ALTER TABLE item_clasificacion ALTER superior TYPE VARCHAR(35);
 
-ALTER TABLE dte_recibido ADD rcv_accion CHAR(3);
-
-ALTER TABLE dte_recibido ADD
-    CONSTRAINT dte_recibido_intercambio_fk FOREIGN KEY (receptor, intercambio, certificacion)
+ALTER TABLE dte_recibido
+    ADD rcv_accion CHAR(3),
+    ADD tipo_transaccion SMALLINT,
+    ADD CONSTRAINT dte_recibido_intercambio_fk FOREIGN KEY (receptor, intercambio, certificacion)
         REFERENCES dte_intercambio (receptor, codigo, certificacion)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ;

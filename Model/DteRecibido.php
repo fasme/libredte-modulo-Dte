@@ -71,6 +71,7 @@ class Model_DteRecibido extends \Model_App
     public $emisor_nc_nd_fc; ///< smallint(16) NULL DEFAULT ''
     public $sucursal_sii_receptor; ///< integer(32) NULL DEFAULT ''
     public $rcv_accion; ///< character(3) NULL DEFAULT ''
+    public $tipo_transaccion; ///< smallint(16) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -420,6 +421,17 @@ class Model_DteRecibido extends \Model_App
             'comment'   => '',
             'type'      => 'character',
             'length'    => 3,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'tipo_transaccion' => array(
+            'name'      => 'Tipo transacción',
+            'comment'   => '',
+            'type'      => 'smallint',
+            'length'    => 16,
             'null'      => true,
             'default'   => '',
             'auto'      => false,
