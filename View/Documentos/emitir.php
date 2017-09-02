@@ -42,7 +42,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
     <!-- DATOS DEL RECEPTOR -->
     <div class="row">
         <div class="form-group col-md-3">
-<?php if (!isset($DteReceptor)) : ?>
+<?php if (!isset($DteReceptor) or $DteReceptor['RUTRecep']=='66666666-6') : ?>
             <div class="input-group">
                 <div class="input-group-addon"><a href="#" title="Buscar RUT del receptor [B]" data-toggle="modal" data-target=".modal-buscar-receptor" accesskey="B" id="modalBuscar">buscar</a></div>
                 <input type="text" name="RUTRecep" id="RUTRecepField" class="check notempty rut form-control" placeholder="RUT del receptor" maxlength="12" onblur="Receptor.setDatos('emitir_dte')" value="<?=$RUTRecep?>" />
