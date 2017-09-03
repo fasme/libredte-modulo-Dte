@@ -1,4 +1,26 @@
 <ul class="nav nav-pills pull-right">
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-download"></span> Descargar <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/descargar_registro_compra/<?=$Libro->periodo?>" title="Descargar CSV con los documentos recibidos que forman el registro de compras">
+                     Registro de compras
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/descargar_registro_compra/<?=$Libro->periodo?>/0" title="Descargar CSV con los documentos no electrónicos recibidos que son parte del registro de compras">
+                     Documentos no electrónicos
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/descargar_tipo_transacciones/<?=$Libro->periodo?>" title="Descargar CSV con los documentos que tienen tipo de transacción definida">
+                    Tipos de transacciones
+                </a>
+            </li>
+        </ul>
+    </li>
     <li>
         <a href="<?=$_base?>/dte/dte_compras" title="Volver a IEC">
             Volver a IEC

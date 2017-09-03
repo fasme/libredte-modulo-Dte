@@ -49,7 +49,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que muestra la información del libro para cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-05
+     * @version 2017-09-03
      */
     public function ver($periodo)
     {
@@ -68,6 +68,9 @@ abstract class Controller_Base_Libros extends \Controller_App
         foreach ($resumen as $r) {
             $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
         }
+        foreach ($detalle as &$d) {
+            unset($d['tipo_transaccion']);
+        }
         $this->set([
             'Emisor' => $Emisor,
             'Libro' => $Libro,
@@ -81,7 +84,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que descarga los datos del libro del período en un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-12
+     * @version 2017-09-03
      */
     public function csv($periodo)
     {
@@ -92,6 +95,9 @@ abstract class Controller_Base_Libros extends \Controller_App
                 'No hay documentos en el período '.$periodo, 'error'
             );
             $this->redirect('/dte/'.$this->request->params['controller']);
+        }
+        foreach ($detalle as &$d) {
+            unset($d['tipo_transaccion']);
         }
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
         array_unshift($detalle, $class::$libro_cols);

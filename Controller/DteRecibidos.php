@@ -86,13 +86,14 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite agregar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-02
+     * @version 2017-09-03
      */
     public function agregar()
     {
         $Emisor = $this->getContribuyente();
         // asignar variables para la vista
         $tipo_transacciones = \sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones;
+        unset($tipo_transacciones[5], $tipo_transacciones[6]);
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,
@@ -128,6 +129,7 @@ class Controller_DteRecibidos extends \Controller_App
         }
         // agregar variables para la vista
         $tipo_transacciones = \sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones;
+        unset($tipo_transacciones[5], $tipo_transacciones[6]);
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,

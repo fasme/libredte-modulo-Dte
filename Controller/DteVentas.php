@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de ventas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-06-14
+ * @version 2017-09-03
  */
 class Controller_DteVentas extends Controller_Base_Libros
 {
@@ -172,6 +172,75 @@ class Controller_DteVentas extends Controller_Base_Libros
         $ventas = $Emisor->getVentasPorTipo($periodo);
         $chart = new \sowerphp\general\View_Helper_Chart();
         $chart->pie('Ventas por tipo de DTE del período '.$periodo, $ventas);
+    }
+
+    /**
+     * Acción que genera el archivo CSV con el registro de ventas
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-03
+     */
+    public function descargar_registro_venta($periodo)
+    {
+        $Emisor = $this->getContribuyente();
+        $ventas = $Emisor->getVentas($periodo);
+        if (!$ventas) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay documentos de venta del período '.$periodo, 'warning'
+            );
+            $this->redirect(str_replace('descargar_registro_venta', 'ver', $this->request->request));
+        }
+        foreach ($ventas as &$v) {
+            unset($v['anulado']);
+        }
+        $columnas = Model_DteVenta::$libro_cols;
+        unset($columnas['anulado']);
+        $columnas['tipo_transaccion'] = 'Tipo Transaccion';
+        array_unshift($ventas, $columnas);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($ventas, 'rv_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo);
+    }
+
+    /**
+     * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-03
+     */
+    public function descargar_resumenes($periodo)
+    {
+        $Emisor = $this->getContribuyente();
+        $Libro = new Model_DteVenta($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$Libro->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Aun no se ha generado el XML del período '.$periodo, 'error'
+            );
+            $this->redirect(str_replace('descargar_resumenes', 'ver', $this->request->request));
+        }
+        $xml = base64_decode($Libro->xml);
+        $LibroCompraVenta = new \sasco\LibreDTE\Sii\LibroCompraVenta();
+        $LibroCompraVenta->loadXML($xml);
+        $resumenes = $LibroCompraVenta->getResumenManual() + $LibroCompraVenta->getResumenBoletas();
+        if (!$resumenes) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay resúmenes para el período '.$periodo, 'warning'
+            );
+            $this->redirect(str_replace('descargar_resumenes', 'ver', $this->request->request));
+        }
+        // generar CSV
+        $datos = [['Tipo Docto', 'Numero de Doctos', 'Operaciones Exentas', 'Monto Exento', 'Montos Netos', 'Montos de IVA', 'Monto IVA Propio', 'Monto IVA Terceros', 'Ley 18.211', 'Monto Total']];
+        foreach ($resumenes as $r) {
+            $datos[] = [
+                $r['TpoDoc'],
+                $r['TotDoc'],
+                $r['TotOpExe'],
+                $r['TotMntExe'],
+                $r['TotMntNeto'],
+                $r['TotMntIVA'],
+                $r['TotIVAPropio'],
+                $r['TotIVATerceros'],
+                $r['TotLey18211'],
+                $r['TotMntTotal'],
+            ];
+        }
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rv_resumenes_'.$periodo);
     }
 
 }

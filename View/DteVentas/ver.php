@@ -1,4 +1,21 @@
 <ul class="nav nav-pills pull-right">
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-download"></span> Descargar <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="<?=$_base?>/dte/dte_ventas/descargar_registro_venta/<?=$Libro->periodo?>" title="Descargar CSV con los documentos emitidos que forman el registro de ventas">
+                     Registro de ventas
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_ventas/descargar_resumenes/<?=$Libro->periodo?>" title="Descargar CSV con los resúmenes de boletas y pagos electrónicos">
+                    Resúmenes (ej: boletas)
+                </a>
+            </li>
+        </ul>
+    </li>
     <li>
         <a href="<?=$_base?>/dte/dte_ventas" title="Volver a IEV">
             Volver a IEV

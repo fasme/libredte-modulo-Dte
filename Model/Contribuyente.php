@@ -1826,9 +1826,9 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-28
+     * @version 2017-09-03
      */
-    public function getCompras($periodo)
+    public function getCompras($periodo, $tipo_dte = null)
     {
         $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
         list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('r.xml', [
@@ -1836,6 +1836,17 @@ class Model_Contribuyente extends \Model_App
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TasaImp',
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/MontoImp',
         ], 'http://www.sii.cl/SiiDte');
+        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo];
+        if ($tipo_dte !== null) {
+            if (is_array($tipo_dte)) {
+                $where_tipo_dte = 'AND t.codigo IN ('.implode(', ', array_map('intval', $tipo_dte)).')';
+            } else {
+                $where_tipo_dte = 'AND t.electronico = :electronico';
+                $vars[':electronico'] = (int)$tipo_dte;
+            }
+        } else {
+            $where_tipo_dte = '';
+        }
         $compras = $this->db->getTable('
             (
                 SELECT
@@ -1869,10 +1880,12 @@ class Model_Contribuyente extends \Model_App
                     r.sucursal_sii,
                     r.numero_interno,
                     r.emisor_nc_nd_fc,
-                    r.total
+                    r.total,
+                    r.tipo_transaccion
                 FROM dte_tipo AS t, dte_recibido AS r, contribuyente AS e
                 WHERE
                     t.codigo = r.dte
+                    '.$where_tipo_dte.'
                     AND t.compra = true
                     AND r.emisor = e.rut
                     AND r.receptor = :rut
@@ -1910,10 +1923,16 @@ class Model_Contribuyente extends \Model_App
                     NULL AS sucursal_sii,
                     NULL AS numero_interno,
                     CASE WHEN r.dte IN (56, 61) THEN 1 ELSE NULL END AS emisor_nc_nd_fc,
-                    r.total
-                FROM dte_emitido AS r, contribuyente AS e
+                    r.total,
+                    NULL AS tipo_transaccion
+                FROM dte_tipo AS t, dte_emitido AS r, contribuyente AS e
                 WHERE
-                    r.receptor = e.rut AND r.emisor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
+                    t.codigo = r.dte
+                    '.$where_tipo_dte.'
+                    AND r.receptor = e.rut
+                    AND r.emisor = :rut
+                    AND r.certificacion = :certificacion
+                    AND '.$periodo_col.' = :periodo
                     AND (
                         r.dte = 46
                         OR (r.emisor, r.dte, r.folio, r.certificacion) IN (
@@ -1926,7 +1945,7 @@ class Model_Contribuyente extends \Model_App
                     )
             )
             ORDER BY fecha, dte, folio
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', $vars);
         // procesar cada compra
         foreach ($compras as &$c) {
             // asignar IVA no recuperable
@@ -1969,7 +1988,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el objeto del libro de compras a partir de las compras registradas en la aplicación
      * @param periodo Período para el cual se está construyendo el libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-06
+     * @version 2017-09-03
      */
     public function getLibroCompras($periodo)
     {
@@ -1980,8 +1999,9 @@ class Model_Contribuyente extends \Model_App
             $d = [];
             foreach ($compra as $k => $v) {
                 if (strpos($k, 'impuesto_adicional')!==0 and strpos($k, 'iva_no_recuperable')!==0) {
-                    if ($v!==null)
+                    if ($v!==null and isset(Model_DteCompra::$libro_cols[$k])) {
                         $d[Model_DteCompra::$libro_cols[$k]] = $v;
+                    }
                 }
             }
             // agregar iva no recuperable

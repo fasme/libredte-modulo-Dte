@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de compras
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-08-07
+ * @version 2017-09-03
  */
 class Controller_DteCompras extends Controller_Base_Libros
 {
@@ -223,6 +223,76 @@ class Controller_DteCompras extends Controller_Base_Libros
         $compras = $Emisor->getComprasPorTipo($periodo);
         $chart = new \sowerphp\general\View_Helper_Chart();
         $chart->pie('Compras por tipo de DTE del período '.$periodo, $compras);
+    }
+
+     /**
+     * Acción que genera el archivo CSV con el registro de compras
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-03
+     */
+    public function descargar_registro_compra($periodo, $electronico = null)
+    {
+        $Emisor = $this->getContribuyente();
+        $compras = $Emisor->getCompras($periodo, is_numeric($electronico) ? $electronico : null);
+        if (!$compras) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay documentos de compra del período '.$periodo, 'warning'
+            );
+            $this->redirect('/dte/dte_compras/ver/'.$periodo);
+        }
+        foreach ($compras as &$c) {
+            unset($c['anulado'], $c['impuesto_vehiculos'], $c['iva_uso_comun_factor']);
+        }
+        $columnas = Model_DteCompra::$libro_cols;
+        unset($columnas['anulado'], $columnas['impuesto_vehiculos'], $columnas['iva_uso_comun_factor']);
+        $columnas['tipo_transaccion'] = 'Tipo Transaccion';
+        array_unshift($compras, $columnas);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($compras, 'rc_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo);
+    }
+
+    /**
+     * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-03
+     */
+    public function descargar_tipo_transacciones($periodo)
+    {
+        $Emisor = $this->getContribuyente();
+        $compras = $Emisor->getCompras($periodo, [33, 34, 43, 46, 56, 61]);
+        $datos = [];
+        foreach ($compras as $c) {
+            if (!$c['tipo_transaccion']) {
+                continue;
+            }
+            $codigo_impuesto = null;
+            if ($c['iva_uso_comun']) {
+                if (empty($c['tipo_transaccion'])) {
+                    $c['tipo_transaccion'] = 2;
+                } else {
+                    $codigo_impuesto = 2;
+                }
+            }
+            if ($c['iva_no_recuperable_codigo']) {
+                $c['tipo_transaccion'] = 6;
+                $codigo_impuesto = $c['iva_no_recuperable_codigo'];
+            }
+            $datos[] = [
+                $c['rut'],
+                $c['dte'],
+                $c['folio'],
+                $c['tipo_transaccion'],
+                $codigo_impuesto,
+            ];
+        }
+        if (!$datos) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay compras caracterizadas para el período '.$periodo, 'warning'
+            );
+            $this->redirect(str_replace('descargar_tipo_transacciones', 'ver', $this->request->request));
+        }
+        // generar CSV
+        array_unshift($datos, ['Rut-DV', 'Codigo_Tipo_Doc', 'Folio_Doc', 'TpoTranCompra', 'Codigo_IVA_E_Imptos']);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rc_tipo_transacciones_'.$periodo);
     }
 
 }
