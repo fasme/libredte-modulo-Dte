@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para mapear la tabla contribuyente de la base de datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2015-09-19
+ * @version 2017-09-03
  */
 class Model_Contribuyentes extends \Model_Plural_App
 {
@@ -234,6 +234,31 @@ class Model_Contribuyentes extends \Model_Plural_App
                 AND u.ultimo_ingreso_fecha_hora BETWEEN :desde AND :hasta
             ORDER BY u.usuario, c.razon_social
         ', [':desde'=>$desde, ':hasta'=>$hasta.' 23:59:59']);
+    }
+
+    /**
+     * Método que entrega la cantidad de contribuyentes registrados por comuna
+     * @param certificacion =true sólo certificación, =false sólo producción, =null todos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-03
+     */
+    public function countByComuna($certificacion = null)
+    {
+        $vars[':certificacion'] = (int)$certificacion;
+        return $this->db->getTable('
+            SELECT co.comuna, COUNT(c.rut) AS contribuyentes
+            FROM
+                contribuyente AS c
+                JOIN comuna AS co ON co.codigo = c.comuna
+                JOIN contribuyente_config AS e ON c.rut = e.contribuyente
+            WHERE
+                c.usuario IS NOT NULL
+                AND e.configuracion = \'ambiente\'
+                AND e.variable = \'en_certificacion\'
+                AND e.valor = :certificacion
+            GROUP BY co.comuna
+            ORDER BY co.comuna
+        ', $vars);
     }
 
 }
