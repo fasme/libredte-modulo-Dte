@@ -1497,6 +1497,22 @@ echo $f->input([
 ]);
 echo '<hr/>'."\n";
 echo $f->input([
+    'name' => 'config_webhooks_shopify_token',
+    'label' => 'Shopify token',
+    'value' => $Contribuyente->config_webhooks_shopify_token,
+    'help' => 'Token de la tienda en <a href="https://es.shopify.com" target="_blank">Shopify</a>. Se obtiene en: Settings &raquo; Notifications &raquo; Webhooks (al final)',
+]);
+$shopify_webhooks = [
+    'Orden pagada: <a href="'.$_url.'/api/webhooks/shopify/orden_pagada/'.$Contribuyente->rut.'">'.$_url.'/api/webhooks/shopify/orden_pagada/'.$Contribuyente->rut.'</a>',
+];
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Shopify webhook',
+    'value' => implode('<br/>', $shopify_webhooks),
+    'help' => 'URL a configurar en <a href="https://es.shopify.com" target="_blank">Shopify</a>. Se obtiene en: Settings &raquo; Notifications &raquo; Webhooks (al final)',
+]);
+echo '<hr/>'."\n";
+echo $f->input([
     'name' => 'config_webhooks_alegra_user',
     'label' => 'Alegra usuario',
     'value' => $Contribuyente->config_webhooks_alegra_user,
