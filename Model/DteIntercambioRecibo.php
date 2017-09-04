@@ -151,7 +151,7 @@ class Model_DteIntercambioRecibo extends \Model_App
     /**
      * Método que guarda el XML del Recibo de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-05
+     * @version 2017-09-04
      */
     public function saveXML($Emisor, $xml) {
         // crear recibo
@@ -160,8 +160,9 @@ class Model_DteIntercambioRecibo extends \Model_App
         if (!$EnvioRecibos->getID())
             return null;
         $Caratula = $EnvioRecibos->toArray()['EnvioRecibos']['SetRecibos']['Caratula'];
-        if (explode('-', $Caratula['RutRecibe'])[0] != $Emisor->rut)
+        if (explode('-', $Caratula['RutRecibe'])[0] != $Emisor->rut or empty($Caratula['TmstFirmaEnv'])) {
             return false;
+        }
         // guardar recibo
         $this->db->beginTransaction();
         $this->responde = explode('-', $Caratula['RutResponde'])[0];
