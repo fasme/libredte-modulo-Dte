@@ -459,7 +459,14 @@ class Controller_DteIntercambios extends \Controller_App
         //
         $rcv_estado = [];
         $rcv_accion = [];
-        $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        try {
+            $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible informar al SII, por favor reintentar. El error fue: '.$e->getMessage(), 'error'
+            );
+            $this->redirect(str_replace('responder', 'ver', $this->request->request));
+        }
         for ($i=0; $i<$n_dtes; $i++) {
             if (in_array($_POST['TipoDTE'][$i], array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) {
                 list($emisor_rut, $emisor_dv) = explode('-', $_POST['RUTEmisor'][$i]);
