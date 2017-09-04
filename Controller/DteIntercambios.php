@@ -290,7 +290,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-02
+     * @version 2017-09-04
      */
     public function responder($codigo)
     {
@@ -680,7 +680,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que permite ingresar una acción del registro a un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-29
+     * @version 2017-09-04
      */
     public function dte_rcv($emisor, $dte, $folio)
     {
@@ -693,8 +693,8 @@ class Controller_DteIntercambios extends \Controller_App
             );
             $this->redirect('/dte/dte_intercambios/listar');
         }
-        $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
         try {
+            $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
             $this->set([
                 'Emisor' => new \website\Dte\Model_Contribuyente($emisor_rut),
                 'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
