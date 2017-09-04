@@ -362,10 +362,13 @@ class Model_DteFolio extends \Model_App
      * Método que entrega los folios que están antes del folio siguiente, para
      * los cuales hay CAF y no se han usado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-09-04
      */
     public function getSinUso()
     {
+        if (!$this->getCafs()) {
+            return [];
+        }
         $rangos_aux = $this->db->getTable('
             SELECT desde, hasta
             FROM dte_caf
