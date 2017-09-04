@@ -1225,23 +1225,73 @@ if (is_dir(DIR_STATIC.'/contribuyentes/'.$Contribuyente->rut.'/transbank/logs/ce
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-bitcoin"></i>
-            Criptomonedas
+            Bitpay (BTC)
+        </div>
+        <div class="panel-body">
+<?php if (!$Contribuyente->config_pagos_bitpay_token) : ?>
+<script>
+function bitpay_asociar() {
+    var codigo = document.getElementById('bitpay_pairing_code').value;
+    var network = document.getElementById('bitpay_networkField').value;
+    if (__.empty(codigo)) {
+        alert('Debe indicar código de pareo de Bitpay');
+        return false;
+    }
+    window.location = _base+'/pagos/bitpay/asociar/'+codigo+'/'+network;
+}
+</script>
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'bitpay_network',
+    'label' => 'Red',
+    'options' => ['Testnet'=>'Testnet (pruebas)', 'Livenet'=>'Livenet (producción)'],
+    'help' => 'Define si se usa la red de pruebas o la real',
+]);
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Código de pareo',
+    'value' => '<input type="text" name="bitpay_pairing_code" id="bitpay_pairing_code" class="form-control" /><br/><a href="#" onclick="bitpay_asociar(); return false" class="btn btn-default">Asociar a Bitpay</a>',
+    'help' => 'Código para asociar LibreDTE a Bitpay, se obtiene en <a href="https://bitpay.com/dashboard/merchant/api-tokens" target="_blank">Livenet</a> o <a href="https://test.bitpay.com/dashboard/merchant/api-tokens" target="_blank">Testnet</a>',
+]);
+?>
+<?php else : ?>
+<?php
+echo $f->input([
+    'type' => 'div',
+    'label' => 'Red',
+    'value' => $Contribuyente->config_pagos_bitpay_network,
+]);
+echo $f->input([
+    'name' => 'config_pagos_bitpay_token',
+    'label' => 'Token',
+    'value' => $Contribuyente->config_pagos_bitpay_token,
+    'help' => 'Eliminar para desconectar Bitpay de LibreDTE',
+]);
+?>
+<?php endif; ?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bitcoin"></i>
+            Criptomonedas (directo a billetera)
         </div>
         <div class="panel-body">
 <?php
 echo $f->input([
     'name' => 'config_pagos_btc_billetera',
-    'label' => 'Bitcoin',
+    'label' => 'Bitcoin (BTC)',
     'value' => $Contribuyente->config_pagos_btc_billetera,
 ]);
 echo $f->input([
     'name' => 'config_pagos_eth_billetera',
-    'label' => 'Ethereum',
+    'label' => 'Ethereum (ETH)',
     'value' => $Contribuyente->config_pagos_eth_billetera,
 ]);
 echo $f->input([
     'name' => 'config_pagos_xmr_billetera',
-    'label' => 'Monero',
+    'label' => 'Monero (XMR)',
     'value' => $Contribuyente->config_pagos_xmr_billetera,
 ]);
 ?>
