@@ -328,7 +328,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite solicitar un CAF al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-09-06
      */
     public function _api_solicitar_caf_GET($dte, $cantidad, $emisor)
     {
@@ -348,6 +348,9 @@ class Controller_DteFolios extends \Controller_App
         $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteFolio->exists()) {
             $this->Api->send('Primero debe crear el mantenedor de los folios de tipo '.$dte, 500);
+        }
+        if (!$DteFolio->siguiente) {
+            $this->Api->send('Debe tener al menos un CAF cargado manualmente antes de solicitar timbraje vía LibreDTE', 500);
         }
         // recuperar firma electrónica
         $Firma = $Emisor->getFirma($User->id);
