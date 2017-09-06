@@ -291,7 +291,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite buscar documentos recibidos en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-10
+     * @version 2017-09-06
      */
     public function sii()
     {
@@ -303,7 +303,7 @@ class Controller_DteRecibidos extends \Controller_App
         if (isset($_POST['submit'])) {
             $r = $this->consume('/api/dte/dte_recibidos/sii/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$Emisor->rut.'?formato=json');
             if ($r['status']['code']!=200) {
-                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener los documentos desde el SII, intente nuevamente', 'error');
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener los documentos desde el SII, intente nuevamente: '.$r['body'], 'error');
                 return;
             }
             if (empty($r['body'])) {
