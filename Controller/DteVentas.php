@@ -196,7 +196,7 @@ class Controller_DteVentas extends Controller_Base_Libros
         unset($columnas['anulado']);
         $columnas['tipo_transaccion'] = 'Tipo Transaccion';
         array_unshift($ventas, $columnas);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($ventas, 'rv_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($ventas, 'rv_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo, ';', '');
     }
 
     /**
@@ -240,7 +240,7 @@ class Controller_DteVentas extends Controller_Base_Libros
                 $r['TotMntTotal'],
             ];
         }
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rv_resumenes_'.$periodo);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rv_resumenes_'.$periodo, ';', '');
     }
 
 }

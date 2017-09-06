@@ -228,7 +228,7 @@ class Controller_DteCompras extends Controller_Base_Libros
      /**
      * Acción que genera el archivo CSV con el registro de compras
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2017-09-06
      */
     public function descargar_registro_compra($periodo, $electronico = null)
     {
@@ -247,13 +247,13 @@ class Controller_DteCompras extends Controller_Base_Libros
         unset($columnas['anulado'], $columnas['impuesto_vehiculos'], $columnas['iva_uso_comun_factor']);
         $columnas['tipo_transaccion'] = 'Tipo Transaccion';
         array_unshift($compras, $columnas);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($compras, 'rc_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($compras, 'rc_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo, ';', '');
     }
 
     /**
      * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2017-09-06
      */
     public function descargar_tipo_transacciones($periodo)
     {
@@ -292,7 +292,7 @@ class Controller_DteCompras extends Controller_Base_Libros
         }
         // generar CSV
         array_unshift($datos, ['Rut-DV', 'Codigo_Tipo_Doc', 'Folio_Doc', 'TpoTranCompra', 'Codigo_IVA_E_Imptos']);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rc_tipo_transacciones_'.$periodo);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rc_tipo_transacciones_'.$periodo, ';', '');
     }
 
 }
