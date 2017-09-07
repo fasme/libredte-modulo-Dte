@@ -243,4 +243,67 @@ class Controller_DteVentas extends Controller_Base_Libros
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rv_resumenes_'.$periodo, ';', '');
     }
 
+    /**
+     * Acción que permite obtener el resumen del registro de venta para un período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-07
+     */
+    public function rcv_resumen($periodo)
+    {
+        $Emisor = $this->getContribuyente();
+        $resumen = libredte_consume('/sii/rcv_resumen/'.$Emisor->rut.'-'.$Emisor->dv.'/VENTA/'.$periodo.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+            'auth'=>[
+                'rut' => $Emisor->rut.'-'.$Emisor->dv,
+                'clave' => $Emisor->config_sii_pass,
+            ],
+        ]);
+        if ($resumen['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message('Error al obtener el resumen del RCV: '.$resumen['body'], 'error');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        if ($resumen['body']['respEstado']['codRespuesta']) {
+            \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el resumen: '.$resumen['body']['respEstado']['msgeRespuesta'], 'error');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        $this->set([
+            'Emisor' => $Emisor,
+            'periodo' => $periodo,
+            'resumen' => $resumen['body']['data'],
+        ]);
+    }
+
+    /**
+     * Acción que permite obtener el detalle del registro de venta para un período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-07
+     */
+    public function rcv_detalle($periodo, $dte)
+    {
+        $Emisor = $this->getContribuyente();
+        $detalle = libredte_consume('/sii/rcv_detalle/'.$Emisor->rut.'-'.$Emisor->dv.'/VENTA/'.$periodo.'/'.$dte.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+            'auth'=>[
+                'rut' => $Emisor->rut.'-'.$Emisor->dv,
+                'clave' => $Emisor->config_sii_pass,
+            ],
+        ]);
+        if ($detalle['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message('Error al obtener el detalle del RCV: '.$detalle['body'], 'error');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        if ($detalle['body']['respEstado']['codRespuesta']) {
+            \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el detalle: '.$detalle['body']['respEstado']['msgeRespuesta'], 'error');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        if (!$detalle['body']['data']) {
+            \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        $this->set([
+            'Emisor' => $Emisor,
+            'periodo' => $periodo,
+            'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
+            'detalle' => $detalle['body']['data'],
+        ]);
+    }
+
 }

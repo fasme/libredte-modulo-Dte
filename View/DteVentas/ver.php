@@ -1,4 +1,11 @@
 <ul class="nav nav-pills pull-right">
+<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
+    <li>
+        <a href="<?=$_base?>/dte/dte_ventas/rcv_resumen/<?=$Libro->periodo?>">
+            <span class="fa fa-bank"></span> Ver resumen RV
+        </a>
+    </li>
+<?php endif; ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fa fa-download"></span> Descargar <span class="caret"></span>

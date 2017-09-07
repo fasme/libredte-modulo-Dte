@@ -1,4 +1,33 @@
 <ul class="nav nav-pills pull-right">
+<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-bank"></span> Ver resumen RC<span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>">
+                     Registrados
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/PENDIENTE">
+                    Pendientes
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/NO_INCLUIR">
+                    No incluídos
+                </a>
+            </li>
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/RECLAMADO">
+                    Reclamados
+                </a>
+            </li>
+        </ul>
+    </li>
+<?php endif; ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fa fa-download"></span> Descargar <span class="caret"></span>
