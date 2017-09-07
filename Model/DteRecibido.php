@@ -501,7 +501,7 @@ class Model_DteRecibido extends \Model_App
     /**
      * Método para guardar el documento recibido, se hacen algunas validaciones previo a guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-22
+     * @version 2017-09-06
      */
     public function save()
     {
@@ -527,7 +527,68 @@ class Model_DteRecibido extends \Model_App
             }
         }
         // se guarda el documento
-        return parent::save();
+        $status = parent::save();
+        // si se pudo guardar y existe tipo transacción se notifica al SII
+        if ($status) {
+            $this->setTipoTransaccionSII();
+        }
+        // entregar estado
+        return $status;
+    }
+
+    /**
+     * Método que determina y envía al SII el tipo de transacción del DTE recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-06
+     */
+    public function setTipoTransaccionSII()
+    {
+        if (($this->tipo_transaccion or $this->iva_uso_comun or $this->iva_no_recuperable) and \sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            // determinar códigos
+            $codigo_impuesto = 1;
+            if ($this->iva_uso_comun) {
+                if (!$this->tipo_transaccion) {
+                    $this->tipo_transaccion = 2;
+                    parent::save();
+                } else {
+                    $codigo_impuesto = 2;
+                }
+            }
+            if ($this->iva_no_recuperable) {
+                if ($this->tipo_transaccion!=6) {
+                    $this->tipo_transaccion = 6;
+                    parent::save();
+                }
+                $codigo_impuesto = json_decode($this->iva_no_recuperable, true)[0]['codigo'];
+            }
+            // enviar al SII
+            $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo(), [
+                'auth'=> [
+                    'rut' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
+                    'clave' => $this->getReceptor()->config_sii_pass,
+                ],
+                'documentos' => [
+                    [$this->getEmisor()->rut.'-'.$this->getEmisor()->dv, $this->dte, $this->folio, $this->tipo_transaccion, $codigo_impuesto]
+                ],
+            ]);
+            if (!empty($r['body']['metaData']['errors'])) {
+                $this->tipo_transaccion = null;
+                parent::save();
+                return false;
+            }
+            return [$this->tipo_transaccion, $codigo_impuesto];
+        }
+        return false;
+    }
+
+    /**
+     * Método que entrega el período al que corresponde el DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-06
+     */
+    public function getPeriodo()
+    {
+        return $this->periodo ? $this->periodo : substr(str_replace('-', '', $this->fecha), 0, 6);
     }
 
     /**
