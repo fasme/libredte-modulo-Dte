@@ -562,7 +562,7 @@ class Model_DteRecibido extends \Model_App
                 $codigo_impuesto = json_decode($this->iva_no_recuperable, true)[0]['codigo'];
             }
             // enviar al SII
-            $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo(), [
+            $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.(int)$this->getReceptor()->config_ambiente_en_certificacion, [
                 'auth'=> [
                     'rut' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
                     'clave' => $this->getReceptor()->config_sii_pass,
