@@ -170,7 +170,7 @@ echo $f->input([
     'value' => date('Ym'),
     'check' => 'notempty integer',
     'help' => 'Período del libro en que se asignará el documento',
-    'attr' => 'readonly="readonly"',
+    //'attr' => 'readonly="readonly"',
 ]);
 echo $f->input([
     'type' => 'select',
