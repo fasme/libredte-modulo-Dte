@@ -300,6 +300,9 @@ echo $f->input([
 <!-- INICIO EMAILS -->
 <div role="tabpanel" class="tab-pane" id="correos">
     <p>Aquí debe configurar las dos casillas de correo para operar con facturación electrónica. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/sowerphp/config/email">documentación de las casillas de correo</a> para obtener detalles de qué opciones debe usar.</p>
+<?php if (isset($Contribuyente) and $Contribuyente->getFirma()) : ?>
+    <p>Los correos deben coincidir con los registrados en el SII, los debe verificar en <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/contribuyente_datos/<?=$Contribuyente->rut?>-<?=$Contribuyente->dv?>', 750, 550); return false" title="Ver datos del contribuyente en el SII">el sitio del web de impuestos internos</a>.</p>
+<?php endif; ?>
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">

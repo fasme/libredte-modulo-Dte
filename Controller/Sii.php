@@ -27,10 +27,46 @@ namespace website\Dte;
 /**
  * Controlador para acciones del SII
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-08-28
+ * @version 2017-09-08
  */
 class Controller_Sii extends \Controller_App
 {
+
+    /**
+     * Acción que permite obtener los datos de la empresa desde el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-08
+     */
+    public function contribuyente_datos($rut)
+    {
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            $Emisor = $this->getContribuyente();
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            $data = [
+                'firma' => [
+                    'cert-data' => $Firma->getCertificate(),
+                    'key-data' => $Firma->getPrivateKey(),
+                ],
+            ];
+            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $response = libredte_consume(
+                '/sii/dte_contribuyente_datos/'.$Emisor->getRUT().'?certificacion='.$certificacion,
+                $data
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se redirecciona al SII
+        else {
+            if (\sasco\LibreDTE\Sii::getAmbiente()) {
+                header('location: https://maullin.sii.cl/cvc_cgi/dte/ad_empresa1');
+            } else {
+                header('location: https://palena.sii.cl/cvc_cgi/dte/ad_empresa1');
+            }
+            exit;
+        }
+    }
 
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
