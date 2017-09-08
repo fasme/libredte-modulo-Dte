@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de compras
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-03
+ * @version 2017-09-07
  */
 class Controller_DteCompras extends Controller_Base_Libros
 {
@@ -357,6 +357,72 @@ class Controller_DteCompras extends Controller_Base_Libros
             'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
             'estado' => $estado,
             'detalle' => $detalle['body']['data'],
+        ]);
+    }
+
+    /**
+     * Acción que permite obtener las diferencias entre el registro de compras y lo que está en LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-07
+     */
+    public function rcv_diferencias($periodo, $dte)
+    {
+        $Emisor = $this->getContribuyente();
+        $documentos_libredte_todos = $Emisor->getCompras($periodo, [$dte]);
+        // obtener documentos en el registro de compra del SII con estado REGISTRO
+        $detalle = libredte_consume('/sii/rcv_detalle/'.$Emisor->rut.'-'.$Emisor->dv.'/COMPRA/'.$periodo.'/'.$dte.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+            'auth'=>[
+                'rut' => $Emisor->rut.'-'.$Emisor->dv,
+                'clave' => $Emisor->config_sii_pass,
+            ],
+        ]);
+        if ($detalle['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message('Error al obtener el detalle del RCV: '.$detalle['body'], 'error');
+            $this->redirect('/dte/dte_compras/ver/'.$periodo);
+        }
+        if ($detalle['body']['respEstado']['codRespuesta']) {
+            \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el detalle: '.$detalle['body']['respEstado']['msgeRespuesta'], 'error');
+            $this->redirect('/dte/dte_compras/ver/'.$periodo);
+        }
+        if (!$detalle['body']['data']) {
+            \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
+            $this->redirect('/dte/dte_compras/ver/'.$periodo);
+        }
+        $documentos_rc_todos = $detalle['body']['data'];
+        // crear documentos rc
+        $documentos_rc = [];
+        foreach ($documentos_rc_todos as $dte_rc) {
+            $existe = false;
+            foreach ($documentos_libredte_todos as $dte_libredte) {
+                if ($dte_rc['detRutDoc']==explode('-', $dte_libredte['rut'])[0] and $dte_rc['detNroDoc']==$dte_libredte['folio']) {
+                    $existe = true;
+                    break;
+                }
+            }
+            if (!$existe) {
+                $documentos_rc[] = $dte_rc;
+            }
+        }
+        // crear documentos libredte
+        $documentos_libredte = [];
+        foreach ($documentos_libredte_todos as $dte_libredte) {
+            $existe = false;
+            foreach ($documentos_rc_todos as $dte_rc) {
+                if ($dte_rc['detRutDoc']==explode('-', $dte_libredte['rut'])[0] and $dte_rc['detNroDoc']==$dte_libredte['folio']) {
+                    $existe = true;
+                    break;
+                }
+            }
+            if (!$existe) {
+                $documentos_libredte[] = $dte_libredte;
+            }
+        }
+        // asignar a la vista
+        $this->set([
+            'periodo' => $periodo,
+            'dte' => $dte,
+            'documentos_rc' => $documentos_rc,
+            'documentos_libredte' => $documentos_libredte,
         ]);
     }
 

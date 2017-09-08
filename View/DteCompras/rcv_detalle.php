@@ -1,4 +1,11 @@
 <ul class="nav nav-pills pull-right">
+<?php if ($estado=='REGISTRO') : ?>
+    <li>
+        <a href="<?=$_base?>/dte/dte_compras/rcv_diferencias/<?=$periodo?>/<?=$DteTipo->codigo?>" title="Descargar diferencias del período <?=$periodo?> entre el RC del SII y el IEC de LibreDTE">
+            <span class="fa fa-download"></span> Diferencias
+        </a>
+    </li>
+<?php endif; ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fa fa-bank"></span> Ver resumen RC<span class="caret"></span>
