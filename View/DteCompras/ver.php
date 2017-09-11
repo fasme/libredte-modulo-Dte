@@ -115,6 +115,7 @@ new \sowerphp\general\View_Helper_Table([
         </div>
     </div>
     <div class="col-md-3 center bg-info">
+
         <span class="lead">Track ID SII: <?=$Libro->track_id?></span>
         <p><strong><?=$Libro->revision_estado?></strong></p>
         <p><?=str_replace("\n", '<br/>', $Libro->revision_detalle)?></p>
@@ -134,7 +135,11 @@ new \sowerphp\general\View_Helper_Table([
 <?php endif; ?>
         </p>
 <?php else: ?>
+<?php if ($Libro->periodo<201708) : ?>
         <p><a class="btn btn-info" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">Enviar libro al SII</a></p>
+<?php else : ?>
+        <p><a class="btn btn-info" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">Generar libro local</a></p>
+<?php endif; ?>
 <?php endif; ?>
         </div>
     </div>
