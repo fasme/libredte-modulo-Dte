@@ -303,51 +303,35 @@ class Controller_DteCompras extends Controller_Base_Libros
     public function rcv_resumen($periodo, $estado = 'REGISTRO')
     {
         $Emisor = $this->getContribuyente();
-        $resumen = libredte_consume('/sii/rcv_resumen/'.$Emisor->rut.'-'.$Emisor->dv.'/COMPRA/'.$periodo.'/'.$estado.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
-            'auth'=>[
-                'rut' => $Emisor->rut.'-'.$Emisor->dv,
-                'clave' => $Emisor->config_sii_pass,
-            ],
-        ]);
-        if ($resumen['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message('Error al obtener el resumen del RCV: '.$resumen['body'], 'error');
-            $this->redirect('/dte/dte_compras/ver/'.$periodo);
-        }
-        if ($resumen['body']['respEstado']['codRespuesta']) {
-            \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el resumen: '.$resumen['body']['respEstado']['msgeRespuesta'], 'error');
+        try {
+            $resumen = $Emisor->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'estado' => $estado, 'detalle'=>false]);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
         $this->set([
             'Emisor' => $Emisor,
             'periodo' => $periodo,
             'estado' => $estado,
-            'resumen' => $resumen['body']['data'],
+            'resumen' => $resumen,
         ]);
     }
 
     /**
      * Acción que permite obtener el detalle del registro de compra para un período y estado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-07
+     * @version 2017-09-10
      */
     public function rcv_detalle($periodo, $dte, $estado = 'REGISTRO')
     {
         $Emisor = $this->getContribuyente();
-        $detalle = libredte_consume('/sii/rcv_detalle/'.$Emisor->rut.'-'.$Emisor->dv.'/COMPRA/'.$periodo.'/'.$dte.'/'.$estado.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
-            'auth'=>[
-                'rut' => $Emisor->rut.'-'.$Emisor->dv,
-                'clave' => $Emisor->config_sii_pass,
-            ],
-        ]);
-        if ($detalle['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message('Error al obtener el detalle del RCV: '.$detalle['body'], 'error');
+        try {
+            $detalle = $Emisor->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'dte' => $dte, 'estado' => $estado]);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
-        if ($detalle['body']['respEstado']['codRespuesta']) {
-            \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el detalle: '.$detalle['body']['respEstado']['msgeRespuesta'], 'error');
-            $this->redirect('/dte/dte_compras/ver/'.$periodo);
-        }
-        if (!$detalle['body']['data']) {
+        if (!$detalle) {
             \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
@@ -356,39 +340,30 @@ class Controller_DteCompras extends Controller_Base_Libros
             'periodo' => $periodo,
             'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
             'estado' => $estado,
-            'detalle' => $detalle['body']['data'],
+            'detalle' => $detalle,
         ]);
     }
 
     /**
      * Acción que permite obtener las diferencias entre el registro de compras y lo que está en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-07
+     * @version 2017-09-10
      */
     public function rcv_diferencias($periodo, $dte)
     {
         $Emisor = $this->getContribuyente();
         $documentos_libredte_todos = $Emisor->getCompras($periodo, [$dte]);
         // obtener documentos en el registro de compra del SII con estado REGISTRO
-        $detalle = libredte_consume('/sii/rcv_detalle/'.$Emisor->rut.'-'.$Emisor->dv.'/COMPRA/'.$periodo.'/'.$dte.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
-            'auth'=>[
-                'rut' => $Emisor->rut.'-'.$Emisor->dv,
-                'clave' => $Emisor->config_sii_pass,
-            ],
-        ]);
-        if ($detalle['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message('Error al obtener el detalle del RCV: '.$detalle['body'], 'error');
+        try {
+            $documentos_rc_todos = $Emisor->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'dte' => $dte, 'estado' => 'REGISTRO']);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
-        if ($detalle['body']['respEstado']['codRespuesta']) {
-            \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el detalle: '.$detalle['body']['respEstado']['msgeRespuesta'], 'error');
-            $this->redirect('/dte/dte_compras/ver/'.$periodo);
-        }
-        if (!$detalle['body']['data']) {
+        if (!$documentos_rc_todos) {
             \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
-        $documentos_rc_todos = $detalle['body']['data'];
         // crear documentos rc
         $documentos_rc = [];
         foreach ($documentos_rc_todos as $dte_rc) {

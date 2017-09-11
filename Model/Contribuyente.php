@@ -2692,4 +2692,70 @@ class Model_Contribuyente extends \Model_App
         ', $vars);
     }
 
+    /**
+     * Método que entrega la información del registro de compra y venta del SII
+     * del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-10
+     */
+    public function getRCV(array $filtros = [])
+    {
+        // filtros por defecto
+        $filtros = array_merge([
+            'detalle' => true,
+            'operacion' => 'COMPRA',
+            'estado' => 'REGISTRO',
+            'periodo' => date('Ym'),
+            'dte' => null,
+        ], $filtros);
+        // si se pide el detalle pero no se indicó el tipo de documento se buscan todos los posible
+        if ($filtros['detalle']===true) {
+            // si no se indicó dte se colocan todos los posibles
+            if (!$filtros['dte']) {
+                // TODO
+                throw new \Exception('Debe indicar el tipo de DTE que desea obtener el resumen');
+            }
+            // si el dte es sólo uno se coloca como arreglo
+            else if (!is_array($filtros['dte'])) {
+                $filtros['dte'] = [$filtros['dte']];
+            }
+        }
+        // consumir servicio web de resumen
+        if (!$filtros['detalle']) {
+            $r = libredte_consume(
+                sprintf(
+                    '/sii/rcv_resumen/%d-%d/%s/%d/%s?formato=json&certificacion=%d',
+                    $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $filtros['estado'], (int)$this->config_ambiente_en_certificacion
+                ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
+            );
+            if ($r['status']['code']!=200) {
+                throw new \Exception('Error al obtener el resumen del RCV: '.$r['body']);
+            }
+            if ($r['body']['respEstado']['codRespuesta']) {
+                throw new \Exception('No fue posible obtener el resumen: '.$r['body']['respEstado']['msgeRespuesta']);
+            }
+            return $r['body']['data'];
+        }
+        // consumir servicio web de detalle
+        else {
+            $detalle = [];
+            foreach ($filtros['dte'] as $dte) {
+                $r = libredte_consume(
+                    sprintf(
+                        '/sii/rcv_detalle/%d-%d/%s/%d/%d/%s?formato=json&certificacion=%d',
+                        $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion
+                    ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
+                );
+                if ($r['status']['code']!=200) {
+                    throw new \Exception('Error al obtener el detalle del RCV: '.$r['body']);
+                }
+                if ($r['body']['respEstado']['codRespuesta']) {
+                    throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta']);
+                }
+                $detalle += $r['body']['data'];
+            }
+            return $detalle;
+        }
+    }
+
 }
