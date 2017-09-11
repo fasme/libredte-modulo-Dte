@@ -459,6 +459,14 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_emision_asignar_folio : 0,
     'help' => '¿Es posible elegir manualmente qué folio se desea utilizar en un documento que se emitirá?',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_emision_forma_pago',
+    'label' => 'Forma de pago',
+    'options' => [''=>'Sin forma de pago', 1=>'Contado'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_forma_pago : 0,
+    'help' => '¿Forma de pago por defecto?',
+]);
 ?>
                 </div>
                 <div class="col-md-6">
