@@ -731,7 +731,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción que permite realizar una búsqueda avanzada dentro de los DTE
      * emitidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-28
+     * @version 2017-09-11
      */
     public function buscar()
     {
@@ -751,7 +751,7 @@ class Controller_DteEmitidos extends \Controller_App
             }
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->Auth->User->hash);
-            $response = $rest->post($this->request->url.'/api/dte/dte_emitidos/buscar/'.$Emisor->rut, json_encode([
+            $response = $rest->post($this->request->url.'/api/dte/dte_emitidos/buscar/'.$Emisor->rut, [
                 'dte' => $_POST['dte'],
                 'receptor' => $_POST['receptor'],
                 'fecha_desde' => $_POST['fecha_desde'],
@@ -759,7 +759,7 @@ class Controller_DteEmitidos extends \Controller_App
                 'total_desde' => $_POST['total_desde'],
                 'total_hasta' => $_POST['total_hasta'],
                 'xml' => $xml,
-            ]));
+            ]);
             if ($response===false) {
                 \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             }
@@ -1279,7 +1279,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción de la API que permite realizar una búsqueda avanzada dentro de los
      * DTEs emitidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-07
+     * @version 2017-09-11
      */
     public function _api_buscar_POST($emisor)
     {
@@ -1300,7 +1300,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // buscar documentos
-        $this->Api->send($Emisor->getDocumentosEmitidos(json_decode($this->Api->data, true)), 200, JSON_PRETTY_PRINT);
+        $this->Api->send($Emisor->getDocumentosEmitidos($this->Api->data, true), 200, JSON_PRETTY_PRINT);
     }
 
     /**
