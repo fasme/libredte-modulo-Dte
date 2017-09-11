@@ -73,9 +73,9 @@ new \sowerphp\general\View_Helper_Table($foliosMensuales, 'uso_mensual_folios_'.
 <!-- INICIO ESTADISTICA -->
 <div role="tabpanel" class="tab-pane" id="sin_uso">
 <?php $foliosSinUso = $DteFolio->getSinUso(); if ($foliosSinUso) : ?>
-<p class="lead">Los folios a continuación son menores al folio siguiente <?=$DteFolio->siguiente?> y no existen en LibreDTE:</p>
-<p class="lead"><?=implode(', ', $foliosSinUso)?></p>
-<p class="lead">Si estos folios no existen en otro sistema de facturación y no los recuperará, debe anularlos en el SII.</p>
+<p>Los folios a continuación, que están entre el N° <?=$DteFolio->getPrimerFolio()?> (primer folio emitido en LibreDTE) y el N° <?=$DteFolio->siguiente?> (folio siguiente), se encuentran sin uso en el sistema:</p>
+<p><?=implode(', ', $foliosSinUso)?></p>
+<p>Si estos folios no existen en otro sistema de facturación y no los recuperará, debe <a href="<?=\sasco\LibreDTE\Sii::getURL('/cvc_cgi/dte/af_anular1', $Emisor->config_ambiente_en_certificacion)?>" target="_blank">anularlos en el SII</a>.</p>
 <?php else : ?>
 <p>No hay CAF con folios sin uso menores al folio siguiente <?=$DteFolio->siguiente?>.</p>
 <?php endif; ?>

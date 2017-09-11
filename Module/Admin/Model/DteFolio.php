@@ -359,16 +359,36 @@ class Model_DteFolio extends \Model_App
     }
 
     /**
+     * Método que entrega el primer folio usado del mantenedor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function getPrimerFolio()
+    {
+        return $this->db->getValue(
+            'SELECT MIN(folio) FROM dte_emitido WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion',
+            [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]
+        );
+    }
+
+    /**
      * Método que entrega los folios que están antes del folio siguiente, para
      * los cuales hay CAF y no se han usado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-04
+     * @version 2017-09-11
      */
     public function getSinUso()
     {
+        // si no hay caf error
         if (!$this->getCafs()) {
             return [];
         }
+        // buscar primer folio usado del CAF (se busca sólo desde este en adelante)
+        $primer_folio = $this->getPrimerFolio();
+        if (!$primer_folio) {
+            return [];
+        }
+        // buscar rango
         $rangos_aux = $this->db->getTable('
             SELECT desde, hasta
             FROM dte_caf
@@ -388,9 +408,10 @@ class Model_DteFolio extends \Model_App
                 folio NOT IN (
                     SELECT folio FROM dte_emitido WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
                 )
+                AND folio > :primer_folio
                 AND folio < (SELECT siguiente FROM dte_folio WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion)
             ORDER BY folio
-        ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
+        ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion, ':primer_folio'=>$primer_folio]);
     }
 
 }
