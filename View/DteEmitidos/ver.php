@@ -215,6 +215,7 @@ if ($email_enviados) {
 
 <!-- INICIO INTERCAMBIO -->
 <div role="tabpanel" class="tab-pane" id="intercambio">
+<?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
 <?php
 $color = [
     '' => 'default',
@@ -229,6 +230,7 @@ $color = [
     <small>(ver datos en el registro de compra/venta en el SII)</small>
 </a>
 <hr/>
+<?php endif; ?>
 <?php
 // recibo
 echo '<h2>Recibo</h2>',"\n";
