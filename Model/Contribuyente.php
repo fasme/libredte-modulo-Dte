@@ -1712,18 +1712,46 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos recibidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-03
+     * @version 2017-09-12
      */
     public function getDocumentosRecibidos($filtros = [])
     {
         // armar filtros
         $where = ['d.receptor = :rut', 'd.certificacion = :certificacion'];
         $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
-        foreach (['dte', 'folio', 'emisor', 'fecha', 'total', 'intercambio', 'usuario'] as $c) {
+        foreach (['folio', 'fecha', 'total', 'intercambio', 'usuario'] as $c) {
             if (isset($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
                 $vars[':'.$c] = $filtros[$c];
             }
+        }
+        // filtrar por DTE
+        if (!empty($filtros['dte'])) {
+            if (is_array($filtros['dte'])) {
+                $i = 0;
+                $where_dte = [];
+                foreach ($filtros['dte'] as $filtro_dte) {
+                    $where_dte[] = ':dte'.$i;
+                    $vars[':dte'.$i] = $filtro_dte;
+                    $i++;
+                }
+                $where[] = 'd.dte IN ('.implode(', ', $where_dte).')';
+            } else {
+                $where[] = 'd.dte = :dte';
+                $vars[':dte'] = $filtros['dte'];
+            }
+        }
+        // filtrar por emisor
+        if (!empty($filtros['emisor'])) {
+            if (strpos($filtros['emisor'], '-')) {
+                $filtros['emisor'] = substr(str_replace('.', '', $filtros['emisor']), 0, -2);
+            }
+            $where[] = 'd.emisor = :emisor';
+            $vars[':emisor'] = $filtros['emisor'];
+        }
+        if (!empty($filtros['periodo'])) {
+            $where[] = $this->db->date('Ym', 'd.fecha').' = :periodo';
+            $vars[':periodo'] = $filtros['periodo'];
         }
         // armar consulta
         $query = '

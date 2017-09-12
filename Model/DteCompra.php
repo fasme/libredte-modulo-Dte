@@ -212,4 +212,39 @@ class Model_DteCompra extends Model_Base_Libro
         return $this->getReceptor()->getComprasPorTipo($this->periodo);
     }
 
+    /**
+     * Método que entrega los tipos de transacciones de las compras del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-12
+     */
+    public function getTiposTransacciones()
+    {
+        $compras = $this->getReceptor()->getCompras($this->periodo, [33, 34, 43, 46, 56, 61]);
+        $datos = [];
+        foreach ($compras as $c) {
+            if (!$c['tipo_transaccion'] and !$c['iva_uso_comun'] and !$c['iva_no_recuperable_codigo']) {
+                continue;
+            }
+            $codigo_impuesto = 1;
+            if ($c['iva_uso_comun']) {
+                if (empty($c['tipo_transaccion'])) {
+                    $c['tipo_transaccion'] = 5;
+                }
+                $codigo_impuesto = 2;
+            }
+            if ($c['iva_no_recuperable_codigo']) {
+                $c['tipo_transaccion'] = 6;
+                $codigo_impuesto = $c['iva_no_recuperable_codigo'];
+            }
+            $datos[] = [
+                $c['rut'],
+                $c['dte'],
+                $c['folio'],
+                $c['tipo_transaccion'],
+                $codigo_impuesto,
+            ];
+        }
+        return $datos;
+    }
+
 }

@@ -1,4 +1,23 @@
 <ul class="nav nav-pills pull-right">
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-exchange"></span> Tipo transacciones<span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/tipo_transacciones_asignar/<?=$Libro->periodo?>">
+                     Buscar y asignar
+                </a>
+            </li>
+<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
+            <li>
+                <a href="<?=$_base?>/dte/dte_compras/rcv_sincronizar_tipo_transacciones/<?=$Libro->periodo?>">
+                    Sincronizar con SII
+                </a>
+            </li>
+<?php endif; ?>
+        </ul>
+    </li>
 <?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">

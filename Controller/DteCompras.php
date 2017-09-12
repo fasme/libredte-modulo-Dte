@@ -240,44 +240,19 @@ class Controller_DteCompras extends Controller_Base_Libros
     /**
      * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2017-09-12
      */
     public function descargar_tipo_transacciones($periodo)
     {
         $Emisor = $this->getContribuyente();
-        $compras = $Emisor->getCompras($periodo, [33, 34, 43, 46, 56, 61]);
-        $datos = [];
-        foreach ($compras as $c) {
-            if (!$c['tipo_transaccion'] and !$c['iva_uso_comun'] and !$c['iva_no_recuperable_codigo']) {
-                continue;
-            }
-            $codigo_impuesto = null;
-            if ($c['iva_uso_comun']) {
-                if (empty($c['tipo_transaccion'])) {
-                    $c['tipo_transaccion'] = 2;
-                } else {
-                    $codigo_impuesto = 2;
-                }
-            }
-            if ($c['iva_no_recuperable_codigo']) {
-                $c['tipo_transaccion'] = 6;
-                $codigo_impuesto = $c['iva_no_recuperable_codigo'];
-            }
-            $datos[] = [
-                $c['rut'],
-                $c['dte'],
-                $c['folio'],
-                $c['tipo_transaccion'],
-                $codigo_impuesto,
-            ];
-        }
+        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $datos = $DteCompra->getTiposTransacciones();
         if (!$datos) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No hay compras caracterizadas para el período '.$periodo, 'warning'
             );
             $this->redirect(str_replace('descargar_tipo_transacciones', 'ver', $this->request->request));
         }
-        // generar CSV
         array_unshift($datos, ['Rut-DV', 'Codigo_Tipo_Doc', 'Folio_Doc', 'TpoTranCompra', 'Codigo_IVA_E_Imptos']);
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rc_tipo_transacciones_'.$periodo, ';', '');
     }
@@ -386,6 +361,74 @@ class Controller_DteCompras extends Controller_Base_Libros
             'documentos_rc' => $documentos_rc,
             'documentos_libredte' => $documentos_libredte,
         ]);
+    }
+
+    /**
+     * Acción que permite sincronizar los tipos de transacciones locales con el SII
+     * Sube masivamente los tipos de transacciones al registro de compras
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-12
+     */
+    public function rcv_sincronizar_tipo_transacciones($periodo)
+    {
+        // obtener tipos de transacciones
+        $Emisor = $this->getContribuyente();
+        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $datos = $DteCompra->getTiposTransacciones();
+        if (!$datos) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay compras caracterizadas para el período '.$periodo, 'warning'
+            );
+            $this->redirect(str_replace('rcv_sincronizar_tipo_transacciones', 'ver', $this->request->request));
+        }
+        // enviar al SII
+        $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+            'auth'=> [
+                'rut' => $Emisor->rut.'-'.$Emisor->dv,
+                'clave' => $Emisor->config_sii_pass,
+            ],
+            'documentos' => $datos,
+        ]);
+        // mostrar resultado
+        $msg = $r['body']['data']['mensaje'];
+        $tipo = $r['body']['data']['codigo'] ? 'error' : 'ok';
+        if (!empty($r['body']['metaData']['errors'])) {
+            $errores = [];
+            foreach ($r['body']['metaData']['errors'] as $e) {
+                $errores[] = $e['descripcion'];
+            }
+            $msg .= ':<br/><br/>- '.implode('<br/>- ', $errores);
+        }
+        \sowerphp\core\Model_Datasource_Session::message($msg, $tipo);
+        $this->set([
+            'periodo' => $periodo,
+            'datos' => $datos,
+        ]);
+    }
+
+    /**
+     * Acción que permite asignar masivamente el tipo de transacción
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-12
+     */
+    public function tipo_transacciones_asignar($periodo)
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'periodo' => $periodo,
+        ]);
+        if (isset($_POST['submit'])) {
+            $documentos = $Emisor->getDocumentosRecibidos($_POST + ['periodo'=>$periodo, 'dte'=>[33, 34, 43, 46, 56, 61]]);
+            if (!$documentos) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No hay resultados en la búsqueda para el período '.$periodo, 'warning'
+                );
+                return;
+            }
+            $this->set([
+                'documentos' => $documentos,
+            ]);
+        }
     }
 
 }

@@ -539,7 +539,7 @@ class Model_DteRecibido extends \Model_App
     /**
      * Método que determina y envía al SII el tipo de transacción del DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-06
+     * @version 2017-09-11
      */
     public function setTipoTransaccionSII()
     {
@@ -548,11 +548,10 @@ class Model_DteRecibido extends \Model_App
             $codigo_impuesto = 1;
             if ($this->iva_uso_comun) {
                 if (!$this->tipo_transaccion) {
-                    $this->tipo_transaccion = 2;
+                    $this->tipo_transaccion = 5;
                     parent::save();
-                } else {
-                    $codigo_impuesto = 2;
                 }
+                $codigo_impuesto = 2;
             }
             if ($this->iva_no_recuperable) {
                 if ($this->tipo_transaccion!=6) {
