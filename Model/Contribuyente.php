@@ -2752,10 +2752,13 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega la información del registro de compra y venta del SII
      * del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-10
+     * @version 2017-09-12
      */
     public function getRCV(array $filtros = [])
     {
+        if (!$this->config_sii_pass) {
+            throw new \Exception('No está configurada la contraseña del SII');
+        }
         // filtros por defecto
         $filtros = array_merge([
             'detalle' => true,
