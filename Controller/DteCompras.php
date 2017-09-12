@@ -240,7 +240,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     /**
      * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-06
+     * @version 2017-09-11
      */
     public function descargar_tipo_transacciones($periodo)
     {
@@ -248,7 +248,7 @@ class Controller_DteCompras extends Controller_Base_Libros
         $compras = $Emisor->getCompras($periodo, [33, 34, 43, 46, 56, 61]);
         $datos = [];
         foreach ($compras as $c) {
-            if (!$c['tipo_transaccion']) {
+            if (!$c['tipo_transaccion'] and !$c['iva_uso_comun'] and !$c['iva_no_recuperable_codigo']) {
                 continue;
             }
             $codigo_impuesto = null;
