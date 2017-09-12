@@ -280,18 +280,12 @@ class Controller_DteVentas extends Controller_Base_Libros
     /**
      * Acción que permite obtener el detalle de documentos emitidos con cierto evento del receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2017-09-12
      */
     public function eventos_receptor($periodo, $evento)
     {
         $Emisor = $this->getContribuyente();
         $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteVenta->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Libro solicitado no existe', 'error'
-            );
-            $this->redirect('/dte/dte_ventas');
-        }
         $this->set([
             'Emisor' => $Emisor,
             'periodo' => $periodo,
