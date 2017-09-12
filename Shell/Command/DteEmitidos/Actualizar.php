@@ -176,11 +176,20 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             if ((int)$Contribuyente->config_ambiente_en_certificacion!=(int)$certificacion) {
                 continue;
             }
+            if ($this->verbose) {
+                $this->out('Buscando eventos receptor de '.$Contribuyente->razon_social);
+            }
             $DteEmitidos = (new Model_DteEmitidos())->setContribuyente($Contribuyente);
             try {
                 $DteEmitidos->actualizarEstadoReceptor($periodo_anterior);
                 $DteEmitidos->actualizarEstadoReceptor($periodo_actual);
+                if ($this->verbose) {
+                    $this->out('  Procesados los períodos '.$periodo_anterior.' y '.$periodo_actual);
+                }
             } catch (\Exception $e) {
+                if ($this->verbose) {
+                    $this->out('  '.$e->getMessage());
+                }
             }
         }
     }
