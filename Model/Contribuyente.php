@@ -1088,17 +1088,33 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-09-11
      */
     public function getDocumentosEmitidos($filtros = [])
     {
         // armar filtros
         $where = ['d.emisor = :rut', 'd.certificacion = :certificacion'];
         $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
-        foreach (['dte', 'folio', 'receptor', 'fecha', 'total', 'usuario'] as $c) {
+        foreach (['folio', 'receptor', 'fecha', 'total', 'usuario'] as $c) {
             if (!empty($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
                 $vars[':'.$c] = $filtros[$c];
+            }
+        }
+        // filtrar por DTE
+        if (!empty($filtros['dte'])) {
+            if (is_array($filtros['dte'])) {
+                $i = 0;
+                $where_dte = [];
+                foreach ($filtros['dte'] as $filtro_dte) {
+                    $where_dte[] = ':dte'.$i;
+                    $vars[':dte'.$i] = $filtro_dte;
+                    $i++;
+                }
+                $where[] = 'd.dte IN ('.implode(', ', $where_dte).')';
+            } else {
+                $where[] = 'd.dte = :dte';
+                $vars[':dte'] = $filtros['dte'];
             }
         }
         // si se debe hacer búsqueda dentro de los XML
@@ -1134,6 +1150,18 @@ class Model_Contribuyente extends \Model_App
                 $vars[':sucursal_sii'] = $filtros['sucursal_sii'];
             } else {
                 $where[] = 'd.sucursal_sii IS NULL';
+            }
+        }
+        if (!empty($filtros['periodo'])) {
+            $where[] = $this->db->date('Ym', 'd.fecha').' = :periodo';
+            $vars[':periodo'] = $filtros['periodo'];
+        }
+        if (isset($filtros['receptor_evento'])) {
+            if ($filtros['receptor_evento']) {
+                $where[] = 'd.receptor_evento = :receptor_evento';
+                $vars[':receptor_evento'] = $filtros['receptor_evento'];
+            } else {
+                $where[] = 'd.receptor_evento IS NULL';
             }
         }
         // forma de obtener razón social
@@ -1498,13 +1526,13 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las ventas diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-09-11
      */
     public function getVentasDiarias($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
         $dia_col = $this->db->date('d', 'e.fecha');
-        return $this->db->getAssociativeArray('
+        return $this->db->getTable('
             SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
             FROM dte_tipo AS t, dte_emitido AS e
             WHERE t.codigo = e.dte AND t.venta = true AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
@@ -1517,13 +1545,13 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de ventas por tipo de un período
      * @return Arreglo asociativo con las ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-09-11
      */
     public function getVentasPorTipo($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
-        return $this->db->getAssociativeArray('
-            SELECT t.tipo, COUNT(*) AS ventas
+        return $this->db->getTable('
+            SELECT t.tipo, COUNT(*) AS documentos
             FROM dte_tipo AS t, dte_emitido AS e
             WHERE t.codigo = e.dte AND t.venta = true AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
             GROUP BY t.tipo
@@ -2028,7 +2056,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-09-11
      */
     public function getComprasDiarias($periodo)
     {
@@ -2036,7 +2064,7 @@ class Model_Contribuyente extends \Model_App
             return $this->getComprasDiariasMySQL($periodo);
         $periodo_col = $this->db->date('Ym', 'r.fecha');
         $dia_col = $this->db->date('d', 'r.fecha');
-        return $this->db->getAssociativeArray('
+        return $this->db->getTable('
             SELECT
                 CASE WHEN r.dia IS NOT NULL THEN
                     r.dia
@@ -2079,13 +2107,13 @@ class Model_Contribuyente extends \Model_App
      * @warning Versión del método para MySQL, no soporta facturas de compra (se hace en método aparte porque no hay FULL JOIN en MySQL)
      * @todo Emular FULL JOIN para obtener el soporte para facturas de compra
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-09-11
      */
     private function getComprasDiariasMySQL($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'r.fecha');
         $dia_col = $this->db->date('d', 'r.fecha');
-        return $this->db->getAssociativeArray('
+        return $this->db->getTable('
             SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
             FROM dte_tipo AS t, dte_recibido AS r
             WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
@@ -2098,14 +2126,14 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de compras por tipo de un período
      * @return Arreglo asociativo con las compras
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2017-09-11
      */
     public function getComprasPorTipo($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'r.fecha');
-        return $this->db->getAssociativeArray('
+        return $this->db->getTable('
             (
-                SELECT t.tipo, COUNT(*) AS compras
+                SELECT t.tipo, COUNT(*) AS documentos
                 FROM dte_tipo AS t, dte_recibido AS r
                 WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
                 GROUP BY t.tipo

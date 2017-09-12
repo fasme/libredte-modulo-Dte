@@ -24,9 +24,12 @@ ALTER TABLE item_clasificacion ALTER superior TYPE VARCHAR(35);
 ALTER TABLE dte_recibido
     ADD rcv_accion CHAR(3),
     ADD tipo_transaccion SMALLINT,
+    -- esta CONSTRAINT podría ocasionar error ¡se deben corregir inconsistencias antes de ejecutar!
     ADD CONSTRAINT dte_recibido_intercambio_fk FOREIGN KEY (receptor, intercambio, certificacion)
         REFERENCES dte_intercambio (receptor, codigo, certificacion)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ;
+
+ALTER TABLE dte_emitido ADD receptor_evento CHAR(1);
 
 COMMIT;

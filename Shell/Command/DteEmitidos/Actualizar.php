@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando para actualizar los documentos emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-01-06
+ * @version 2017-09-11
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
@@ -38,13 +38,16 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         foreach ($contribuyentes as $rut) {
             $this->actualizarDocumentosEmitidos($rut, $certificacion);
         }
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            $this->actualizarEventosReceptor($certificacion);
+        }
         $this->showStats();
         return 0;
     }
 
     private function actualizarDocumentosEmitidos($rut, $certificacion)
     {
-        $Contribuyente = new Model_Contribuyente($rut);
+        $Contribuyente = (new Model_Contribuyentes())->get($rut);
         if ($this->verbose) {
             $this->out('Buscando documentos del contribuyente '.$Contribuyente->razon_social);
         }
@@ -149,6 +152,36 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                         )
                     )
             ', [':certificacion'=>(int)$certificacion]);
+        }
+    }
+
+    private function actualizarEventosReceptor($certificacion = 0)
+    {
+        $contribuyentes = $this->db->getCol('
+            SELECT DISTINCT c.rut
+            FROM
+                contribuyente AS c
+                JOIN dte_emitido AS e ON c.rut = e.emisor
+            WHERE
+                c.usuario IS NOT NULL
+                AND e.dte IN ('.implode(', ', array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes)).')
+                AND e.certificacion = :certificacion
+                AND e.receptor_evento IS NULL
+                AND e.fecha  >=  (CURRENT_DATE - INTERVAL \'2 MONTHS\')
+        ', [':certificacion'=>(int)$certificacion]);
+        $periodo_actual = (int)date('Ym');
+        $periodo_anterior = \sowerphp\general\Utility_Date::previousPeriod($periodo_actual);
+        foreach ($contribuyentes as $rut) {
+            $Contribuyente = (new Model_Contribuyentes())->get($rut);
+            if ((int)$Contribuyente->config_ambiente_en_certificacion!=(int)$certificacion) {
+                continue;
+            }
+            $DteEmitidos = (new Model_DteEmitidos())->setContribuyente($Contribuyente);
+            try {
+                $DteEmitidos->actualizarEstadoReceptor($periodo_anterior);
+                $DteEmitidos->actualizarEstadoReceptor($periodo_actual);
+            } catch (\Exception $e) {
+            }
         }
     }
 

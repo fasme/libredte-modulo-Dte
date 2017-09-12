@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador base para libros
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-08-06
+ * @version 2017-09-11
  */
 abstract class Controller_Base_Libros extends \Controller_App
 {
@@ -371,28 +371,6 @@ abstract class Controller_Base_Libros extends \Controller_App
             );
         }
         $this->redirect(str_replace('subir_revision', 'ver', $this->request->request));
-    }
-
-    /**
-     * Acción que genera la imagen del gráfico de barras de con los documentos
-     * diarios del libro
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-07
-     */
-    public function grafico_documentos_diarios($periodo)
-    {
-        $Emisor = $this->getContribuyente();
-        $detalle = $Emisor->{'get'.$this->config['model']['plural'].'Diarias'}($periodo);
-        for ($dia=1; $dia<=31; $dia++) {
-            if (!isset($detalle[$dia]))
-                $detalle[$dia] = 0;
-        }
-        ksort($detalle);
-        $chart = new \sowerphp\general\View_Helper_Chart();
-        $chart->line(
-            $this->config['model']['plural'].' diarias período '.$periodo,
-            [$this->config['model']['plural']=>$detalle]
-        );
     }
 
     /**

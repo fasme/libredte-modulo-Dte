@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de ventas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-03
+ * @version 2017-09-11
  */
 class Controller_DteVentas extends Controller_Base_Libros
 {
@@ -162,19 +162,6 @@ class Controller_DteVentas extends Controller_Base_Libros
     }
 
     /**
-     * Acción que genera la imagen del gráfico de torta de ventas
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-26
-     */
-    public function grafico_tipos($periodo)
-    {
-        $Emisor = $this->getContribuyente();
-        $ventas = $Emisor->getVentasPorTipo($periodo);
-        $chart = new \sowerphp\general\View_Helper_Chart();
-        $chart->pie('Ventas por tipo de DTE del período '.$periodo, $ventas);
-    }
-
-    /**
      * Acción que genera el archivo CSV con el registro de ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-03
@@ -287,6 +274,29 @@ class Controller_DteVentas extends Controller_Base_Libros
             'periodo' => $periodo,
             'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
             'detalle' => $detalle,
+        ]);
+    }
+
+    /**
+     * Acción que permite obtener el detalle de documentos emitidos con cierto evento del receptor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function eventos_receptor($periodo, $evento)
+    {
+        $Emisor = $this->getContribuyente();
+        $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteVenta->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Libro solicitado no existe', 'error'
+            );
+            $this->redirect('/dte/dte_ventas');
+        }
+        $this->set([
+            'Emisor' => $Emisor,
+            'periodo' => $periodo,
+            'Evento' => (object)['codigo'=>$evento, 'glosa'=>$evento?\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$evento]:'Sin evento registrado'],
+            'documentos' => $DteVenta->getDocumentosConEventoReceptor($evento),
         ]);
     }
 

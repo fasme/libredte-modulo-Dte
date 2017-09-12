@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de compras
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-07
+ * @version 2017-09-11
  */
 class Controller_DteCompras extends Controller_Base_Libros
 {
@@ -210,19 +210,6 @@ class Controller_DteCompras extends Controller_Base_Libros
         $DteCompra->revision_detalle = $revision_detalle;
         $DteCompra->save();
         $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
-    }
-
-    /**
-     * Acción que genera la imagen del gráfico de torta de compras
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-28
-     */
-    public function grafico_tipos($periodo)
-    {
-        $Emisor = $this->getContribuyente();
-        $compras = $Emisor->getComprasPorTipo($periodo);
-        $chart = new \sowerphp\general\View_Helper_Chart();
-        $chart->pie('Compras por tipo de DTE del período '.$periodo, $compras);
     }
 
      /**

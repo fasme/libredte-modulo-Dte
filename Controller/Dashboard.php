@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-27
+     * @version 2017-09-11
      */
     public function index()
     {
@@ -59,19 +59,19 @@ class Controller_Dashboard extends \Controller_App
         // ventas
         $ventas_periodo_aux = $Emisor->getVentasPorTipo($periodo);
         $ventas_periodo = [];
-        foreach ($ventas_periodo_aux as $label => $value) {
+        foreach ($ventas_periodo_aux as $vt) {
             $ventas_periodo[] = [
-                'label' => str_replace('electrónica', 'e.', $label),
-                'value' => $value,
+                'label' => str_replace('electrónica', 'e.', $vt['tipo']),
+                'value' => $vt['documentos'],
             ];
         }
         // compras
         $compras_periodo_aux = $Emisor->getComprasPorTipo($periodo);
         $compras_periodo = [];
-        foreach ($compras_periodo_aux as $label => $value) {
+        foreach ($compras_periodo_aux as $vc) {
             $compras_periodo[] = [
-                'label' => str_replace('electrónica', 'e.', $label),
-                'value' => $value,
+                'label' => str_replace('electrónica', 'e.', $vc['tipo']),
+                'value' => $vc['documentos'],
             ];
         }
         // folios

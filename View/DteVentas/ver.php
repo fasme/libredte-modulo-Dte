@@ -57,7 +57,9 @@ function get_codigo_reemplazo() {
         <li role="presentation"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle</a></li>
         <li role="presentation"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab">Estadísticas</a></li>
 <?php endif; ?>
+<?php if ($Libro->track_id>0) : ?>
         <li role="presentation"><a href="#revision" aria-controls="revision" role="tab" data-toggle="tab">Subir revisión</a></li>
+<?php endif; ?>
     </ul>
     <div class="tab-content">
 
@@ -244,14 +246,84 @@ new \sowerphp\general\View_Helper_Table($detalle);
 
 <!-- INICIO ESTADÍSTICAS -->
 <div role="tabpanel" class="tab-pane" id="estadisticas">
-    <img src="<?=$_base.'/dte/dte_ventas/grafico_documentos_diarios/'.$Libro->periodo?>" alt="Gráfico ventas diarias del período" class="img-responsive thumbnail center" />
-    <br/>
-    <img src="<?=$_base.'/dte/dte_ventas/grafico_tipos/'.$Libro->periodo?>" alt="Gráfico con tipos de ventas del período" class="img-responsive thumbnail center" />
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos emitidos por día
+    </div>
+    <div class="panel-body">
+        <div id="grafico-documentos_por_dia"></div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos emitidos por tipo
+    </div>
+    <div class="panel-body">
+        <div id="grafico-documentos_por_tipo"></div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos emitidos según el estado que asignó el receptor
+    </div>
+    <div class="panel-body">
+<?php
+$documentos_por_estado_receptor = $Libro->getDocumentosPorEventoReceptor();
+$tabla = [['Evento', 'Documentos', 'Ver']];
+foreach ($documentos_por_estado_receptor as $evento) {
+    $tabla[] = [
+        $evento['glosa'],
+        num($evento['documentos']),
+        '<a href="'.$_base.'/dte/dte_ventas/eventos_receptor/'.$Libro->periodo.'/'.$evento['codigo'].'" class="btn btn-default" title="Ver documentos con estado '.$evento['glosa'].'"><span class="fa fa-search"></span></a>'
+    ];
+}
+new \sowerphp\general\View_Helper_Table($tabla, 'eventos_receptor', false, false);
+?>
+        <div id="grafico-documentos_por_estado_receptor"></div>
+    </div>
+</div>
+<script>
+var documentos_por_dia = Morris.Line({
+    element: 'grafico-documentos_por_dia',
+    data: <?=json_encode($Libro->getDocumentosPorDia())?>,
+    xkey: 'dia',
+    ykeys: ['documentos'],
+    labels: ['Documentos'],
+    resize: true,
+    parseTime: false
+});
+var documentos_por_tipo = Morris.Bar({
+    element: 'grafico-documentos_por_tipo',
+    data: <?=json_encode($Libro->getDocumentosPorTipo())?>,
+    xkey: 'tipo',
+    ykeys: ['documentos'],
+    labels: ['Documentos'],
+    resize: true
+});
+var documentos_por_estado_receptor = Morris.Bar({
+    element: 'grafico-documentos_por_estado_receptor',
+    data: <?=json_encode($documentos_por_estado_receptor)?>,
+    xkey: 'glosa',
+    ykeys: ['documentos'],
+    labels: ['Documentos'],
+    resize: true
+});
+$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    var target = $(e.target).attr("href");
+    if (target=='#estadisticas') {
+        documentos_por_dia.redraw();
+        documentos_por_tipo.redraw();
+        documentos_por_estado_receptor.redraw();
+        $(window).trigger('resize');
+    }
+});
+</script>
 </div>
 <!-- FIN ESTADÍSTICAS -->
 
 <?php endif; ?>
 
+<?php if ($Libro->track_id>0) : ?>
 <!-- INICIO REVISIÓN -->
 <div role="tabpanel" class="tab-pane" id="revision">
 <p>Aquí puede subir el XML con el resultado de la revisión del libro de ventas envíado al SII.</p>
@@ -269,6 +341,7 @@ echo $f->end('Subir XML de revisión');
 ?>
 </div>
 <!-- FIN REVISIÓN -->
+<?php endif; ?>
 
     </div>
 </div>

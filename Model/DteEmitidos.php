@@ -296,4 +296,36 @@ class Model_DteEmitidos extends \Model_Plural_App
         ', [':desde'=>$desde, ':hasta'=>$hasta, ':certificacion'=>(int)$certificacion]);
     }
 
+    public function actualizarEstadoReceptor($periodo = null)
+    {
+        if (!$periodo) {
+            $periodo = date('Ym');
+        }
+        $dtes  = array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes);
+        $dtes = $this->db->getCol('
+            SELECT DISTINCT dte
+            FROM dte_emitido
+            WHERE
+                emisor = :emisor
+                AND dte IN ('.implode(', ', array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes)).')
+                AND certificacion = :certificacion
+                AND receptor_evento IS NULL
+                AND '.$this->db->date('Ym', 'fecha', 'INTEGER').' = :periodo
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        foreach ($dtes as $dte) {
+            $documentos = $this->getContribuyente()->getRCV(['operacion'=>'VENTA', 'periodo'=>$periodo, 'dte'=>$dte]);
+            foreach ($documentos as $d) {
+                if (!$d['detEventoReceptor']) {
+                    continue;
+                }
+                $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $dte, $d['detNroDoc'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+                if (!$DteEmitido->usuario or $DteEmitido->receptor_evento) {
+                    continue; // DTE no está emitido en LibreDTE o ya tiene evento registrado
+                }
+                $DteEmitido->receptor_evento = $d['detEventoReceptor'];
+                $DteEmitido->save();
+            }
+        }
+    }
+
 }

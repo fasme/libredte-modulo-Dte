@@ -60,6 +60,7 @@ class Model_DteEmitido extends Model_Base_Envio
     public $iva_fuera_plazo; ///< boolean() NOT NULL DEFAULT 'false'
     public $cesion_xml; ///< text() NOT NULL DEFAULT ''
     public $cesion_track_id; ///< integer(32) NULL DEFAULT ''
+    public $receptor_evento; ///< char(1) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -288,6 +289,17 @@ class Model_DteEmitido extends Model_Base_Envio
             'comment'   => '',
             'type'      => 'integer',
             'length'    => 32,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'receptor_evento' => array(
+            'name'      => 'Evento receptor',
+            'comment'   => '',
+            'type'      => 'character',
+            'length'    => 1,
             'null'      => true,
             'default'   => '',
             'auto'      => false,

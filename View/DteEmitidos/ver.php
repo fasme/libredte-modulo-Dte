@@ -1,7 +1,7 @@
 <ul class="nav nav-pills pull-right">
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
     <li>
-        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550)" title="Ver datos del registro de compra/venta en el SII">
+        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII">
             Ver RCV
         </a>
     </li>
@@ -215,6 +215,20 @@ if ($email_enviados) {
 
 <!-- INICIO INTERCAMBIO -->
 <div role="tabpanel" class="tab-pane" id="intercambio">
+<?php
+$color = [
+    '' => 'default',
+    'A' => 'primary',
+    'C' => 'success',
+    'P' => 'warning',
+    'R' => 'danger',
+][$DteEmitido->receptor_evento];
+?>
+<a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-<?=$color?> btn-lg btn-block">
+    <?=($DteEmitido->receptor_evento?\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$DteEmitido->receptor_evento]:'Sin evento registrado')?><br/>
+    <small>(ver datos en el registro de compra/venta en el SII)</small>
+</a>
+<hr/>
 <?php
 // recibo
 echo '<h2>Recibo</h2>',"\n";

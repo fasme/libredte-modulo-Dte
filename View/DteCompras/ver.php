@@ -79,7 +79,9 @@ $(function() {
         <li role="presentation"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle</a></li>
         <li role="presentation"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab">Estadísticas</a></li>
 <?php endif; ?>
+<?php if ($Libro->track_id>0) : ?>
         <li role="presentation"><a href="#revision" aria-controls="revision" role="tab" data-toggle="tab">Subir revisión</a></li>
+<?php endif; ?>
     </ul>
     <div class="tab-content">
 
@@ -223,14 +225,55 @@ new \sowerphp\general\View_Helper_Table($detalle);
 
 <!-- INICIO ESTADÍSTICAS -->
 <div role="tabpanel" class="tab-pane" id="estadisticas">
-    <img src="<?=$_base.'/dte/dte_compras/grafico_documentos_diarios/'.$Libro->periodo?>" alt="Gráfico compras diarias del período" class="img-responsive thumbnail center" />
-    <br/>
-    <img src="<?=$_base.'/dte/dte_compras/grafico_tipos/'.$Libro->periodo?>" alt="Gráfico con tipos de compras del período" class="img-responsive thumbnail center" />
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos por día recibidos con fecha en el período <?=$Libro->periodo?>
+    </div>
+    <div class="panel-body">
+        <div id="grafico-documentos_por_dia"></div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos por tipo recibidos con fecha en el período <?=$Libro->periodo?>
+    </div>
+    <div class="panel-body">
+        <div id="grafico-documentos_por_tipo"></div>
+    </div>
+</div>
+<script>
+var documentos_por_dia = Morris.Line({
+    element: 'grafico-documentos_por_dia',
+    data: <?=json_encode($Libro->getDocumentosPorDia())?>,
+    xkey: 'dia',
+    ykeys: ['documentos'],
+    labels: ['Documentos'],
+    resize: true,
+    parseTime: false
+});
+var documentos_por_tipo = Morris.Bar({
+    element: 'grafico-documentos_por_tipo',
+    data: <?=json_encode($Libro->getDocumentosPorTipo())?>,
+    xkey: 'tipo',
+    ykeys: ['documentos'],
+    labels: ['Documentos'],
+    resize: true
+});
+$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    var target = $(e.target).attr("href");
+    if (target=='#estadisticas') {
+        documentos_por_dia.redraw();
+        documentos_por_tipo.redraw();
+        $(window).trigger('resize');
+    }
+});
+</script>
 </div>
 <!-- FIN ESTADÍSTICAS -->
 
 <?php endif; ?>
 
+<?php if ($Libro->track_id>0) : ?>
 <!-- INICIO REVISIÓN -->
 <div role="tabpanel" class="tab-pane" id="revision">
 <p>Aquí puede subir el XML con el resultado de la revisión del libro de compras envíado al SII.</p>
@@ -248,6 +291,7 @@ echo $f->end('Subir XML de revisión');
 ?>
 </div>
 <!-- FIN REVISIÓN -->
+<?php endif; ?>
 
     </div>
 </div>

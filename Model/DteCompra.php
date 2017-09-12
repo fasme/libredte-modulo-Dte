@@ -192,4 +192,24 @@ class Model_DteCompra extends Model_Base_Libro
         return $this->getReceptor()->getLibroCompras($this->periodo)->getResumen();
     }
 
+    /**
+     * Método que entrega los documentos por día del libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function getDocumentosPorDia()
+    {
+        return $this->getReceptor()->getComprasDiarias($this->periodo);
+    }
+
+    /**
+     * Método que entrega las compras por tipo del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function getDocumentosPorTipo()
+    {
+        return $this->getReceptor()->getComprasPorTipo($this->periodo);
+    }
+
 }

@@ -243,4 +243,67 @@ class Model_DteVenta extends Model_Base_Libro
         return [];
     }
 
+    /**
+     * Método que entrega los documentos por día del libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function getDocumentosPorDia()
+    {
+        return $this->getEmisor()->getVentasDiarias($this->periodo);
+    }
+
+    /**
+     * Método que entrega las compras por tipo del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function getDocumentosPorTipo()
+    {
+        return $this->getEmisor()->getVentasPorTipo($this->periodo);
+    }
+
+    /**
+     * Método que entrega los documentos por evento del receptor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-11
+     */
+    public function getDocumentosPorEventoReceptor()
+    {
+        $aux = $this->db->getTable('
+            SELECT receptor_evento AS codigo, NULL AS glosa, COUNT(*) AS documentos
+            FROM dte_emitido
+            WHERE
+                emisor = :emisor
+                AND dte IN ('.implode(', ', array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes)).')
+                AND '.$this->db->date('Ym', 'fecha', 'INTEGER').' = :periodo
+                AND certificacion = :certificacion
+            GROUP BY receptor_evento
+            ORDER BY receptor_evento ASC
+        ', [':emisor'=>$this->emisor, ':periodo'=>$this->periodo, ':certificacion'=>(int)$this->certificacion]);
+        foreach ($aux as &$a) {
+            if ($a['codigo']) {
+                $a['glosa'] = \sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$a['codigo']];
+            } else {
+                $a['codigo'] = 0;
+                $a['glosa'] = 'Sin evento registrado';
+            }
+        }
+        return $aux;
+    }
+
+    /**
+     * Método que entrega los documentos por evento del receptor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-12
+     */
+    public function getDocumentosConEventoReceptor($evento)
+    {
+        return $this->getEmisor()->getDocumentosEmitidos([
+            'dte' => array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes),
+            'periodo' => $this->periodo,
+            'receptor_evento' => $evento,
+        ]);
+    }
+
 }
