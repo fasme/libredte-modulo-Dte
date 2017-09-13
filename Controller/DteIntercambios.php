@@ -290,7 +290,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que procesa y responde al intercambio recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-04
+     * @version 2017-09-13
      */
     public function responder($codigo)
     {
@@ -324,6 +324,7 @@ class Controller_DteIntercambios extends \Controller_App
         $RecepcionDTE = [];
         $n_dtes = count($_POST['TipoDTE']);
         $guardar_dte = [];
+        $EstadoRecepEnv = 99;
         for ($i=0; $i<$n_dtes; $i++) {
             if (in_array($_POST['rcv_accion_codigo'][$i], ['ACD', 'ERM'])) {
                 $_POST['acuse'][$i] = (int)($_POST['rcv_accion_codigo'][$i]=='ERM');
@@ -331,6 +332,7 @@ class Controller_DteIntercambios extends \Controller_App
                     $guardar_dte[] = 'T'.$_POST['TipoDTE'][$i].'F'.$_POST['Folio'][$i];
                 }
                 $EstadoRecepDTE = 0;
+                $EstadoRecepEnv = 0;
             } else {
                 $EstadoRecepDTE = 99;
             }
@@ -357,8 +359,8 @@ class Controller_DteIntercambios extends \Controller_App
             'Digest' => $EnvioDte->getDigest(),
             'RutEmisor' => $EnvioDte->getEmisor(),
             'RutReceptor' => $EnvioDte->getReceptor(),
-            'EstadoRecepEnv' => $guardar_dte ? 0 : 99,
-            'RecepEnvGlosa' => $guardar_dte ? 'EnvioDTE recibido' : 'No se aceptaron los DTE del EnvioDTE',
+            'EstadoRecepEnv' => $EstadoRecepEnv,
+            'RecepEnvGlosa' => !$EstadoRecepEnv ? 'EnvioDTE recibido' : 'No se aceptaron los DTE del EnvioDTE',
             'NroDTE' => count($RecepcionDTE),
             'RecepcionDTE' => $RecepcionDTE,
         ]);
@@ -480,10 +482,13 @@ class Controller_DteIntercambios extends \Controller_App
         //
         // guardar estado del intercambio y usuario que lo procesó
         //
-        $DteIntercambio->estado = $guardar_dte ? 0 : 99;
+        $DteIntercambio->estado = $EstadoRecepEnv;
         $DteIntercambio->recepcion_xml = base64_encode($RecepcionDTE_xml);
-        if (isset($EnvioRecibos_xml))
+        if (isset($EnvioRecibos_xml)) {
             $DteIntercambio->recibos_xml = base64_encode($EnvioRecibos_xml);
+        } else {
+            $DteIntercambio->recibos_xml = null;
+        }
         $DteIntercambio->resultado_xml = base64_encode($ResultadoDTE_xml);
         $DteIntercambio->fecha_hora_respuesta = date('Y-m-d H:i:s');
         $DteIntercambio->usuario = $this->Auth->User->id;
