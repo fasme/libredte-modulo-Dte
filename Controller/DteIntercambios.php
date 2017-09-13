@@ -526,9 +526,7 @@ class Controller_DteIntercambios extends \Controller_App
                     // procesar DTE recibido
                     $resumen = $Dte->getResumen();
                     $DteRecibido = new Model_DteRecibido($DteIntercambio->getEmisor()->rut, $resumen['TpoDoc'], $resumen['NroDoc'], (int)$DteIntercambio->certificacion);
-                    if (!empty($rcv_accion[$dte_id])) {
-                        $DteRecibido->rcv_accion = $rcv_accion[$dte_id];
-                    }
+                    $DteRecibido->rcv_accion = !empty($rcv_accion[$dte_id]) ? $rcv_accion[$dte_id] : ($DteRecibido->rcv_accion ? $DteRecibido->rcv_accion : '000');
                     if (!$DteRecibido->exists()) {
                         $DteRecibido->receptor = $Emisor->rut;
                         $DteRecibido->tasa = (int)$resumen['TasaImp'];
