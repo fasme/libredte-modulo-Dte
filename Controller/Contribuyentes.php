@@ -697,8 +697,9 @@ class Controller_Contribuyentes extends \Controller_App
             }
         }
         $Contribuyente = new Model_Contribuyente($rut);
-        if (!$Contribuyente->exists())
+        if (!$Contribuyente->exists()) {
             $this->Api->send('Contribuyente solicitado no existe', 404);
+        }
         $Contribuyente->config_ambiente_produccion_fecha;
         $Contribuyente->config_ambiente_produccion_numero;
         $Contribuyente->config_email_intercambio_user;
@@ -706,6 +707,30 @@ class Controller_Contribuyentes extends \Controller_App
         $Contribuyente->config_extra_contador_rut;
         $Contribuyente->config_extra_web;
         $this->Api->send($Contribuyente, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Método de la API que permite obtener la configuración de un contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-22
+     */
+    public function _api_config_GET($rut)
+    {
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Contribuyente = new Model_Contribuyente($rut);
+        if (!$Contribuyente->exists()) {
+            $this->Api->send('Contribuyente solicitado no existe', 404);
+        }
+        if (!$Contribuyente->usuarioAutorizado($User, 'admin')) {
+            $this->Api->send('Usted no es el administrador de la empresa solicitada', 401);
+        }
+        $config = [
+            'documentos_autorizados' => $Contribuyente->getDocumentosAutorizados(),
+        ];
+        $this->Api->send($config, 200, JSON_PRETTY_PRINT);
     }
 
 }
