@@ -198,7 +198,43 @@ class Controller_Documentos extends \Controller_App
         if ($normalizar and empty($dte['Encabezado']['Receptor']['GiroRecep']) and $Receptor->giro) {
             $dte['Encabezado']['Receptor']['GiroRecep'] = $Receptor->giro;
         }
-        // crear objeto Dte y documento temporal
+        // asignar tipo de cambio
+        if ($normalizar and in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [110,111,112])) {
+            // se convierte a arreglo de OtraMoneda si existe o se crea arreglo OtraMoneda vacio si existe
+            if (!empty($dte['Encabezado']['OtraMoneda'])) {
+                if (!isset($dte['Encabezado']['OtraMoneda'][0])) {
+                    $dte['Encabezado']['OtraMoneda'] = [$dte['Encabezado']['OtraMoneda']];
+                }
+            } else {
+                $dte['Encabezado']['OtraMoneda'] = [];
+            }
+            // buscar si viene el tipo de cambio, si viene se usa (debería ser el del banco central
+            // se deja sólo porque a veces podría no estar el tipo de cambio en LibreDTE y sólo en ese
+            // caso el usuario podría ingresar el tipo de cambio manualmente)
+            $cambio = false;
+            foreach ($dte['Encabezado']['OtraMoneda'] as $OtraMoneda) {
+                if ($OtraMoneda['TpoMoneda'] == 'PESO CL' and !empty($OtraMoneda['TpoCambio'])) {
+                    $cambio = $OtraMoneda['TpoCambio'];
+                    break;
+                }
+            }
+            // si no se encontró el tipo de cambio se determina según el del banco central
+            if (!$cambio and !empty($dte['Encabezado']['Totales']['TpoMoneda'])) {
+                if (empty($dte['Encabezado']['IdDoc']['FchEmis'])) {
+                    $dte['Encabezado']['IdDoc']['FchEmis'] = date('Y-m-d');
+                }
+                $fecha = $dte['Encabezado']['IdDoc']['FchEmis'];
+                $moneda = $dte['Encabezado']['Totales']['TpoMoneda'];
+                $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($moneda, 'CLP', $fecha))->valor;
+                if ($cambio) {
+                    $dte['Encabezado']['OtraMoneda'][] = [
+                        'TpoMoneda' => 'PESO CL',
+                        'TpoCambio' => $cambio,
+                    ];
+                }
+            }
+        }
+        // crear objeto Dte y documento temporal asignando valores
         $Dte = new \sasco\LibreDTE\Sii\Dte($dte, isset($_GET['normalizar'])?(bool)$_GET['normalizar']:true);
         $datos_dte = $Dte->getDatos();
         $datos_json = json_encode($datos_dte);
@@ -213,17 +249,31 @@ class Controller_Documentos extends \Controller_App
         $DteTmp->dte = $resumen['TpoDoc'];
         $DteTmp->codigo = md5(md5($DteTmp->datos).date('U'));
         $DteTmp->fecha = $resumen['FchDoc'];
+        // si no es DTE exportación, se saca el total en pesos del MntTotal
         if (!$Dte->esExportacion()) {
             $DteTmp->total = $resumen['MntTotal'];
-        } else {
-            $cambio = false;
-            if (!empty($dte['Encabezado']['Totales']['TpoMoneda'])) {
-                $moneda = $dte['Encabezado']['Totales']['TpoMoneda'];
-                $fecha = $resumen['FchDoc'];
-                $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($moneda, 'CLP', $fecha))->valor;
-            }
-            $DteTmp->total = $cambio ? round($resumen['MntTotal'] * $cambio) : -1;
         }
+        // si es DTE de exportación, se saca el total del MntTotOtrMnda en PESOS CL
+        else {
+            $total = false;
+            if (!empty($datos_dte['Encabezado']['OtraMoneda'])) {
+                if (!isset($datos_dte['Encabezado']['OtraMoneda'][0])) {
+                    $datos_dte['Encabezado']['OtraMoneda'] = [$dte['Encabezado']['OtraMoneda']];
+                }
+                foreach ($datos_dte['Encabezado']['OtraMoneda'] as $OtraMoneda) {
+                    if ($OtraMoneda['TpoMoneda'] == 'PESO CL' and !empty($OtraMoneda['MntTotOtrMnda'])) {
+                        $total = $OtraMoneda['MntTotOtrMnda'];
+                        break;
+                    }
+                }
+            }
+            if (!$total) {
+                $total = -1; // TODO: el 31 de octubre esto se quitará y se entregará el error si no hay total en pesos
+                //$this->Api->send('No fue posible determinar el valor total en pesos del DTE', 400);
+            }
+            $DteTmp->total = round($total);
+        }
+        // guardar DTE temporal
         try {
             if ($DteTmp->save()) {
                 if ($DteTmp->getTipo()->operacion=='S' and $Emisor->config_pagos_habilitado and $Emisor->config_cobros_temporal_automatico) {
@@ -314,7 +364,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-09-23
      */
     public function previsualizacion()
     {
@@ -467,6 +517,12 @@ class Controller_Documentos extends \Controller_App
                 $dte['Encabezado']['Receptor']['Extranjero']['Nacionalidad'] = $_POST['Nacionalidad'];
             }
             $dte['Encabezado']['Totales']['TpoMoneda'] = $_POST['TpoMoneda'];
+            if (!empty($_POST['TpoCambio'])) {
+                $dte['Encabezado']['OtraMoneda'] = [
+                    'TpoMoneda' => 'PESO CL',
+                    'TpoCambio' => (float)$_POST['TpoCambio'],
+                ];
+            }
         }
         // agregar detalle a los datos
         $n_detalles = count($_POST['NmbItem']);
