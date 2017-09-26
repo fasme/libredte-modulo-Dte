@@ -87,7 +87,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-15
+     * @version 2017-09-25
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
@@ -96,27 +96,25 @@ class Controller_DteTmps extends \Controller_App
         extract($this->Api->getQuery([
             'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
         ]));
-        // obtener datos JSON del DTE
-        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
-        if (!$DteTmp->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el DTE temporal solicitado', 'error'
-            );
+        // realizar consulta a la API
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth($this->Auth->User->hash);
+        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?cotizacion=1&papelContinuo='.$papelContinuo);
+        if ($response===false) {
+            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_tmps');
         }
-        $datos = json_decode($DteTmp->datos, true);
-        $datos['Encabezado']['IdDoc']['TipoDTE'] = 0;
-        $datos['Encabezado']['IdDoc']['Folio'] = $DteTmp->getFolio();
-        // generar PDF
-        $pdf = new \sasco\LibreDTE\Sii\PDF\Dte($papelContinuo);
-        $pdf->setFooterText(\sowerphp\core\Configure::read('dte.pdf.footer'));
-        $logo = DIR_STATIC.'/contribuyentes/'.$Emisor->rut.'/logo.png';
-        if (is_readable($logo)) {
-            $pdf->setLogo($logo);
+        if ($response['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            $this->redirect('/dte/dte_tmps');
         }
-        $pdf->agregar($datos);
-        $file = 'cotizacion_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$DteTmp->getFolio().'.pdf';
-        $pdf->Output($file, 'D');
+        // si dió código 200 se entrega la respuesta del servicio web
+        foreach (['Content-Length', 'Content-Type'] as $header) {
+            if (isset($response['header'][$header]))
+                header($header.': '.$response['header'][$header]);
+        }
+        header('Content-Disposition: inline');
+        echo $response['body'];
         exit;
     }
 
@@ -234,7 +232,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Recurso de la API que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-15
+     * @version 2017-09-25
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -258,18 +256,19 @@ class Controller_DteTmps extends \Controller_App
         if (!$DteTmp->exists()) {
             $this->Api->send('No existe el DTE temporal solicitado', 404);
         }
+        // datos por defecto
+        extract($this->Api->getQuery([
+            'cotizacion' => 0,
+            'papelContinuo' => $Emisor->config_pdf_dte_papel,
+            'compress' => false,
+        ]));
         // armar xml a partir de datos del dte temporal
-        $xml = $DteTmp->getEnvioDte()->generar();
+        $xml = $DteTmp->getEnvioDte($cotizacion ? $DteTmp->getFolio() : 0)->generar();
         if (!$xml) {
             $this->Api->send(
                 'No fue posible crear el PDF para previsualización:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 507
             );
         }
-        // datos por defecto
-        extract($this->Api->getQuery([
-            'papelContinuo' => $Emisor->config_pdf_dte_papel,
-            'compress' => false,
-        ]));
         // armar datos con archivo XML y flag para indicar si es cedible o no
         $data = [
             'xml' => base64_encode($xml),
