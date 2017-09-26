@@ -299,7 +299,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que entrega el la información de cierto mantenedor de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-02
+     * @version 2017-09-26
      */
     public function _api_info_GET($dte, $emisor)
     {
@@ -321,6 +321,10 @@ class Controller_DteFolios extends \Controller_App
         $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteFolio->exists()) {
             $this->Api->send('No existe el mantenedor de folios para el tipo de DTE '.$dte, 404);
+        }
+        extract($this->Api->getQuery(['sinUso'=>false]));
+        if ($sinUso) {
+            $DteFolio->sin_uso = $DteFolio->getSinUso();
         }
         return $DteFolio;
     }
