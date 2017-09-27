@@ -131,7 +131,7 @@ class Controller_Itemes extends \Controller_Maintainer
             if ($campo == 'libredte') {
                 $Item = (new Model_Itemes())->get($Empresa->rut, $codigo, $tipo);
             } else {
-                $Item = (new \website\Inventario\Model_InventarioItemes())->getItem($Empresa->rut, $codigo, $tipo, $campo);
+                $Item = (new \website\Inventario\Model_InventarioItemes())->setContribuyente($Empresa)->getItem($codigo, $tipo, $campo);
             }
             if (!$Item or !$Item->exists() or !$Item->activo) {
                 $this->Api->send('Item solicitado no existe o está inactivo', 404);
