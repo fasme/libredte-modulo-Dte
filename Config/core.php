@@ -76,10 +76,10 @@
         'desc' => 'Reporte de consumo de folios de boletas',
         'icon' => 'fa fa-archive',
     ],
-    '/cobranzas' => [
-        'name' => 'Cobranzas',
-        'desc' => 'Generar o cobrar pagos programados',
-        'icon' => 'fa fa-dollar',
+    '/cobranzas/cobranzas/buscar' => [
+        'name' => 'Pagos programados',
+        'desc' => 'Buscar pagos programados ventas a crédito',
+        'icon' => 'fa fa-calendar',
     ],
     '/informes' => [
         'name' => 'Informes',
