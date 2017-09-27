@@ -96,21 +96,18 @@ class Controller_Itemes extends \Controller_Maintainer
 
     /**
      * Recurso de la API que permite obtener los datos de un item a partir de su
-     * código
+     * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
+     * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-25
+     * @version 2017-09-27
      */
     public function _api_info_GET($empresa, $codigo)
     {
-        extract($this->Api->getQuery(['fecha', 'tipo', 'bruto'=>false, 'moneda'=>'CLP']));
+        extract($this->Api->getQuery(['fecha', 'tipo', 'bruto'=>false, 'moneda'=>'CLP', 'campo'=>'libredte']));
         // obtener usuario autenticado
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         // crear contribuyente y verificar que exista y tenga api configurada
         $Empresa = new \website\Dte\Model_Contribuyente($empresa);
@@ -120,18 +117,23 @@ class Controller_Itemes extends \Controller_Maintainer
         if ($Empresa->config_api_url_items) {
             $rest = new \sowerphp\core\Network_Http_Rest();
             if ($Empresa->config_api_auth_user) {
-                if ($Empresa->config_api_auth_pass)
+                if ($Empresa->config_api_auth_pass) {
                     $rest->setAuth($Empresa->config_api_auth_user, $Empresa->config_api_auth_pass);
-                else
+                } else {
                     $rest->setAuth($Empresa->config_api_auth_user);
+                }
             }
             $response = $rest->get($Empresa->config_api_url_items.$codigo);
             $this->Api->send($response['body'], $response['status']['code']);
         }
         // consultar item en base de datos local de LibreDTE
         else {
-            $Item = (new Model_Itemes())->get($Empresa->rut, $codigo, $tipo);
-            if (!$Item->exists() or !$Item->activo) {
+            if ($campo == 'libredte') {
+                $Item = (new Model_Itemes())->get($Empresa->rut, $codigo, $tipo);
+            } else {
+                $Item = (new \website\Inventario\Model_InventarioItemes())->getItem($Empresa->rut, $codigo, $tipo, $campo);
+            }
+            if (!$Item or !$Item->exists() or !$Item->activo) {
                 $this->Api->send('Item solicitado no existe o está inactivo', 404);
             }
             $this->Api->send([
