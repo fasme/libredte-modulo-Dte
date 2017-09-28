@@ -42,24 +42,40 @@ class Model_Cobranzas extends \Model_Plural_App
      * Método que entrega los pagos programados pendientes de pago (pagos por
      * cobrar)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-17
+     * @version 2017-09-28
      */
-    public function getPendientes($emisor, $certificacion, $desde = null, $hasta = null, $receptor = null)
+    public function getPendientes($filtros = [])
     {
         $where = [];
-        $vars = [':emisor'=>$emisor, ':certificacion'=>$certificacion];
-        if (!empty($desde)) {
+        $vars = [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion];
+        // estado de vencimiento
+        $hoy = date('Y-m-d');
+        if (isset($filtros['vencidos'])) {
+            $where[] = 'c.fecha < :fecha';
+            $vars[':fecha'] = $hoy;
+        }
+        if (isset($filtros['vencen_hoy'])) {
+            $where[] = 'c.fecha = :fecha';
+            $vars[':fecha'] = $hoy;
+        }
+        if (isset($filtros['vigentes'])) {
+            $where[] = 'c.fecha > :fecha';
+            $vars[':fecha'] = $hoy;
+        }
+        // otros filtros
+        if (!empty($filtros['desde'])) {
             $where[] = 'c.fecha >= :desde';
-            $vars[':desde'] = $desde;
+            $vars[':desde'] = $filtros['desde'];
         }
-        if (!empty($hasta)) {
+        if (!empty($filtros['hasta'])) {
             $where[] = 'c.fecha <= :hasta';
-            $vars[':hasta'] = $hasta;
+            $vars[':hasta'] = $filtros['hasta'];
         }
-        if (!empty($receptor)) {
+        if (!empty($filtros['receptor'])) {
             $where[] = 'd.receptor = :receptor';
-            $vars[':receptor'] = strpos($receptor,'-') ? \sowerphp\app\Utility_Rut::normalizar($receptor) : $receptor;
+            $vars[':receptor'] = strpos($filtros['receptor'],'-') ? \sowerphp\app\Utility_Rut::normalizar($filtros['receptor']) : $filtros['receptor'];
         }
+        // realizar consulta
         return $this->db->getTable('
             SELECT
                 r.razon_social,
@@ -93,6 +109,33 @@ class Model_Cobranzas extends \Model_Plural_App
                 AND (c.pagado IS NULL OR c.monto != c.pagado)
             ORDER BY c.fecha, r.razon_social
         ', $vars);
+    }
+
+    /**
+     * Método que entrega un resumen con el estado de los pagos programados por ventas a crédito
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-28
+     */
+    public function getResumen($dia = null)
+    {
+        if (!$dia) {
+            $dia = date('Y-m-d');
+        }
+        return $this->db->getAssociativeArray('
+            (
+                SELECT \'vencidos\' AS glosa, COUNT(*) AS cantidad
+                FROM cobranza
+                WHERE emisor = :emisor AND (pagado IS NULL OR monto < pagado) AND fecha < :dia
+            ) UNION (
+                SELECT \'vencen_hoy\' AS glosa, COUNT(*) AS cantidad
+                FROM cobranza
+                WHERE emisor = :emisor AND (pagado IS NULL OR monto < pagado) AND fecha = :dia
+            ) UNION (
+                SELECT \'vigentes\' AS glosa, COUNT(*) AS cantidad
+                FROM cobranza
+                WHERE emisor = :emisor AND (pagado IS NULL OR monto < pagado) AND fecha > :dia
+            )
+        ', [':emisor' => $this->getContribuyente()->rut, ':dia'=>$dia]);
     }
 
 }

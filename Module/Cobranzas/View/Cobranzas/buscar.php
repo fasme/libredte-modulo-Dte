@@ -1,3 +1,17 @@
+<ul class="nav nav-pills pull-right">
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-search"></span> Filtrar <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencidos">Vencidos <span class="badge"><?=num($cobranza_resumen['vencidos'])?></a></li>
+            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencen_hoy">Vencen hoy <span class="badge"><?=num($cobranza_resumen['vencen_hoy'])?></a></li>
+            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vigentes">Vigentes <span class="badge"><?=num($cobranza_resumen['vigentes'])?></a></li>
+            <li class="divider"></li>
+            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar">Limpiar búsqueda</a></li>
+        </ul>
+    </li>
+</ul>
 <h1>Buscar pagos programados ventas a crédito</h1>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
@@ -39,5 +53,5 @@ if (isset($cobranza)) {
         unset($c['dte']);
     }
     array_unshift($cobranza, ['Receptor', 'RUT receptor', 'Emisión', 'Documento', 'Folio', 'Total', 'Fecha pago', 'Monto pago', 'Glosa', 'Pago parcial', 'Acciones']);
-    new \sowerphp\general\View_Helper_Table($cobranza, 'cobranza_'.$_POST['desde'].'_'.$_POST['hasta'], true);
+    new \sowerphp\general\View_Helper_Table($cobranza, 'pagos_programados_pendientes', true);
 }

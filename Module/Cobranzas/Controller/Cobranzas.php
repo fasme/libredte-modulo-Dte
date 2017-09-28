@@ -39,20 +39,28 @@ class Controller_Cobranzas extends \Controller_App
     /**
      * Acción que permite buscar los pagos pendientes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-17
+     * @version 2017-09-28
      */
     public function buscar()
     {
-        if (isset($_POST['submit'])) {
-            $Emisor = $this->getContribuyente();
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'cobranza_resumen' => (new Model_Cobranzas())->setContribuyente($Emisor)->getResumen(),
+        ]);
+        $filtros = [];
+        foreach (['desde', 'hasta', 'receptor'] as $filtro) {
+            if (!empty($_POST[$filtro])) {
+                $filtros[$filtro] = $_POST[$filtro];
+            }
+        }
+        foreach (['vencidos', 'vencen_hoy', 'vigentes'] as $estado) {
+            if (isset($_GET[$estado])) {
+                $filtros[$estado] = $_GET[$estado];
+            }
+        }
+        if (!empty($filtros)) {
             $this->set([
-                'cobranza' => (new Model_Cobranzas())->getPendientes(
-                    $Emisor->rut,
-                    $Emisor->config_ambiente_en_certificacion,
-                    $_POST['desde'],
-                    $_POST['hasta'],
-                    $_POST['receptor']
-                ),
+                'cobranza' => (new Model_Cobranzas())->setContribuyente($Emisor)->getPendientes($filtros),
             ]);
         }
     }
