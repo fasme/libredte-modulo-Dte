@@ -342,7 +342,7 @@ if ($cobranza) {
     array_unshift($cobranza, ['Fecha', 'Monto', 'Glosa', 'Pagado', 'Observación', 'Usuario', 'Modificado', 'Acciones']);
     new \sowerphp\general\View_Helper_Table($cobranza);
 } else {
-    echo '<p>No hay pagos programados para este documento.</p>',"\n";
+    echo '<p>No hay pagos programados por ventas a crédito para este documento.</p>',"\n";
 }
 ?>
 </div>
