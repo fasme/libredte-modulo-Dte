@@ -289,6 +289,24 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
+     * Acción que permite descargar el PDF del documento recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-10-05
+     */
+    public function pdf($emisor, $dte, $folio)
+    {
+        $Receptor = $this->getContribuyente();
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or !$DteRecibido->intercambio) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible obtener el PDF, el DTE recibido solicitado no existe o bien no tiene intercambio asociado', 'warning'
+            );
+            $this->redirect('/dte/dte_recibidos/listar');
+        }
+        $this->redirect('/dte/dte_intercambios/pdf/'.$DteRecibido->intercambio.'/0/'.$emisor.'/'.$dte.'/'.$folio);
+    }
+
+    /**
      * Acción que permite buscar documentos recibidos en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-06

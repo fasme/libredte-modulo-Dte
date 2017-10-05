@@ -36,7 +36,7 @@
 <?php
 foreach ($documentos as &$d) {
     $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-search"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$d['intercambio'].'/0/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-file-pdf-o"></span></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-file-pdf-o"></span></a>';
     $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-default"><span class="fa fa-edit"></span></a>';
     $d[] = $acciones;
     $d['total'] = num($d['total']);
