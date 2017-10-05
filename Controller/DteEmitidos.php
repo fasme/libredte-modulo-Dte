@@ -1017,7 +1017,7 @@ class Controller_DteEmitidos extends \Controller_App
      * @param dte Tipo de DTE
      * @param folio Folio del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-05
+     * @version 2017-10-05
      */
     public function _api_enviar_sii_GET($dte, $folio, $emisor)
     {
@@ -1050,14 +1050,14 @@ class Controller_DteEmitidos extends \Controller_App
             $DteEmitido->enviar($User->id);
             return $DteEmitido;
         } catch (\Exception $e) {
-            $this->Api->send($e->getMessage(), 502);
+            $this->Api->send($e->getMessage(), 500);
         }
     }
 
     /**
      * Acción de la API que permite enviar el DTE emitido por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-03
+     * @version 2017-10-05
      */
     public function _api_enviar_email_POST($dte, $folio, $emisor)
     {
@@ -1094,7 +1094,7 @@ class Controller_DteEmitidos extends \Controller_App
             $DteEmitido->email($data['emails'], $data['asunto'], $data['mensaje'], $data['pdf'], $data['cedible'], $data['papelContinuo']);
             return 'Correo envíado';
         } catch (\Exception $e) {
-            $this->Api->send($e->getMessage(), 502);
+            $this->Api->send($e->getMessage(), 500);
         }
     }
 
