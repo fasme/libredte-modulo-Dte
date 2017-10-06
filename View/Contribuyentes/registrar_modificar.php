@@ -701,6 +701,18 @@ echo $f->input([
 ]);
 ?>
                 </div>
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pdf_timbre_posicion',
+    'label' => 'Posición timbre',
+    'options' => ['Al pie de la página', 'Inmediatamente bajo el detalle'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_timbre_posicion : 0,
+    'help' => '¿Dónde debe ir el timbre, acuse y totales?',
+]);
+?>
+                </div>
             </div>
 <?php
 $f->setColsLabel();
