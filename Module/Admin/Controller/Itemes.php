@@ -99,7 +99,7 @@ class Controller_Itemes extends \Controller_Maintainer
      * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
      * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-27
+     * @version 2017-10-06
      */
     public function _api_info_GET($empresa, $codigo)
     {
@@ -114,16 +114,18 @@ class Controller_Itemes extends \Controller_Maintainer
         if (!$Empresa->exists())
             $this->Api->send('Empresa solicitada no existe', 404);
         // consultar item en servicio web del contribuyente
-        if ($Empresa->config_api_url_items) {
+        $ApiDteItems = $Empresa->getAPI('dte_items');
+        if ($ApiDteItems) {
             $rest = new \sowerphp\core\Network_Http_Rest();
-            if ($Empresa->config_api_auth_user) {
-                if ($Empresa->config_api_auth_pass) {
-                    $rest->setAuth($Empresa->config_api_auth_user, $Empresa->config_api_auth_pass);
+            if (!empty($ApiDteItems->credenciales)) {
+                $aux = explode(':', $ApiDteItems->credenciales);
+                if (isset($aux[1])) {
+                    $rest->setAuth($aux[0], $aux[1]);
                 } else {
-                    $rest->setAuth($Empresa->config_api_auth_user);
+                    $rest->setAuth($aux[0]);
                 }
             }
-            $response = $rest->get($Empresa->config_api_url_items.$codigo);
+            $response = $rest->get($ApiDteItems->url.$codigo);
             $this->Api->send($response['body'], $response['status']['code']);
         }
         // consultar item en base de datos local de LibreDTE

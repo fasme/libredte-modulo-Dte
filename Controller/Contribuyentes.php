@@ -255,7 +255,7 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-24
+     * @version 2017-10-06
      */
     private function prepararDatosContribuyente(&$Contribuyente)
     {
@@ -443,6 +443,30 @@ class Controller_Contribuyentes extends \Controller_App
                     }
                 }
             }
+        }
+        // guardar datos de la API
+        if (!empty($_POST['config_api_codigo'])) {
+            $config_api_servicios = [];
+            $n_api_servicios = count($_POST['config_api_codigo']);
+            for ($i=0; $i<$n_api_servicios; $i++) {
+                if (empty($_POST['config_api_url'][$i])) {
+                    continue;
+                }
+                $config_api_servicios[$_POST['config_api_codigo'][$i]] = [
+                    'url' => $_POST['config_api_url'][$i],
+                ];
+                if (!empty($_POST['config_api_credenciales'][$i])) {
+                    $config_api_servicios[$_POST['config_api_codigo'][$i]]['auth'] = $_POST['config_api_auth'][$i];
+                    $config_api_servicios[$_POST['config_api_codigo'][$i]]['credenciales'] = $_POST['config_api_credenciales'][$i];
+                }
+            }
+            $_POST['config_api_servicios'] = $config_api_servicios ? $config_api_servicios : null;
+            unset($_POST['config_api_codigo']);
+            unset($_POST['config_api_url']);
+            unset($_POST['config_api_auth']);
+            unset($_POST['config_api_credenciales']);
+        } else {
+            $_POST['config_api_servicios'] = null;
         }
         // poner valores por defecto
         foreach (Model_Contribuyente::$defaultConfig as $key => $value) {

@@ -2827,4 +2827,14 @@ class Model_Contribuyente extends \Model_App
         }
     }
 
+    /**
+     * Método que entrega la configuración de cierta API (servicio web) del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-10-06
+     */
+    public function getAPI($api)
+    {
+        return ($this->config_api_servicios and isset($this->config_api_servicios->$api)) ? $this->config_api_servicios->$api : false;
+    }
+
 }

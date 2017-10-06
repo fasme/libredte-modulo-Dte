@@ -1464,54 +1464,45 @@ echo $f->input([
 
 <!-- INICIO API -->
 <div role="tabpanel" class="tab-pane" id="api">
-    <p>LibreDTE puede comunicarse con la aplicación web de su empresa a través de servicios web. A continuación puede ingresar las URL para diferentes consultas que LibreDTE debería poder hacer a su aplicación. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/sowerphp/integracion">documentación de la integración</a> para obtener detalles de las salidas esperadas para cada consulta.</p>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-key"></i>
-            Autenticación
+            <i class="fa fa-exchange"></i>
+            Servicios web del contribuyente
         </div>
         <div class="panel-body">
+            <p>LibreDTE puede comunicarse con la aplicación de su empresa u otros sitios a través de servicios web. A continuación puede ingresar las URL para consultas que se podrían hacer a su aplicación. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/sowerphp/integracion">documentación de la integración</a> para obtener detalles de las entradas y salidas esperadas para cada consulta.</p>
 <?php
-echo $f->input([
-    'name' => 'config_api_auth_user',
-    'label' => 'Usuario o token',
-    'value' => $Contribuyente->config_api_auth_user,
-    'help' => 'Usuario o token opcional para autenticación a través de <em>HTTP Basic Auth</em>',
-    'attr' => 'maxlength="255"',
-]);
-echo $f->input([
-    'name' => 'config_api_auth_pass',
-    'label' => 'Contraseña',
-    'value' => $Contribuyente->config_api_auth_pass,
-    'help' => 'Si no se especifíca la contraseña se enviará al servicio web el usuario/token y una X como contraseña',
-    'attr' => 'maxlength="255" onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
-]);
-?>
-        </div>
-    </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-list-alt"></i>
-            Recursos
-        </div>
-        <div class="panel-body">
-<?php
-echo $f->input([
-    'name' => 'config_api_url_items',
-    'label' => 'Items',
-    'value' => $Contribuyente->config_api_url_items,
-    'help' => 'URL para consultar los items a través de su código (<a href="https://wiki.libredte.cl/doku.php/sowerphp/integracion/url_items">documentación</a>).',
-    'attr' => 'maxlength="255"',
-]);
-if (\sowerphp\core\Module::loaded('Pagos')) {
-    echo $f->input([
-        'name' => 'config_api_pagos_notificar',
-        'label' => 'Notificar pagos',
-        'value' => $Contribuyente->config_api_pagos_notificar,
-        'help' => 'URL para notificar los pagos recibidos (<a href="https://wiki.libredte.cl/doku.php/sowerphp/integracion/pagos_notificar">documentación</a>).',
-        'attr' => 'maxlength="255"',
-    ]);
+$api_servicios_disponibles = (array)\sowerphp\core\Configure::read('api_contribuyentes');
+$api = [];
+foreach ($api_servicios_disponibles as $api_codigo => $api_servicio) {
+    if (!empty($api_servicio['uses']) and !\sowerphp\core\Module::loaded($api_servicio['uses'])) {
+        continue;
+    }
+    $api[] = [
+        'config_api_codigo' => $api_codigo,
+        'config_api_servicio' => $api_servicio['name'].'<span>'.$api_servicio['desc'].(!empty($api_servicio['link'])?(' (<a href="'.$api_servicio['link'].'">más info</a>)'):'').'</span>',
+        'config_api_url' => isset($Contribuyente->config_api_servicios->$api_codigo->url) ? $Contribuyente->config_api_servicios->$api_codigo->url : null,
+        'config_api_auth' => isset($Contribuyente->config_api_servicios->$api_codigo->auth) ? $Contribuyente->config_api_servicios->$api_codigo->auth : null,
+        'config_api_credenciales' => isset($Contribuyente->config_api_servicios->$api_codigo->credenciales) ? $Contribuyente->config_api_servicios->$api_codigo->credenciales : null,
+    ];
 }
+$f->setStyle(false);
+echo $f->input([
+    'type' => 'table',
+    'id' => 'config_api',
+    'label' => 'API',
+    'titles' => ['Servicio', 'URL', 'Auth', 'Credenciales'],
+    'inputs' => [
+        ['name' => 'config_api_codigo', 'type'=>'hidden'],
+        ['name' => 'config_api_servicio', 'type'=>'div', 'attr'=>'style="max-width:10em"'],
+        ['name' => 'config_api_url', 'placeholder'=>'https://example.com/api/recurso'],
+        ['name' => 'config_api_auth', 'type'=>'select', 'options'=>['http_auth_basic'=>'HTTP Auth Basic']],
+        ['name' => 'config_api_credenciales', 'placeholder'=>'usuario:contraseña', 'attr' => 'maxlength="255" onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"'],
+    ],
+    'values' => $api,
+    'help' => 'Datos para contacto comercial (ej: envío de cobros del servicio)',
+]);
+$f->setStyle('horizontal');
 ?>
         </div>
     </div>
@@ -1729,6 +1720,6 @@ $(function() {
     $('#config_email_sii_passField').attr('type', 'password');
     $('#config_email_intercambio_passField').attr('type', 'password');
     $('#config_email_crm_passField').attr('type', 'password');
-    $('#config_api_auth_passField').attr('type', 'password');
+    $('input[name="config_api_credenciales[]"]').attr('type', 'password');
 });
 </script>
