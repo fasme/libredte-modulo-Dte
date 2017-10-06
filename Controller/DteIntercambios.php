@@ -214,13 +214,13 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2017-10-06
      */
     public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
-        $Emisor = $this->getContribuyente();
+        $Receptor = $this->getContribuyente();
         // obtener DTE intercambiado
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, (int)$Receptor->config_ambiente_en_certificacion);
         if (!$DteIntercambio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el intercambio solicitado', 'error'
@@ -245,10 +245,18 @@ class Controller_DteIntercambios extends \Controller_App
             'xml' => $xml,
             'cedible' => $cedible,
         ];
-        // realizar consulta a la API
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : $this->token);
-        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        // consultar servicio web de LibreDTE
+        $ApiDtePdfClient = $DteIntercambio->getEmisor()->getApiClient('dte_pdf');
+        if (!$ApiDtePdfClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
+            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
+        }
+        // procesar respuesta
         if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
             return;

@@ -243,7 +243,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2017-10-06
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -292,10 +292,18 @@ class Controller_DteEmitidos extends \Controller_App
             'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : 1,
             'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : $cedible,
         ];
-        // realizar consulta a la API
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
-        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        // consultar servicio web de LibreDTE
+        $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
+        if (!$ApiDtePdfClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
+            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
+        }
+        // procesar respuesta
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_emitidos/listar');
@@ -853,10 +861,18 @@ class Controller_DteEmitidos extends \Controller_App
             'copias_tributarias' => $copias_tributarias,
             'copias_cedibles' => $copias_cedibles,
         ];
-        // realizar consulta a la API
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($User->hash);
-        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        // consultar servicio web de LibreDTE
+        $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
+        if (!$ApiDtePdfClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($User->hash);
+            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
+        }
+        // procesar respuesta
         if ($response===false) {
             $this->Api->send(implode('<br/>', $rest->getErrors(), 500));
         }

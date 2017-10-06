@@ -121,7 +121,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-15
+     * @version 2017-10-06
      */
     public function pdf($receptor, $dte, $codigo, $disposition = 'attachment')
     {
@@ -147,7 +147,7 @@ class Controller_DteTmps extends \Controller_App
             if (isset($response['header'][$header]))
                 header($header.': '.$response['header'][$header]);
         }
-        header('Content-Disposition: '.($disposition=='inline'?'inline':$response['header']['Content-Disposition']));
+        header('Content-Disposition: '.($disposition=='inline'?'inline':(!empty($response['header']['Content-Disposition'])?$response['header']['Content-Disposition']:'inline')));
         echo $response['body'];
         exit;
     }
@@ -276,10 +276,18 @@ class Controller_DteTmps extends \Controller_App
             'papelContinuo' => $papelContinuo,
             'compress' => $compress,
         ];
-        // realizar consulta a la API
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($User->hash);
-        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        // consultar servicio web de LibreDTE
+        $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
+        if (!$ApiDtePdfClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($User->hash);
+            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
+        }
+        // procesar respuesta
         if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
             return;
