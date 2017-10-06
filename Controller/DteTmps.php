@@ -87,7 +87,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-25
+     * @version 2017-10-06
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
@@ -109,11 +109,11 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
+        foreach (['Content-Length', 'Content-Type', 'Content-Disposition'] as $header) {
+            if (!empty($response['header'][$header])) {
                 header($header.': '.$response['header'][$header]);
+            }
         }
-        header('Content-Disposition: inline');
         echo $response['body'];
         exit;
     }
