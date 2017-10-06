@@ -114,18 +114,9 @@ class Controller_Itemes extends \Controller_Maintainer
         if (!$Empresa->exists())
             $this->Api->send('Empresa solicitada no existe', 404);
         // consultar item en servicio web del contribuyente
-        $ApiDteItems = $Empresa->getAPI('dte_items');
-        if ($ApiDteItems) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            if (!empty($ApiDteItems->credenciales)) {
-                $aux = explode(':', $ApiDteItems->credenciales);
-                if (isset($aux[1])) {
-                    $rest->setAuth($aux[0], $aux[1]);
-                } else {
-                    $rest->setAuth($aux[0]);
-                }
-            }
-            $response = $rest->get($ApiDteItems->url.$codigo);
+        $ApiDteItemsClient = $Empresa->getApiClient('dte_items');
+        if ($ApiDteItemsClient) {
+            $response = $ApiDteItemsClient->get($ApiDteItemsClient->url.$codigo);
             $this->Api->send($response['body'], $response['status']['code']);
         }
         // consultar item en base de datos local de LibreDTE

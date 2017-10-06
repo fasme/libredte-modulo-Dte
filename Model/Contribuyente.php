@@ -2837,4 +2837,30 @@ class Model_Contribuyente extends \Model_App
         return ($this->config_api_servicios and isset($this->config_api_servicios->$api)) ? $this->config_api_servicios->$api : false;
     }
 
+    /**
+     * Método que entrega el cliente para la API (servicio web) del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-10-06
+     */
+    public function getApiClient($api)
+    {
+        $Api = $this->getAPI($api);
+        if (!$Api) {
+            return false;
+        }
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->url = $Api->url;
+        if (!empty($Api->credenciales)) {
+            if ($Api->auth=='http_auth_basic') {
+                $aux = explode(':', $Api->credenciales);
+                if (isset($aux[1])) {
+                    $rest->setAuth($aux[0], $aux[1]);
+                } else {
+                    $rest->setAuth($aux[0]);
+                }
+            }
+        }
+        return $rest;
+    }
+
 }
