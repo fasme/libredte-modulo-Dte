@@ -834,7 +834,7 @@ echo $f->input([
         <div class="panel-body">
 <?php
 $p_sucursales = ['*'=>'*'] + (array)$Contribuyente->getSucursales();
-$p_medios = ['*'=>'*'] + (\sowerphp\core\Module::loaded('Pagos') ? (new \website\Pagos\Model_MedioPagos())->getList() : []);
+$p_medios = ['*'=>'*'] + (\sowerphp\core\Module::loaded('Pagos') ? (new \libredte\oficial\Pagos\Model_MedioPagos())->getList() : []);
 $config_contabilidad_mapeo_ventas = [];
 foreach ((array)$Contribuyente->config_contabilidad_mapeo_ventas as $m) {
     $config_contabilidad_mapeo_ventas[] = [
@@ -1356,7 +1356,7 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_rrhh_mutual_institucion',
     'label' => 'Institución',
-    'options' => (new \website\Rrhh\Admin\Mantenedores\Model_Mutuales())->getList(),
+    'options' => (new \libredte\oficial\Rrhh\Admin\Mantenedores\Model_Mutuales())->getList(),
     'value' => $Contribuyente->config_rrhh_mutual_institucion,
 ]);
 echo $f->input([
@@ -1388,7 +1388,7 @@ echo $f->input([
     'label' => 'Procesar emitido',
     'options' => [
         '' => 'Nunca',
-        \website\Inventario\Utility_Inventario::PROCESAR_EMITIDO_EMITIR => 'Al emitir el DTE real',
+        \libredte\oficial\Inventario\Utility_Inventario::PROCESAR_EMITIDO_EMITIR => 'Al emitir el DTE real',
     ],
     'value' => $Contribuyente->config_inventario_procesar_emitido,
     'help' => '¿En qué momento se debe mover el inventario con los DTE emitidos?',
@@ -1399,7 +1399,7 @@ echo $f->input([
     'label' => 'Procesar recibido',
     'options' => [
         '' => 'Nunca',
-        \website\Inventario\Utility_Inventario::PROCESAR_RECIBIDO_RECIBIR => 'Al hacer el acuse de recibo del DTE por primera vez en la bandeja de intercambio',
+        \libredte\oficial\Inventario\Utility_Inventario::PROCESAR_RECIBIDO_RECIBIR => 'Al hacer el acuse de recibo del DTE por primera vez en la bandeja de intercambio',
     ],
     'value' => $Contribuyente->config_inventario_procesar_recibido,
     'help' => '¿En qué momento se debe mover el inventario con los DTE recibidos?',

@@ -101,7 +101,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-18
+     * @version 2017-10-10
      */
     public function _api_emitir_POST()
     {
@@ -276,9 +276,8 @@ class Controller_Documentos extends \Controller_App
         // guardar DTE temporal
         try {
             if ($DteTmp->save()) {
-                if ($DteTmp->getTipo()->operacion=='S' and $Emisor->config_pagos_habilitado and $Emisor->config_cobros_temporal_automatico) {
-                    $DteTmp->getCobro();
-                }
+                // ejecutar trigger asociado a la emisión del DTE temporal
+                \sowerphp\core\Trigger::run('dte_documento_emitido', $DteTmp);
             } else {
                 $this->Api->send('No fue posible guardar el DTE temporal', 507);
             }

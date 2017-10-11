@@ -84,7 +84,7 @@ class Model_F29
             '06' => $this->Emisor->direccion,
             '08' => $this->Emisor->getComuna()->comuna,
             '09' => $this->Emisor->telefono,
-            '15' => substr($periodo, 4).'/'.substr($periodo, 0, 4),            
+            '15' => substr($periodo, 4).'/'.substr($periodo, 0, 4),
             '55' => $this->Emisor->email,
             '110' => $boletas['cantidad'],
             '111' => $boletas['iva'],
@@ -99,8 +99,8 @@ class Model_F29
             'pagos_electronicos_neto' => $pagos_electronicos['neto'],
         ];
         if (\sowerphp\core\Module::loaded('Lce')) {
-            $this->datos['48'] = (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_48))->getHaber($this->periodo);
-            $this->datos['151'] = (new \website\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_151))->getHaber($this->periodo);
+            $this->datos['48'] = (new \libredte\oficial\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_48))->getHaber($this->periodo);
+            $this->datos['151'] = (new \libredte\oficial\Lce\Model_LceCuenta($this->Emisor->rut, $this->Emisor->config_contabilidad_f29_151))->getHaber($this->periodo);
         }
     }
 

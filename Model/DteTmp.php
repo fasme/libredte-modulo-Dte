@@ -233,7 +233,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-17
+     * @version 2017-10-10
      */
     public function generar($user_id = null)
     {
@@ -352,18 +352,8 @@ class Model_DteTmp extends \Model_App
             $DteEmitido->enviar($user_id);
         } catch (\Exception $e) {
         }
-        // generar cobro si corresponde o actualizar el existe si está pagado
-        if ($this->getTipo()->operacion=='S' and $Emisor->config_pagos_habilitado) {
-            $Cobro = $this->getCobro(false);
-            if (!$Cobro->pagado) {
-                if ($Emisor->config_cobros_emitido_automatico) {
-                    $DteEmitido->getCobro();
-                }
-            } else {
-                $Cobro->emitido = $DteEmitido->folio;
-                $Cobro->save();
-            }
-        }
+        // ejecutar trigger asociado a la generación del DTE real
+        \sowerphp\core\Trigger::run('dte_documento_generado', $this, $DteEmitido);
         // eliminar DTE temporal
         $this->delete();
         // entregar DTE emitido
@@ -425,7 +415,7 @@ class Model_DteTmp extends \Model_App
         }
         if (\sowerphp\core\Module::loaded('Crm')) {
             try {
-                $Cliente = new \website\Crm\Model_Cliente($this->getEmisor(), $this->getReceptor()->rut);
+                $Cliente = new \libredte\oficial\Crm\Model_Cliente($this->getEmisor(), $this->getReceptor()->rut);
                 $contactos = $Cliente->getContactos();
                 $i = 1;
                 foreach ($contactos as $c) {
@@ -517,7 +507,7 @@ class Model_DteTmp extends \Model_App
      */
     public function getCobro($crearSiNoExiste = true)
     {
-        return (new \website\Pagos\Model_Cobro())->setDocumento($this, $crearSiNoExiste);
+        return (new \libredte\oficial\Pagos\Model_Cobro())->setDocumento($this, $crearSiNoExiste);
     }
 
     /**

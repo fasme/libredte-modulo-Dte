@@ -340,21 +340,15 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que realiza verificaciones a campos antes de guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-22
+     * @version 2017-10-10
      */
     public function save()
     {
         // corregir datos
         $this->anulado = (int)$this->anulado;
         $this->iva_fuera_plazo = (int)$this->iva_fuera_plazo;
-        // procesar inventario si corresponde
-        if ($this->getEmisor()->config_inventario_procesar_emitido and $this->getEmisor()->config_inventario_procesar_emitido == \website\Inventario\Utility_Inventario::PROCESAR_EMITIDO_EMITIR and !$this->exists()) {
-            try {
-                (new \website\Inventario\Utility_Inventario())->procesar($this);
-            } catch (\Exception $e) {
-                //throw new \Exception($e->getMessage());
-            }
-        }
+        // trigger al guardar el DTE emitido
+        \sowerphp\core\Trigger::run('dte_dte_emitido_guardar', $this);
         // guardar DTE emitido
         parent::save();
     }
@@ -453,7 +447,7 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         if (\sowerphp\core\Module::loaded('Crm')) {
             try {
-                $Cliente = new \website\Crm\Model_Cliente($this->getEmisor(), $this->getReceptor()->rut);
+                $Cliente = new \libredte\oficial\Crm\Model_Cliente($this->getEmisor(), $this->getReceptor()->rut);
                 $contactos = $Cliente->getContactos();
                 $i = 1;
                 foreach ($contactos as $c) {
@@ -1030,7 +1024,7 @@ class Model_DteEmitido extends Model_Base_Envio
      */
     public function getCobro($crearSiNoExiste = true)
     {
-        return (new \website\Pagos\Model_Cobro())->setDocumento($this, $crearSiNoExiste);
+        return (new \libredte\oficial\Pagos\Model_Cobro())->setDocumento($this, $crearSiNoExiste);
     }
 
     /**

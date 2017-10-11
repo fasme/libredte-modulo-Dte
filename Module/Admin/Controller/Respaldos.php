@@ -35,7 +35,7 @@ class Controller_Respaldos extends \Controller_App
     /**
      * Acción que permite exportar todos los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2017-10-10
      */
     public function exportar($all = false)
     {
@@ -60,7 +60,7 @@ class Controller_Respaldos extends \Controller_App
         }
         if (isset($_POST['tablas'])) {
             // si existe el comando para programar respaldo y avisar por email se usa
-            if (class_exists('\website\Dte\Shell_Command_Respaldos_Email')) {
+            if (class_exists('\libredte\oficial\Dte\Shell_Command_Respaldos_Email')) {
                 if ($this->shell('Dte.Respaldos_Email '.$Emisor->rut)) {
                     \sowerphp\core\Model_Datasource_Session::message(
                         'No fue posible programar el respaldo', 'error'

@@ -451,6 +451,7 @@ class Model_Contribuyente extends \Model_App
             $this->db->query('DELETE FROM dte_emitido_email WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_folio WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_guia WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_recibido WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_recepcion WHERE recibe = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_recepcion_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
@@ -458,7 +459,6 @@ class Model_Contribuyente extends \Model_App
             $this->db->query('DELETE FROM dte_intercambio_recibo_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_resultado WHERE recibe = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_resultado_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_recibido WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_referencia WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_tmp WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_venta WHERE emisor = :rut', [':rut'=>$this->rut]);
@@ -2486,7 +2486,7 @@ class Model_Contribuyente extends \Model_App
         }
         // si hay módulo CRM se sacan los clientes desde el módulo
         else {
-            return (new \website\Crm\Model_Clientes())->setContribuyente($this)->getListado($filtros);
+            return (new \libredte\oficial\Crm\Model_Clientes())->setContribuyente($this)->getListado($filtros);
         }
     }
 

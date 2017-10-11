@@ -510,22 +510,8 @@ class Model_DteRecibido extends \Model_App
         // campo emisor solo en nc y nd
         if (!in_array($this->dte, [55, 56, 60, 61]))
             $this->emisor_nc_nd_fc = null;
-        // procesar inventario si corresponde
-        if ($this->getReceptor()->config_inventario_procesar_recibido and $this->getReceptor()->config_inventario_procesar_recibido == \website\Inventario\Utility_Inventario::PROCESAR_RECIBIDO_RECIBIR and !$this->exists()) {
-            try {
-                (new \website\Inventario\Utility_Inventario())->procesar($this);
-            } catch (\Exception $e) {
-                //throw new \Exception($e->getMessage());
-            }
-        }
-        // procesar contabilidad si corresponde
-        if ($this->getReceptor()->config_contabilidad_mapeo_compras and !$this->exists()) {
-            try {
-                $Asiento = (new \website\Lce\Utility_Asiento())->setContribuyente($this->getReceptor())->procesar($this);
-            } catch (\Exception $e) {
-                //throw new \Exception($e->getMessage());
-            }
-        }
+        // trigger al guardar el DTE recibido
+        \sowerphp\core\Trigger::run('dte_dte_recibido_guardar', $this);
         // se guarda el documento
         $status = parent::save();
         // si se pudo guardar y existe tipo transacción se notifica al SII

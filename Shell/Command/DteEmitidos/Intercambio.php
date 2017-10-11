@@ -47,7 +47,7 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
 
     private function enviarDTE($d, $certificacion)
     {
-        $DteEmitido = new \website\Dte\Model_DteEmitido($d['emisor'], $d['dte'], $d['folio'], (int)$certificacion);
+        $DteEmitido = new Model_DteEmitido($d['emisor'], $d['dte'], $d['folio'], (int)$certificacion);
         if ($DteEmitido->getEstado()=='R')
             return;
         $this->out('Enviando XML del DTE T'.$DteEmitido->dte.'F'.$DteEmitido->folio.' de '.$DteEmitido->getEmisor()->razon_social.' al correo '.$DteEmitido->getReceptor()->config_email_intercambio_user);
@@ -66,7 +66,7 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
         if (is_numeric($desde)) {
             $desde = date('Y-m-d', strtotime('-'.$desde.' days'));
         }
-        $estados = \website\Dte\Model_DteEmitidos::$revision_estados['rechazados'];
+        $estados = Model_DteEmitidos::$revision_estados['rechazados'];
         return $this->db->getTable('
             SELECT e.emisor, e.dte, e.folio
             FROM

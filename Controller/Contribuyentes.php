@@ -229,7 +229,7 @@ class Controller_Contribuyentes extends \Controller_App
         ]);
         if (\sowerphp\core\Module::loaded('Lce')) {
             $this->set([
-                'cuentas' => (new \website\Lce\Model_LceCuentas())->setContribuyente($Contribuyente)->getList(),
+                'cuentas' => (new \libredte\oficial\Lce\Model_LceCuentas())->setContribuyente($Contribuyente)->getList(),
             ]);
         }
         // editar contribuyente

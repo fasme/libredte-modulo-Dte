@@ -161,7 +161,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             }
             // agregar y/o actualizar datos del contribuyente si no tiene usuario administrador
             list($rut, $dv) = explode('-', $c[0]);
-            $Contribuyente = new \website\Dte\Model_Contribuyente($rut);
+            $Contribuyente = new Model_Contribuyente($rut);
             $Contribuyente->dv = $dv;
             if (!$Contribuyente->usuario) {
                 $Contribuyente->razon_social = substr($c[1], 0, 100);
@@ -220,7 +220,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         $procesados = 0;
         $actualizados = 0;
         foreach ($contribuyentes as $rut) {
-            $Contribuyente = new \website\Dte\Model_Contribuyente($rut);
+            $Contribuyente = new Model_Contribuyente($rut);
             $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$Contribuyente->getRUT());
             if ($response['status']['code']==200) {
                 $info = $response['body'];
