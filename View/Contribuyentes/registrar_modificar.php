@@ -1247,6 +1247,31 @@ if (is_dir(DIR_STATIC.'/contribuyentes/'.$Contribuyente->rut.'/transbank/logs/ce
     </div>-->
     <div class="panel panel-default">
         <div class="panel-heading">
+            <i class="fa fa-money"></i>
+            CryptoMKT (ETH)
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'name' => 'config_pagos_cryptomkt_email',
+    'label' => 'Email',
+    'value' => $Contribuyente->config_pagos_cryptomkt_email,
+    'help' => 'Email del usuario o comercio que recibirá el pago. Debe estar registrado en <a href="https://www.cryptomkt.com/es" target="_blank">CryptoMKT</a>',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pagos_cryptomkt_estado',
+    'label' => '¿Estado validación?',
+    'value' => $Contribuyente->config_pagos_cryptomkt_estado,
+    'options' => [3=>'Pago exitoso (recomendado)', 2=>'Esperando procesamiento', 1=>'Esperando bloque (no recomendado)'],
+    'help' => 'Estado que debe tener el pago para que sea considerado como válido',
+]);
+?>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <i class="fa fa-bitcoin"></i>
             Bitpay (BTC)
         </div>
