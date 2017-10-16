@@ -340,7 +340,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que realiza verificaciones a campos antes de guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-10
+     * @version 2017-10-16
      */
     public function save()
     {
@@ -350,7 +350,7 @@ class Model_DteEmitido extends Model_Base_Envio
         // trigger al guardar el DTE emitido
         \sowerphp\core\Trigger::run('dte_dte_emitido_guardar', $this);
         // guardar DTE emitido
-        parent::save();
+        return parent::save();
     }
 
     /**

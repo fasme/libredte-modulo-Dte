@@ -361,6 +361,19 @@ class Model_DteTmp extends \Model_App
     }
 
     /**
+     * Método que realiza verificaciones a campos antes de guardar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-10-16
+     */
+    public function save()
+    {
+        // trigger al guardar el DTE temporal
+        \sowerphp\core\Trigger::run('dte_dte_tmp_guardar', $this);
+        // guardar DTE temporal
+        return parent::save();
+    }
+
+    /**
      * Método que borra el DTE temporal y su cobro asociado si existe
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-16
