@@ -118,10 +118,20 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite registrar un nuevo contribuyente y asociarlo a un usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-08
+     * @version 2017-10-16
      */
     public function registrar()
     {
+        // verificar si el usuario puede registrar más empresas (sólo si está definido el valor
+        if ($this->Auth->User->config_contribuyentes_autorizados!==null) {
+            $n_empresas = count((new Model_Contribuyentes())->getByUsuario($this->Auth->User->id));
+            if ($n_empresas >= $this->Auth->User->config_contribuyentes_autorizados) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Ha llegado al límite de empresas que puede registrar ('.num($this->Auth->User->config_contribuyentes_autorizados).'). Si requiere una cantidad mayor <a href="'.$this->request->base.'/contacto">contáctenos</a>.', 'error'
+                );
+                $this->redirect('/dte/contribuyentes/seleccionar');
+            }
+        }
         // asignar variables para la vista
         $ImpuestosAdicionales = new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales();
         $impuestos_adicionales = $ImpuestosAdicionales->getListConTasa();
