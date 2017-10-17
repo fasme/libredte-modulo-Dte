@@ -266,7 +266,8 @@ class Model_Contribuyente extends \Model_App
                     $datos = [$datos];
                 $this->config[$configuracion] = [];
                 foreach ($datos as $dato) {
-                    if (in_array($configuracion.'_'.$dato['variable'], get_called_class()::$encriptar)) {
+                    $class = get_called_class();
+                    if (in_array($configuracion.'_'.$dato['variable'], $class::$encriptar)) {
                         $dato['valor'] = Utility_Data::decrypt($dato['valor']);
                     }
                     $this->config[$configuracion][$dato['variable']] =
@@ -290,8 +291,10 @@ class Model_Contribuyente extends \Model_App
             $key = str_replace('config_', '', $name);
             $c = substr($key, 0, strpos($key, '_'));
             $v = substr($key, strpos($key, '_')+1);
-            if (!isset($this->config[$c][$v]))
-                return isset(get_called_class()::$defaultConfig[$c.'_'.$v]) ? get_called_class()::$defaultConfig[$c.'_'.$v] : null;
+            if (!isset($this->config[$c][$v])) {
+                $class = get_called_class();
+                return isset($class::$defaultConfig[$c.'_'.$v]) ? $class::$defaultConfig[$c.'_'.$v] : null;
+            }
             $this->$name = $this->config[$c][$v];
             return $this->$name;
         } else {
@@ -402,7 +405,8 @@ class Model_Contribuyente extends \Model_App
                         $valor = json_encode($valor);
                         $Config->json = 1;
                     }
-                    if (in_array($configuracion.'_'.$variable, get_called_class()::$encriptar) and $valor!==null) {
+                    $class = get_called_class();
+                    if (in_array($configuracion.'_'.$variable, $class::$encriptar) and $valor!==null) {
                         $valor = Utility_Data::encrypt($valor);
                     }
                     $Config->valor = $valor;
