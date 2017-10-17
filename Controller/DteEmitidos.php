@@ -243,7 +243,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-06
+     * @version 2017-10-17
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -286,7 +286,7 @@ class Controller_DteEmitidos extends \Controller_App
         $data = [
             'xml' => $DteEmitido->xml,
             'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
-            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : $Emisor->config_pdf_dte_papel,
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $Emisor->config_pdf_dte_papel ),
             'compress' => false,
             'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
             'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : 1,
