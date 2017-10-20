@@ -62,10 +62,17 @@ class Controller_DteCompras extends Controller_Base_Libros
             // agregar cada documento del libro
             $keys = array_keys(Model_DteCompra::$libro_cols);
             $noGuardado = [];
+            $linea = 1;
             foreach ($detalle as $d) {
+                $linea++;
                 $datos = array_combine($keys, $d);
                 $emisor = explode('-', str_replace('.', '', $datos['rut']))[0];
-                $DteRecibido = new Model_DteRecibido($emisor, $datos['dte'], $datos['folio'], $Receptor->config_ambiente_en_certificacion);
+                try {
+                    $DteRecibido = new Model_DteRecibido($emisor, $datos['dte'], $datos['folio'], $Receptor->config_ambiente_en_certificacion);
+                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                    $noGuardado[] = 'Problema con fila '.$linea.': verificar código del documento en columna A y/o el número de folio en columna B';
+                    continue;
+                }
                 $DteRecibido->set($datos);
                 $DteRecibido->emisor = $emisor;
                 $DteRecibido->receptor = $Receptor->rut;
