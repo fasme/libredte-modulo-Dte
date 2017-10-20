@@ -237,12 +237,12 @@ class Model_Item extends \Model_App
     /**
      * Método que guarda el item del inventario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-24
+     * @version 2017-10-19
      */
     public function save()
     {
         $this->codigo = str_replace('/', '_', $this->codigo);
-        parent::save();
+        return parent::save();
     }
 
     /**
