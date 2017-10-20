@@ -418,7 +418,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el listado de correos a los que se debería enviar el
      * DTE (correo receptor, correo intercambio y correo del dte)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-02
+     * @version 2017-10-20
      */
     public function getEmails()
     {
@@ -445,20 +445,8 @@ class Model_DteEmitido extends Model_Base_Envio
         if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'], $emails)) {
             $emails['DTE T'.$this->dte.'F'.$this->folio] = $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'];
         }
-        if (\sowerphp\core\Module::loaded('Crm')) {
-            try {
-                $Cliente = new \libredte\oficial\Crm\Model_Cliente($this->getEmisor(), $this->getReceptor()->rut);
-                $contactos = $Cliente->getContactos();
-                $i = 1;
-                foreach ($contactos as $c) {
-                    if (!in_array($c['email'], $emails)) {
-                        $emails['Correo CRM #'.$i++] = $c['email'];
-                    }
-                }
-            } catch (\Exception $e) {
-            }
-        }
-        return $emails;
+        $emails_trigger = \sowerphp\core\Trigger::run('dte_dte_emitido_emails', $this, $emails);
+        return $emails_trigger ? $emails_trigger : $emails;
     }
 
     /**
@@ -581,13 +569,21 @@ class Model_DteEmitido extends Model_Base_Envio
      * restaura el folio para que se volver a utilizar.
      * Sólo se pueden eliminar DTE que estén rechazados o no enviados al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-01
+     * @version 2017-10-20
      */
     public function delete()
     {
-        if ($this->track_id and $this->track_id!=-1 and $this->getEstado()!='R') {
-            return false;
+        if ($this->track_id!=-1) {
+            if ($this->track_id and $this->getEstado()!='R') {
+                throw new \Exception('El DTE no tiene estado rechazado en el sistema');
+            }
+            if (in_array($this->dte, [39, 41])) {
+                throw new \Exception('No es posible eliminar boletas');
+            }
         }
+        // trigger al eliminar el DTE emitido
+        \sowerphp\core\Trigger::run('dte_dte_emitido_eliminar', $this);
+        // eliminar DTE (se hace en transacción para retroceder el folio si corresponde
         $this->db->beginTransaction(true);
         $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->emisor, $this->dte, (int)$this->certificacion);
         if ($DteFolio->siguiente == ($this->folio+1)) {
@@ -606,15 +602,6 @@ class Model_DteEmitido extends Model_Base_Envio
         if (!parent::delete()) {
             $this->db->rollback();
             return false;
-        }
-        if (\sowerphp\core\Module::loaded('Pagos')) {
-            $Cobro = $this->getCobro(false);
-            if ($Cobro->exists()) {
-                if (!$Cobro->delete()) {
-                    $this->db->rollback();
-                    return false;
-                }
-            }
         }
         $this->db->commit();
         return true;

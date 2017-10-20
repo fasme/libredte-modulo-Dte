@@ -427,7 +427,7 @@ class Model_Contribuyente extends \Model_App
      * Los datos del contribuyente de documentos emitidos, recibidos, etc no se
      * eliminan por defecto, se debe solicitar específicamente.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-26
+     * @version 2017-10-20
      */
     public function delete($all = false)
     {
@@ -468,54 +468,8 @@ class Model_Contribuyente extends \Model_App
             $this->db->query('DELETE FROM dte_venta WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM item_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-            // módulo Lce
-            if (\sowerphp\core\Module::loaded('Lce')) {
-                $this->db->query('DELETE FROM lce_asiento WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM lce_asiento_detalle WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM lce_cuenta WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM lce_cuenta_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-            }
-            // módulo Pagos
-            if (\sowerphp\core\Module::loaded('Pagos')) {
-                $this->db->query('DELETE FROM cobro WHERE emisor = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cobro_masivo WHERE emisor = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cobro_masivo_emitido WHERE emisor = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cobro_masivo_item WHERE emisor = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cobro_masivo_programado WHERE emisor = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cobro_masivo_programado_item WHERE emisor = :rut', [':rut'=>$this->rut]);
-            }
-            // módulo Rrhh
-            if (\sowerphp\core\Module::loaded('Rrhh')) {
-                $this->db->query('DELETE FROM area WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM empleado WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM empleado_asignacion WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM empleado_carga WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM empleado_contrato WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM empleado_descuento WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM empleado_liquidacion WHERE empresa = :rut', [':rut'=>$this->rut]);
-            }
-            // módulo Crm
-            if (\sowerphp\core\Module::loaded('Crm')) {
-                $this->db->query('DELETE FROM cliente WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cliente_contacto WHERE empresa = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM cliente_direccion WHERE empresa = :rut', [':rut'=>$this->rut]);
-            }
-            // modulo Inventario
-            if (\sowerphp\core\Module::loaded('Inventario')) {
-                $this->db->query('DELETE FROM inventario_ubicacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM inventario_item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM inventario_item_insumo WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM inventario_ubicacion_item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM inventario_item_proveedor WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-            }
-            // módulo Tienda
-            if (\sowerphp\core\Module::loaded('Tienda')) {
-                $this->db->query('DELETE FROM tienda WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM tienda_item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM tienda_etiqueta WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-                $this->db->query('DELETE FROM tienda_item_etiqueta WHERE contribuyente = :rut', [':rut'=>$this->rut]);
-            }
         }
+        // todo ok
         $this->db->commit();
         return true;
     }

@@ -1118,7 +1118,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Recurso de la API que permite eliminar un DTE rechazado o no enviado al
      * SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-03
+     * @version 2017-10-20
      */
     public function _api_eliminar_GET($dte, $folio, $emisor)
     {
@@ -1147,8 +1147,12 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No es posible eliminar el DTE ya que no está rechazado', 400);
         }
         // eliminar DTE
-        if (!$DteEmitido->delete()) {
-            $this->Api->send('No fue posible eliminar el DTE', 500);
+        try {
+            if (!$DteEmitido->delete()) {
+                $this->Api->send('No fue posible eliminar el DTE', 500);
+            }
+        } catch (\Exception $e) {
+            $this->Api->send('No fue posible eliminar el DTE: '.$e->getMessage(), 500);
         }
         return true;
     }

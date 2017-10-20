@@ -28,7 +28,7 @@ namespace website\Dte;
  * Clase para el controlador asociado a la tabla contribuyente de la base de
  * datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-06-10
+ * @version 2017-10-19
  */
 class Controller_Contribuyentes extends \Controller_App
 {
@@ -237,11 +237,6 @@ class Controller_Contribuyentes extends \Controller_App
             'boton' => 'Modificar empresa',
             'tipos_dte' => $Contribuyente->getDocumentosAutorizados(),
         ]);
-        if (\sowerphp\core\Module::loaded('Lce')) {
-            $this->set([
-                'cuentas' => (new \libredte\oficial\Lce\Model_LceCuentas())->setContribuyente($Contribuyente)->getList(),
-            ]);
-        }
         // editar contribuyente
         if (isset($_POST['submit'])) {
             $this->prepararDatosContribuyente($Contribuyente);
@@ -265,9 +260,9 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-06
+     * @version 2017-10-19
      */
-    private function prepararDatosContribuyente(&$Contribuyente)
+    protected function prepararDatosContribuyente(&$Contribuyente)
     {
         // si hay cualquier campo que empiece por 'config_libredte_' se quita ya que son
         // configuraciones reservadas para los administradores de LibreDTE y no pueden
@@ -393,66 +388,6 @@ class Controller_Contribuyentes extends \Controller_App
             unset($_POST['config_app_contacto_comercial_telefono']);
         } else {
             $_POST['config_app_contacto_comercial'] = null;
-        }
-        // crear arreglo con mapa contable para ventas
-        if (!empty($_POST['config_contabilidad_mapeo_ventas_sucursal'])) {
-            $n_cuentas = count($_POST['config_contabilidad_mapeo_ventas_sucursal']);
-            for ($i=0; $i<$n_cuentas; $i++) {
-                if (!empty($_POST['config_contabilidad_mapeo_ventas_neto'][$i]) and !empty($_POST['config_contabilidad_mapeo_ventas_total'])) {
-                    $_POST['config_contabilidad_mapeo_ventas'][] = [
-                        'sucursal' => $_POST['config_contabilidad_mapeo_ventas_sucursal'][$i],
-                        'medio' => $_POST['config_contabilidad_mapeo_ventas_medio'][$i],
-                        'neto' => $_POST['config_contabilidad_mapeo_ventas_neto'][$i],
-                        'iva' => !empty($_POST['config_contabilidad_mapeo_ventas_iva'][$i]) ? $_POST['config_contabilidad_mapeo_ventas_iva'][$i] : null,
-                        'total' => $_POST['config_contabilidad_mapeo_ventas_total'][$i],
-                    ];
-                }
-            }
-            unset($_POST['config_contabilidad_mapeo_ventas_sucursal']);
-            unset($_POST['config_contabilidad_mapeo_ventas_medio']);
-            unset($_POST['config_contabilidad_mapeo_ventas_neto']);
-            unset($_POST['config_contabilidad_mapeo_ventas_iva']);
-            unset($_POST['config_contabilidad_mapeo_ventas_total']);
-        } else {
-            $_POST['config_contabilidad_mapeo_ventas'] = null;
-        }
-        // crear arreglo con mapa contable para compras
-        if (!empty($_POST['config_contabilidad_mapeo_compras_sucursal'])) {
-            $n_cuentas = count($_POST['config_contabilidad_mapeo_compras_sucursal']);
-            for ($i=0; $i<$n_cuentas; $i++) {
-                if (!empty($_POST['config_contabilidad_mapeo_compras_neto'][$i]) and !empty($_POST['config_contabilidad_mapeo_compras_total'])) {
-                    $_POST['config_contabilidad_mapeo_compras'][] = [
-                        'sucursal' => $_POST['config_contabilidad_mapeo_compras_sucursal'][$i],
-                        'medio' => $_POST['config_contabilidad_mapeo_compras_medio'][$i],
-                        'neto' => $_POST['config_contabilidad_mapeo_compras_neto'][$i],
-                        'iva' => !empty($_POST['config_contabilidad_mapeo_compras_iva'][$i]) ? $_POST['config_contabilidad_mapeo_compras_iva'][$i] : null,
-                        'total' => $_POST['config_contabilidad_mapeo_compras_total'][$i],
-                    ];
-                }
-            }
-            unset($_POST['config_contabilidad_mapeo_compras_sucursal']);
-            unset($_POST['config_contabilidad_mapeo_compras_medio']);
-            unset($_POST['config_contabilidad_mapeo_compras_neto']);
-            unset($_POST['config_contabilidad_mapeo_compras_iva']);
-            unset($_POST['config_contabilidad_mapeo_compras_total']);
-        } else {
-            $_POST['config_contabilidad_mapeo_compras'] = null;
-        }
-        // guardar datos de módulo Pagos
-        if (\sowerphp\core\Module::loaded('Pagos')) {
-            // guardar archivos transbank
-            $dir = DIR_STATIC.'/contribuyentes/'.$Contribuyente->rut.'/transbank';
-            if (is_dir($dir) or (!is_dir($dir) and is_writable (dirname($dir)) and mkdir($dir))) {
-                foreach (['key'=>'application/x-iwork-keynote-sffkey', 'crt'=>'application/pkix-cert'] as $archivo => $mimetype) {
-                    $a = 'config_pagos_transbank_'.$archivo;
-                    if (!empty($_FILES[$a]) and !$_FILES[$a]['error'] and $_FILES[$a]['type']==$mimetype) {
-                        $md5 = md5(file_get_contents($_FILES[$a]['tmp_name'])).'.'.$archivo;
-                        if (move_uploaded_file($_FILES[$a]['tmp_name'], $dir.'/'.$md5)) {
-                            $_POST[$a] = $md5;
-                        }
-                    }
-                }
-            }
         }
         // guardar datos de la API
         if (!empty($_POST['config_api_codigo'])) {
@@ -690,28 +625,6 @@ class Controller_Contribuyentes extends \Controller_App
         header('Content-Length: '.filesize($logo));
         header('Content-Disposition: inline; filename="'.$Contribuyente->rut.'.png"');
         print file_get_contents($logo);
-        exit;
-    }
-
-    /**
-     * Acción que descarga algo del directorio estático del cliente
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-07
-     */
-    public function descargar($what, $eliminar = false)
-    {
-        $Emisor = $this->getContribuyente();
-        if ($what == 'transbank_logs_certificacion') {
-            $dir = DIR_STATIC.'/contribuyentes/'.$Emisor->rut.'/transbank/logs/certificacion';
-            if (!is_dir($dir)) {
-                $dir = null;
-            }
-        }
-        if (!isset($dir)) {
-            \sowerphp\core\Model_Datasource_Session::message('No es posible descargar lo solicitado', 'error');
-            $this->redirect('/');
-        }
-        \sowerphp\general\Utility_File::compress($dir, ['delete'=>$eliminar]);
         exit;
     }
 

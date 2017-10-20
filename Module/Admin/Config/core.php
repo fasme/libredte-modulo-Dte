@@ -25,7 +25,7 @@
 \sowerphp\core\Configure::write('module.title', 'Panel de administración');
 
 // Menú para el módulo
-$_nav_module = [
+\sowerphp\core\Configure::write('nav.module', [
     '/itemes/listar/1/codigo/A?search=activo:1' => [
         'name' => 'Productos y/o servicios',
         'desc' => 'Mantenedor de productos y/o servicios que se comercializan',
@@ -51,22 +51,14 @@ $_nav_module = [
         'desc' => 'Exportar datos del sistema para respaldo o migración',
         'icon' => 'fa fa-download',
     ],
-    /*'/respaldos/importar' => [
-        'name' => 'Importar datos',
-        'desc' => 'Importar datos al sistema para restaurar respaldo o migración',
-        'icon' => 'fa fa-upload',
-    ],*/
-];
-if (\sowerphp\core\Module::loaded('Dte.Admin.Informes')) {
-    $_nav_module['/informes'] = array(
+    '/informes' => [
         'name' => 'Informes',
         'desc' => 'Informes de los usuarios y contribuyentes',
         'icon' => 'fa fa-file',
-    );
-}
-$_nav_module['/mantenedores'] = array(
-    'name' => 'Mantenedores',
-    'desc' => 'Mantenedores de tablas generales',
-    'icon' => 'fa fa-list-alt',
-);
-\sowerphp\core\Configure::write('nav.module', $_nav_module);
+    ],
+    '/mantenedores' => [
+        'name' => 'Mantenedores',
+        'desc' => 'Mantenedores de tablas generales',
+        'icon' => 'fa fa-list-alt',
+    ],
+]);
