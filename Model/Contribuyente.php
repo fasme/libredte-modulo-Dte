@@ -621,14 +621,21 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el listado de usuarios para los campos select
      * @return Listado de usuarios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-03
+     * @version 2017-10-20
      */
     public function getListUsuarios()
     {
         return $this->db->getTable('
-            SELECT u.id, u.usuario
-            FROM usuario AS u, contribuyente_usuario AS c
-            WHERE u.id = c.usuario AND c.contribuyente = :rut
+            (
+                SELECT DISTINCT u.id, u.usuario
+                FROM usuario AS u JOIN contribuyente_usuario AS c ON u.id = c.usuario
+                WHERE c.contribuyente = :rut
+            ) UNION (
+                SELECT DISTINCT u.id, u.usuario
+                FROM usuario AS u JOIN contribuyente AS c ON u.id = c.usuario
+                WHERE c.rut = :rut
+            )
+            ORDER BY usuario
         ', [':rut'=>$this->rut]);
     }
 
