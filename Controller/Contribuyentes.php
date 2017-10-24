@@ -61,14 +61,15 @@ class Controller_Contribuyentes extends \Controller_App
      * @param rut Si se pasa un RUT se tratará de seleccionar
      * @param url URL a la que redirigir después de seleccionar el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-11
+     * @version 2017-10-23
      */
     public function seleccionar($rut = null, $url = null)
     {
         $referer = \sowerphp\core\Model_Datasource_Session::read('referer');
         // si se está pidiendo una empresa en particular se tratará de usar
+        $class = $this->Contribuyente_class;
         if ($rut) {
-            $Emisor = new Model_Contribuyente($rut);
+            $Emisor = new $class($rut);
             if (!$Emisor->usuario) {
                 \sowerphp\core\Model_Datasource_Session::message('Empresa solicitada no está registrada', 'error');
                 $this->redirect('/dte/contribuyentes/seleccionar');
@@ -88,7 +89,7 @@ class Controller_Contribuyentes extends \Controller_App
             // si hay una empresa forzada a través de la configuración se crea
             $empresa = \sowerphp\core\Configure::read('dte.empresa');
             if ($empresa) {
-                $Emisor = new Model_Contribuyente();
+                $Emisor = new $class();
                 $Emisor->set($empresa);
                 \sowerphp\core\Model_Datasource_Session::message(); // borrar mensaje de sesión si había
             }
@@ -118,7 +119,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite registrar un nuevo contribuyente y asociarlo a un usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-16
+     * @version 2017-10-23
      */
     public function registrar()
     {
@@ -154,7 +155,8 @@ class Controller_Contribuyentes extends \Controller_App
         if (isset($_POST['submit'])) {
             // crear objeto del contribuyente con el rut y verificar que no esté ya asociada a un usuario
             list($rut, $dv) = explode('-', str_replace('.', '', $_POST['rut']));
-            $Contribuyente = new Model_Contribuyente($rut);
+            $class = $this->Contribuyente_class;
+            $Contribuyente = new $class($rut);
             if ($Contribuyente->usuario) {
                 if ($Contribuyente->usuario==$this->Auth->User->id) {
                     \sowerphp\core\Model_Datasource_Session::message(
@@ -168,7 +170,12 @@ class Controller_Contribuyentes extends \Controller_App
                 $this->redirect('/dte/contribuyentes/seleccionar');
             }
             // rellenar campos de la empresa
-            $this->prepararDatosContribuyente($Contribuyente);
+            try {
+                $this->prepararDatosContribuyente($Contribuyente);
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                $this->redirect('/dte/contribuyentes/registrar');
+            }
             $Contribuyente->set($_POST);
             $Contribuyente->rut = $rut;
             $Contribuyente->dv = $dv;
@@ -202,13 +209,14 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite modificar contribuyente previamente registrado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-08
+     * @version 2017-10-23
      */
     public function modificar($rut)
     {
         // crear objeto del contribuyente
         try {
-            $Contribuyente = new Model_Contribuyente($rut);
+            $class = $this->Contribuyente_class;
+            $Contribuyente = new $class($rut);
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             \sowerphp\core\Model_Datasource_Session::message('No se encontró la empresa solicitada', 'error');
             $this->redirect('/dte/contribuyentes/seleccionar');
@@ -239,7 +247,12 @@ class Controller_Contribuyentes extends \Controller_App
         ]);
         // editar contribuyente
         if (isset($_POST['submit'])) {
-            $this->prepararDatosContribuyente($Contribuyente);
+            try {
+                $this->prepararDatosContribuyente($Contribuyente);
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                $this->redirect('/dte/contribuyentes/modificar/'.$rut);
+            }
             $Contribuyente->set($_POST);
             $Contribuyente->modificado = date('Y-m-d H:i:s');
             try {
