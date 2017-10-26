@@ -1053,7 +1053,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2017-10-26
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1080,16 +1080,6 @@ class Model_Contribuyente extends \Model_App
             } else {
                 $where[] = 'd.dte = :dte';
                 $vars[':dte'] = $filtros['dte'];
-            }
-        }
-        // si se debe hacer búsqueda dentro de los XML
-        if (!empty($filtros['xml'])) {
-            $i = 1;
-            foreach ($filtros['xml'] as $nodo => $valor) {
-                $nodo = preg_replace('/[^A-Za-z\/]/', '', $nodo);
-                $where[] = 'LOWER('.$this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/'.$nodo, 'http://www.sii.cl/SiiDte').') LIKE :xml'.$i;
-                $vars[':xml'.$i] = '%'.strtolower($valor).'%';
-                $i++;
             }
         }
         // otros filtros
@@ -1129,36 +1119,59 @@ class Model_Contribuyente extends \Model_App
                 $where[] = 'd.receptor_evento IS NULL';
             }
         }
-        // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        // armar consulta
+        // si se debe hacer búsqueda dentro de los XML
+        if (!empty($filtros['xml'])) {
+            $i = 1;
+            foreach ($filtros['xml'] as $nodo => $valor) {
+                $nodo = preg_replace('/[^A-Za-z\/]/', '', $nodo);
+                $where[] = 'LOWER('.$this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/'.$nodo, 'http://www.sii.cl/SiiDte').') LIKE :xml'.$i;
+                $vars[':xml'.$i] = '%'.strtolower($valor).'%';
+                $i++;
+            }
+        }
+        // armar consulta interna (no obtiene razón social verdadera en DTE exportación por que requiere acceder al XML)
         $query = '
             SELECT
+                d.emisor,
                 d.dte,
-                t.tipo,
                 d.folio,
-                CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
-                d.fecha,
-                d.total,
-                d.revision_estado AS estado,
+                d.certificacion,
+                t.tipo,
+                r.razon_social,
                 i.glosa AS intercambio,
-                d.sucursal_sii,
                 u.usuario
             FROM
-                dte_emitido AS d LEFT JOIN dte_intercambio_resultado_dte AS i
-                    ON i.emisor = d.emisor AND i.dte = d.dte AND i.folio = d.folio AND i.certificacion = d.certificacion,
-                dte_tipo AS t,
-                contribuyente AS r,
-                usuario AS u
-            WHERE d.dte = t.codigo AND d.receptor = r.rut AND d.usuario = u.id AND '.implode(' AND ', $where).'
+                dte_emitido AS d
+                JOIN dte_tipo AS t ON d.dte = t.codigo
+                JOIN contribuyente AS r ON d.receptor = r.rut
+                JOIN usuario AS u ON d.usuario = u.id
+                LEFT JOIN dte_intercambio_resultado_dte AS i ON i.emisor = d.emisor AND i.dte = d.dte AND i.folio = d.folio AND i.certificacion = d.certificacion
+            WHERE '.implode(' AND ', $where).'
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
         ';
         // armar límite consulta
         if (isset($filtros['limit'])) {
             $query = $this->db->setLimit($query, $filtros['limit'], $filtros['offset']);
         }
-        // entregar consulta
-        return $this->db->getTable($query, $vars);
+        // entregar consulta verdadera (esta si obtiene razón social verdadera en DTE exportación, pero sólo para las filas del límite consultado)
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        return $this->db->getTable('
+            SELECT
+                e.dte,
+                e.tipo,
+                e.folio,
+                CASE WHEN e.dte NOT IN (110, 111, 112) THEN e.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
+                d.fecha,
+                d.total,
+                d.revision_estado AS estado,
+                e.intercambio,
+                d.sucursal_sii,
+                e.usuario
+            FROM
+                dte_emitido AS d
+                JOIN ('.$query.') AS e ON d.emisor = e.emisor AND e.dte = d.dte AND e.folio = d.folio AND e.certificacion = d.certificacion
+            ORDER BY d.fecha DESC, e.tipo, e.folio DESC
+        ', $vars);
     }
 
     /**
