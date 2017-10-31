@@ -35,13 +35,17 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los datos de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-08
+     * @version 2017-10-31
      */
     public function contribuyente_datos($rut)
     {
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
         if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
-            $Emisor = $this->getContribuyente();
+            $Emisor = (new Model_Contribuyentes())->get($rut);
+            if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
+                \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
+                $this->redirect('/dte/contribuyentes/seleccionar');
+            }
             $Firma = $Emisor->getFirma($this->Auth->User->id);
             $data = [
                 'firma' => [
