@@ -252,6 +252,20 @@ if ($estado_enviodte==1) {
     debug(implode("\n\n", \sasco\LibreDTE\Log::readAll()));
     echo '<hr/>';
 }
+if ($_Auth->User->inGroup('soporte')) {
+    $tabla = [['DTE', 'Folio', 'Tasa', 'Fecha', 'Sucursal', 'Receptor', 'Razón social receptor', 'Exento', 'Neto', 'IVA', 'Total']];
+    foreach ($Documentos as $Dte) {
+        $resumen = $Dte->getResumen();
+        foreach (['MntExe', 'MntIVA', 'MntNeto', 'MntTotal'] as $monto) {
+            if ($resumen[$monto]) {
+                $resumen[$monto] = num($resumen[$monto]);
+            }
+        }
+        $tabla[] = $resumen;
+    }
+    new \sowerphp\general\View_Helper_Table($tabla);
+    echo '<hr/>';
+}
 ?>
 <a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/eliminar/<?=$DteIntercambio->codigo?>" role="button" title="Eliminar intercambio" onclick="return Form.checkSend('¿Confirmar la eliminación del intercambio?')">
     Eliminar archivo EnvioDTE de intercambio
