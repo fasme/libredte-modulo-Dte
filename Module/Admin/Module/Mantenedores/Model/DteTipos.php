@@ -40,6 +40,7 @@ class Model_DteTipos extends \Model_Plural_App
 
     private $internos = [
         'HES' => 'Hoja de entrada de servicios',
+        'EM' => 'Entrada de mercadería',
     ]; ///< Tipos de documentos internos de LibreDTE (sin código oficial del SII)
 
     /**
