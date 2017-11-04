@@ -26,7 +26,7 @@ namespace website\Dte\Informes;
 /**
  * Helper para generar la propuesta del formulario 29
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-01
+ * @version 2017-11-03
  */
 class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
 {
@@ -116,6 +116,14 @@ class View_Helper_PropuestaF29 extends \sowerphp\general\View_Helper_Spreadsheet
             'subtotal' => [
                 'documentos' => 586,
                 'total' => 142,
+            ],
+        ],
+        'exportaciones' => [
+            'nombre' => 'Facturas exportaciones',
+            'tipos' => [110],
+            'subtotal' => [
+                'documentos' => 585,
+                'total' => 20,
             ],
         ],
         'debito' => [
