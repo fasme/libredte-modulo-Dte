@@ -795,7 +795,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-08
+     * @version 2017-11-04
      */
     private function guardarReceptor($datos)
     {
@@ -805,19 +805,29 @@ class Controller_Documentos extends \Controller_App
         }
         list($receptor, $dv) = $aux;
         $Receptor = new Model_Contribuyente($receptor);
-        if ($Receptor->usuario)
+        if ($Receptor->usuario) {
             return $Receptor;
+        }
         $Receptor->dv = $dv;
-        if (!empty($datos['RznSocRecep']))
+        if (!empty($datos['RznSocRecep'])) {
             $Receptor->razon_social = substr($datos['RznSocRecep'], 0, 100);
-        if (!empty($datos['GiroRecep']))
+        }
+        if (!empty($datos['GiroRecep'])) {
             $Receptor->giro = substr($datos['GiroRecep'], 0, 80);
-        if (!empty($datos['Contacto']))
-            $Receptor->telefono = substr($datos['Contacto'], 0, 20);
-        if (!empty($datos['CorreoRecep']))
+        }
+        if (!empty($datos['Contacto'])) {
+            if (strpos($datos['Contacto'], '@')) {
+                $Receptor->email = substr($datos['Contacto'], 0, 80);
+            } else {
+                $Receptor->telefono = substr($datos['Contacto'], 0, 20);
+            }
+        }
+        if (!empty($datos['CorreoRecep'])) {
             $Receptor->email = substr($datos['CorreoRecep'], 0, 80);
-        if (!empty($datos['DirRecep']))
+        }
+        if (!empty($datos['DirRecep'])) {
             $Receptor->direccion = substr($datos['DirRecep'], 0, 70);
+        }
         if (!empty($datos['CmnaRecep'])) {
             if (is_numeric($datos['CmnaRecep'])) {
                 $Receptor->comuna = $datos['CmnaRecep'];
