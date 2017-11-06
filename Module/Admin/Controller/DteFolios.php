@@ -252,7 +252,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite solicitar un archivo CAF al SII y cargarlo en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-11-05
      */
     public function solicitar_caf($dte = null)
     {
@@ -272,11 +272,17 @@ class Controller_DteFolios extends \Controller_App
             // cargar caf
             $caf = base64_decode($r['body']);
             $Folios = new \sasco\LibreDTE\Sii\Folios($caf);
+            if (!$Folios->getTipo()) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible obtener el XML del CAF de tipo '.$_POST['dte'].' desde el SII', 'error'
+                );
+                return;
+            }
             // buscar el mantenedor de folios del CAF
-            $DteFolio = new Model_DteFolio($Emisor->rut, $Folios->getTipo(), (int)$Folios->getCertificacion());
+            $DteFolio = new Model_DteFolio($Emisor->rut, (int)$Folios->getTipo(), (int)$Folios->getCertificacion());
             if (!$DteFolio->exists()) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Primero debe crear el mantenedor de los folios de tipo '.$Folios->getTipo(), 'error'
+                    'Primero debe crear el mantenedor de los folios de tipo '.(int)$Folios->getTipo(), 'error'
                 );
                 return;
             }
