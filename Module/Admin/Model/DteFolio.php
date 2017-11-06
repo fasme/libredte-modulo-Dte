@@ -247,7 +247,7 @@ class Model_DteFolio extends \Model_App
     /**
      * Método que permite realizar el timbraje de manera automática
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-07
+     * @version 2017-11-05
      */
     public function timbrar($cantidad = null)
     {
@@ -281,17 +281,16 @@ class Model_DteFolio extends \Model_App
         }
         // cargar caf
         try {
-            $this->guardarFolios($r['body']);
-            return true;
+            return $this->guardarFolios($r['body']);
         } catch (\Exception $e) {
-            throw new \Exception('No fue posible guardar el CAF obtenido desde el SII');
+            throw new \Exception('No fue posible guardar el CAF obtenido desde el SII: '.$e->getMessage());
         }
     }
 
     /**
      * Método que guardar un archivo de folios en la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-05
+     * @version 2017-11-05
      */
     public function guardarFolios($xml)
     {
@@ -332,10 +331,11 @@ class Model_DteFolio extends \Model_App
         }
         $this->alertado = 'f';
         try {
-            return $this->save();
+            $this->save();
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             throw new \Exception('El CAF se guardó, pero no fue posible actualizar el mantenedor de folios, deberá actualizar manualmente. '.$e->getMessage());
         }
+        return $Folios;
     }
 
     /**

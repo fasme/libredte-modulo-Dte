@@ -263,32 +263,17 @@ class Controller_DteFolios extends \Controller_App
         ]);
         // procesar solicitud de folios
         if (isset($_POST['submit'])) {
-            // solicitar CAF al SII (se usa servicio web local como wrapper del real)
-            $r = $this->consume('/api/dte/admin/dte_folios/solicitar_caf/'.$_POST['dte'].'/'.$_POST['cantidad'].'/'.$Emisor->rut);
-            if ($r['status']['code']!=200) {
-                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener el archivo CAF desde el SII, intente nuevamente: '.$r['body'], 'error');
-                return;
-            }
-            // cargar caf
-            $caf = base64_decode($r['body']);
-            $Folios = new \sasco\LibreDTE\Sii\Folios($caf);
-            if (!$Folios->getTipo()) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'No fue posible obtener el XML del CAF de tipo '.$_POST['dte'].' desde el SII', 'error'
-                );
-                return;
-            }
             // buscar el mantenedor de folios del CAF
-            $DteFolio = new Model_DteFolio($Emisor->rut, (int)$Folios->getTipo(), (int)$Folios->getCertificacion());
+            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], (int)$Emisor->config_ambiente_en_certificacion);
             if (!$DteFolio->exists()) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Primero debe crear el mantenedor de los folios de tipo '.(int)$Folios->getTipo(), 'error'
+                    'Primero debe crear el mantenedor de los folios de tipo '.$_POST['dte'], 'error'
                 );
                 return;
             }
-            // guardar el CAF
+            // solicitar timbraje
             try {
-                $DteFolio->guardarFolios($caf);
+                $Folios = $DteFolio->timbrar($_POST['cantidad']);
                 \sowerphp\core\Model_Datasource_Session::message(
                     'El CAF para el documento de tipo '.$Folios->getTipo().' que inicia en '.$Folios->getDesde().' fue cargado, el siguiente folio disponible es '.$DteFolio->siguiente, 'ok'
                 );
