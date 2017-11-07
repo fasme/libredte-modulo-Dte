@@ -469,9 +469,8 @@ class Model_Contribuyente extends \Model_App
             $this->db->query('DELETE FROM item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM item_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
         }
-        // todo ok
-        $this->db->commit();
-        return true;
+        // aplicar cambios
+        return $this->db->commit();
     }
 
     /**
