@@ -645,9 +645,9 @@ class Model_Contribuyente extends \Model_App
      * @param permisos Permisos que se desean verificar que tenga el usuario
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-25
+     * @version 2017-11-07
      */
-    public function usuarioAutorizado(\sowerphp\app\Sistema\Usuarios\Model_Usuario $Usuario, $permisos = [])
+    public function usuarioAutorizado($Usuario, $permisos = [])
     {
         // si es el usuario que registró la empresa se le autoriza
         if ($this->usuario == $Usuario->id) {
@@ -715,9 +715,9 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario al que se asignarán permisos
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-14
+     * @version 2017-11-07
      */
-    public function setPermisos(\sowerphp\app\Sistema\Usuarios\Model_Usuario &$Usuario)
+    public function setPermisos(&$Usuario)
     {
         // si el usuario es el administrador de la empresa se colocan sus permisos estándares (tambien si es de soporte)
         if ($this->usuario == $Usuario->id or $Usuario->inGroup(['soporte'])) {
@@ -751,9 +751,9 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario con el usuario a verificar
      * @return =true si está autorizado a cambiar el folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-11-07
      */
-    public function puedeAsignarFolio(\sowerphp\app\Sistema\Usuarios\Model_Usuario $Usuario)
+    public function puedeAsignarFolio($Usuario)
     {
         if (!$this->config_emision_asignar_folio) {
             return false;

@@ -39,7 +39,7 @@ class Model_F29
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-03-09
      */
-    public function __construct(\website\Dte\Model_Contribuyente $Emisor, $periodo)
+    public function __construct($Emisor, $periodo)
     {
         $this->Emisor = $Emisor;
         $this->periodo = (int)$periodo;
