@@ -88,10 +88,11 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
     <div class="row" id="datosExportacion" style="display:none">
         <div class="form-group col-md-12">
             <?php new \sowerphp\general\View_Helper_Table([
-                ['Moneda', 'Nacionalidad', 'Tipo de cambio'],
+                ['Moneda', 'Nacionalidad', 'ID cliente', 'Tipo de cambio'],
                 [
                     $f->input(['type'=>'select', 'name'=>'TpoMoneda', 'options'=>$monedas]),
                     $f->input(['type'=>'select', 'name'=>'Nacionalidad', 'options'=>[''=>''] + $nacionalidades, 'check'=>'notempty']),
+                    $f->input(['name' => 'NumId', 'placeholder' => 'Número ID', 'attr' => 'maxlength="20"', 'popover'=>'ID si el cliente no tiene pasaporte, si lo tiene va en sección referencias (código 813)']),
                     $f->input(['name'=>'TpoCambio', 'label'=>'Tipo de cambio', 'placeholder'=>'Tipo de cambio', 'popover'=>'Dejar vacío para determinar automáticamente', 'check'=>'real']),
                 ]
             ]); ?>

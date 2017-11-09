@@ -363,7 +363,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-23
+     * @version 2017-11-09
      */
     public function previsualizacion()
     {
@@ -512,6 +512,9 @@ class Controller_Documentos extends \Controller_App
         }
         // agregar datos de exportación
         if (in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [110, 111, 112])) {
+            if (!empty($_POST['NumId'])) {
+                $dte['Encabezado']['Receptor']['Extranjero']['NumId'] = $_POST['NumId'];
+            }
             if (!empty($_POST['Nacionalidad'])) {
                 $dte['Encabezado']['Receptor']['Extranjero']['Nacionalidad'] = $_POST['Nacionalidad'];
             }

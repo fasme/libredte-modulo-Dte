@@ -189,6 +189,7 @@ DTE.setTipo = function (tipo) {
         $('#RUTRecepField').attr('readonly', 'readonly');
         $('#GiroRecepField').attr('disabled', 'disabled');
         $('#CmnaRecepField').attr('disabled', 'disabled');
+        $('#RUTSolicitaField').attr('disabled', 'disabled');
         $('#TpoMonedaField').removeAttr('disabled');
         $('#NacionalidadField').removeAttr('disabled');
         document.getElementById('RUTRecepField').value = '55.555.555-5';
@@ -208,6 +209,7 @@ DTE.setTipo = function (tipo) {
         }
         $('#GiroRecepField').removeAttr('disabled');
         $('#CmnaRecepField').removeAttr('disabled');
+        $('#RUTSolicitaField').removeAttr('disabled');
         $('#TpoMonedaField').attr('disabled', 'disabled');
         $('#NacionalidadField').attr('disabled', 'disabled');
         $('#datosExportacion').hide();
