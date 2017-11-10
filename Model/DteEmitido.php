@@ -1052,13 +1052,14 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega los enlaces públicos del documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-11
+     * @version 2017-11-10
      */
     public function getLinks()
     {
         $Request = new \sowerphp\core\Network_Request();
         $links = [];
         $links['pdf'] = $Request->url.'/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/1/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
+        $links['xml'] = $Request->url.'/dte/dte_emitidos/xml/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
         if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->operacion=='S') {
             $links['pagar'] = $Request->url.'/pagos/documentos/pagar/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
         }
