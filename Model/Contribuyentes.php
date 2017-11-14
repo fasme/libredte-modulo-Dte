@@ -261,4 +261,29 @@ class Model_Contribuyentes extends \Model_Plural_App
         ', $vars);
     }
 
+    /**
+     * Método que entrega la cantidad de contribuyentes registrados por actividad económica
+     * @param certificacion =true sólo certificación, =false sólo producción, =null todos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-11-14
+     */
+    public function countByActividadEconomica($certificacion = null)
+    {
+        $vars[':certificacion'] = (int)$certificacion;
+        return $this->db->getTable('
+            SELECT a.actividad_economica, COUNT(c.rut) AS contribuyentes
+            FROM
+                contribuyente AS c
+                JOIN actividad_economica AS a ON a.codigo = c.actividad_economica
+                JOIN contribuyente_config AS e ON c.rut = e.contribuyente
+            WHERE
+                c.usuario IS NOT NULL
+                AND e.configuracion = \'ambiente\'
+                AND e.variable = \'en_certificacion\'
+                AND e.valor = :certificacion
+            GROUP BY a.actividad_economica
+            ORDER BY a.actividad_economica
+        ', $vars);
+    }
+
 }
