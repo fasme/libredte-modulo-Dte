@@ -79,7 +79,12 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
             if ($this->verbose) {
                 $this->out('  No fue posible enviar el reporte');
             }
-            $Contribuyente->notificar('RCOF '.$dia.' falló', 'No fue posible enviar el reporte del día '.$dia);
+            $msg = $Contribuyente->getNombre().','."\n\n";
+            $msg .= 'El envío automático del reporte de consumo de folios (RCOF) falló para el día '.$dia.'.'."\n\n";
+            $msg .= 'Ingrese a Facturación -> Consumo de folios y envíelo manualmente.'."\n\n";
+            $url = '/dte/dte_boleta_consumos/crear?listar=LzEvZGlhL0Q/c2VhcmNoPWVtaXNvcjo3NjE5MjA4MyxjZXJ0aWZpY2FjaW9uOjE=';
+            $msg .= 'Enlace envío manual: '.(new \sowerphp\core\Network_Request())->url.'/dte/contribuyentes/seleccionar/'.$Contribuyente->rut.'/'.base64_encode($url);
+            $Contribuyente->notificar('RCOF '.$dia.' falló', $msg);
         }
     }
 
