@@ -208,33 +208,40 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2017-11-14
      */
     public function __construct($rut = null)
     {
-        if (is_array($rut))
+        if (is_array($rut)) {
             $rut = $rut[0];
-        if (!is_numeric($rut) and strpos($rut, '-'))
+        }
+        if (!is_numeric($rut) and strpos($rut, '-')) {
             $rut = explode('-', str_replace('.', '', $rut))[0];
+        }
         parent::__construct(+$rut);
         if (\sowerphp\core\Configure::read('proveedores.api.libredte') and $this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
             $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$this->getRUT());
             if ($response['status']['code']==200) {
                 $info = $response['body'];
-                $this->razon_social = substr($info['razon_social'], 0, 100);
-                if (!empty($info['actividades'][0]['codigo']))
+                if (!empty($info['razon_social'])) {
+                    $this->razon_social = substr($info['razon_social'], 0, 100);
+                }
+                if (!empty($info['actividades'][0]['codigo'])) {
                     $this->actividad_economica = $info['actividades'][0]['codigo'];
-                if (!empty($info['actividades'][0]['glosa']))
+                }
+                if (!empty($info['actividades'][0]['glosa'])) {
                     $this->giro = substr($info['actividades'][0]['glosa'], 0, 80);
+                }
                 try {
                     $this->save();
                 } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 }
             }
             foreach (['telefono', 'email', 'direccion'] as $attr) {
-                if (!$this->$attr)
+                if (!$this->$attr) {
                     $this->$attr = null;
+                }
             }
         }
         $this->contribuyente = &$this->razon_social;

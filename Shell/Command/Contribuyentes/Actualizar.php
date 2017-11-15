@@ -98,8 +98,9 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             $lines[$i] = utf8_encode($lines[$i]);
             $row = array_map('trim', str_getcsv($lines[$i], ';', ''));
             unset($lines[$i]);
-            if (!isset($row[5]))
+            if (!isset($row[5])) {
                 continue;
+            }
             $row[4] = strtolower($row[4]);
             $row[5] = strtolower($row[5]);
             $data[] = $row;
@@ -114,12 +115,17 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
      */
     private function libredte($ambiente, $dia)
     {
-        if (!$dia)
+        if (!$dia) {
             $dia = date('Y-m-d');
+        }
         // obtener contribuyentes desde el servicio web de LibreDTE
         $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=csv');
         if ($response['status']['code']!=200 or empty($response['body'])) {
-            $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
+            $msg = 'No fue posible obtener los contribuyentes desde el SII';
+            if ($response['body']) {
+                $msg .= ': '.$response['body'];
+            }
+            $this->out('<error>'.$msg.'</error>');
             return 2;
         }
         $this->procesarContribuyentes($this->csv2array($response['body']));
@@ -191,6 +197,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                     $this->out('<error>Contribuyente '.$c[1].' no pudo ser guardado en la base de datos</error>');
                 }
             }
+            unset($Contribuyente);
         }
     }
 
