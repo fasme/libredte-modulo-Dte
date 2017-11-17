@@ -72,7 +72,13 @@ new \sowerphp\general\View_Helper_Table($foliosMensuales, 'uso_mensual_folios_'.
 
 <!-- INICIO ESTADISTICA -->
 <div role="tabpanel" class="tab-pane" id="sin_uso">
-<?php $foliosSinUso = $DteFolio->getSinUso(); if ($foliosSinUso) : ?>
+<?php
+$foliosSinUso = $DteFolio->getSinUso();
+if ($foliosSinUso) :
+    foreach ($foliosSinUso as &$folioSinUso) {
+        $folioSinUso = '<a href="#" onclick="__.popup(\''.$_base.'/dte/admin/dte_folios/estado/'.$DteFolio->dte.'/'.$folioSinUso.'\', 750, 550); return false" title="Ver el estado del folio '.$folioSinUso.' en el SII">'.$folioSinUso.'</a>';
+    }
+?>
 <p>Los folios a continuación, que están entre el N° <?=$DteFolio->getPrimerFolio()?> (primer folio emitido en LibreDTE) y el N° <?=$DteFolio->siguiente?> (folio siguiente), se encuentran sin uso en el sistema:</p>
 <p><?=implode(', ', $foliosSinUso)?></p>
 <p>Si estos folios no existen en otro sistema de facturación y no los recuperará, debe <a href="<?=\sasco\LibreDTE\Sii::getURL('/cvc_cgi/dte/af_anular1', $Emisor->config_ambiente_en_certificacion)?>" target="_blank">anularlos en el SII</a>.</p>

@@ -288,6 +288,43 @@ class Controller_DteFolios extends \Controller_App
     }
 
     /**
+     * Acción que muestra la página con el estado del folio en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-11-17
+     */
+    public function estado($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        $r = $this->consume('/api/dte/admin/dte_folios/estado/'.$dte.'/'.$folio.'/'.$Emisor->rut);
+        if ($r['status']['code']!=200) {
+            die($r['body']);
+        }
+        $this->layout = null;
+        $this->set([
+            'Emisor' => $Emisor,
+            'dte' => $dte,
+            'folio' => $folio,
+            'estado_web' => utf8_encode($r['body']),
+        ]);
+    }
+
+    /**
+     * Acción que permite anular un folio directamente en el sitio del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-11-17
+     */
+    public function anular($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        $r = $this->consume('/api/dte/admin/dte_folios/anular/'.$dte.'/'.$folio.'/'.$Emisor->rut);
+        if ($r['status']['code']!=200) {
+            die($r['body']);
+        }
+        echo utf8_encode($r['body']);
+        exit;
+    }
+
+    /**
      * Recurso que entrega el la información de cierto mantenedor de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-26
@@ -364,6 +401,84 @@ class Controller_DteFolios extends \Controller_App
             $this->Api->send('No fue posible timbrar: '.$r['body'], 500);
         }
         return base64_encode($r['body']);
+    }
+
+    /**
+     * Recurso que permite consultar el estado de un folio en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-11-17
+     */
+    public function _api_estado_GET($dte, $folio, $emisor)
+    {
+        // crear usuario, emisor y verificar permisos
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Emisor = new \website\Dte\Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/admin/dte_folios/ver')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // recuperar firma electrónica
+        $Firma = $Emisor->getFirma($User->id);
+        if (!$Firma) {
+            $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de consultar el estado de un folio', 506);
+        }
+        // consultar estado del folio
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        $r = libredte_consume('/sii/folio_estado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, $data);
+        if ($r['status']['code']!=200) {
+            $this->Api->send('No fue posible consultar el estado del folio: '.$r['body'], 500);
+        }
+        echo $r['body'];
+        exit;
+    }
+
+    /**
+     * Recurso que permite anular un folio en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-11-17
+     */
+    public function _api_anular_GET($dte, $folio, $emisor)
+    {
+        // crear usuario, emisor y verificar permisos
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Emisor = new \website\Dte\Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/admin/dte_folios/subir_caf')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // recuperar firma electrónica
+        $Firma = $Emisor->getFirma($User->id);
+        if (!$Firma) {
+            $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de anular un folio', 506);
+        }
+        // anular folio
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        $r = libredte_consume('/sii/folio_anular/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, $data);
+        if ($r['status']['code']!=200) {
+            $this->Api->send('No fue posible anular el folio: '.$r['body'], 500);
+        }
+        echo $r['body'];
+        exit;
     }
 
 }
