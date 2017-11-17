@@ -343,7 +343,7 @@ class Controller_DteFolios extends \Controller_App
         if (!$Emisor->exists()) {
             $this->Api->send('Emisor no existe', 404);
         }
-        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
+        if (!$Emisor->usuarioAutorizado($User, '/dte/admin/dte_folios/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
@@ -355,6 +355,46 @@ class Controller_DteFolios extends \Controller_App
             $DteFolio->sin_uso = $DteFolio->getSinUso();
         }
         return $DteFolio;
+    }
+
+    /**
+     * Recurso que permite modificar el mantenedor de folios
+     * Modifica: folio siguiente y/o alerta
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-11-17
+     */
+    public function _api_modificar_POST($dte, $emisor)
+    {
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Emisor = new \website\Dte\Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteFolio->exists()) {
+            $this->Api->send('No existe el mantenedor de folios para el tipo de DTE '.$dte, 404);
+        }
+        // validar que campos existan y asignar
+        foreach (['siguiente', 'alerta'] as $attr) {
+            if (isset($this->Api->data[$attr])) {
+                $DteFolio->$attr = $this->Api->data[$attr];
+            }
+        }
+        // guardar e informar
+        try {
+            if (!$DteFolio->calcularDisponibles()) {
+                $this->Api->send('No fue posible actualizar el mantenedor de folios', 500);
+            }
+            return $DteFolio;
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            $this->Api->send('No fue posible actualizar el mantenedor de folios: '.$e->getMessage(), 500);
+        }
     }
 
     /**
