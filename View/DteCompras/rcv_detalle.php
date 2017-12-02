@@ -44,7 +44,7 @@
 <?php
 foreach ($detalle as &$d) {
     $d['detRutDoc'] = num($d['detRutDoc']).'-'.$d['detDvDoc'];
-    unset($d['dhdrCodigo'], $d['dcvCodigo'], $d['detCodigo'], $d['detTipoDoc'], $d['detDvDoc'], $d['cambiarTipoTran'], $d['totalDtoiMontoImp'], $d['totalDinrMontoIVANoR']);
+    unset($d['dhdrCodigo'], $d['dcvCodigo'], $d['dcvEstadoContab'], $d['detCodigo'], $d['detTipoDoc'], $d['detDvDoc'], $d['cambiarTipoTran'], $d['totalDtoiMontoImp'], $d['totalDinrMontoIVANoR']);
 }
 $keys = array_keys($detalle[0]);
 foreach ($keys as &$k) {
