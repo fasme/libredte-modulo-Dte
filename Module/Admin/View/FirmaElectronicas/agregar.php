@@ -8,7 +8,7 @@ echo $f->input([
     'label' => 'Firma electrónica',
     'help' => 'Certificado digital con extensión .p12 o .pfx',
     'check' => 'notempty',
-    'attr' => 'accept="application/x-pkcs12"',
+    'attr' => 'accept=".p12,.pfx"',
 ]);
 echo $f->input([
     'type' => 'password',
