@@ -492,8 +492,8 @@ echo $f->end('Guardar');
 </div>
 <?php endif; ?>
 <?php
-// si es exportación permitir cambiar tipo de cambio
-if ($DteEmitido->getDte()->esExportacion()) :
+// si es exportación permitir cambiar tipo de cambio (sólo si es usuario administrador)
+if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()->esExportacion()) :
 ?>
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -511,7 +511,7 @@ if ($DteEmitido->getDte()->esExportacion()) :
         'name' => 'tipo_cambio',
         'label' => 'Tipo de cambio',
         'check' => 'notempty real',
-        'help' => 'Monto en pesos (CLP) equivalente a 1 '.$DteEmitido->getDte()->getMoneda(),
+        'help' => 'Monto en pesos (CLP) equivalente a 1 '.$DteEmitido->getDte()->getMoneda().' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha),
     ]);
     echo $f->end('Modificar el tipo de cambio');
 ?>
