@@ -268,8 +268,7 @@ class Controller_Documentos extends \Controller_App
                 }
             }
             if (!$total) {
-                $total = -1; // TODO: el 31 de octubre esto se quitará y se entregará el error si no hay total en pesos
-                //$this->Api->send('No fue posible determinar el valor total en pesos del DTE', 400);
+                $this->Api->send('No fue posible determinar el valor total en pesos del DTE', 400);
             }
             $DteTmp->total = round($total);
         }
