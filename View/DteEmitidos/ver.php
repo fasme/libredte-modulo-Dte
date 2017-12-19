@@ -313,7 +313,19 @@ if ($Resultado) {
     </div>
 </div>
 <?php else: ?>
-<p>El documento se encuentra pagado con fecha <?=\sowerphp\general\Utility_Date::format($Cobro->pagado)?> usando el medio de pago <?=$Cobro->getMedioPago()->medio_pago?>.</p>
+<p>El documento se encuentra pagado con fecha <strong><?=\sowerphp\general\Utility_Date::format($Cobro->pagado)?></strong> usando el medio de pago <strong><?=$Cobro->getMedioPago()->medio_pago?></strong>.</p>
+<?php
+if ($Cobro->datos) {
+    $datos = $Cobro->getDatosNormalizados();
+    if ($datos) {
+        echo '<hr/><table class="table table-striped"><tbody>';
+        foreach($datos as $dato => $valor) {
+            echo '<tr><th>',$dato,'</th><td>',$valor,'</td></tr>';
+        }
+        echo '</tbody></table>',"\n";
+    }
+}
+?>
 <?php endif; ?>
 <?php else : ?>
 <p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
