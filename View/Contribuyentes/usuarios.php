@@ -28,7 +28,7 @@ $(function() {
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#usuarios" aria-controls="usuarios" role="tab" data-toggle="tab">Usuarios autorizados</a></li>
         <li role="presentation"><a href="#dtes" aria-controls="dtes" role="tab" data-toggle="tab">Documentos por usuario</a></li>
-        <li role="presentation"><a href="#administrador" aria-controls="administrador" role="tab" data-toggle="tab">Administrador</a></li>
+        <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
     </ul>
     <div class="tab-content">
 
@@ -132,8 +132,39 @@ echo $f->end('Guardar documentos por usuarios');
 </div>
 <!-- FIN DOCUMENTOS POR USUARIOS -->
 
-<!-- INICIO ADMINISTRADOR -->
-<div role="tabpanel" class="tab-pane" id="administrador">
+<!-- INICIO GENERAL -->
+<div role="tabpanel" class="tab-pane" id="general">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-cogs"></i>
+            Configuración general usuarios
+        </div>
+        <div class="panel-body">
+<?php
+$f = new \sowerphp\general\View_Helper_Form();
+echo $f->begin([
+    'action' => '../usuarios_general/'.$Contribuyente->rut,
+    'id' => 'general',
+    'onsubmit' => 'Form.check(\'general\')',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_usuarios_auth2',
+    'label' => '¿Requerir Auth2?',
+    'options' => ['No es obligatorio', 'Sólo usuarios administradores', 'Todos los usuarios autorizados'],
+    'value' => $Contribuyente->config_usuarios_auth2,
+    'help' => 'Esto mejora la seguridad exigiendo que usuarios autorizados usen doble factor de autenticación',
+]);
+echo $f->end('Guardar configuración');
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-user-secret"></i>
+            Administrador de la empresa
+        </div>
+        <div class="panel-body">
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([
@@ -143,15 +174,17 @@ echo $f->begin([
 ]);
 echo $f->input([
     'name' => 'usuario',
-    'label' => 'Administrador',
+    'label' => 'Usuario',
     'value' => $Contribuyente->getUsuario()->usuario,
     'check' => 'notempty',
     'help' => 'Usuario que actúa como administrador de la empresa en LibreDTE',
 ]);
 echo $f->end('Cambiar usuario administrador');
 ?>
+        </div>
+    </div>
 </div>
-<!-- FIN ADMINISTRADOR -->
+<!-- FIN GENERAL -->
 
     </div>
 </div>

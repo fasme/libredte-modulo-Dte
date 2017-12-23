@@ -61,7 +61,7 @@ class Controller_Contribuyentes extends \Controller_App
      * @param rut Si se pasa un RUT se tratará de seleccionar
      * @param url URL a la que redirigir después de seleccionar el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-23
+     * @version 2017-12-23
      */
     public function seleccionar($rut = null, $url = null)
     {
@@ -77,6 +77,16 @@ class Controller_Contribuyentes extends \Controller_App
             if (!$Emisor->usuarioAutorizado($this->Auth->User)) {
                 \sowerphp\core\Model_Datasource_Session::message('No está autorizado a operar con la empresa solicitada', 'error');
                 $this->redirect('/dte/contribuyentes/seleccionar');
+            }
+            if ($Emisor->config_usuarios_auth2) {
+                $auth2_enabled = (bool)$this->Auth->User->getAuth2();
+                if (!$auth2_enabled) {
+                    $auth2_required = (($Emisor->config_usuarios_auth2==1 && $Emisor->usuarioAutorizado($this->Auth->User, 'admin')) || $Emisor->config_usuarios_auth2==2);
+                    if ($auth2_required) {
+                        \sowerphp\core\Model_Datasource_Session::message('Debe habilitar algún mecanismo de autenticación secundaria antes de poder operar con esta empresa', 'error');
+                        $this->redirect('/dte/contribuyentes/seleccionar');
+                    }
+                }
             }
             if (!$url) {
                 \sowerphp\core\Model_Datasource_Session::message('Desde ahora estará operando con '.$Emisor->razon_social);
@@ -567,6 +577,55 @@ class Controller_Contribuyentes extends \Controller_App
                 'No puede acceder directamente a la página '.$this->request->request, 'error'
             );
             $this->redirect(str_replace('/usuarios_dtes/', '/usuarios/', $this->request->request).'#dtes');
+        }
+    }
+
+    /**
+     * Método que permite modificar la configuración general de usuarios de la empresa
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-12-23
+     */
+    public function usuarios_general($rut)
+    {
+        // crear objeto del contribuyente
+        try {
+            $Contribuyente = new Model_Contribuyente($rut);
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            \sowerphp\core\Model_Datasource_Session::message('No se encontró la empresa solicitada', 'error');
+            $this->redirect('/dte/contribuyentes/seleccionar');
+        }
+        // verificar que el usuario sea el administrador o sea soporte autorizado
+        if (!$Contribuyente->usuarioAutorizado($this->Auth->User, 'admin')) {
+            \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
+            $this->redirect('/dte/contribuyentes/seleccionar');
+        }
+        // editar configuración de usuarios
+        if (isset($_POST['submit'])) {
+            // si hay cualquier campo que empiece por 'config_libredte_' se quita ya que son
+            // configuraciones reservadas para los administradores de LibreDTE y no pueden
+            // ser asignadas por los usuarios (esto evita que envién "a la mala" una
+            // configuración del sistema)
+            foreach ($_POST as $var => $val) {
+                if (strpos($var, 'config_libredte_')===0) {
+                    unset($_POST[$var]);
+                }
+            }
+            // guardar configuración
+            $Contribuyente->set($_POST);
+            $Contribuyente->modificado = date('Y-m-d H:i:s');
+            try {
+                $Contribuyente->save();
+                $link = '<a href="'.$this->request->base.str_replace('usuarios_general', 'seleccionar', $this->request->request).'">[seleccionar]</a>';
+                \sowerphp\core\Model_Datasource_Session::message('Configuración de usuarios de la empresa '.$Contribuyente->razon_social.' ha sido modificada '.$link, 'ok');
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible modificar la configuración de usuarios de la empresa:<br/>'.$e->getMessage(), 'error');
+            }
+            $this->redirect('/dte/contribuyentes/seleccionar');
+        } else {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No puede acceder directamente a la página '.$this->request->request, 'error'
+            );
+            $this->redirect(str_replace('/usuarios_general/', '/usuarios/', $this->request->request).'#general');
         }
     }
 
