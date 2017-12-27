@@ -31,7 +31,7 @@ Configure::write('nav.module', array(
     '/documentos/rechazados' => [
         'name' => 'Documentos rechazados',
         'desc' => 'Reporte con listado de documentos rechazados',
-        'icon' => 'fa fa-file-text-o',
+        'icon' => 'far fa-file-alt',
     ],
     '/contribuyentes' => [
         'name' => 'Contribuyentes registrados',

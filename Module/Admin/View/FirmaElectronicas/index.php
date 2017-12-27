@@ -22,7 +22,7 @@ new \sowerphp\general\View_Helper_Table($firmas);
     </div>
     <div class="col-xs-4">
         <a class="btn btn-default btn-lg btn-block" href="firma_electronicas/eliminar" role="button">
-            <span class="fa fa-remove"></span>
+            <span class="fas fa-times"></span>
             Eliminar mi firma electrónica
         </a>
     </div>

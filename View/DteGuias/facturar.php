@@ -37,7 +37,7 @@ if (isset($guias)) {
     foreach ($guias as &$g) {
         $g['total'] = num($g['total']);
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/52/'.$g['folio'].'"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$g['folio'].'"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$g['folio'].'"><span class="far fa-file-pdf btn btn-default"></span></a>';
         $g[] = $acciones;
     }
     echo $f->begin(['id'=>'facturarForm', 'onsubmit'=>'Form.check(\'facturarForm\')']);
@@ -64,10 +64,10 @@ if (isset($temporales)) {
     echo '<p>Se generaron los siguientes documentos temporales:</p>';
     $tabla = [];
     foreach ($temporales as $DteTmp) {
-        $acciones = '<a href="'.$_base.'/dte/dte_tmps/cotizacion/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Descargar cotización"><span class="fa fa-dollar btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/pdf/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Descargar previsualización"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_tmps/cotizacion/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Descargar cotización"><span class="fas fa-dollar-sign btn btn-default"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/pdf/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Descargar previsualización"><span class="far fa-file-pdf btn btn-default"></span></a>';
         $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/ver/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Ver el documento temporal"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/documentos/generar/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Generar DTE y enviar al SII" onclick="return Form.checkSend(\'¿Está seguro de querer generar el DTE?\')"><span class="fa fa-send-o btn btn-default"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/documentos/generar/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'" title="Generar DTE y enviar al SII" onclick="return Form.checkSend(\'¿Está seguro de querer generar el DTE?\')"><span class="far fa-paper-plane btn btn-default"></span></a>';
         $tabla[] = [
             $DteTmp->getFolio(),
             $DteTmp->getReceptor()->razon_social,

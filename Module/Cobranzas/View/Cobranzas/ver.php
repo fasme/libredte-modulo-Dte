@@ -93,7 +93,7 @@ new \sowerphp\general\View_Helper_Table([
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-calendar"></i>
+                <i class="fas fa-calendar-alt"></i>
                 Otros pagos programados asociados al DTE
             </div>
             <div class="panel-body">
@@ -118,13 +118,13 @@ new \sowerphp\general\View_Helper_Table($otros);
                 </div>
                 <div class="col-md-4">
                     <a class="btn btn-default btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
-                        <span class="fa fa-file-pdf-o"></span>
+                        <span class="far fa-file-pdf"></span>
                         Ver PDF
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a class="btn btn-default btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>" role="button">
-                        <span class="fa fa-file-code-o"></span>
+                        <span class="far fa-file-code"></span>
                         Ver XML
                     </a>
                 </div>

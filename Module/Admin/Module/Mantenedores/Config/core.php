@@ -45,10 +45,10 @@ Configure::write('nav.module', array(
     ],
     '/iva_no_recuperables/listar/1/codigo/A' => [
         'name' => 'IVA no recuperable',
-        'icon' => 'fa fa-dollar',
+        'icon' => 'fas fa-dollar-sign',
     ],
     '/impuesto_adicionales/listar/1/codigo/A' => [
         'name' => 'Impuestos adicionales',
-        'icon' => 'fa fa-dollar',
+        'icon' => 'fas fa-dollar-sign',
     ],
 ));

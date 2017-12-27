@@ -26,7 +26,7 @@ Configure::write('nav.module', array(
     '/dte_emitidos' => [
         'name' => 'Documentos emitidos',
         'desc' => 'Informe de documentos emitidos',
-        'icon' => 'fa fa-sign-out',
+        'icon' => 'fas fa-sign-out-alt',
     ],
     '/despachos' => [
         'name' => 'Despachos diarios',
@@ -41,17 +41,17 @@ Configure::write('nav.module', array(
     '/dte_emitidos/intercambio' => [
         'name' => 'Respuesta intercambio DTE',
         'desc' => 'Respuestas del proceso de intercambio para DTE emitidos a clientes',
-        'icon' => 'fa fa-exchange',
+        'icon' => 'fas fa-exchange-alt',
     ],
     '/dte_emitidos/estados' => [
         'name' => 'Estado DTEs emitidos',
         'desc' => 'Estados de documentos emitidos y envíados al SII',
-        'icon' => 'fa fa-files-o',
+        'icon' => 'far fa-copy',
     ],
     '/dte_emitidos/sin_enviar' => [
         'name' => 'Documentos sin enviar al SII',
         'desc' => 'Documentos emitidos y que no han sido envíados al SII',
-        'icon' => 'fa fa-send-o',
+        'icon' => 'far fa-paper-plane',
     ],
     '/documentos_usados' => [
         'name' => 'Documentos usados',

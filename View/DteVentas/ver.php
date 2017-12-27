@@ -2,7 +2,7 @@
 <?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li>
         <a href="<?=$_base?>/dte/dte_ventas/rcv_resumen/<?=$Libro->periodo?>">
-            <span class="fa fa-bank"></span> Ver resumen RV
+            <span class="fas fa-university"></span> Ver resumen RV
         </a>
     </li>
 <?php endif; ?>
@@ -76,19 +76,19 @@ new \sowerphp\general\View_Helper_Table([
         <div class="row">
             <div class="col-md-4">
                 <a class="btn btn-default btn-lg btn-block<?=!$n_ventas?' disabled':''?>" href="<?=$_base?>/dte/dte_ventas/csv/<?=$Libro->periodo?>" role="button">
-                    <span class="fa fa-file-excel-o" style="font-size:24px"></span>
+                    <span class="far fa-file-excel" style="font-size:24px"></span>
                     Descargar CSV
                 </a>
             </div>
             <div class="col-md-4">
                 <a class="btn btn-default btn-lg btn-block<?=!$Libro->xml?' disabled':''?>" href="<?=$_base?>/dte/dte_ventas/pdf/<?=$Libro->periodo?>" role="button">
-                    <span class="fa fa-file-pdf-o" style="font-size:24px"></span>
+                    <span class="far fa-file-pdf" style="font-size:24px"></span>
                     Descargar PDF
                 </a>
             </div>
             <div class="col-md-4">
                 <a class="btn btn-default btn-lg btn-block<?=!$Libro->xml?' disabled':''?>" href="<?=$_base?>/dte/dte_ventas/xml/<?=$Libro->periodo?>" role="button">
-                    <span class="fa fa-file-code-o" style="font-size:24px"></span>
+                    <span class="far fa-file-code" style="font-size:24px"></span>
                     Descargar XML
                 </a>
             </div>
@@ -248,7 +248,7 @@ new \sowerphp\general\View_Helper_Table($detalle);
 <div role="tabpanel" class="tab-pane" id="estadisticas">
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos emitidos por día
+        <i class="far fa-chart-bar fa-fw"></i> Documentos emitidos por día
     </div>
     <div class="panel-body">
         <div id="grafico-documentos_por_dia"></div>
@@ -256,7 +256,7 @@ new \sowerphp\general\View_Helper_Table($detalle);
 </div>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos emitidos por tipo
+        <i class="far fa-chart-bar fa-fw"></i> Documentos emitidos por tipo
     </div>
     <div class="panel-body">
         <div id="grafico-documentos_por_tipo"></div>
@@ -264,7 +264,7 @@ new \sowerphp\general\View_Helper_Table($detalle);
 </div>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-bar-chart-o fa-fw"></i> Documentos emitidos según el estado que asignó el receptor
+        <i class="far fa-chart-bar fa-fw"></i> Documentos emitidos según el estado que asignó el receptor
     </div>
     <div class="panel-body">
 <?php

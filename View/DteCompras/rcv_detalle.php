@@ -8,7 +8,7 @@
 <?php endif; ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-bank"></span> Ver resumen RC<span class="caret"></span>
+            <span class="fas fa-university"></span> Ver resumen RC<span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
             <li>

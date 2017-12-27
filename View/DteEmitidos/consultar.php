@@ -47,13 +47,13 @@ if (isset($DteEmitido)) : ?>
         <div class="row">
             <div class="col-md-6">
                 <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/0/<?=$DteEmitido->emisor?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>" role="button">
-                    <span class="fa fa-file-pdf-o" style="font-size:24px"></span>
+                    <span class="far fa-file-pdf" style="font-size:24px"></span>
                     Descargar PDF del DTE
                 </a>
             </div>
             <div class="col-md-6">
                 <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->emisor?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>" role="button">
-                    <span class="fa fa-file-code-o" style="font-size:24px"></span>
+                    <span class="far fa-file-code" style="font-size:24px"></span>
                     Descargar XML del DTE
                 </a>
             </div>

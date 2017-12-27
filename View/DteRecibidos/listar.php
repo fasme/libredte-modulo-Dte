@@ -2,7 +2,7 @@
 <?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-bank"></span> Recibidos en SII <span class="caret"></span>
+            <span class="fas fa-university"></span> Recibidos en SII <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
             <li>
@@ -36,7 +36,7 @@
 <?php
 foreach ($documentos as &$d) {
     $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-search"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-file-pdf-o"></span></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="far fa-file-pdf"></span></a>';
     $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-default"><span class="fa fa-edit"></span></a>';
     $d[] = $acciones;
     $d['total'] = num($d['total']);

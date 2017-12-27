@@ -5,8 +5,8 @@ $titles = [];
 $colsWidth = [];
 foreach ($columns as $column => $info) {
     $titles[] = $info['name'].' '.
-        '<div class="pull-right"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><span class="fa fa-sort-alpha-asc"></span></a>'.
-        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><span class="fa fa-sort-alpha-desc"></span></a></div>'
+        '<div class="pull-right"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><span class="fas fa-sort-alpha-down"></span></a>'.
+        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><span class="fas fa-sort-alpha-up"></span></a></div>'
     ;
     $colsWidth[] = null;
 }
@@ -84,11 +84,11 @@ foreach ($Objs as &$obj) {
             $row[] = $obj->{$column};
         }
     }
-    $actions = '<a href="'.$_base.$module_url.$controller.'/xml/'.$obj->dia.'" title="Descargar XML"><span class="fa fa-file-code-o btn btn-default"></span></a>';
-    $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII"><span class="fa fa-refresh btn btn-default"></span></a>';
+    $actions = '<a href="'.$_base.$module_url.$controller.'/xml/'.$obj->dia.'" title="Descargar XML"><span class="far fa-file-code btn btn-default"></span></a>';
+    $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII"><span class="fas fa-sync btn btn-default"></span></a>';
     $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII"><span class="fa fa-eye btn btn-default"></span></a>';
     $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
-    //$actions .= ' <a href="'.$_base.$module_url.$controller.'/enviar_sii/'.$obj->dia.$listarFilterUrl.'" title="Reenviar al SII" onclick="return Form.checkSend(\'¿Confirmar el reenvío del reporte de consumo de folios al SII?\')"><span class="fa fa-send-o btn btn-default"></span></a>';
+    //$actions .= ' <a href="'.$_base.$module_url.$controller.'/enviar_sii/'.$obj->dia.$listarFilterUrl.'" title="Reenviar al SII" onclick="return Form.checkSend(\'¿Confirmar el reenvío del reporte de consumo de folios al SII?\')"><span class="far fa-paper-plane btn btn-default"></span></a>';
     $row[] = $actions;
     $data[] = $row;
 }

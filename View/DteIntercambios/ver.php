@@ -89,19 +89,19 @@ new \sowerphp\general\View_Helper_Table([
 <div class="row">
     <div class="col-md-4">
         <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/pdf/<?=$DteIntercambio->codigo?>" role="button">
-            <span class="fa fa-file-pdf-o" style="font-size:24px"></span>
+            <span class="far fa-file-pdf" style="font-size:24px"></span>
             Descargar PDF del intercambio
         </a>
     </div>
     <div class="col-md-4">
         <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/xml/<?=$DteIntercambio->codigo?>" role="button">
-            <span class="fa fa-file-code-o" style="font-size:24px"></span>
+            <span class="far fa-file-code" style="font-size:24px"></span>
             Descargar XML del intercambio
         </a>
     </div>
     <div class="col-md-4">
         <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/resultados_xml/<?=$DteIntercambio->codigo?>" role="button">
-            <span class="fa fa-file-code-o" style="font-size:24px"></span>
+            <span class="far fa-file-code" style="font-size:24px"></span>
             Descargar XML de resultados
         </a>
     </div>
@@ -196,7 +196,7 @@ foreach ($Documentos as $Dte) {
     }
     $acciones .= '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
     $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII"><span class="fa fa-eye btn btn-default"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
     $RecepcionDTE[] = [
         'TipoDTE' => $Dte->getTipo(),
         'Folio' => $Dte->getFolio(),

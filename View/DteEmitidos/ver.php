@@ -63,19 +63,19 @@ new \sowerphp\general\View_Helper_Table([
             <div class="row">
                 <div class="col-md-4">
                     <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
-                        <span class="fa fa-file-pdf-o" style="font-size:24px"></span>
+                        <span class="far fa-file-pdf" style="font-size:24px"></span>
                         Descargar PDF
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
-                        <span class="fa fa-file-code-o" style="font-size:24px"></span>
+                        <span class="far fa-file-code" style="font-size:24px"></span>
                         Descargar XML
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/json/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
-                        <span class="fa fa-file-code-o" style="font-size:24px"></span>
+                        <span class="far fa-file-code" style="font-size:24px"></span>
                         Descargar JSON
                     </a>
                 </div>
@@ -246,7 +246,7 @@ if ($Recibo) {
             $Recibo->recinto,
             $Recibo->firma,
             $Recibo->fecha_hora,
-            '<a href="'.$_base.'/dte/dte_intercambio_recibos/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="fa fa-file-code-o btn btn-default"></span></a>',
+            '<a href="'.$_base.'/dte/dte_intercambio_recibos/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="far fa-file-code btn btn-default"></span></a>',
         ],
     ]);
 } else {
@@ -266,7 +266,7 @@ if ($Recepcion) {
             $Sobre->estado.': '.$Sobre->glosa,
             $Recepcion->estado.': '.$Recepcion->glosa,
             $Sobre->fecha_hora,
-            '<a href="'.$_base.'/dte/dte_intercambio_recepciones/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="fa fa-file-code-o btn btn-default"></span></a>',
+            '<a href="'.$_base.'/dte/dte_intercambio_recepciones/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="far fa-file-code btn btn-default"></span></a>',
         ],
     ]);
 } else {
@@ -285,7 +285,7 @@ if ($Resultado) {
             $Sobre->email,
             $Resultado->estado.': '.$Resultado->glosa,
             $Sobre->fecha_hora,
-            '<a href="'.$_base.'/dte/dte_intercambio_resultados/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="fa fa-file-code-o btn btn-default"></span></a>',
+            '<a href="'.$_base.'/dte/dte_intercambio_resultados/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="far fa-file-code btn btn-default"></span></a>',
         ],
     ]);
 } else {
@@ -367,7 +367,7 @@ if ($referencias) {
     echo '<p>Los siguientes son documentos que hacen referencia a este.</p>',"\n";
     foreach ($referencias as &$r) {
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$r['dte'].'/'.$r['folio'].'" title="Ver documento"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$r['dte'].'/'.$r['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$r['dte'].'/'.$r['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
         $r[] = $acciones;
         unset($r['dte']);
     }
@@ -509,7 +509,7 @@ if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()-
 ?>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-dollar"></i>
+        <i class="fas fa-dollar-sign"></i>
         Tipo de cambio para valor en pesos (CLP)
     </div>
     <div class="panel-body">
@@ -533,7 +533,7 @@ if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()-
 <?php if ($DteEmitido->getTipo()->enviar) : ?>
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-send-o"></i>
+        <i class="far fa-paper-plane"></i>
         Track ID o identificador del envío
     </div>
     <div class="panel-body">

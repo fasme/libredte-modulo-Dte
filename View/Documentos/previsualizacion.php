@@ -17,25 +17,25 @@ new \sowerphp\general\View_Helper_Table([
 <div class="row">
     <div class="col-md-3">
         <a class="btn btn-primary btn-lg btn-block<?=!$DteTmp->getTipo()->permiteCotizacion()?' disabled':''?>" href="../dte_tmps/cotizacion/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-            <span class="fa fa-file-o" style="font-size:24px"></span>
+            <span class="far fa-file" style="font-size:24px"></span>
             Descargar cotización
         </a>
     </div>
     <div class="col-md-3">
         <a class="btn btn-primary btn-lg btn-block" href="../dte_tmps/pdf/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-            <span class="fa fa-file-pdf-o" style="font-size:24px"></span>
+            <span class="far fa-file-pdf" style="font-size:24px"></span>
             Previsualizar PDF
         </a>
     </div>
     <div class="col-md-3">
         <a class="btn btn-primary btn-lg btn-block<?=!$DteTmp->getTipo()->permiteCobro()?' disabled':''?>" href="../dte_tmps/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-            <span class="fa fa-dollar" style="font-size:24px"></span>
+            <span class="fas fa-dollar-sign" style="font-size:24px"></span>
             Registrar pago
         </a>
     </div>
     <div class="col-md-3">
         <a class="btn btn-primary btn-lg btn-block" href="generar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button" onclick="return Form.checkSend('¿Está seguro de querer generar el DTE?')">
-            <span class="fa fa-send-o" style="font-size:24px"></span>
+            <span class="far fa-paper-plane" style="font-size:24px"></span>
             Generar DTE
         </a>
     </div>

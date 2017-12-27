@@ -35,7 +35,7 @@ if (isset($compras)) {
         $c['items'] = implode('<br/>', $c['items']);
         $c['precios'] = implode('<br/>', array_map('num', $c['precios']));
         $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$c['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-default'.(!$c['intercambio']?' disabled':'').'"><span class="fa fa-search"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$c['intercambio'].'/0/'.$c['emisor'].'/'.$c['dte'].'/'.$c['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$c['intercambio']?' disabled':'').'"><span class="fa fa-file-pdf-o"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$c['intercambio'].'/0/'.$c['emisor'].'/'.$c['dte'].'/'.$c['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$c['intercambio']?' disabled':'').'"><span class="far fa-file-pdf"></span></a>';
         $c[] = $acciones;
         unset($c['emisor'], $c['intercambio'], $c['dte']);
     }

@@ -2,7 +2,7 @@
 <?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-bank"></span> Recibidos en SII <span class="caret"></span>
+            <span class="fas fa-university"></span> Recibidos en SII <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
             <li>
@@ -21,7 +21,7 @@
 <?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
         <a href="https://www4.sii.cl/consdcvinternetui/#/home" title="Ir al registro de compra y venta en el SII" target="_blank">
-            <span class="fa fa-bank"></span>
+            <span class="fas fa-university"></span>
             Ver RCV en SII
         </a>
     </li>
@@ -49,7 +49,7 @@
     </li>
     <li>
         <a href="<?=$_base?>/dte/dte_intercambios/actualizar" title="Actualizar bandeja de intercambio <?=$Emisor->config_email_intercambio_user?>">
-            <span class="fa fa-refresh"></span>
+            <span class="fas fa-sync"></span>
             Actualizar
         </a>
     </li>
@@ -76,7 +76,7 @@ foreach ($intercambios as &$i) {
         $i[] = '';
     }
     $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$i['codigo'].'" title="Ver detalles del intercambio"><span class="fa fa-search btn btn-default"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$i['codigo'].'" title="Descargar PDF del intercambio"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$i['codigo'].'" title="Descargar PDF del intercambio"><span class="far fa-file-pdf btn btn-default"></span></a>';
     $i[] = $acciones;
     if (is_numeric($i['emisor'])) {
         $i['emisor'] = \sowerphp\app\Utility_Rut::addDV($i['emisor']);

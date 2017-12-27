@@ -56,25 +56,25 @@ new \sowerphp\general\View_Helper_Table([
     <div class="row">
         <div class="col-md-3">
             <a class="btn btn-default btn-lg btn-block<?=!$DteTmp->getTipo()->permiteCotizacion()?' disabled':''?>" href="<?=$_base?>/dte/dte_tmps/cotizacion/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="fa fa-file-o" style="font-size:24px"></span>
+                <span class="far fa-file" style="font-size:24px"></span>
                 Cotización
             </a>
         </div>
         <div class="col-md-3">
             <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pdf/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="fa fa-file-pdf-o" style="font-size:24px"></span>
+                <span class="far fa-file-pdf" style="font-size:24px"></span>
                 Previsualización
             </a>
         </div>
         <div class="col-md-3">
             <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/xml/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="fa fa-file-code-o" style="font-size:24px"></span>
+                <span class="far fa-file-code" style="font-size:24px"></span>
                 XML sin firmar
             </a>
         </div>
         <div class="col-md-3">
             <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/json/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="fa fa-file-code-o" style="font-size:24px"></span>
+                <span class="far fa-file-code" style="font-size:24px"></span>
                 Archivo JSON
             </a>
         </div>

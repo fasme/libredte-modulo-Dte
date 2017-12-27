@@ -24,7 +24,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por día
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por día
             </div>
             <div class="panel-body">
                 <div id="grafico-por_dia"></div>
@@ -34,7 +34,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por hora
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por hora
             </div>
             <div class="panel-body">
                 <div id="grafico-por_hora"></div>
@@ -44,7 +44,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por sucursal
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por sucursal
             </div>
             <div class="panel-body">
                 <div id="grafico-por_sucursal"></div>
@@ -54,7 +54,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por usuario
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por usuario
             </div>
             <div class="panel-body">
                 <div id="grafico-por_usuario"></div>
@@ -64,7 +64,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por tipo de documento
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por tipo de documento
             </div>
             <div class="panel-body">
                 <div id="grafico-por_tipo"></div>
@@ -74,7 +74,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por nacionalidad (sólo exportación)
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por nacionalidad (sólo exportación)
             </div>
             <div class="panel-body">
                 <div id="grafico-por_nacionalidad"></div>
@@ -84,7 +84,7 @@ echo $f->end('Generar informe de documentos emitidos');
     <div class="col-sm-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-bar-chart-o fa-fw"></i> Emitidos por moneda (sólo exportación)
+                <i class="far fa-chart-bar fa-fw"></i> Emitidos por moneda (sólo exportación)
             </div>
             <div class="panel-body">
                 <div id="grafico-por_moneda"></div>

@@ -6,7 +6,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-3">
-                        <i class="fa fa-file-o fa-5x"></i>
+                        <i class="far fa-file fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_temporales)?></div>
@@ -28,7 +28,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-3">
-                        <i class="fa fa-sign-out fa-5x"></i>
+                        <i class="fas fa-sign-out-alt fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_emitidos)?></div>
@@ -50,7 +50,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-3">
-                        <i class="fa fa-sign-in fa-5x"></i>
+                        <i class="fas fa-sign-in-alt fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_recibidos)?></div>
@@ -72,7 +72,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-3">
-                        <i class="fa fa-exchange fa-5x"></i>
+                        <i class="fas fa-exchange-alt fa-5x"></i>
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_intercambios)?></div>
@@ -143,7 +143,7 @@
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Ventas período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Ventas período <?=$periodo?>
                     </div>
                     <div class="panel-body">
                         <div id="grafico-ventas"></div>
@@ -154,7 +154,7 @@
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Compras período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Compras período <?=$periodo?>
                     </div>
                     <div class="panel-body">
                         <div id="grafico-compras"></div>
@@ -169,7 +169,7 @@
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Estado documentos emitidos período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Estado documentos emitidos período <?=$periodo?>
                     </div>
                     <div class="panel-body">
                         <div id="grafico-dte_emitidos_estados"></div>
@@ -200,7 +200,7 @@
         <!-- folios disponibles -->
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-file-code-o fa-fw"></i>
+                <i class="far fa-file-code fa-fw"></i>
                 Folios disponibles
                 <div class="btn-group pull-right">
                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -260,7 +260,7 @@
                         </li>
                         <li>
                             <a href="admin/firma_electronicas/eliminar">
-                                <i class="fa fa-remove fa-fw"></i> Eliminar
+                                <i class="fas fa-times fa-fw"></i> Eliminar
                             </a>
                         </li>
                     </ul>

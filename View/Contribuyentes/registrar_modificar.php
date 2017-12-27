@@ -334,7 +334,7 @@ echo $f->input([
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-envelope-o"></i>
+                    <i class="far fa-envelope"></i>
                     Correo contacto empresas (intercambio)
                 </div>
                 <div class="panel-body">
@@ -382,7 +382,7 @@ $f->setColsLabel();
 <div role="tabpanel" class="tab-pane" id="facturacion">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-send-o"></i>
+            <i class="far fa-paper-plane"></i>
             Emisión documentos
         </div>
         <div class="panel-body">
@@ -591,7 +591,7 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-file-pdf-o"></i>
+            <i class="far fa-file-pdf"></i>
             PDF
         </div>
         <div class="panel-body">
@@ -754,7 +754,7 @@ $f->setStyle(false);
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-file-o"></i>
+            <i class="far fa-file"></i>
             Recepción documentos
         </div>
         <div class="panel-body">
@@ -815,7 +815,7 @@ echo $f->input([
 <div role="tabpanel" class="tab-pane" id="api">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-exchange"></i>
+            <i class="fas fa-exchange-alt"></i>
             Servicios web del contribuyente
         </div>
         <div class="panel-body">
@@ -889,7 +889,7 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-envelope-o"></i>
+            <i class="far fa-envelope"></i>
             Datos de contacto
         </div>
         <div class="panel-body">
@@ -920,7 +920,7 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-support"></i>
+            <i class="far fa-life-ring"></i>
             Soporte
         </div>
         <div class="panel-body">

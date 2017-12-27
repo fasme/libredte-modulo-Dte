@@ -2,7 +2,7 @@
 <?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
         <a href="https://www4.sii.cl/consdcvinternetui/#/home" title="Ir al registro de compra y venta en el SII" target="_blank">
-            <span class="fa fa-bank"></span>
+            <span class="fas fa-university"></span>
             Ver RCV en SII
         </a>
     </li>
@@ -23,9 +23,9 @@
 foreach ($periodos as &$p) {
     $acciones = '<a href="dte_compras/ver/'.$p['periodo'].'" title="Ver estado del libro del período"><span class="fa fa-search btn btn-default"></span></a>';
     if ($p['recibidos'])
-        $acciones .= ' <a href="dte_compras/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período"><span class="fa fa-file-excel-o btn btn-default"></span></a>';
+        $acciones .= ' <a href="dte_compras/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período"><span class="far fa-file-excel btn btn-default"></span></a>';
     else
-        $acciones .= ' <span class="fa fa-file-excel-o btn btn-default disabled"></span>';
+        $acciones .= ' <span class="far fa-file-excel btn btn-default disabled"></span>';
     $p[] = $acciones;
 }
 array_unshift($periodos, ['Período','Recibidos', 'Envíados', 'Track ID', 'Estado', 'Acciones']);

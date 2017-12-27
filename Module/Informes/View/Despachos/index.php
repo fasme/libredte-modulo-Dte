@@ -72,7 +72,7 @@ if (isset($despachos)) {
     $despachos_mapa = [];
     foreach ($despachos as &$d) {
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/52/'.$d['folio'].'"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$d['folio'].'"><span class="fa fa-file-pdf-o btn btn-default"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$d['folio'].'"><span class="far fa-file-pdf btn btn-default"></span></a>';
         $d[] = $acciones;
         $d['direccion'] .= ', '.$d['comuna'];
         $d['total'] = num($d['total']);

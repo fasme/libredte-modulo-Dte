@@ -29,22 +29,22 @@
     '/documentos/emitir' => [
         'name' => 'Emitir documento',
         'desc' => 'Emitir documento tributario electrónico (DTE)',
-        'icon' => 'fa fa-file-text',
+        'icon' => 'fas fa-file-alt',
     ],
     '/dte_tmps' => [
         'name' => 'Documentos temporales',
         'desc' => 'Revisar documentos temporales',
-        'icon' => 'fa fa-file-o',
+        'icon' => 'far fa-file',
     ],
     '/dte_emitidos/listar' => [
         'name' => 'Documentos emitidos',
         'desc' => 'Revisar documentos emitidos',
-        'icon' => 'fa fa-sign-out',
+        'icon' => 'fas fa-sign-out-alt',
     ],
     '/dte_recibidos/listar' => [
         'name' => 'Documentos recibidos',
         'desc' => 'Revisar documentos recibidos',
-        'icon' => 'fa fa-sign-in',
+        'icon' => 'fas fa-sign-in-alt',
     ],
     '/dte_ventas' => [
         'name' => 'Libro de ventas',
@@ -59,7 +59,7 @@
     '/dte_intercambios/listar' => [
         'name' => 'Bandeja de intercambio',
         'desc' => 'Menú de intercambio de DTE entre contribuyentes',
-        'icon' => 'fa fa-exchange',
+        'icon' => 'fas fa-exchange-alt',
     ],
     '/dte_guias' => [
         'name' => 'Libro de guías',
@@ -79,7 +79,7 @@
     '/cobranzas/cobranzas/buscar' => [
         'name' => 'Pagos programados',
         'desc' => 'Buscar pagos programados ventas a crédito',
-        'icon' => 'fa fa-calendar',
+        'icon' => 'fas fa-calendar-alt',
     ],
     '/informes' => [
         'name' => 'Informes',

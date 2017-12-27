@@ -20,7 +20,7 @@ echo $f->end('Buscar boletas');
 
 if (isset($boletas)) {
     foreach ($boletas as &$b) {
-        $b[] = '<a href="'.$_base.'/dte/dte_recibidos/bhe_pdf/'.$b['codigo'].'" title="Descargar PDF boleta honorarios electrónica" class="btn btn-default" target="_blank"><span class="fa fa-file-pdf-o"></span></a>';
+        $b[] = '<a href="'.$_base.'/dte/dte_recibidos/bhe_pdf/'.$b['codigo'].'" title="Descargar PDF boleta honorarios electrónica" class="btn btn-default" target="_blank"><span class="far fa-file-pdf"></span></a>';
         if ($b['anulada']) {
             $b['anulada'] = \sowerphp\general\Utility_Date::format($b['anulada']);
         }

@@ -44,7 +44,7 @@
     '/respaldos/dropbox' => [
         'name' => 'Respaldos en Dropbox',
         'desc' => 'Configuración para respaldos automáticos en Dropbox',
-        'icon' => 'fa fa-dropbox',
+        'icon' => 'fab fa-dropbox',
     ],
     '/respaldos/exportar' => [
         'name' => 'Exportar datos',

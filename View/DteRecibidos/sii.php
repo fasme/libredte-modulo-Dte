@@ -2,13 +2,13 @@
 <?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
         <a href="https://palena.sii.cl/cgi_dte/consultaDTE/wsDTEConsRecContHtml.cgi" title="Consultar documentos recibidos directamente en la web del SII" target="_blank">
-            <span class="fa fa-bank"></span>
+            <span class="fas fa-university"></span>
             Consultar en web del SII
         </a>
     </li>
     <li>
         <a href="https://www4.sii.cl/registrorechazodteInternet" title="Ir al registro de aceptación o reclamos de un DTE en el SII" target="_blank">
-            <span class="fa fa-bank"></span>
+            <span class="fas fa-university"></span>
             Aceptar/rechazar en SII
         </a>
     </li>

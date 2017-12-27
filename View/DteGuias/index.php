@@ -10,9 +10,9 @@
 foreach ($periodos as &$p) {
     $acciones = '<a href="dte_guias/ver/'.$p['periodo'].'" title="Ver estado del libro del período"><span class="fa fa-search btn btn-default"></span></a>';
     if ($p['emitidos'])
-        $acciones .= ' <a href="dte_guias/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período"><span class="fa fa-file-excel-o btn btn-default"></span></a>';
+        $acciones .= ' <a href="dte_guias/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período"><span class="far fa-file-excel btn btn-default"></span></a>';
     else
-        $acciones .= ' <span class="fa fa-file-excel-o btn btn-default disabled"></span>';
+        $acciones .= ' <span class="far fa-file-excel btn btn-default disabled"></span>';
     $p[] = $acciones;
 }
 array_unshift($periodos, ['Período', 'Emitidas', 'Envíadas', 'Track ID', 'Estado', 'Acciones']);

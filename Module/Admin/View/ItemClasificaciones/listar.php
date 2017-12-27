@@ -26,8 +26,8 @@ $titles = [];
 $colsWidth = [];
 foreach ($columns as $column => $info) {
     $titles[] = $info['name'].' '.
-        '<div class="pull-right"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><span class="fa fa-sort-alpha-asc"></span></a>'.
-        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><span class="fa fa-sort-alpha-desc"></span></a></div>'
+        '<div class="pull-right"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><span class="fas fa-sort-alpha-down"></span></a>'.
+        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><span class="fas fa-sort-alpha-up"></span></a></div>'
     ;
     $colsWidth[] = null;
 }
@@ -115,7 +115,7 @@ foreach ($Objs as &$obj) {
     }
     $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$obj->codigo.$listarFilterUrl.'" title="Editar"><span class="fa fa-edit btn btn-default"></span></a>';
     if ($deleteRecord) {
-        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(\''.$model.'\', \''.implode(', ', $pkValues).'\')"><span class="fa fa-remove btn btn-default"></span></a>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(\''.$model.'\', \''.implode(', ', $pkValues).'\')"><span class="fas fa-times btn btn-default"></span></a>';
     }
     $row[] = $actions;
     $data[] = $row;
