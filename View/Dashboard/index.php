@@ -10,13 +10,13 @@
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_temporales)?></div>
-                        <div>Documentos temporales</div>
+                        <div>Temporales</div>
                     </div>
                 </div>
             </div>
             <a href="dte_tmps">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir a los documentos temporales</span>
+                    <span class="pull-left">Explorar documentos</span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -32,13 +32,13 @@
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_emitidos)?></div>
-                        <div>Libro de ventas <?=$periodo?></div>
+                        <div>Ventas <?=$periodo?></div>
                     </div>
                 </div>
             </div>
             <a href="dte_ventas/ver/<?=$periodo?>">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir al libro de ventas <?=$periodo?></span>
+                    <span class="pull-left">Detalle ventas <?=$periodo?></span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -54,13 +54,13 @@
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_recibidos)?></div>
-                        <div>Libro de compras <?=$periodo?></div>
+                        <div>Compras <?=$periodo?></div>
                     </div>
                 </div>
             </div>
             <a href="dte_compras/ver/<?=$periodo?>">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir al libro de compras <?=$periodo?></span>
+                    <span class="pull-left">Detalle compras <?=$periodo?></span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -76,13 +76,13 @@
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge"><?=num($n_intercambios)?></div>
-                        <div>Intercambios pendientes</div>
+                        <div>Pendientes</div>
                     </div>
                 </div>
             </div>
             <a href="dte_intercambios/listar">
                 <div class="panel-footer">
-                    <span class="pull-left">Ir a la bandeja de intercambio</span>
+                    <span class="pull-left">Bandeja de intercambio</span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
                 </div>
@@ -117,14 +117,14 @@
 <?php if (!$libro_ventas) : ?>
                 <a class="btn btn-danger btn-lg btn-block" href="dte_ventas" role="button" title="Ir al libro de ventas">
                     <i class="fa fa-exclamation-circle"></i>
-                    Está pendiente el envio del libro de ventas <?=$periodo_anterior?>
+                    Falta generar ventas <?=$periodo_anterior?>
                 </a>
                 <br />
 <?php endif; ?>
 <?php if (!$libro_compras) : ?>
                 <a class="btn btn-danger btn-lg btn-block" href="dte_compras" role="button" title="Ir al libro de compras">
                     <i class="fa fa-exclamation-circle"></i>
-                    Está pendiente el envio del libro de compras <?=$periodo_anterior?>
+                    Falta generar compras <?=$periodo_anterior?>
                 </a>
                 <br />
 <?php endif; ?>
