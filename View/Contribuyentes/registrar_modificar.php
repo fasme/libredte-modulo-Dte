@@ -920,6 +920,37 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
+            <i class="fas fa-link"></i>
+            Enlaces personalizados
+        </div>
+        <div class="panel-body">
+<?php
+$config_extra_links = [];
+foreach ((array)$Contribuyente->config_extra_links as $l) {
+    $config_extra_links[] = [
+        'config_extra_links_nombre' => $l->nombre,
+        'config_extra_links_enlace' => !empty($l->enlace) ? $l->enlace : null,
+        'config_extra_links_icono' => !empty($l->icono) ? $l->icono : null,
+    ];
+}
+echo $f->input([
+    'type' => 'js',
+    'id' => 'config_extra_links',
+    'label' => 'Enlaces',
+    'titles' => ['Nombre', 'Enlace', 'Icono'],
+    'inputs' => [
+        ['name' => 'config_extra_links_nombre', 'check' => 'notempty'],
+        ['name' => 'config_extra_links_enlace'],
+        ['name' => 'config_extra_links_icono'],
+    ],
+    'values' => $config_extra_links,
+    'help' => 'Enlaces para reemplazar el menú por defecto de la empresa. Si se desea agregar un separador usar un guión en el nombre y el enlace en blanco',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <i class="far fa-life-ring"></i>
             Soporte
         </div>

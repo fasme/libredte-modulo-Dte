@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para mapear la tabla contribuyente de la base de datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-12-26
+ * @version 2017-12-28
  */
 class Model_Contribuyente extends \Model_App
 {
@@ -2855,6 +2855,34 @@ class Model_Contribuyente extends \Model_App
             }
         }
         return $rest;
+    }
+
+    /**
+     * Método que entrega los enlaces normalizados para ser usados en el layout
+     * de la aplicación
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-12-29
+     */
+    public function getLinks()
+    {
+        // entregar el menú de contribuyente por defecto (genérico de la aplicación)
+        if (!$this->config_extra_links) {
+            return (array)\sowerphp\core\Configure::read('nav.contribuyente');
+        }
+        // entregar menu personalizado de la empresa
+        $links = [];
+        foreach ($this->config_extra_links as $l) {
+            if ($l->nombre == '-') {
+                $links[] = '-';
+            } else {
+                if (!empty($l->icono)) {
+                    $links[$l->enlace] = '<span class="'.$l->icono.'"></span> '.$l->nombre;
+                } else {
+                    $links[$l->enlace] = $l->nombre;
+                }
+            }
+        }
+        return $links;
     }
 
 }

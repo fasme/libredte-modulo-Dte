@@ -283,7 +283,7 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-19
+     * @version 2017-12-28
      */
     protected function prepararDatosContribuyente(&$Contribuyente)
     {
@@ -435,6 +435,31 @@ class Controller_Contribuyentes extends \Controller_App
             unset($_POST['config_api_credenciales']);
         } else {
             $_POST['config_api_servicios'] = null;
+        }
+        // guardar enlaces personalizados
+        if (!empty($_POST['config_extra_links_nombre'])) {
+            $config_extra_links = [];
+            $n_links = count($_POST['config_extra_links_nombre']);
+            for ($i=0; $i<$n_links; $i++) {
+                if (empty($_POST['config_extra_links_nombre'][$i])) {
+                    continue;
+                }
+                $link = [
+                    'nombre' => strip_tags($_POST['config_extra_links_nombre'][$i]),
+                ];
+                if (!empty($_POST['config_extra_links_enlace'][$i])) {
+                    $link['enlace'] = str_replace($this->request->url, '', strip_tags($_POST['config_extra_links_enlace'][$i]));
+                }
+                if (!empty($_POST['config_extra_links_icono'][$i])) {
+                    $link['icono'] = strip_tags($_POST['config_extra_links_icono'][$i]);
+                }
+                $config_extra_links[] = $link;
+            }
+            $_POST['config_extra_links'] = $config_extra_links ? $config_extra_links : null;
+            unset($_POST['config_extra_links_nombre']);
+            unset($_POST['config_extra_links_enlace']);
+        } else {
+            $_POST['config_extra_links'] = null;
         }
         // poner valores por defecto
         foreach (Model_Contribuyente::$defaultConfig as $key => $value) {
