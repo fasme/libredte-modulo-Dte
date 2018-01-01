@@ -152,7 +152,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método que procesa los datos de los contribuyentes y los actualiza en la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-26
+     * @version 2018-01-01
      */
     private function procesarContribuyentes($contribuyentes)
     {
@@ -170,7 +170,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             $Contribuyente = new Model_Contribuyente($rut);
             $Contribuyente->dv = $dv;
             if (!$Contribuyente->usuario) {
-                $Contribuyente->razon_social = substr($c[1], 0, 100);
+                $Contribuyente->razon_social = mb_substr($c[1], 0, 100);
             }
             if (is_numeric($c[2]) and $c[2]) {
                 $Contribuyente->config_ambiente_produccion_numero = (int)$c[2];
@@ -237,7 +237,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 }
                 $cambios = false;
                 if ($Contribuyente->razon_social==\sowerphp\app\Utility_Rut::addDV($Contribuyente->rut) and !empty($info['razon_social'])) {
-                    $Contribuyente->razon_social = substr($info['razon_social'], 0, 100);
+                    $Contribuyente->razon_social = mb_substr($info['razon_social'], 0, 100);
                     $cambios = true;
                 }
                 if (!$Contribuyente->actividad_economica and !empty($info['actividades'][0]['codigo'])) {
@@ -245,7 +245,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                     $cambios = true;
                 }
                 if (!$Contribuyente->giro and !empty($info['actividades'][0]['glosa'])) {
-                    $Contribuyente->giro = substr($info['actividades'][0]['glosa'], 0, 80);
+                    $Contribuyente->giro = mb_substr($info['actividades'][0]['glosa'], 0, 80);
                     $cambios = true;
                 }
                 if ($cambios) {
