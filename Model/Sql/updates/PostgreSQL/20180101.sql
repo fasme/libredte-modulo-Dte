@@ -1,7 +1,7 @@
 BEGIN;
 
 --
--- Actualización al día 25 de diciembre de 2017
+-- Actualización al día 01 de enero de 2018
 --
 
 -- tabla para los datos extra del usuario (api, configuraciones, etc, propias de la aplicación)
