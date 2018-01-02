@@ -170,7 +170,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             $Contribuyente = new Model_Contribuyente($rut);
             $Contribuyente->dv = $dv;
             if (!$Contribuyente->usuario) {
-                $Contribuyente->razon_social = mb_substr($c[1], 0, 100);
+                $Contribuyente->razon_social = mb_substr(utf8_encode($c[1]), 0, 100);
             }
             if (is_numeric($c[2]) and $c[2]) {
                 $Contribuyente->config_ambiente_produccion_numero = (int)$c[2];
