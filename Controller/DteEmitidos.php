@@ -920,7 +920,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el timbre de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-02
+     * @version 2018-01-10
      */
     public function _api_ted_GET($dte, $folio, $emisor)
     {
@@ -941,8 +941,9 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteEmitido->exists())
+        if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
         $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
         $EnvioDte->loadXML(base64_decode($DteEmitido->xml));
         $ted = $EnvioDte->getDocumentos()[0]->getTED();
@@ -952,6 +953,23 @@ class Controller_DteEmitidos extends \Controller_App
         else if ($formato == 'png') {
             $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
             $pdf417->getBarcodePNG(4, 4, [0,0,0]);
+            exit;
+        }
+        else if ($formato == 'bmp') {
+            $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
+            $png = $pdf417->getBarcodePngData(4, 4, [0,0,0]);
+            $im = imagecreatefromstring($png);
+            header('Content-Typ: image/x-ms-bmp');
+            \imagebmp($im);
+            exit;
+        }
+        else if ($formato == 'svg') {
+            $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
+            $pdf417->getBarcodeSVG(1, 1, 'black');
+            exit;
+        }
+        else {
+            $this->Api->send('Formato '.$formato.' no soportado', 400);
         }
     }
 
