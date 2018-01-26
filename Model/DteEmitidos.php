@@ -296,6 +296,11 @@ class Model_DteEmitidos extends \Model_Plural_App
         ', [':desde'=>$desde, ':hasta'=>$hasta, ':certificacion'=>(int)$certificacion]);
     }
 
+    /**
+     * Método que actualiza el estado del evento del receptor (si está aceptado o no el DTE)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-12
+     */
     public function actualizarEstadoReceptor($periodo = null)
     {
         if (!$periodo) {
@@ -326,6 +331,48 @@ class Model_DteEmitidos extends \Model_Plural_App
                 $DteEmitido->save();
             }
         }
+    }
+
+    /**
+     * Método que entrega el listado de documentos en cierto rango de fecha que
+     * no han sido enviados al correo de intercambio del receptor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-01-26
+     */
+    public function getSinEnvioIntercambio($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT
+                d.dte,
+                t.tipo,
+                d.folio,
+                r.razon_social,
+                d.fecha,
+                d.total,
+                d.revision_estado,
+                d.sucursal_sii,
+                u.usuario,
+                re.valor AS email
+            FROM
+                dte_emitido AS d
+                JOIN dte_tipo AS t ON d.dte = t.codigo
+                JOIN contribuyente AS r ON d.receptor = r.rut
+                JOIN usuario AS u ON d.usuario = u.id
+                LEFT JOIN contribuyente_config AS re ON r.rut = re.contribuyente AND configuracion = \'email\' AND variable = \'intercambio_user\'
+            WHERE
+                d.emisor = :emisor AND d.dte NOT IN (39, 41, 110, 111, 112) AND d.certificacion = :certificacion AND d.fecha BETWEEN :desde AND :hasta
+                AND (d.emisor, d.dte, d.folio, d.certificacion) NOT IN (
+                    SELECT d.emisor, d.dte, d.folio, d.certificacion
+                    FROM
+                        dte_emitido AS d
+                        JOIN contribuyente_config AS re ON d.receptor = re.contribuyente AND configuracion = \'email\' AND variable = \'intercambio_user\'
+                        JOIN dte_emitido_email AS de ON de.emisor = d.emisor AND de.dte = d.dte AND de.folio = d.folio AND de.certificacion = d.certificacion
+                    WHERE
+                        d.emisor = :emisor AND d.dte NOT IN (39, 41, 110, 111, 112) AND d.certificacion = :certificacion AND d.fecha BETWEEN :desde AND :hasta
+                        AND de.email::text = re.valor
+                )
+            ORDER BY d.fecha DESC, t.tipo, d.folio DESC
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
 }

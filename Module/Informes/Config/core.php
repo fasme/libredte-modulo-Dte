@@ -38,6 +38,11 @@ Configure::write('nav.module', array(
         'desc' => 'Propuesta para el formulario 29',
         'icon' => 'fa fa-file',
     ],
+    '/dte_emitidos/sin_intercambio' => [
+        'name' => 'Emitidos sin intercambio',
+        'desc' => 'Documentos emitidos que no han sido enviados en el proceso de intercambio',
+        'icon' => 'far fa-envelope',
+    ],
     '/dte_emitidos/intercambio' => [
         'name' => 'Respuesta intercambio DTE',
         'desc' => 'Respuestas del proceso de intercambio para DTE emitidos a clientes',

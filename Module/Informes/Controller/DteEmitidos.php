@@ -129,6 +129,27 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite buscar los DTE emitidos sin envíos de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-01-26
+     */
+    public function sin_intercambio($desde = null, $hasta = null)
+    {
+        // si existen datos por post se redirecciona para usar siempre por get
+        if (isset($_POST['submit'])) {
+            $this->redirect('/dte/informes/dte_emitidos/sin_intercambio/'.$_POST['desde'].'/'.$_POST['hasta']);
+        }
+        // obtener datos
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+            'desde' => $desde ? $desde : date('Y-m-01'),
+            'hasta' => $hasta ? $hasta : date('Y-m-d'),
+            'documentos' => ($desde and $hasta) ? (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor)->getSinEnvioIntercambio($desde, $hasta) : false,
+        ]);
+    }
+
+    /**
      * Acción que permite buscar las respuestas de los procesos de intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-09-23
