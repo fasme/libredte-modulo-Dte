@@ -344,19 +344,26 @@ $(function() {
 $clientes = $Emisor->getClientes();
 foreach($clientes as &$c) {
     $c['rut'] = '<a href="#" onclick="$(\'.modal-buscar-receptor\').modal(\'hide\'); document.getElementById(\'RUTRecepField\').value=this.innerText; Receptor.setDatos(\'emitir_dte\')">'.num($c['rut']).'-'.$c['dv'].'</a>';
-    if (!empty($c['comuna']))
+    if (!empty($c['codigo_interno'])) {
+        $c['rut'] .= '<span>'.$c['codigo_interno'].'</span>';
+    }
+    if (!empty($c['comuna'])) {
         $c['direccion'] .= ', '.$c['comuna'];
+    }
     if (!empty($c['telefono']) or !empty($c['email'])) {
-        if (!empty($c['direccion']))
+        if (!empty($c['direccion'])) {
             $c['direccion'] .= '<br/>';
+        }
         $contacto = [];
-        if (!empty($c['telefono']))
+        if (!empty($c['telefono'])) {
             $contacto[] = $c['telefono'];
-        if (!empty($c['email']))
+        }
+        if (!empty($c['email'])) {
             $contacto[] = '<a href="mailto:'.$c['email'].'">'.$c['email'].'</a>';
+        }
         $c['direccion'] .= '<span>'.implode(' / ', $contacto).'</span>';
     }
-    unset($c['dv'], $c['telefono'], $c['email'], $c['comuna']);
+    unset($c['dv'], $c['telefono'], $c['email'], $c['comuna'], $c['codigo_interno']);
 }
 array_unshift($clientes, ['RUT', 'Razón social', 'Contacto']);
 $t = new \sowerphp\general\View_Helper_Table();

@@ -2452,14 +2452,14 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de clientes del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-01
+     * @version 2018-01-26
      */
     public function getClientes(array $filtros = [])
     {
         // si no hay módulo CRM se sacan los clientes de los DTE emitidos
         if (!\sowerphp\core\Module::loaded('Crm')) {
             return $this->db->getTable('
-                SELECT c.rut, c.dv, c.razon_social, c.telefono, c.email, c.direccion, co.comuna
+                SELECT c.rut, c.dv, c.razon_social, c.telefono, c.email, c.direccion, co.comuna, NULL AS codigo_interno
                 FROM
                     contribuyente AS c
                     LEFT JOIN comuna AS co ON co.codigo = c.comuna
