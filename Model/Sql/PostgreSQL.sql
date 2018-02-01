@@ -258,6 +258,21 @@ CREATE INDEX dte_emitido_fecha_emisor_idx ON dte_emitido (fecha, emisor);
 CREATE INDEX dte_emitido_receptor_emisor_idx ON dte_emitido (receptor, emisor);
 CREATE INDEX dte_emitido_usuario_emisor_idx ON dte_emitido (usuario, emisor);
 
+-- tabla para los correos de los DTE emitidos
+DROP TABLE IF EXISTS dte_emitido_email CASCADE;
+CREATE TABLE dte_emitido_email (
+    emisor INTEGER NOT NULL,
+    dte SMALLINT NOT NULL,
+    folio INTEGER NOT NULL,
+    certificacion BOOLEAN NOT NULL DEFAULT false,
+    email VARCHAR(80) NOT NULL,
+    fecha_hora TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT dte_emitido_email_pk PRIMARY KEY (emisor, dte, folio, certificacion, email, fecha_hora),
+    CONSTRAINT dte_emitido_email_dte_emitido_fk FOREIGN KEY (emisor, dte, folio, certificacion)
+        REFERENCES dte_emitido (emisor, dte, folio, certificacion) MATCH FULL
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 -- tabla para referencias de los dte
 DROP TABLE IF EXISTS dte_referencia CASCADE;
 CREATE TABLE dte_referencia (
@@ -557,7 +572,7 @@ CREATE TABLE item_clasificacion (
     contribuyente INTEGER NOT NULL,
     codigo VARCHAR(35) NOT NULL,
     clasificacion VARCHAR (50) NOT NULL,
-    superior VARCHAR(10),
+    superior VARCHAR(35),
     activa BOOLEAN NOT NULL DEFAULT true,
     CONSTRAINT item_clasificacion_pk PRIMARY KEY (contribuyente, codigo),
     CONSTRAINT item_clasificacion_contribuyente_fk FOREIGN KEY (contribuyente)
