@@ -141,6 +141,24 @@ CREATE TABLE contribuyente_usuario (
 );
 CREATE INDEX contribuyente_usuario_usuario_idx ON contribuyente_usuario (usuario);
 
+-- tabla con los permisos que tiene cada usuario sobre cada tipo de dte que el contribuyente puede emitir
+DROP TABLE IF EXISTS contribuyente_usuario_dte CASCADE;
+CREATE TABLE contribuyente_usuario_dte (
+    contribuyente INTEGER NOT NULL,
+    usuario INTEGER NOT NULL,
+    dte SMALLINT NOT NULL,
+    CONSTRAINT contribuyente_usuario_dte_pk PRIMARY KEY (contribuyente, usuario, dte),
+    CONSTRAINT contribuyente_usuario_dte_contribuyente_fk FOREIGN KEY (contribuyente)
+        REFERENCES contribuyente (rut) MATCH FULL
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT contribuyente_usuario_dte_usuario_fk FOREIGN KEY (usuario)
+        REFERENCES usuario (id) MATCH FULL
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT contribuyente_usuario_dte_dte_fk FOREIGN KEY (dte)
+        REFERENCES dte_tipo (codigo) MATCH FULL
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 -- tabla para mantedor de folios
 DROP TABLE IF EXISTS dte_folio CASCADE;
 CREATE TABLE dte_folio (
