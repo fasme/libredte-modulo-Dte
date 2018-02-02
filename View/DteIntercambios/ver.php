@@ -81,7 +81,7 @@ new \sowerphp\general\View_Helper_Table([
 <p><?=str_replace("\n", '<br/>', strip_tags(base64_decode($DteIntercambio->mensaje)))?></p>
 <?php if ($DteIntercambio->mensaje_html) : ?>
 <a class="btn btn-default btn-lg btn-block" href="javascript:__.popup('<?=$_base?>/dte/dte_intercambios/html/<?=$DteIntercambio->codigo?>', 800, 600)" role="button">
-    <span class="fa fa-html5" style="font-size:24px"></span>
+    <span class="fab fa-html5" style="font-size:24px"></span>
     Ver mensaje del correo electrónico del intercambio
 </a>
 <br/>
