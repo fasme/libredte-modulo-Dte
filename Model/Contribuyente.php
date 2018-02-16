@@ -652,7 +652,7 @@ class Model_Contribuyente extends \Model_App
      * @param permisos Permisos que se desean verificar que tenga el usuario
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-07
+     * @version 2018-02-16
      */
     public function usuarioAutorizado($Usuario, $permisos = [])
     {
@@ -661,8 +661,9 @@ class Model_Contribuyente extends \Model_App
             return true;
         }
         // normalizar permisos
-        if (!is_array($permisos))
+        if (!is_array($permisos)) {
             $permisos = [$permisos];
+        }
         // si la aplicación sólo tiene configurada una empresa se verifican los
         // permisos normales (basados en grupos) de sowerphp
         if (\sowerphp\core\Configure::read('dte.empresa')) {
@@ -689,6 +690,9 @@ class Model_Contribuyente extends \Model_App
         // si se está buscando por un recurso en particular entonces se
         // valida contra los permisos del sistema
         if (isset($permisos[0]) and $permisos[0][0]=='/') {
+            // actualizar permisos del usuario (útil cuando la llamada es vía API)
+            $this->setPermisos($Usuario);
+            // verificar permisos
             foreach ($permisos as $permiso) {
                 if ($Usuario->auth($permiso)) {
                     return true;
