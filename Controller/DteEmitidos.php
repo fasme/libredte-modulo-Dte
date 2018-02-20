@@ -582,35 +582,57 @@ class Controller_DteEmitidos extends \Controller_App
         \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
         $this->redirect(str_replace('avanzado_iva_fuera_plazo', 'ver', $this->request->request).'#avanzado');
     }
+
     /**
      * Acción que permite anular un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-15
+     * @version 2018-02-20
      */
     public function avanzado_anular($dte, $folio)
     {
         $Emisor = $this->getContribuyente();
-        // obtener DTE emitido
+        $r = $this->consume('/api/dte/dte_emitidos/avanzado_anular/'.$dte.'/'.$folio.'/'.$Emisor->rut, $_POST);
+        if ($r['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                str_replace("\n", '<br/>', $r['body']), 'error'
+            );
+            if ($r['status']['code']==404) {
+                $this->redirect('/dte/dte_emitidos/listar');
+            } else {
+                $this->redirect(str_replace('avanzado_anular', 'ver', $this->request->request).'#avanzado');
+            }
+        }
+        $msg = $r['body'] ? 'DTE anulado' : 'DTE ya no está anulado';
+        \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
+        $this->redirect(str_replace('avanzado_anular', 'ver', $this->request->request).'#avanzado');
+    }
+
+    /**
+     * Recurso de la API que permite anular un DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-02-20
+     */
+    public function _api_avanzado_anular_POST($dte, $folio, $emisor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // obtener DTE
+        $Emisor = new Model_Contribuyente($emisor);
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el DTE solicitado', 'error'
-            );
-            $this->redirect('/dte/dte_emitidos/listar');
+            $this->Api->send('No existe el DTE solicitado', 404);
         }
         // verificar que sea documento que se puede anular
         if ($DteEmitido->dte!=52) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Sólo es posible anular guias de despacho con la opción avanzada', 'error'
-            );
-            $this->redirect(str_replace('avanzado_anular', 'ver', $this->request->request));
+            $this->Api->send('Sólo es posible anular guias de despacho con la opción avanzada', 400);
         }
         // cambiar estado anulado del documento
-        $DteEmitido->anulado = (int)$_POST['anulado'];
+        $DteEmitido->anulado = (int)$this->Api->data['anulado'];
         $DteEmitido->save();
-        $msg = $DteEmitido->anulado ? 'DTE anulado' : 'DTE ya no está anulado';
-        \sowerphp\core\Model_Datasource_Session::message($msg, 'ok');
-        $this->redirect(str_replace('avanzado_anular', 'ver', $this->request->request).'#avanzado');
+        return (int)$DteEmitido->anulado;
     }
 
     /**
