@@ -493,7 +493,15 @@ echo $f->input([
     'label' => 'Intercambio automático',
     'options' => ['No', 'Si'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_emision_intercambio_automatico : 0,
-    'help' => '¿Se debe enviar automáticamente el DTE que está aceptado por el SII y no tiene recepción registrada?',
+    'help' => '¿Enviar automáticamente al correo de intercambio el DTE emitido que no tiene recepción registrada? (no envía boletas, sólo DTEs aceptados por el SII)',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_emision_email',
+    'label' => 'Enviar email al emitir',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_email : 0,
+    'help' => '¿Enviar automáticamente a los correos disponibles el DTE emitido que ha sido generado? (todos los documentos, sin importar el estado)',
 ]);
 ?>
                 </div>
