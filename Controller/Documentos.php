@@ -192,11 +192,28 @@ class Controller_Documentos extends \Controller_App
         if (!$Emisor->documentoAutorizado($dte['Encabezado']['IdDoc']['TipoDTE'], $User)) {
             $this->Api->send('No está autorizado a emitir el tipo de documento '.$dte['Encabezado']['IdDoc']['TipoDTE'], 403);
         }
-        // asignar giro si no fue entregado y existe en la base de datos,
+        // asignar giro u otros campos si no fue entregado y existe en la base de datos,
         // no se recomienda confiar en que exista el giro en la base de datos, pero ayuda
         // a reducir reparos leves del DTE
-        if ($normalizar and empty($dte['Encabezado']['Receptor']['GiroRecep']) and $Receptor->giro) {
-            $dte['Encabezado']['Receptor']['GiroRecep'] = $Receptor->giro;
+        if ($normalizar) {
+            if (empty($dte['Encabezado']['Receptor']['RznSocRecep']) and $Receptor->razon_social) {
+                $dte['Encabezado']['Receptor']['RznSocRecep'] = $Receptor->razon_social;
+            }
+            if (empty($dte['Encabezado']['Receptor']['GiroRecep']) and $Receptor->giro) {
+                $dte['Encabezado']['Receptor']['GiroRecep'] = $Receptor->giro;
+            }
+            if (empty($dte['Encabezado']['Receptor']['Contacto']) and $Receptor->telefono) {
+                $dte['Encabezado']['Receptor']['Contacto'] = $Receptor->telefono;
+            }
+            if (empty($dte['Encabezado']['Receptor']['CorreoRecep']) and $Receptor->email) {
+                $dte['Encabezado']['Receptor']['CorreoRecep'] = $Receptor->email;
+            }
+            if (empty($dte['Encabezado']['Receptor']['DirRecep']) and $Receptor->direccion) {
+                $dte['Encabezado']['Receptor']['DirRecep'] = $Receptor->direccion;
+            }
+            if (empty($dte['Encabezado']['Receptor']['CmnaRecep']) and $Receptor->comuna) {
+                $dte['Encabezado']['Receptor']['CmnaRecep'] = $Receptor->getComuna()->comuna;
+            }
         }
         // asignar tipo de cambio
         if ($normalizar and in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [110,111,112])) {
