@@ -728,7 +728,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método de la API que permite obtener los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-18
+     * @version 2017-03-01
      */
     public function _api_info_GET($rut)
     {
@@ -750,7 +750,11 @@ class Controller_Contribuyentes extends \Controller_App
         $Contribuyente->config_extra_representante_rut;
         $Contribuyente->config_extra_contador_rut;
         $Contribuyente->config_extra_web;
-        $this->Api->send($Contribuyente, 200, JSON_PRETTY_PRINT);
+        $datos = array_merge(get_object_vars($Contribuyente), [
+            'comuna_glosa' => $Contribuyente->getComuna()->comuna,
+            'usuario_glosa' => $Contribuyente->getUsuario()->usuario, 
+        ]);
+        $this->Api->send($datos, 200, JSON_PRETTY_PRINT);
     }
 
     /**
