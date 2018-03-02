@@ -402,29 +402,29 @@ class Model_DteTmp extends \Model_App
      * Método que entrega el listado de correos a los que se podría enviar el documento
      * temporal (correo receptor, correo del dte y contacto comercial)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-20
+     * @version 2018-03-01
      */
     public function getEmails()
     {
         $emails = [];
         if ($this->getReceptor()->email) {
-            $emails['Email receptor'] = $this->getReceptor()->email;
+            $emails['Email receptor'] = strtolower($this->getReceptor()->email);
         }
-        if ($this->getReceptor()->getUsuario()->email and !in_array($this->getReceptor()->getUsuario()->email, $emails)) {
-            $emails['Email usuario administrador'] = $this->getReceptor()->getUsuario()->email;
+        if ($this->getReceptor()->getUsuario()->email and !in_array(strtolower($this->getReceptor()->getUsuario()->email), $emails)) {
+            $emails['Email usuario administrador'] = strtolower($this->getReceptor()->getUsuario()->email);
         }
         if ($this->emisor==\sowerphp\core\Configure::read('libredte.proveedor.rut')) {
             if ($this->getReceptor()->config_app_contacto_comercial) {
                 $i = 1;
                 foreach($this->getReceptor()->config_app_contacto_comercial as $contacto) {
-                    if (!in_array($contacto->email, $emails)) {
-                        $emails['Contacto comercial #'.$i++] = $contacto->email;
+                    if (!in_array(strtolower($contacto->email), $emails)) {
+                        $emails['Contacto comercial #'.$i++] = strtolower($contacto->email);
                     }
                 }
             }
         }
-        if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'], $emails)) {
-            $emails[$this->getFolio()] = $this->getDatos()['Encabezado']['Receptor']['CorreoRecep'];
+        if (!empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array(strtolower($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']), $emails)) {
+            $emails[$this->getFolio()] = strtolower($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']);
         }
         $emails_trigger = \sowerphp\core\Trigger::run('dte_dte_tmp_emails', $this, $emails);
         return $emails_trigger ? $emails_trigger : $emails;
