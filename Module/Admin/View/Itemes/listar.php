@@ -5,7 +5,7 @@
         </a>
     </li>
     <li>
-        <a href="<?=$_base?>/dte/admin/itemes/exportar" title="Exportar items desde archivo CSV">
+        <a href="<?=$_base?>/dte/admin/itemes/exportar" title="Exportar items a archivo CSV">
             <span class="fa fa-download"></span> Exportar
         </a>
     </li>
