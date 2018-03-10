@@ -168,14 +168,6 @@ DTE.round = function (valor) {
 }
 
 DTE.setTipo = function (tipo) {
-    // si es boleta indicador de servicios 3 por defecto
-    if (!document.getElementById('IndServicioField').value || document.getElementById('IndServicioField').value==3) {
-        if (tipo==39 || tipo==41) {
-            document.getElementById('IndServicioField').value = 3;
-        } else {
-            document.getElementById('IndServicioField').value = '';
-        }
-    }
     // habilitar u ocultar datos para guía de despacho
     if (tipo==52) {
         $('#datosTransporte').show();
