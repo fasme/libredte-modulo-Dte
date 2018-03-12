@@ -13,7 +13,7 @@ echo $f->input([
     'type' => 'file',
     'name' => 'archivo',
     'label' => 'Archivo con clasificaciones',
-    'help' => 'Archivo con clasificaciones de productos y/o servicios en formato CSV. Puede consultar un <a href="'.$_base.'/dte/archivos/item_clasificacion.csv">ejemplo</a> para conocer el formato esperado.',
+    'help' => 'Archivo con clasificaciones de productos y/o servicios en formato CSV (separado por punto y coma, codificado en UTF-8). Puede consultar un <a href="'.$_base.'/dte/archivos/item_clasificacion.csv">ejemplo</a> para conocer el formato esperado.',
     'check' => 'notempty',
     'attr' => 'accept="csv"',
 ]);
