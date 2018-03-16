@@ -152,7 +152,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                         e.track_id IS NULL
                         -- enviados al SII (con track ID válido != -1)
                         OR (
-                            (e.revision_estado IS NULL OR e.revision_estado = \'-11\')
+                            (e.revision_estado IS NULL OR e.revision_estado LIKE \'-%\')
                             AND e.track_id > 0
                         )
                     )
