@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de ventas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-11
+ * @version 2018-03-27
  */
 class Controller_DteVentas extends Controller_Base_Libros
 {
@@ -292,6 +292,55 @@ class Controller_DteVentas extends Controller_Base_Libros
             'Evento' => (object)['codigo'=>$evento, 'glosa'=>$evento?\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$evento]:'Sin evento registrado'],
             'documentos' => $DteVenta->getDocumentosConEventoReceptor($evento),
         ]);
+    }
+
+    public function resumen($anio = null)
+    {
+        $Emisor = $this->getContribuyente();
+        if (!empty($_POST['anio'])) {
+            $this->redirect('/dte/dte_ventas/resumen/'.(int)$_POST['anio']);
+        }
+        if ($anio) {
+            // obtener libros de cada mes con su resumen
+            $libros = [];
+            foreach (range(1,12) as $mes) {
+                $mes = $mes < 10 ? '0'.$mes : $mes;
+                $DteVenta = new Model_DteVenta($Emisor->rut, (int)($anio.$mes), (int)$Emisor->config_ambiente_en_certificacion);
+                $resumen = $DteVenta->getResumen();
+                if ($resumen) {
+                    $libros[$anio][$mes] = $resumen;
+                }
+            }
+            // ir sumando en el resumen anual
+            $resumen = [];
+            foreach($libros[$anio] as $mes => $resumen_mensual) {
+                foreach ($resumen_mensual as $r) {
+                    $cols = array_keys($r);
+                    unset($cols[array_search('TpoDoc',$cols)]);
+                    if (!isset($resumen[$r['TpoDoc']])) {
+                        $resumen[$r['TpoDoc']] = ['TpoDoc' => $r['TpoDoc']];
+                        foreach ($cols as $col) {
+                            $resumen[$r['TpoDoc']][$col] = 0;
+                        }
+                    }
+                    foreach ($cols as $col) {
+                        $resumen[$r['TpoDoc']][$col] += $r[$col];
+                    }
+                }
+            }
+            ksort($resumen);
+            // crear operaciones
+            $operaciones = [];
+            foreach ($resumen as $r) {
+                $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
+            }
+            // asignar variable a vista
+            $this->set([
+                'anio' => $anio,
+                'resumen' => $resumen,
+                'operaciones' => $operaciones,
+            ]);
+        }
     }
 
 }

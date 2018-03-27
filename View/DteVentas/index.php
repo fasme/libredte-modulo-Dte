@@ -13,6 +13,11 @@
         </a>
     </li>
     <li>
+        <a href="<?=$_base?>/dte/dte_ventas/resumen" title="Ver resumen del libro de ventas">
+            <span class="fa fa-list"></span> Resumen
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/dte_compras" title="Ir al libro de compras">
             <span class="fa fa-book"></span> Libro de compras
         </a>
