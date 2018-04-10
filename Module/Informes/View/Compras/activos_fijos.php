@@ -28,7 +28,9 @@ echo $f->end('Buscar compras');
 
 // mostrar informe compras de activos fijos
 if (isset($compras)) {
+    $total_activo_fijo = 0;
     foreach ($compras as &$c) {
+        $total_activo_fijo += $c['monto_activo_fijo'];
         $c['fecha'] = \sowerphp\general\Utility_Date::format($c['fecha']);
         $c['neto'] = num($c['neto']);
         $c['monto_activo_fijo'] = num($c['monto_activo_fijo']);
@@ -44,5 +46,6 @@ if (isset($compras)) {
     $t->setID('activos_fijos_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta']);
     $t->setExport(true);
     $t->setColsWidth([null, null, null, null, null, null, null, null, null, null, 100]);
+    echo '<div class="well lead text-center">Total monto activo fijo del período: $',num($total_activo_fijo),'.-</div>',"\n";
     echo $t->generate($compras);
 }
