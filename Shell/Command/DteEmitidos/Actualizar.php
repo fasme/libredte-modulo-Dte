@@ -26,12 +26,12 @@ namespace website\Dte;
 /**
  * Comando para actualizar los documentos emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-11
+ * @version 2018-04-09
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
 
-    public function main($grupo = null, $certificacion = 0)
+    public function main($grupo = null, $certificacion = 0, $meses = 2)
     {
         $this->db = \sowerphp\core\Model_Datasource_Database::get();
         $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
@@ -39,7 +39,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             $this->actualizarDocumentosEmitidos($rut, $certificacion);
         }
         if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
-            $this->actualizarEventosReceptor($certificacion);
+            $this->actualizarEventosReceptor($meses, $certificacion);
         }
         $this->showStats();
         return 0;
@@ -106,7 +106,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         }
     }
 
-    private function getContribuyentes($grupo = null, $certificacion = 0)
+    private function getContribuyentes($grupo, $certificacion)
     {
         if (is_numeric($grupo))
             return [$grupo];
@@ -160,22 +160,28 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         }
     }
 
-    private function actualizarEventosReceptor($certificacion = 0)
+    private function actualizarEventosReceptor($meses, $certificacion)
     {
         $contribuyentes = $this->db->getCol('
             SELECT DISTINCT c.rut
             FROM
                 contribuyente AS c
+                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
                 JOIN dte_emitido AS e ON c.rut = e.emisor
             WHERE
                 c.usuario IS NOT NULL
+                AND cc.configuracion = \'sii\' AND cc.variable = \'pass\' AND cc.valor IS NOT NULL
                 AND e.dte IN ('.implode(', ', array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes)).')
                 AND e.certificacion = :certificacion
                 AND e.receptor_evento IS NULL
-                AND e.fecha  >=  (CURRENT_DATE - INTERVAL \'2 MONTHS\')
+                AND e.fecha  >=  (CURRENT_DATE - INTERVAL \''.(int)$meses.' MONTHS\')
         ', [':certificacion'=>(int)$certificacion]);
         $periodo_actual = (int)date('Ym');
-        $periodo_anterior = \sowerphp\general\Utility_Date::previousPeriod($periodo_actual);
+        $periodos = [$periodo_actual];
+        for ($i = 0; $i < $meses-1; $i++) {
+            $periodos[] = \sowerphp\general\Utility_Date::previousPeriod($periodos[$i]);
+        }
+        sort($periodos);
         foreach ($contribuyentes as $rut) {
             $Contribuyente = (new Model_Contribuyentes())->get($rut);
             if ((int)$Contribuyente->config_ambiente_en_certificacion!=(int)$certificacion) {
@@ -186,11 +192,13 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             }
             $DteEmitidos = (new Model_DteEmitidos())->setContribuyente($Contribuyente);
             try {
-                $DteEmitidos->actualizarEstadoReceptor($periodo_anterior);
-                $DteEmitidos->actualizarEstadoReceptor($periodo_actual);
-                if ($this->verbose) {
-                    $this->out('  Procesados los períodos '.$periodo_anterior.' y '.$periodo_actual);
+                foreach ($periodos as $periodo) {
+                    $DteEmitidos->actualizarEstadoReceptor($periodo);
+                    if ($this->verbose) {
+                        $this->out('  Procesado período '.$periodo);
+                    }
                 }
+
             } catch (\Exception $e) {
                 if ($this->verbose) {
                     $this->out('  '.$e->getMessage());
