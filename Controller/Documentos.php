@@ -518,13 +518,35 @@ class Controller_Documentos extends \Controller_App
         }
         // si hay indicador de servicio se agrega
         if (!empty($_POST['IndServicio'])) {
+            // se cambia el tipo de indicador en boletas ya que es el contrario a facturas
             if (in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
-                if ($_POST['IndServicio']==1)
+                if ($_POST['IndServicio']==1) {
                     $_POST['IndServicio'] = 2;
-                else if ($_POST['IndServicio']==2)
+                }
+                else if ($_POST['IndServicio']==2) {
                     $_POST['IndServicio'] = 1;
+                }
             }
-            $dte['Encabezado']['IdDoc']['IndServicio'] = $_POST['IndServicio'];
+            // quitar indicador de servicio si se pasó para un tipo de documento que no corresponde
+            if (in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
+                if (!in_array($_POST['IndServicio'], [1, 2, 3, 4])) {
+                    $_POST['IndServicio'] = false;
+                }
+            }
+            else if (in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [110, 111, 112])) {
+                if (!in_array($_POST['IndServicio'], [1, 3, 4, 5])) {
+                    $_POST['IndServicio'] = false;
+                }
+            }
+            else {
+                if (!in_array($_POST['IndServicio'], [1, 2, 3])) {
+                    $_POST['IndServicio'] = false;
+                }
+            }
+            // asignar indicador de servicio
+            if ($_POST['IndServicio']) {
+                $dte['Encabezado']['IdDoc']['IndServicio'] = $_POST['IndServicio'];
+            }
         }
         // agregar datos de exportación
         if (in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [110, 111, 112])) {
