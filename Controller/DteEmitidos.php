@@ -243,7 +243,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-17
+     * @version 2018-04-12
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -279,9 +279,13 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/consultar');
         }
         // armar datos con archivo XML y flag para indicar si es cedible o no
-        $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
-        if (!$webVerificacion) {
-            $webVerificacion = $this->request->url.'/boletas';
+        if ($Emisor->config_pdf_web_verificacion) {
+            $webVerificacion = $Emisor->config_pdf_web_verificacion;
+        } else {
+            $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
+            if (!$webVerificacion) {
+                $webVerificacion = $this->request->url.'/boletas';
+            }
         }
         $data = [
             'xml' => $DteEmitido->xml,

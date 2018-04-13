@@ -758,6 +758,15 @@ $f->setStyle(false);
                 </div>
             </div>
 <?php $f->setStyle('horizontal'); ?>
+<?php
+echo $f->input([
+    'name' => 'config_pdf_web_verificacion',
+    'label' => 'Web verificación boletas electrónicas',
+    'placeholder' => 'libredte.cl/boletas',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_web_verificacion : 0,
+    'help' => 'Enlace que se incluirá en las boletas para poder verificarlas',
+]);
+?>
         </div>
     </div>
     <div class="panel panel-default">
