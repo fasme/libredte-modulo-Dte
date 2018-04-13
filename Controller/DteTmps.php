@@ -232,7 +232,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Recurso de la API que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-25
+     * @version 2018-04-13
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -289,8 +289,7 @@ class Controller_DteTmps extends \Controller_App
         }
         // procesar respuesta
         if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            return;
+            $this->Api->send($response['body'], $response['status']['code']);
         }
         // si dió código 200 se entrega la respuesta del servicio web
         foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
