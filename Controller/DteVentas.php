@@ -294,6 +294,11 @@ class Controller_DteVentas extends Controller_Base_Libros
         ]);
     }
 
+    /**
+     * Acción que genera un resumen de las ventas de un año completo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2017-09-12
+     */
     public function resumen($anio = null)
     {
         $Emisor = $this->getContribuyente();
@@ -341,6 +346,32 @@ class Controller_DteVentas extends Controller_Base_Libros
                 'operaciones' => $operaciones,
             ]);
         }
+    }
+
+    /**
+     * Servicio web que entrega el historial de montos agrupados por mes de un receptor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-14
+     */
+    public function _api_historial_GET($receptor, $fecha, $periodos, $emisor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // obtener historial
+        $Emisor = new Model_Contribuyente($emisor);
+        $historial = $Emisor->getHistorialVentas($receptor, $fecha, $periodos);
+        if (empty($_GET['periodo_glosa'])) {
+            return $historial;
+        }
+        $historial_nuevo = [];
+        foreach ($historial as $periodo => $total) {
+            $mes = substr(\sowerphp\general\Utility_Date::$meses[((int)substr($periodo,4))-1],0,3);
+            $historial_nuevo[$mes] = $total;
+        }
+        return $historial_nuevo;
     }
 
 }

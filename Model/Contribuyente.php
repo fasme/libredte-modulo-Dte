@@ -1471,6 +1471,60 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el historial de ventas con el monto total por período para un determinado receptor
+     * @param periodo Período para el cual se está construyendo el libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-14
+     */
+    public function getHistorialVentas($receptor, $fecha = null, $periodos = 12)
+    {
+        if (strpos($receptor, '-')) {
+            $receptor = substr($receptor, 0, -2);
+        }
+        if (!$fecha) {
+            $fecha = date('Y-m-d');
+        }
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
+        $desde = substr(str_replace('-', '', \sowerphp\general\Utility_Date::getPrevious($fecha, 'M', $periodos)),0,6);
+        $hasta = \sowerphp\general\Utility_Date::previousPeriod(substr(str_replace('-', '', $fecha),0,6));
+        // realizar consulta
+        $montos = $this->db->getTable('
+            SELECT
+                '.$periodo_col.' AS periodo,
+                t.operacion,
+                SUM(e.total) AS total
+            FROM dte_emitido AS e JOIN dte_tipo AS t ON t.codigo = e.dte
+            WHERE
+                t.venta = true
+                AND e.emisor = :emisor
+                AND e.certificacion = :certificacion
+                AND e.dte != 46
+                AND '.$periodo_col.' BETWEEN :desde AND :hasta
+                AND e.receptor = :receptor
+            GROUP BY periodo, t.operacion
+            ORDER BY periodo
+        ', [':emisor'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':receptor'=>$receptor, ':desde'=>$desde, ':hasta'=>$hasta]);
+        if (!$montos) {
+            return [];
+        }
+        $historial = [];
+        $periodo = $montos[0]['periodo'];
+        $periodo_hasta = $montos[count($montos)-1]['periodo'];
+        while ($periodo <= $periodo_hasta) {
+            $historial[(int)$periodo] = 0;
+            $periodo = \sowerphp\general\Utility_Date::nextPeriod($periodo);
+        }
+        foreach ($montos as $monto) {
+            if ($monto['operacion'] == 'S') {
+                $historial[$monto['periodo']] += $monto['total'];
+            } else {
+                $historial[$monto['periodo']] -= $monto['total'];
+            }
+        }
+        return $historial;
+    }
+
+    /**
      * Método que entrega el objeto del libro de ventas a partir de las ventas registradas en la aplicación
      * @param periodo Período para el cual se está construyendo el libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
