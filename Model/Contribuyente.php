@@ -1509,8 +1509,7 @@ class Model_Contribuyente extends \Model_App
         }
         $historial = [];
         $periodo = $montos[0]['periodo'];
-        $periodo_hasta = $montos[count($montos)-1]['periodo'];
-        while ($periodo <= $periodo_hasta) {
+        while ($periodo <= $hasta) {
             $historial[(int)$periodo] = 0;
             $periodo = \sowerphp\general\Utility_Date::nextPeriod($periodo);
         }
