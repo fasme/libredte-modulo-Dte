@@ -63,13 +63,14 @@ class Model_Contribuyentes extends \Model_Plural_App
      * Método que entrega una tabla con los contribuyentes que cierto usuario
      * está autorizado a operar
      * @param usuario ID del usuario que se quiere obtener el listado de contribuyentes con los que está autorizado a operar
-     * @return Tabla con los usuarios
+     * @param omitir Se puede indicar el RUT de una empresa que no se quiere que aparezca en el listado
+     * @return Tabla con las empresas que se están buscando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-11
+     * @version 2018-04-17
      */
-    public function getByUsuario($usuario)
+    public function getByUsuario($usuario, $omitir = null)
     {
-        return $this->db->getTable('
+        $empresas =  $this->db->getTable('
             (
                 SELECT c.rut, c.dv, c.razon_social, c.giro, a.valor AS certificacion, true AS administrador
                 FROM contribuyente AS c JOIN contribuyente_config AS a ON c.rut = a.contribuyente
@@ -94,6 +95,16 @@ class Model_Contribuyentes extends \Model_Plural_App
             )
             ORDER BY certificacion, administrador DESC, razon_social
         ', [':usuario'=>$usuario]);
+        if ($omitir) {
+            $n_empresas = count($empresas);
+            for ($i=0; $i<$n_empresas; $i++) {
+                if ($empresas[$i]['rut']==$omitir) {
+                    unset($empresas[$i]);
+                }
+            }
+            ksort($empresas);
+        }
+        return $empresas;
     }
 
     /**
