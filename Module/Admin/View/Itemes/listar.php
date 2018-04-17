@@ -102,7 +102,7 @@ foreach ($Objs as &$obj) {
         }
         // si es cualquier otro tipo de datos
         else {
-            $row[] = $obj->{$column};
+            $row[] = $info['type']=='real' ? (float)$obj->{$column} : $obj->{$column};
         }
     }
     $pkValues = $obj->getPkValues();
