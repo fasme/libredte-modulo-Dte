@@ -69,7 +69,7 @@ echo $f->input([
 echo $f->input([
     'name' => 'precio',
     'label' => 'Precio',
-    'value' => isset($Obj)?$Obj->precio:'',
+    'value' => isset($Obj)?(float)$Obj->precio:'',
     'check' => 'notempty real',
 ]);
 echo $f->input([
@@ -99,7 +99,7 @@ echo $f->input([
 echo $f->input([
     'name' => 'descuento',
     'label' => 'Descuento',
-    'value' => isset($Obj)?$Obj->descuento:0,
+    'value' => isset($Obj)?(float)$Obj->descuento:0,
     'check' => 'notempty real',
 ]);
 echo $f->input([
