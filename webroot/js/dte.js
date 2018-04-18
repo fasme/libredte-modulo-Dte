@@ -188,7 +188,6 @@ DTE.setTipo = function (tipo) {
         document.getElementById('RznSocRecepField').focus();
         document.getElementById('GiroRecepField').value = '';
         document.getElementById('CmnaRecepField').value = '';
-        Form.addJS('referencias');
         $('#datosExportacion').show();
         if (config_extra_indicador_servicio) {
             document.getElementById('IndServicioField').value = config_extra_indicador_servicio;

@@ -1,4 +1,9 @@
 <ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>?copiar" title="Crear DTE con los mismos datos de este">
+            Copiar DTE
+        </a>
+    </li>
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
     <li>
         <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII">

@@ -339,21 +339,26 @@ class Controller_Documentos extends \Controller_App
                 );
                 $this->redirect('/dte/dte_emitidos');
             }
-            $DteEmisor = $DteEmitido->getDatos()['Encabezado']['Emisor'];
-            $DteReceptor = $DteEmitido->getDatos()['Encabezado']['Receptor'];
+            $datos = $DteEmitido->getDatos();
+            unset($datos['TED']);
             $Comunas = new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas();
-            $DteEmisor['CmnaOrigen'] = !empty($DteEmisor['CmnaOrigen']) ? $Comunas->getComunaByName($DteEmisor['CmnaOrigen']) : null;
-            $DteReceptor['CmnaRecep'] = !empty($DteReceptor['CmnaRecep']) ? $Comunas->getComunaByName($DteReceptor['CmnaRecep']) : null;
-            if (empty($DteReceptor['GiroRecep'])) {
-                $DteReceptor['GiroRecep'] = $DteEmitido->getReceptor()->giro;
+            $datos['Encabezado']['Emisor']['CmnaOrigen'] = !empty($datos['Encabezado']['Emisor']['CmnaOrigen']) ? $Comunas->getComunaByName($datos['Encabezado']['Emisor']['CmnaOrigen']) : null;
+            $datos['Encabezado']['Receptor']['CmnaRecep'] = !empty($datos['Encabezado']['Receptor']['CmnaRecep']) ? $Comunas->getComunaByName($datos['Encabezado']['Receptor']['CmnaRecep']) : null;
+            $datos['Encabezado']['Transporte']['CmnaDest'] = !empty($datos['Encabezado']['Transporte']['CmnaDest']) ? $Comunas->getComunaByName($datos['Encabezado']['Transporte']['CmnaDest']) : null;
+            if (empty($datos['Encabezado']['Receptor']['GiroRecep'])) {
+                $datos['Encabezado']['Receptor']['GiroRecep'] = $DteEmitido->getReceptor()->giro;
             }
-            if (empty($DteReceptor['CorreoRecep'])) {
-                $DteReceptor['CorreoRecep'] = $DteEmitido->getReceptor()->email;
+            if (empty($datos['Encabezado']['Receptor']['CorreoRecep'])) {
+                $datos['Encabezado']['Receptor']['CorreoRecep'] = $DteEmitido->getReceptor()->email;
+            }
+            if (isset($_GET['copiar'])) {
+                $dte_defecto = $datos['Encabezado']['IdDoc']['TipoDTE'];
             }
             $this->set([
-                'DteEmitido' => $DteEmitido,
-                'DteEmisor' => $DteEmisor,
-                'DteReceptor' => $DteReceptor,
+                'datos' => $datos,
+                'referencia' => isset($_GET['copiar']) ? 'copia' : 'referencia',
+                'referencia_codigo' => (int)$referencia_codigo,
+                'referencia_razon' => substr(urldecode($referencia_razon), 0, 90),
             ]);
         }
         // variables para la vista
@@ -378,9 +383,8 @@ class Controller_Documentos extends \Controller_App
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getListContribuyente($Emisor->config_extra_impuestos_adicionales),
             'ImpuestoAdicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getObjectsContribuyente($Emisor->config_extra_impuestos_adicionales),
             'dte_defecto' => $dte_defecto ? $dte_defecto : $Emisor->config_emision_dte_defecto,
-            'referencia_codigo' => (int)$referencia_codigo,
-            'referencia_razon' => substr(urldecode($referencia_razon), 0, 90),
             'RUTRecep' => !empty($_GET['RUTRecep']) ? $_GET['RUTRecep'] : false,
+            'hoy' => date('Y-m-d'),
         ]);
     }
 
