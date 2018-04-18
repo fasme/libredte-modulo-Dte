@@ -319,11 +319,18 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-25
+     * @version 2018-04-18
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
         $Emisor = $this->getContribuyente();
+        // verificar que tenga a lo menos un tipo de DTE autorizado el usuario para emitir
+        $tipos_dte_autorizados = $Emisor->getDocumentosAutorizados($this->Auth->User);
+        if (empty($tipos_dte_autorizados)) {
+            \sowerphp\core\Model_Datasource_Session::message('No está autorizado a emitir DTE', 'warning');
+            $this->redirect('/dte');
+        }
+        // si hay un DTE de referencia se arman datos para poder copiar
         if ($referencia_dte and $referencia_folio) {
             $DteEmitido = new Model_DteEmitido($Emisor->rut, $referencia_dte, $referencia_folio, (int)$Emisor->config_ambiente_en_certificacion);
             if (!$DteEmitido->exists()) {
@@ -349,6 +356,7 @@ class Controller_Documentos extends \Controller_App
                 'DteReceptor' => $DteReceptor,
             ]);
         }
+        // variables para la vista
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js', '/js/typeahead.bundle.min.js', '/js/js.js'], 'css'=>['/dte/css/dte.css', '/css/typeahead.css']],
             'Emisor' => $Emisor,
@@ -359,7 +367,7 @@ class Controller_Documentos extends \Controller_App
             'sucursal' => '', // TODO: sucursal por defecto
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
             'tasa' => \sasco\LibreDTE\Sii::getIVA(),
-            'tipos_dte_autorizados' => $Emisor->getDocumentosAutorizados(),
+            'tipos_dte_autorizados' => $tipos_dte_autorizados,
             'tipos_dte_referencia' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getListReferencias(),
             'tipos_referencia' => (new \website\Dte\Admin\Mantenedores\Model_DteReferenciaTipos())->getList(),
             'IndTraslado' => $this->IndTraslado,
@@ -765,7 +773,7 @@ class Controller_Documentos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/documentos/generar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        if (!$Emisor->documentoAutorizado($this->Api->data['dte'])) {
+        if (!$Emisor->documentoAutorizado($this->Api->data['dte'], $User)) {
             $this->Api->send('No está autorizado a emitir el tipo de documento '.$this->Api->data['dte'], 403);
         }
         // obtener DTE temporal

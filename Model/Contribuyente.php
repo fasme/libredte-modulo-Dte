@@ -783,23 +783,48 @@ class Model_Contribuyente extends \Model_App
      * a emitir en la aplicación
      * @return Listado de documentos autorizados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-11
+     * @version 2018-04-18
      */
-    public function getDocumentosAutorizados($onlyPK = false)
+    public function getDocumentosAutorizados($onlyPK = false, $User = null)
     {
+        // invertir parámetros recibidos si User es objeto (se pasó el objeto del usuario)
+        if (is_object($onlyPK)) {
+            $aux = $onlyPK;
+            $onlyPK = (boolean)$User;
+            $User = $aux;
+        }
+        // buscar documentos
         if ($onlyPK) {
-            return $this->db->getCol('
+            $documentos = $this->db->getCol('
                 SELECT t.codigo
                 FROM dte_tipo AS t, contribuyente_dte AS c
                 WHERE t.codigo = c.dte AND c.contribuyente = :rut AND c.activo = :activo
             ', [':rut'=>$this->rut, ':activo'=>1]);
         } else {
-            return $this->db->getTable('
+            $documentos = $this->db->getTable('
                 SELECT t.codigo, t.tipo
                 FROM dte_tipo AS t, contribuyente_dte AS c
                 WHERE t.codigo = c.dte AND c.contribuyente = :rut AND c.activo = :activo
             ', [':rut'=>$this->rut, ':activo'=>1]);
         }
+        // entregar todos los documentos si no se pidió filtrar por usuario o el usuario es administrador
+        if (!$User or $User->id == $this->usuario) {
+            return $documentos;
+        }
+        // obtener sólo los documentos autorizados si se pidió por usuario
+        $documentos_autorizados = [];
+        foreach ($documentos as $d) {
+            if (is_array($d)) {
+                if ($this->documentoAutorizado($d['codigo'], $User)) {
+                    $documentos_autorizados[] = $d;
+                }
+            } else {
+                if ($this->documentoAutorizado($d, $User)) {
+                    $documentos_autorizados[] = $d;
+                }
+            }
+        }
+        return $documentos_autorizados;
     }
 
     /**
