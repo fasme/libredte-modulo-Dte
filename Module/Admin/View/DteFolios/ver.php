@@ -8,7 +8,7 @@
 </ul>
 <?php endif; ?>
 
-<h1>Mantenedor folios <?=$DteFolio->getTipo()->tipo?> <small>código <?=$DteFolio->dte?></small></h1>
+<div class="page-header"><h1>Mantenedor folios <?=$DteFolio->getTipo()->tipo?> <small>código <?=$DteFolio->dte?></small></h1></div>
 
 <div class="row">
     <div class="col-sm-4 text-center well">

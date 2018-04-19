@@ -1,4 +1,5 @@
 <?php
+
 // arreglar documentos del rc (campos que sobran) y poner titulos
 if ($documentos_rc) {
     foreach ($documentos_rc as &$d) {

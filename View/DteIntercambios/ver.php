@@ -25,7 +25,7 @@
     </li>
 </ul>
 
-<h1>Intercambio N° <?=$DteIntercambio->codigo?></h1>
+<div class="page-header"><h1>Intercambio N° <?=$DteIntercambio->codigo?></h1></div>
 <p>Esta es la página del intercambio N° <?=$DteIntercambio->codigo?> de la empresa <?=$Emisor->razon_social?>.</p>
 
 <script type="text/javascript">

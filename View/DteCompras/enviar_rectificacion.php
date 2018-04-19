@@ -12,7 +12,7 @@ function get_codigo_reemplazo() {
     }).fail(function(error){alert(error.responseJSON)});
 }
 </script>
-<h1>Rectificación IEC para el período <?=$periodo?></h1>
+<div class="page-header"><h1>Rectificación IEC para el período <?=$periodo?></h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([

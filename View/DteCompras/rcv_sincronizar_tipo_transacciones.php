@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Sincronización tipo de transacciones del período <?=$periodo?></h1>
+<div class="page-header"><h1>Sincronización tipo de transacciones del período <?=$periodo?></h1></div>
 <?php
 foreach ($datos as &$d) {
     $d[] = '<a href="'.$_base.'/dte/dte_recibidos/modificar/'.substr($d[0],0,-2).'/'.$d[1].'/'.$d[2].'" class="btn btn-default"><span class="fa fa-edit"></span></a>';

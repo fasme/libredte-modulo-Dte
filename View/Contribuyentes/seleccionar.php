@@ -1,4 +1,4 @@
-<h1>Seleccionar empresa con que operar</h1>
+<div class="page-header"><h1>Seleccionar empresa con que operar</h1></div>
 <p>Aquí podrá seleccionar una empresa con la cual operar durante su sesión de LibreDTE. Todas las acciones que realice quedarán registradas a nombre de la empresa que seleccione.</p>
 <?php
 foreach ($empresas as &$e) {

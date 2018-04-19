@@ -30,7 +30,7 @@
     </li>
 </ul>
 
-<h1>Libro de ventas período <?=$Libro->periodo?></h1>
+<div class="page-header"><h1>Libro de ventas período <?=$Libro->periodo?></h1></div>
 <p>Esta es la página del libro de ventas del período <?=$Libro->periodo?> de la empresa <?=$Emisor->razon_social?>.</p>
 
 <script type="text/javascript">

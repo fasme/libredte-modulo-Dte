@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Evento <?=$Evento->glosa?> <small>período <?=$periodo?></small></h1>
+<div class="page-header"><h1>Evento <?=$Evento->glosa?> <small>período <?=$periodo?></small></h1></div>
 <p>Aquí podrá ver los eventos del tipo "<?=$Evento->glosa?>" registrados por el receptor para el período <?=$periodo?>.</p>
 <?php
 foreach ($documentos as &$d) {

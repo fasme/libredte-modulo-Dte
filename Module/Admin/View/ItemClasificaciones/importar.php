@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Importar clasificaciones de items desde archivo CSV</h1>
+<div class="page-header"><h1>Importar clasificaciones de items desde archivo CSV</h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Form.check() && Form.checkSend(\'¿Está seguro de importar el archivo seleccionado?\')']);

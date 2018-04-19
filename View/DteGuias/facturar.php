@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Facturación masiva de guías de despacho</h1>
+<div class="page-header"><h1>Facturación masiva de guías de despacho</h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['id'=>'buscarForm', 'onsubmit'=>'Form.check(\'buscarForm\')']);

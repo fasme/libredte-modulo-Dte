@@ -1,4 +1,4 @@
-<h1>Subir CAF</h1>
+<div class="page-header"><h1>Subir CAF</h1></div>
 <p>Aquí podrá subir los códigos de autorización de folios (CAF) obtenidos desde el SII para la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

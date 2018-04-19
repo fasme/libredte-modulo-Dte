@@ -1,4 +1,4 @@
-<h1>Mantenedor de folios empresa <?=$Emisor->razon_social?></h1>
+<div class="page-header"><h1>Mantenedor de folios empresa <?=$Emisor->razon_social?></h1></div>
 <p>Aquí podrá administrar los códigos de autorización de folios (CAF) disponibles para la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 foreach ($folios as &$f) {

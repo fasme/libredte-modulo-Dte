@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Buscar boletas de honorarios recibidas</h1>
+<div class="page-header"><h1>Buscar boletas de honorarios recibidas</h1></div>
 <p>Aquí podrá consultar las boletas de honorarios electrónicas que el SII recibió para la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

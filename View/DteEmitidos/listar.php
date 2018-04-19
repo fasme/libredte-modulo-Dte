@@ -15,7 +15,7 @@
         </a>
     </li>
 </ul>
-<h1>Documentos emitidos</h1>
+<div class="page-header"><h1>Documentos emitidos</h1></div>
 <p>Aquí podrá consultar todos los documentos emitidos por la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 foreach ($documentos as &$d) {

@@ -19,9 +19,9 @@
 </ul>
 
 <?php if (isset($DteRecibido)) : ?>
-<h1><?=$DteRecibido->getTipo()->tipo?> N° <?=$DteRecibido->folio?> <small><?=$DteRecibido->getEmisor()->razon_social?></small></h1>
+<div class="page-header"><h1><?=$DteRecibido->getTipo()->tipo?> N° <?=$DteRecibido->folio?> <small><?=$DteRecibido->getEmisor()->razon_social?></small></h1></div>
 <?php else : ?>
-<h1>Agregar documento recibido</h1>
+<div class="page-header"><h1>Agregar documento recibido</h1></div>
 <?php
 endif;
 $f = new \sowerphp\general\View_Helper_Form();

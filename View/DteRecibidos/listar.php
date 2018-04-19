@@ -30,7 +30,7 @@
     </li>
 </ul>
 
-<h1>Documentos recibidos</h1>
+<div class="page-header"><h1>Documentos recibidos</h1></div>
 <p>Aquí podrá consultar todos los documentos recibidos por la empresa <?=$Emisor->razon_social?>.</p>
 
 <?php

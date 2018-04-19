@@ -1,4 +1,4 @@
-<h1>Reporte consumo de folios boletas</h1>
+<div class="page-header"><h1>Reporte consumo de folios boletas</h1></div>
 <?php
 // preparar títulos de columnas (con link para ordenar por dicho campo)
 $titles = [];

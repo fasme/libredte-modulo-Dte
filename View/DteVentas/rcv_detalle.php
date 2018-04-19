@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Detalle RV período <?=$periodo?></h1>
+<div class="page-header"><h1>Detalle RV período <?=$periodo?></h1></div>
 <p>Esta es la página del detalle del registro de ventas para <?=$DteTipo->tipo?> del período <?=$periodo?> de la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 foreach ($detalle as &$d) {

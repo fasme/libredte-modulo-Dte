@@ -1,4 +1,4 @@
-<h1><?=$accion?> clasificación de items</h1>
+<div class="page-header"><h1><?=$accion?> clasificación de items</h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form ();
 echo $f->begin(array('onsubmit'=>'Form.check()'));

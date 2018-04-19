@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Búsqueda avanzada de DTE emitidos</h1>
+<div class="page-header"><h1>Búsqueda avanzada de DTE emitidos</h1></div>
 <p>Aquí podrá buscar entre sus documentos emitidos.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form(false);

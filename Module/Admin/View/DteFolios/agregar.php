@@ -1,4 +1,4 @@
-<h1>Crear mantenedor de folios</h1>
+<div class="page-header"><h1>Crear mantenedor de folios</h1></div>
 <p>Aquí podrá agregar un mantenedor de folios para un nuevo tipo de documento. En el paso siguiente se le pedirá que suba el primer archio CAF.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

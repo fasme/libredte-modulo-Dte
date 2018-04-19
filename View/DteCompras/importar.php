@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Importar libro de compras (IEC) desde archivo CSV</h1>
+<div class="page-header"><h1>Importar libro de compras (IEC) desde archivo CSV</h1></div>
 <p>Aquí podrá importar documentos de manera masiva desde un archivo CSV. Si bien esta opción existe y se puede usar para completar el listado de documentos recibidos y luego construir el libro no se aconseja su uso. Si de todas formas la usará por favor considerar los siguientes puntos:</p>
 <ol>
     <li>

@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Informes &raquo; Despachos</h1>
+<div class="page-header"><h1>Dte &raquo; Informes &raquo; Despachos</h1></div>
 <p>Se listan los despachos programados para cierto día por el contribuyente <?=$Emisor->razon_social?>.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

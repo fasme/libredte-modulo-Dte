@@ -25,7 +25,7 @@
     </li>
 </ul>
 
-<h1>Documento T<?=$DteEmitido->dte?>F<?=$DteEmitido->folio?></h1>
+<div class="page-header"><h1>Documento T<?=$DteEmitido->dte?>F<?=$DteEmitido->folio?></h1></div>
 <p>Esta es la página del documento <?=$DteEmitido->getTipo()->tipo?> (<?=$DteEmitido->dte?>) folio número <?=$DteEmitido->folio?> de la empresa <?=$Emisor->razon_social?> emitido a <?=$Receptor->razon_social?> (<?=$Receptor->rut.'-'.$Receptor->dv?>).</p>
 
 <script type="text/javascript">

@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Admin &raquo; Informes &raquo; Contribuyentes registrados</h1>
+<div class="page-header"><h1>Dte &raquo; Admin &raquo; Informes &raquo; Contribuyentes registrados</h1></div>
 <p>Aquí podrá buscar los contribuyentes registrados para los cuales el usuario administrador a iniciado sesión por última vez en un rango de fechas.</p>
 <?php
 // formulario

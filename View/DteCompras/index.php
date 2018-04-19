@@ -18,7 +18,7 @@
         </a>
     </li>
 </ul>
-<h1>Libro de compras (IEC)</h1>
+<div class="page-header"><h1>Libro de compras (IEC)</h1></div>
 <?php
 foreach ($periodos as &$p) {
     $acciones = '<a href="dte_compras/ver/'.$p['periodo'].'" title="Ver estado del libro del período"><span class="fa fa-search btn btn-default"></span></a>';

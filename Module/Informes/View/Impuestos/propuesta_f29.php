@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Informes &raquo; Propuesta F29</h1>
+<div class="page-header"><h1>Dte &raquo; Informes &raquo; Propuesta F29</h1></div>
 <p>Aquí podrá generar una propuesta al formulario 29 de acuerdo a sus compras y ventas<sup>*</sup> del mes. Se recomienda que esta propuesta sea revisada por un contador, ya que puede requerir modificaciones.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

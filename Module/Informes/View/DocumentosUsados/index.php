@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Informes &raquo; Documentos usados</h1>
+<div class="page-header"><h1>Dte &raquo; Informes &raquo; Documentos usados</h1></div>
 <p>Se listan los documentos usados por periodo por el contribuyente <?=$Emisor->razon_social?>.</p>
 <?php
 $emitidos = 0;

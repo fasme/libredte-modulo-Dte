@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Asignación tipo de transacciones del período <?=$periodo?></h1>
+<div class="page-header"><h1>Asignación tipo de transacciones del período <?=$periodo?></h1></div>
 <p>Aquí puede hacer una búsqueda de los documentos emitidos y realizar la asignación del tipo de transacción.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

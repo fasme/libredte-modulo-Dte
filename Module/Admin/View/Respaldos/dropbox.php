@@ -1,4 +1,4 @@
-<h1>Configuración de respaldos automáticos en Dropbox</h1>
+<div class="page-header"><h1>Configuración de respaldos automáticos en Dropbox</h1></div>
 <?php if (!$Emisor->config_respaldos_dropbox) : ?>
 <p>Aquí podrá conectar LibreDTE con Dropbox para que se realicen respalos automáticos del contribuyente <?=$Emisor->razon_social?>.</p>
 <div class="row">

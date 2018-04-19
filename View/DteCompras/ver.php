@@ -76,7 +76,7 @@
     </li>
 </ul>
 
-<h1>Libro de compras período <?=$Libro->periodo?></h1>
+<div class="page-header"><h1>Libro de compras período <?=$Libro->periodo?></h1></div>
 <p>Esta es la página del libro de compras del período <?=$Libro->periodo?> de la empresa <?=$Emisor->razon_social?>.</p>
 
 <script type="text/javascript">

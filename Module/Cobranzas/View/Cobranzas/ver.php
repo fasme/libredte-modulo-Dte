@@ -1,4 +1,4 @@
-<h1>Pago programado <small><?=$Pago->getDte()->getTipo()->tipo?> N° <?=$Pago->folio?></small></h1>
+<div class="page-header"><h1>Pago programado <small><?=$Pago->getDte()->getTipo()->tipo?> N° <?=$Pago->folio?></small></h1></div>
 <div class="panel panel-default">
     <div class="panel-heading">
         <i class="fa fa-info"></i>

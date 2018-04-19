@@ -15,7 +15,7 @@
 </ul>
 <?php endif; ?>
 
-<h1><?=$titulo?></h1>
+<div class="page-header"><h1><?=$titulo?></h1></div>
 <p><?=$descripcion?></p>
 
 <?php

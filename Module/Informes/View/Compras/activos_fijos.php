@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Informes &raquo; Compras de activos fijos</h1>
+<div class="page-header"><h1>Dte &raquo; Informes &raquo; Compras de activos fijos</h1></div>
 <p>Se listan los documentos de compras de activos fijos según fue informado en el libro de compras (IEC) del contribuyente <?=$Emisor->razon_social?>.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

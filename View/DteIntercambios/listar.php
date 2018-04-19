@@ -55,7 +55,7 @@
     </li>
 </ul>
 
-<h1>Bandeja de intercambio</h1>
+<div class="page-header"><h1>Bandeja de intercambio</h1></div>
 <p>Aquí podrá revisar, aceptar o rechazar aquellos documentos que otros contribuyentes han envíado a <?=$Emisor->razon_social?> de manera electrónica.</p>
 
 <?php

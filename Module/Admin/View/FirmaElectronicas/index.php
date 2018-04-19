@@ -1,4 +1,4 @@
-<h1>Mantenedor firmas electrónicas <?=$Emisor->razon_social?></h1>
+<div class="page-header"><h1>Mantenedor firmas electrónicas <?=$Emisor->razon_social?></h1></div>
 <p>A continuación se muestra un listado de los usuarios autorizados a operar con la empresa <?=$Emisor->razon_social?> y que tienen firma electrónica registrada en el sistema.</p>
 <?php
 foreach ($firmas as &$f) {

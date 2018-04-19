@@ -5,7 +5,7 @@
         </a>
     </li>
 </ul>
-<h1>Cargar XML como DTE emitido</h1>
+<div class="page-header"><h1>Cargar XML como DTE emitido</h1></div>
 <p>Si ha emitido un DTE en una aplicación externa aquí podrá cargarlo para que sea agregado a sus otros documentos generados en el sistema.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

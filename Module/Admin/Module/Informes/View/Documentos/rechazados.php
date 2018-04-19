@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Admin &raquo; Informes &raquo; Documentos emitidos rechazados</h1>
+<div class="page-header"><h1>Dte &raquo; Admin &raquo; Informes &raquo; Documentos emitidos rechazados</h1></div>
 <p>Este reporte permite conocer el listado de documentos rechazados en ambiente de producción.</p>
 <?php
 // formulario

@@ -1,4 +1,4 @@
-<h1>Dte &raquo; Admin &raquo; Informes &raquo; Planes plus</h1>
+<div class="page-header"><h1>Dte &raquo; Admin &raquo; Informes &raquo; Planes plus</h1></div>
 <p>Aquí podrá buscar los usuarios pertenecientes al grupo <em>dte_plus</em> y los contribuyentes que tengan registrados.</pi>
 <?php
 foreach ($plus as &$p) {

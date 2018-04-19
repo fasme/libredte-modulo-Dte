@@ -1,4 +1,4 @@
-<h1>Solicitar CAF al SII</h1>
+<div class="page-header"><h1>Solicitar CAF al SII</h1></div>
 <p>Aquí podrá solicitar un archivo de folios (CAF) al SII y cargarlo automáticamente a LibreDTE.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

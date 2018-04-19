@@ -23,7 +23,7 @@
         </a>
     </li>
 </ul>
-<h1>Libro de ventas (IEV)</h1>
+<div class="page-header"><h1>Libro de ventas (IEV)</h1></div>
 <?php
 foreach ($periodos as &$p) {
     $acciones = '<a href="dte_ventas/ver/'.$p['periodo'].'" title="Ver estado del libro del período"><span class="fa fa-search btn btn-default"></span></a>';

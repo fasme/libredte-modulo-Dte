@@ -16,7 +16,7 @@
     </li>
 </ul>
 
-<h1>Listado de productos y/o servicios</h1>
+<div class="page-header"><h1>Listado de productos y/o servicios</h1></div>
 <p><?=$comment?></p>
 
 <?php

@@ -32,7 +32,7 @@
         </a>
     </li>
 </ul>
-<h1>Resumen RC período <?=$periodo?> <small>estado: <?=$estado?></small></h1>
+<div class="page-header"><h1>Resumen RC período <?=$periodo?> <small>estado: <?=$estado?></small></h1></div>
 <p>Esta es la página del resumen del registro de compras del período <?=$periodo?> de la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 foreach ($resumen as &$r) {

@@ -17,7 +17,7 @@ function buscar(q) {
         </a>
     </li>
 </ul>
-<h1>Documentos temporales</h1>
+<div class="page-header"><h1>Documentos temporales</h1></div>
 <p>Aquí se listan los documentos temporales del emisor <?=$Emisor->razon_social?> que ya están normalizados pero que aun no han sido generados oficialmente (no poseen folio, ni timbre, ni firma).</p>
 <form name="buscador" onsubmit="buscar(this.q); return false">
     <div class="form-group">

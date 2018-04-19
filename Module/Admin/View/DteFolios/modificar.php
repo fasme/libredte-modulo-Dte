@@ -1,4 +1,4 @@
-<h1>Modificar mantenedor de folios DTE <?=$DteFolio->dte?></h1>
+<div class="page-header"><h1>Modificar mantenedor de folios DTE <?=$DteFolio->dte?></h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Form.check()']);

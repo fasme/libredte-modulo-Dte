@@ -12,7 +12,7 @@
         </a>
     </li>
 </ul>
-<h1>Usuarios empresa <?=$Contribuyente->razon_social?></h1>
+<div class="page-header"><h1>Usuarios empresa <?=$Contribuyente->razon_social?></h1></div>
 <p>Aquí podrá modificar los usuarios autorizados a operar con la empresa <?=$Contribuyente->razon_social?> RUT <?=num($Contribuyente->rut).'-'.$Contribuyente->dv?>, para la cual usted es el usuario administrador.</p>
 
 <script type="text/javascript">
