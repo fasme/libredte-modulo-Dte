@@ -47,11 +47,15 @@
             Descargar
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_intercambios/actualizar" title="Actualizar bandeja de intercambio <?=$Emisor->config_email_intercambio_user?>">
-            <span class="fas fa-sync"></span>
-            Actualizar
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fas fa-sync"></span> Actualizar <span class="caret"></span>
         </a>
+        <ul class="dropdown-menu">
+            <li><a href="<?=$_base?>/dte/dte_intercambios/actualizar/7">Últimos 7 días</a></li>
+            <li><a href="<?=$_base?>/dte/dte_intercambios/actualizar/30">Últimos 30 días</a></li>
+            <li><a href="<?=$_base?>/dte/dte_intercambios/actualizar/90">Últimos 90 días</a></li>
+        </ul>
     </li>
 </ul>
 
