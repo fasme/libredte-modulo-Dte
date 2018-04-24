@@ -939,7 +939,7 @@ class Controller_Documentos extends \Controller_App
      * Acción que permite generar masivamente los DTE
      * En estrictor rigor esta opción sólo lanza un comando que permite hacer la generación masiva
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-19
+     * @version 2018-04-20
      */
     public function emitir_masivo()
     {
@@ -948,7 +948,7 @@ class Controller_Documentos extends \Controller_App
             'Emisor' => $Emisor,
         ]);
         if (isset($_POST['submit'])) {
-            if (empty($_FILES['archivo']) or $_FILES['archivo']['error'] or $_FILES['archivo']['type']!='text/csv') {
+            if (empty($_FILES['archivo']) or $_FILES['archivo']['error']) {
                 \sowerphp\core\Model_Datasource_Session::message('No fue posible subir el archivo con los documentos', 'error');
                 return;
             }
