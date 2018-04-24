@@ -119,6 +119,9 @@ class Shell_Command_DteEmitidos_EmitirMasivo extends \Shell_App
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($Usuario->hash);
         foreach($documentos as $dte) {
+            if ($this->verbose) {
+                $this->out('Generando DTE T'.$dte['Encabezado']['IdDoc']['TipoDTE'].'F'.$dte['Encabezado']['IdDoc']['Folio']);
+            }
             // agregar RUT emisor
             $dte['Encabezado']['Emisor']['RUTEmisor'] = $Emisor->rut.'-'.$Emisor->dv;
             // emitir DTE temporal

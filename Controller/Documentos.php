@@ -939,7 +939,7 @@ class Controller_Documentos extends \Controller_App
      * Acción que permite generar masivamente los DTE
      * En estrictor rigor esta opción sólo lanza un comando que permite hacer la generación masiva
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-20
+     * @version 2018-04-24
      */
     public function emitir_masivo()
     {
@@ -954,8 +954,9 @@ class Controller_Documentos extends \Controller_App
             }
             $archivo = tempnam('/tmp', $Emisor->rut.'_dte_masivo_pendiente_');
             move_uploaded_file($_FILES['archivo']['tmp_name'], $archivo);
-            $cmd = 'Dte.DteEmitidos_EmitirMasivo '.(int)$Emisor->rut.' '.$archivo.' '.(int)$this->Auth->User->id.' '.(int)$_POST['dte_emitido'].' '.(int)$_POST['email'];
-            if ($this->shell($cmd)) {
+            $cmd = 'Dte.DteEmitidos_EmitirMasivo '.(int)$Emisor->rut.' '.$archivo.' '.(int)$this->Auth->User->id.' '.(int)$_POST['dte_emitido'].' '.(int)$_POST['email'].' -v';
+            $log = TMP.'/screen_documentos_emitir_masivo_'.$Emisor->rut.'_'.date('YmdHis').'.log';
+            if ($this->shell($cmd, $log)) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'No fue posible programar la emisión masiva', 'error'
                 );
