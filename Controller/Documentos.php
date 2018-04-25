@@ -319,7 +319,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-18
+     * @version 2018-04-25
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -332,24 +332,42 @@ class Controller_Documentos extends \Controller_App
         }
         // si hay un DTE de referencia se arman datos para poder copiar
         if ($referencia_dte and $referencia_folio) {
-            $DteEmitido = new Model_DteEmitido($Emisor->rut, $referencia_dte, $referencia_folio, (int)$Emisor->config_ambiente_en_certificacion);
-            if (!$DteEmitido->exists()) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'Documento T'.$referencia_dte.'F'.$referencia_folio.' no existe, no se puede referenciar', 'error'
-                );
-                $this->redirect('/dte/dte_emitidos');
+            // si el folio de referencia es un número se busca un DTE emitido
+            if (is_numeric($referencia_folio)) {
+                $DocumentoOriginal = new Model_DteEmitido($Emisor->rut, $referencia_dte, $referencia_folio, (int)$Emisor->config_ambiente_en_certificacion);
+                if (!$DocumentoOriginal->exists()) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Documento T'.$referencia_dte.'F'.$referencia_folio.' no existe, no se puede referenciar', 'error'
+                    );
+                    $this->redirect('/dte/dte_emitidos/listar');
+                }
             }
-            $datos = $DteEmitido->getDatos();
+            // si el folio de referencia es alfanumérico se busca un DTE temporal
+            else {
+                list($codigo, $receptor) = explode('-', $referencia_folio);
+                $DocumentoOriginal = new Model_DteTmp($Emisor->rut, $receptor, $referencia_dte, $codigo);
+                if (!$DocumentoOriginal->exists()) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Documento '.$DocumentoOriginal->getFolio().' no existe, no se puede referenciar', 'error'
+                    );
+                    $this->redirect('/dte/dte_tmps');
+                }
+                if (isset($_GET['reemplazar'])) {
+                    $DocumentoOriginal->delete();
+                    $_GET['copiar'] = 1;
+                }
+            }
+            $datos = $DocumentoOriginal->getDatos();
             unset($datos['TED']);
             $Comunas = new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas();
             $datos['Encabezado']['Emisor']['CmnaOrigen'] = !empty($datos['Encabezado']['Emisor']['CmnaOrigen']) ? $Comunas->getComunaByName($datos['Encabezado']['Emisor']['CmnaOrigen']) : null;
             $datos['Encabezado']['Receptor']['CmnaRecep'] = !empty($datos['Encabezado']['Receptor']['CmnaRecep']) ? $Comunas->getComunaByName($datos['Encabezado']['Receptor']['CmnaRecep']) : null;
             $datos['Encabezado']['Transporte']['CmnaDest'] = !empty($datos['Encabezado']['Transporte']['CmnaDest']) ? $Comunas->getComunaByName($datos['Encabezado']['Transporte']['CmnaDest']) : null;
             if (empty($datos['Encabezado']['Receptor']['GiroRecep'])) {
-                $datos['Encabezado']['Receptor']['GiroRecep'] = $DteEmitido->getReceptor()->giro;
+                $datos['Encabezado']['Receptor']['GiroRecep'] = $DocumentoOriginal->getReceptor()->giro;
             }
             if (empty($datos['Encabezado']['Receptor']['CorreoRecep'])) {
-                $datos['Encabezado']['Receptor']['CorreoRecep'] = $DteEmitido->getReceptor()->email;
+                $datos['Encabezado']['Receptor']['CorreoRecep'] = $DocumentoOriginal->getReceptor()->email;
             }
             if (isset($_GET['copiar'])) {
                 $dte_defecto = $datos['Encabezado']['IdDoc']['TipoDTE'];

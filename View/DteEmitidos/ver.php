@@ -20,7 +20,7 @@
 <?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_emitidos/listar" title="Volver a los documentos emitidos">
-            Volver a documentos emitidos
+            Volver
         </a>
     </li>
 </ul>

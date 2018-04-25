@@ -48,7 +48,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
         <div class="form-group col-md-2"><?=$f->input(['name'=>'CdgVendedor', 'placeholder' => 'Código vendedor', 'popover' => 'Código del vendedor asociado al DTE', 'value'=>!empty($datos['Encabezado']['Emisor']['CdgVendedor'])?$datos['Encabezado']['Emisor']['CdgVendedor']:$_Auth->User->usuario, 'check' => 'notempty', 'attr' => 'maxlength="60"'])?></div>
         <div class="form-group col-md-4"><?=$f->input(['type' => 'select', 'name' => 'CdgSIISucur', 'value' => (!empty($datos['Encabezado']['Emisor']['CdgSIISucur'])?$datos['Encabezado']['Emisor']['CdgSIISucur']:$sucursal), 'options' => $sucursales, 'attr'=>'onchange="emisor_set_actividad()"'])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'select', 'name' => 'Acteco', 'options' => $actividades_economicas, 'value'=>!empty($datos['Encabezado']['Emisor']['Acteco'])?$datos['Encabezado']['Emisor']['Acteco']:$Emisor->actividad_economica, 'check' => 'notempty', 'attr'=>'onchange="emisor_set_giro()"'])?></div>
-        <div class="form-group col-md-3"><?=$f->input(['name'=>'GiroEmis', 'placeholder' => 'Giro del emisor', 'popover' => 'Giro del emisor del DTE', 'value'=>isset($datos)?(isset($datos['Encabezado']['Emisor']['GiroEmis'])?$datos['Encabezado']['Emisor']['GiroEmis']:$datos['Encabezado']['Emisor']['GiroEmisor']):$Emisor->giro, 'check' => 'notempty', 'attr' => 'maxlength="80"'])?></div>
+        <div class="form-group col-md-3"><?=$f->input(['name'=>'GiroEmis', 'placeholder' => 'Giro del emisor', 'popover' => 'Giro del emisor del DTE', 'value'=>isset($datos)?(!empty($datos['Encabezado']['Emisor']['GiroEmis'])?$datos['Encabezado']['Emisor']['GiroEmis']:$datos['Encabezado']['Emisor']['GiroEmisor']):$Emisor->giro, 'check' => 'notempty', 'attr' => 'maxlength="80"'])?></div>
     </div>
     <p>(*) modificar el giro y/o actividad económica del emisor sólo afectará a la emisión de este documento, no se guardarán estos cambios.</p>
     <!-- DATOS DEL RECEPTOR -->
@@ -154,7 +154,9 @@ if (isset($datos)) {
     foreach ($Detalle as $d) {
         if ($datos['Encabezado']['IdDoc']['TipoDTE']==39 and (!isset($d['IndExe']) or !$d['IndExe'])) {
             $d['PrcItem'] = round($d['PrcItem']/(1+(\sasco\LibreDTE\Sii::getIVA())/100));
-            $d['MontoItem'] = $d['PrcItem'] * $d['QtyItem'];
+            if (!empty($d['DescuentoMonto'])) {
+                $d['DescuentoMonto'] = round($d['DescuentoMonto']/(1+(\sasco\LibreDTE\Sii::getIVA())/100));
+            }
         }
         $detalle[] = [
             'VlrCodigo' => isset($d['CdgItem']['VlrCodigo']) ? $d['CdgItem']['VlrCodigo'] : '',
@@ -164,8 +166,8 @@ if (isset($datos)) {
             'QtyItem' => isset($d['QtyItem']) ? $d['QtyItem'] : '',
             'UnmdItem' => isset($d['UnmdItem']) ? $d['UnmdItem'] : '',
             'PrcItem' => isset($d['PrcItem']) ? $d['PrcItem'] : '',
-            'ValorDR' => isset($d['DescuentoPct']) ? $d['DescuentoPct'] : (isset($d['DescuentoMonto']) ? $d['DescuentoMonto'] : 0),
-            'TpoValor' => isset($d['DescuentoPct']) ? '%' : (isset($d['DescuentoMonto']) ? '$' : '%'),
+            'ValorDR' => (float)(!empty($d['DescuentoPct']) ? $d['DescuentoPct'] : (!empty($d['DescuentoMonto']) ? $d['DescuentoMonto'] : 0)),
+            'TpoValor' => !empty($d['DescuentoPct']) ? '%' : (!empty($d['DescuentoMonto']) ? '$' : '%'),
             'CodImpAdic' => isset($d['CodImpAdic']) ? $d['CodImpAdic'] : '',
         ];
     }
@@ -246,8 +248,11 @@ if (isset($datos) and isset($datos['DscRcgGlobal'])) {
     if (!isset($datos['DscRcgGlobal'][0])) {
         $datos['DscRcgGlobal'] = [$datos['DscRcgGlobal']];
     }
-    $ValorDR_global = $datos['DscRcgGlobal'][0]['ValorDR'];
+    $ValorDR_global = (float)$datos['DscRcgGlobal'][0]['ValorDR'];
     $TpoValor_global = $datos['DscRcgGlobal'][0]['TpoValor'];
+    if ($ValorDR_global and $datos['Encabezado']['IdDoc']['TipoDTE']==39 and $TpoValor_global=='$') {
+        $ValorDR_global = round($ValorDR_global/(1+(\sasco\LibreDTE\Sii::getIVA())/100));
+    }
 } else {
     $ValorDR_global = 0;
     $TpoValor_global = '%';

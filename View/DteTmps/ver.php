@@ -1,4 +1,14 @@
 <ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?copiar" title="Crear DTE con los mismos datos de este">
+            Copiar DTE
+        </a>
+    </li>
+    <li>
+        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?reemplazar" title="Eliminar este documento y crear un DTE con los mismos datos de este">
+            Reemplazar DTE
+        </a>
+    </li>
 <?php if (\sowerphp\core\Module::loaded('Crm')) :?>
     <li>
         <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>">
@@ -13,7 +23,7 @@
     </li>
     <li>
         <a href="<?=$_base?>/dte/dte_tmps" title="Volver a los documentos temporales">
-            Volver a documentos temporales
+            Volver
         </a>
     </li>
 </ul>
