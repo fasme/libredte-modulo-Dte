@@ -17,6 +17,7 @@ echo $f->input([
 ]);
 echo $f->end('Generar resumen');
 if (isset($resumen)) {
+    // resumen
     $total = [
         'TpoDoc' => '<strong>Total</strong>',
         'TotDoc' => 0,
@@ -47,8 +48,8 @@ if (isset($resumen)) {
         }
         // dar formato de número
         foreach ($r as &$v) {
-            if ($v) {
-                $v = num($v);
+            if (is_numeric($v)) {
+                $v = $v>0 ? num($v) : null;
             }
         }
     }
@@ -63,4 +64,16 @@ if (isset($resumen)) {
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setShowEmptyCols(false);
     echo $t->generate($resumen);
+    // totales mensuales
+    foreach ($totales_mensuales as &$r) {
+        // dar formato de número
+        foreach ($r as $k => &$v) {
+            if ($k != 'periodo' and is_numeric($v)) {
+                $v = $v>0 ? num($v) : null;
+            }
+        }
+    }
+    $titulos = ['Período', '# docs', 'Anulados', 'Op. exen.', 'Exento', 'Neto', 'IVA', 'IVA propio', 'IVA terc.', 'Ley 18211', 'Monto total', 'No fact.', 'Total periodo'];
+    array_unshift($totales_mensuales, $titulos);
+    echo $t->generate($totales_mensuales);
 }

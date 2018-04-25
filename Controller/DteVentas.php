@@ -297,7 +297,7 @@ class Controller_DteVentas extends Controller_Base_Libros
     /**
      * Acción que genera un resumen de las ventas de un año completo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-12
+     * @version 2018-04-25
      */
     public function resumen($anio = null)
     {
@@ -307,33 +307,8 @@ class Controller_DteVentas extends Controller_Base_Libros
         }
         if ($anio) {
             // obtener libros de cada mes con su resumen
-            $libros = [];
-            foreach (range(1,12) as $mes) {
-                $mes = $mes < 10 ? '0'.$mes : $mes;
-                $DteVenta = new Model_DteVenta($Emisor->rut, (int)($anio.$mes), (int)$Emisor->config_ambiente_en_certificacion);
-                $resumen = $DteVenta->getResumen();
-                if ($resumen) {
-                    $libros[$anio][$mes] = $resumen;
-                }
-            }
-            // ir sumando en el resumen anual
-            $resumen = [];
-            foreach($libros[$anio] as $mes => $resumen_mensual) {
-                foreach ($resumen_mensual as $r) {
-                    $cols = array_keys($r);
-                    unset($cols[array_search('TpoDoc',$cols)]);
-                    if (!isset($resumen[$r['TpoDoc']])) {
-                        $resumen[$r['TpoDoc']] = ['TpoDoc' => $r['TpoDoc']];
-                        foreach ($cols as $col) {
-                            $resumen[$r['TpoDoc']][$col] = 0;
-                        }
-                    }
-                    foreach ($cols as $col) {
-                        $resumen[$r['TpoDoc']][$col] += $r[$col];
-                    }
-                }
-            }
-            ksort($resumen);
+            $DteVentas = (new Model_DteVentas())->setContribuyente($Emisor);
+            $resumen = $DteVentas->getResumenAnual($anio);
             // crear operaciones
             $operaciones = [];
             foreach ($resumen as $r) {
@@ -344,6 +319,7 @@ class Controller_DteVentas extends Controller_Base_Libros
                 'anio' => $anio,
                 'resumen' => $resumen,
                 'operaciones' => $operaciones,
+                'totales_mensuales' => $DteVentas->getTotalesMensuales($anio),
             ]);
         }
     }

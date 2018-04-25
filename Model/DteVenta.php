@@ -306,4 +306,55 @@ class Model_DteVenta extends Model_Base_Libro
         ]);
     }
 
+    /**
+     * Método que entrega los totales del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function getTotales()
+    {
+        $resumen = $this->getResumen();
+        $total = [
+            'TotDoc' => 0,
+            'TotAnulado' => 0,
+            'TotOpExe' => 0,
+            'TotMntExe' => 0,
+            'TotMntNeto' => 0,
+            'TotMntIVA' => 0,
+            'TotIVAPropio' => 0,
+            'TotIVATerceros' => 0,
+            'TotLey18211' => 0,
+            'TotMntTotal' => 0,
+            'TotMntNoFact' => 0,
+            'TotMntPeriodo' => 0,
+        ];
+        foreach ($resumen as &$r) {
+            // sumar campos que se suman directamente
+            foreach (['TotDoc', 'TotAnulado', 'TotOpExe'] as $c) {
+                $total[$c] += $r[$c];
+            }
+            // sumar o restar campos segun operación
+            $operacion = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
+            foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntTotal', 'TotMntNoFact', 'TotMntPeriodo'] as $c) {
+                if ($operacion=='S') {
+                    $total[$c] += $r[$c];
+                } else if ($operacion=='R') {
+                    $total[$c] -= $r[$c];
+                }
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Método que entrega el total del neto + exento del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function getTotalExentoNeto()
+    {
+        $totales = $this->getTotales();
+        return $totales['TotMntExe'] + $totales['TotMntNeto'];
+    }
+
 }
