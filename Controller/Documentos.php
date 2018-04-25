@@ -969,4 +969,146 @@ class Controller_Documentos extends \Controller_App
         }
     }
 
+    /**
+     * Acción que permite buscar un documento (ya sea temporal o real)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function buscar($q = null)
+    {
+        $Emisor = $this->getContribuyente();
+        // definir parámetro de búsqueda
+        $q = !empty($_GET['q']) ? $_GET['q'] : $q;
+        if (!$q) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Debe indicar un documento a buscar', 'warning'
+            );
+            $this->redirect('/dte');
+        }
+        // buscar si es documento real
+        if ($q[0]=='T') {
+            $aux = explode('F', $q);
+            if (count($aux)==2) {
+                $dte = (int)substr($aux[0], 1);
+                $folio = (int)$aux[1];
+                $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+                if ($DteEmitido->exists()) {
+                    header('location: '.$DteEmitido->getLinks()['ver']);
+                    exit;
+                }
+            }
+        }
+        // buscar si es documento temporal
+        else {
+            $aux = explode('-', $q);
+            if (count($aux)==2) {
+                $codigo = strtolower($aux[1]);
+                if (!is_numeric($aux[0]) or strlen($codigo)!=7) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Código documento temporal no es válido', 'error'
+                    );
+                    $this->redirect('/dte');
+                }
+                $DteTmps = new Model_DteTmps();
+                $DteTmps->setWhereStatement(
+                    ['emisor = :emisor', 'dte = :dte', 'codigo LIKE :codigo'],
+                    [':emisor'=>$Emisor->rut, ':dte'=>(int)$aux[0], ':codigo'=>$codigo.'%']
+                );
+                $documentos = $DteTmps->getObjects();
+                if (isset($documentos[0])) {
+                    if (isset($documentos[1])) {
+                        \sowerphp\core\Model_Datasource_Session::message(
+                            'Se encontró más de un documento temporal que coincide con la búsqueda, buscar en el listado completo', 'warning'
+                        );
+                        $this->redirect('/dte');
+                    }
+                    header('location: '.$documentos[0]->getLinks()['ver']);
+                    exit;
+                }
+            }
+        }
+        // no se encontró el documento
+        \sowerphp\core\Model_Datasource_Session::message(
+            'No se encontró el documento solicitado', 'warning'
+        );
+        $this->redirect('/dte');
+    }
+
+    /**
+     * Acción que permite buscar masivamente los documentos asociados a un archivo masivo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function buscar_masivo()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+        ]);
+        if (isset($_POST['submit'])) {
+            if (empty($_FILES['archivo']) or $_FILES['archivo']['error']) {
+                \sowerphp\core\Model_Datasource_Session::message('No fue posible subir el archivo con los documentos', 'error');
+                return;
+            }
+            $datos = \sowerphp\general\Utility_Spreadsheet_CSV::read($_FILES['archivo']['tmp_name']);
+            $datos[0][] = 'documento_encontrado';
+            $n_datos = count($datos);
+            for ($i=1; $i<$n_datos; $i++) {
+                $documento_encontrado = [];
+                // verificar campos básicos
+                if (empty($datos[$i][0])) {
+                    continue;
+                }
+                if (empty($datos[$i][2])) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Falta fecha de emisión en T'.$datos[$i][0].'F'.$datos[$i][1], 'error'
+                    );
+                    return;
+                }
+                if (empty($datos[$i][4])) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Falta RUT receptor en T'.$datos[$i][0].'F'.$datos[$i][1], 'error'
+                    );
+                    return;
+                }
+                // crear filtros
+                $dte = (int)$datos[$i][0];
+                $fecha = $datos[$i][2];
+                $receptor = (int)substr(str_replace('.', '', $datos[$i][4]), 0, -2);
+                // buscar documento real
+                if (in_array($_POST['buscar'], [0, 2])) {
+                    $documentos = $Emisor->getDocumentosEmitidos([
+                        'dte' => $dte,
+                        'fecha' => $fecha,
+                        'receptor' => $receptor,
+                    ]);
+                    // se encontró documento real (se agrega, a pesar que podría no ser el correcto)
+                    if ($documentos) {
+                        foreach ($documentos as $documento) {
+                            $documento_encontrado[] = 'T'.$documento['dte'].'F'.$documento['folio'].' ('.$documento['total'].')';
+                        }
+                    }
+                }
+                // buscar documento temporal
+                if (in_array($_POST['buscar'], [0, 1])) {
+                    $DteTmps = new Model_DteTmps();
+                    $DteTmps->setWhereStatement(
+                        ['emisor = :emisor', 'dte = :dte', 'fecha = :fecha', 'receptor = :receptor'],
+                        [':emisor'=>$Emisor->rut, ':dte'=>$dte, ':fecha'=>$fecha, ':receptor'=>$receptor]
+                    );
+                    $documentos = $DteTmps->getTable();
+                    if ($documentos) {
+                        foreach ($documentos as $documento) {
+                            $documento_encontrado[] = $documento['dte'].'-'.strtoupper(substr($documento['codigo'],0,7)).' ('.$documento['total'].')';
+                        }
+                    }
+                }
+                // agregar lo encontrado
+                $datos[$i][] = implode(', ', $documento_encontrado);
+            }
+            // descargar archivo con resultados
+            \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, substr($_FILES['archivo']['name'], 0, -4).'_resultado_buscar_masivo');
+        }
+    }
+
 }

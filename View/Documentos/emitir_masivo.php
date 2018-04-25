@@ -1,5 +1,10 @@
 <ul class="nav nav-pills pull-right">
     <li>
+        <a href="<?=$_base?>/dte/documentos/buscar_masivo" title="Buscar documentos masivamente">
+            Buscar DTE masivo
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir DTE de manera individual">
             Emitir DTE individual
         </a>

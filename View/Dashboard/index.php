@@ -183,6 +183,27 @@
     <!-- FIN PANEL CENTRO -->
     <!-- PANEL DERECHA -->
     <div class="col-md-3">
+        <!-- buscador documentos -->
+        <script>
+            function buscar(q) {
+                window.location = _url+'/dte/documentos/buscar?q='+encodeURI(q);
+            }
+            $(function(){$('#qField').focus()});
+        </script>
+        <form name="buscador" onsubmit="buscar(this.q.value); return false">
+            <div class="form-group">
+                <label class="control-label sr-only" for="qField">Buscar por código documento</label>
+                <div class="input-group input-group-lg">
+                    <input type="text" name="q" class="form-control" id="qField" placeholder="Buscar documento..." />
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button" onclick="buscar(document.buscador.q.value); return false">
+                            <span class="fa fa-search"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </form>
+        <!-- fin buscador documentos -->
 <?php if ($cuota) : ?>
         <!-- dtes usados (totales de emitidos y recibidos) -->
         <div class="panel panel-default">

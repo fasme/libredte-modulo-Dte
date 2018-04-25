@@ -536,12 +536,13 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que entrega los enlaces públicos del documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-11
+     * @version 2018-04-25
      */
     public function getLinks()
     {
         $Request = new \sowerphp\core\Network_Request();
         $links = [];
+        $links['ver'] = $Request->url.'/dte/dte_tmps/ver/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo;
         $links['pdf'] = $Request->url.'/dte/dte_tmps/cotizacion/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo.'/'.$this->emisor;
         if ($this->getEmisor()->config_pagos_habilitado and $this->getDte()->operacion=='S') {
             $links['pagar'] = $Request->url.'/pagos/cotizaciones/pagar/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo.'/'.$this->emisor;
