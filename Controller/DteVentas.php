@@ -312,7 +312,7 @@ class Controller_DteVentas extends Controller_Base_Libros
             // crear operaciones
             $operaciones = [];
             foreach ($resumen as $r) {
-                $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
+                $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($r['TpoDoc'])->operacion;
             }
             // asignar variable a vista
             $this->set([

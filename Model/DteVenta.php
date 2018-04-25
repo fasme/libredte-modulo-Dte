@@ -334,7 +334,7 @@ class Model_DteVenta extends Model_Base_Libro
                 $total[$c] += $r[$c];
             }
             // sumar o restar campos segun operación
-            $operacion = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
+            $operacion = (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($r['TpoDoc'])->operacion;
             foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntTotal', 'TotMntNoFact', 'TotMntPeriodo'] as $c) {
                 if ($operacion=='S') {
                     $total[$c] += $r[$c];
