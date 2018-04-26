@@ -53,6 +53,11 @@ Configure::write('nav.module', array(
         'desc' => 'Estados de documentos emitidos y envíados al SII',
         'icon' => 'far fa-copy',
     ],
+    '/dte_emitidos/eventos' => [
+        'name' => 'Eventos DTEs emitidos',
+        'desc' => 'Eventos registrados por los receptores de los documentos emitidos',
+        'icon' => 'fas fa-user-secret',
+    ],
     '/dte_emitidos/sin_enviar' => [
         'name' => 'Documentos sin enviar al SII',
         'desc' => 'Documentos emitidos y que no han sido envíados al SII',

@@ -114,6 +114,45 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite buscar los eventos de los dte emitidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-23
+     */
+    public function eventos($desde = null, $hasta = null)
+    {
+        // si existen datos por post se redirecciona para usar siempre por get
+        if (isset($_POST['submit'])) {
+            $this->redirect('/dte/informes/dte_emitidos/eventos/'.$_POST['desde'].'/'.$_POST['hasta']);
+        }
+        // obtener datos
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+            'desde' => $desde ? $desde : date('Y-m-01'),
+            'hasta' => $hasta ? $hasta : date('Y-m-d'),
+            'documentos' => ($desde and $hasta) ? $Emisor->getDocumentosEmitidosResumenEventos($desde, $hasta) : false,
+        ]);
+    }
+
+    /**
+     * Acción que permite buscar los documentos emitidos con cierto evento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function eventos_detalle($desde, $hasta, $evento = null)
+    {
+        $Emisor = $this->getContribuyente();
+        $evento = urldecode($evento);
+        $this->set([
+            'Emisor' => $Emisor,
+            'desde' => $desde,
+            'hasta' => $hasta,
+            'evento' => $evento,
+            'documentos' => $Emisor->getDocumentosEmitidosEvento($desde, $hasta, $evento),
+        ]);
+    }
+
+    /**
      * Acción que permite buscar los documentos emitidos pero que aun no se
      * envian al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

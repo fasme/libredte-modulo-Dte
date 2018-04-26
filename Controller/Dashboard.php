@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2018-04-25
      */
     public function index()
     {
@@ -84,6 +84,7 @@ class Controller_Dashboard extends \Controller_App
         }
         // estados de documentos emitidos del periodo
         $emitidos_estados = $Emisor->getDocumentosEmitidosResumenEstados($desde, $hasta);
+        $emitidos_eventos = $Emisor->getDocumentosEmitidosResumenEventos($desde, $hasta);
         // asignar variables a la vista
         $this->set([
             'nav' => array_slice(\sowerphp\core\Configure::read('nav.module'), 1),
@@ -106,6 +107,7 @@ class Controller_Dashboard extends \Controller_App
             'n_dtes' => $n_dtes,
             'cuota' => $cuota,
             'emitidos_estados' => $emitidos_estados,
+            'emitidos_eventos' => $emitidos_eventos,
         ]);
     }
 

@@ -1,5 +1,5 @@
 <div class="page-header"><h1>Dte &raquo; Informes &raquo; Estado de DTEs emitidos</h1></div>
-<p>Aquí podrá revisar los estados de documentos emitidos y envíados al SII por el contribuyente <?=$Emisor->razon_social?>, como también acceder al detalle de los documentos por cada estado.</p>
+<p>Aquí podrá revisar los estados del envío al SII de documentos emitidos por el contribuyente <?=$Emisor->razon_social?>, como también acceder al detalle de los documentos por cada estado.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Formcheck()']);

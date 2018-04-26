@@ -2711,6 +2711,74 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el resumen de los eventos asignados por los receptores para un periodo de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function getDocumentosEmitidosResumenEventos($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT receptor_evento AS evento, COUNT(*) AS total
+            FROM dte_emitido
+            WHERE emisor = :rut AND certificacion = :certificacion AND fecha BETWEEN :desde AND :hasta AND dte IN (33, 34, 43)
+            GROUP BY receptor_evento
+            ORDER BY total DESC
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    /**
+     * Método que entrega el detalle de los documentos emitidos con cierto
+     * evento en un rango de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function getDocumentosEmitidosEvento($desde, $hasta, $evento = null)
+    {
+        // filtros
+        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        if ($evento) {
+            $vars[':evento'] = $evento;
+            $evento = 'd.receptor_evento = :evento';
+        } else {
+            $evento = 'd.receptor_evento IS NULL';
+        }
+        // forma de obtener razón social
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        // realizar consulta
+        return $this->db->getTable('
+            SELECT
+                d.dte,
+                t.tipo,
+                d.folio,
+                '.$razon_social.',
+                d.fecha,
+                d.total,
+                d.revision_detalle AS estado_detalle,
+                i.glosa AS intercambio,
+                d.sucursal_sii,
+                u.usuario
+            FROM
+                dte_emitido AS d LEFT JOIN dte_intercambio_resultado_dte AS i
+                    ON i.emisor = d.emisor AND i.dte = d.dte AND i.folio = d.folio AND i.certificacion = d.certificacion,
+                dte_tipo AS t,
+                contribuyente AS r,
+                usuario AS u
+            WHERE
+                d.dte = t.codigo
+                AND d.receptor = r.rut
+                AND d.usuario = u.id
+                AND d.emisor = :rut
+                AND d.certificacion = :certificacion
+                AND d.fecha BETWEEN :desde AND :hasta
+                AND d.dte IN (33, 34, 43)
+                AND '.$evento.'
+            ORDER BY d.fecha DESC, t.tipo, d.folio DESC
+
+        ', $vars);
+    }
+
+    /**
      * Método que entrega el detalle de los documentos emitidos que aun no han
      * sido enviado al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

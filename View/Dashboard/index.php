@@ -164,12 +164,12 @@
             </div>
         </div>
         <!-- fin graficos ventas y compras -->
-        <!-- estado de documentos emitidos -->
+        <!-- estado de documentos emitidos SII -->
         <div class="row">
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="far fa-chart-bar fa-fw"></i> Estado documentos emitidos período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Estado envíos al SII de documentos emitidos período <?=$periodo?>
                     </div>
                     <div class="panel-body">
                         <div id="grafico-dte_emitidos_estados"></div>
@@ -178,7 +178,27 @@
                 </div>
             </div>
         </div>
-        <!-- fin estado de documentos emitidos -->
+        <!-- fin estado de documentos emitidos SII -->
+        <!-- estado de documentos emitidos receptores -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="far fa-chart-bar fa-fw"></i> Eventos asignados por receptores de documentos emitidos período <?=$periodo?>
+                    </div>
+                    <div class="panel-body">
+                        <div id="grafico-dte_emitidos_eventos"></div>
+                        <p class="small">
+<?php foreach (\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos as $codigo => $evento) : ?>
+                            <strong><?=$codigo?></strong>: <?=$evento?>
+<?php endforeach; ?>
+                        </p>
+                        <a href="informes/dte_emitidos/eventos/<?=$desde?>/<?=$hasta?>" class="btn btn-default btn-block">Ver detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin estado de documentos emitidos SII -->
     </div>
     <!-- FIN PANEL CENTRO -->
     <!-- PANEL DERECHA -->
@@ -319,6 +339,14 @@ Morris.Bar({
     element: 'grafico-dte_emitidos_estados',
     data: <?=json_encode($emitidos_estados)?>,
     xkey: 'estado',
+    ykeys: ['total'],
+    labels: ['DTEs'],
+    resize: true
+});
+Morris.Bar({
+    element: 'grafico-dte_emitidos_eventos',
+    data: <?=json_encode($emitidos_eventos)?>,
+    xkey: 'evento',
     ykeys: ['total'],
     labels: ['DTEs'],
     resize: true
