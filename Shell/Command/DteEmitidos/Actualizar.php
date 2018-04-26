@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando para actualizar los documentos emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2018-04-09
+ * @version 2018-04-25
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
@@ -39,7 +39,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             $this->actualizarDocumentosEmitidos($rut, $certificacion);
         }
         if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
-            $this->actualizarEventosReceptor($meses, $certificacion);
+            $this->actualizarEventosReceptor($meses, $grupo, $certificacion);
         }
         $this->showStats();
         return 0;
@@ -160,22 +160,26 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         }
     }
 
-    private function actualizarEventosReceptor($meses, $certificacion)
+    private function actualizarEventosReceptor($meses, $grupo, $certificacion)
     {
-        $contribuyentes = $this->db->getCol('
-            SELECT DISTINCT c.rut
-            FROM
-                contribuyente AS c
-                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
-                JOIN dte_emitido AS e ON c.rut = e.emisor
-            WHERE
-                c.usuario IS NOT NULL
-                AND cc.configuracion = \'sii\' AND cc.variable = \'pass\' AND cc.valor IS NOT NULL
-                AND e.dte IN ('.implode(', ', array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes)).')
-                AND e.certificacion = :certificacion
-                AND e.receptor_evento IS NULL
-                AND e.fecha  >=  (CURRENT_DATE - INTERVAL \''.(int)$meses.' MONTHS\')
-        ', [':certificacion'=>(int)$certificacion]);
+        if (is_numeric($grupo)) {
+            $contribuyentes = [$grupo];
+        } else {
+            $contribuyentes = $this->db->getCol('
+                SELECT DISTINCT c.rut
+                FROM
+                    contribuyente AS c
+                    JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
+                    JOIN dte_emitido AS e ON c.rut = e.emisor
+                WHERE
+                    c.usuario IS NOT NULL
+                    AND cc.configuracion = \'sii\' AND cc.variable = \'pass\' AND cc.valor IS NOT NULL
+                    AND e.dte IN ('.implode(', ', array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes)).')
+                    AND e.certificacion = :certificacion
+                    AND e.receptor_evento IS NULL
+                    AND e.fecha  >=  (CURRENT_DATE - INTERVAL \''.(int)$meses.' MONTHS\')
+            ', [':certificacion'=>(int)$certificacion]);
+        }
         $periodo_actual = (int)date('Ym');
         $periodos = [$periodo_actual];
         for ($i = 0; $i < $meses-1; $i++) {
