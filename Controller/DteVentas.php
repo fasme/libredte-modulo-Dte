@@ -231,6 +231,18 @@ class Controller_DteVentas extends Controller_Base_Libros
     }
 
     /**
+     * Acción que permite seleccionar el período para explorar el resumen del registro de ventas del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function registro_ventas()
+    {
+        if (!empty($_POST['periodo'])) {
+            $this->redirect('/dte/dte_ventas/rcv_resumen/'.$_POST['periodo']);
+        }
+    }
+
+    /**
      * Acción que permite obtener el resumen del registro de venta para un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-10

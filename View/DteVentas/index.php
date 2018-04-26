@@ -1,12 +1,10 @@
 <ul class="nav nav-pills pull-right">
-<?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
-        <a href="https://www4.sii.cl/consdcvinternetui/#/home" title="Ir al registro de compra y venta en el SII" target="_blank">
+        <a href="<?=$_base?>/dte/dte_ventas/registro_ventas" title="Explorar el registro de ventas del SII">
             <span class="fas fa-university"></span>
-            Ver RCV en SII
+            Registro ventas SII
         </a>
     </li>
-<?php endif; ?>
     <li>
         <a href="<?=$_base?>/dte/dte_emitidos/buscar" title="Búsqueda avanzada de documentos emitidos">
             <span class="fa fa-search"></span> Buscar
