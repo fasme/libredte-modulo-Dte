@@ -493,12 +493,12 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que envía un correo electrónico al contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-19
+     * @version 2018-04-26
      */
     public function notificar($asunto, $mensaje, $para = null, $responder_a = null, $attach = null)
     {
         $email = new \sowerphp\core\Network_Email();
-        $email->to($para ? $para : $this->getUsuario()->email);
+        $email->to($para ? $para : $this->getUsuariosEmail());
         if ($responder_a) {
             $email->replyTo($responder_a);
         }
@@ -603,6 +603,29 @@ class Model_Contribuyente extends \Model_App
         }
         $this->db->commit();
         return true;
+    }
+
+    /**
+     * Método que entrega los correos electrónicos asociados a cierto permiso
+     * Por defecto se entregan los correos de los usuarios administradores
+     * @return Tabla con los usuarios y sus permisos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-26
+     */
+    public function getUsuariosEmail($permiso = 'admin')
+    {
+        $emails = $this->db->getCol('
+            (
+                SELECT u.email
+                FROM contribuyente AS c JOIN usuario AS u ON u.id = c.usuario
+                WHERE c.rut = :rut
+            ) UNION (
+                SELECT u.email
+                FROM contribuyente_usuario AS c JOIN usuario AS u ON u.id = c.usuario
+                WHERE c.contribuyente = :rut AND c.permiso = :permiso
+            )
+        ', [':rut'=>$this->rut, ':permiso'=>$permiso]);
+        return $emails;
     }
 
     /**
