@@ -706,6 +706,20 @@ echo $f->input([
 ?>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pdf_disposition',
+    'label' => '¿Descargar PDF?',
+    'options' => ['Si, descargar PDF', 'No, mostrar PDF en el navegador'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_disposition : 0,
+    'help' => '¿El PDF generado se debe descargar al equipo o se debe mostrar en el navegador?',
+]);
+?>
+                </div>
+            </div>
 <?php
 $f->setColsLabel();
 $f->setStyle(false);
