@@ -266,8 +266,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="admin/dte_folios/agregar">
-                                <i class="fa fa-edit fa-fw"></i> Crear folio
+                            <a href="admin/dte_folios/solicitar_caf">
+                                <i class="fa fa-download fa-fw"></i> Solicitar CAF
                             </a>
                         </li>
                         <li class="divider"></li>
