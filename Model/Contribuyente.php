@@ -3061,4 +3061,14 @@ class Model_Contribuyente extends \Model_App
         return $links;
     }
 
+    /**
+     * Método que entrega la sucursal del usuario indicado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-27
+     */
+    public function getSucursalUsuario($Usuario)
+    {
+        return method_exists($Usuario, 'getSucursal') ? $Usuario->getSucursal($this->rut) : null;
+    }
+
 }

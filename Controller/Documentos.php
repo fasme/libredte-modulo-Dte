@@ -319,7 +319,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2018-04-27
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -387,7 +387,7 @@ class Controller_Documentos extends \Controller_App
             'actividades_economicas' => $Emisor->getListActividades(),
             'giros' => $Emisor->getListGiros(),
             'sucursales' => $Emisor->getSucursales(),
-            'sucursal' => '', // TODO: sucursal por defecto
+            'sucursal' => $Emisor->getSucursalUsuario($this->Auth->User),
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
             'tasa' => \sasco\LibreDTE\Sii::getIVA(),
             'tipos_dte_autorizados' => $tipos_dte_autorizados,
