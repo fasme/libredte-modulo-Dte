@@ -111,14 +111,14 @@
         <div class="row">
             <div class="col-xs-12">
 <?php if (!$libro_ventas) : ?>
-                <a class="btn btn-danger btn-lg btn-block" href="dte_ventas" role="button" title="Ir al libro de ventas">
+                <a class="btn btn-info btn-lg btn-block" href="dte_ventas" role="button" title="Ir al libro de ventas">
                     <i class="fa fa-exclamation-circle"></i>
                     Generar IV <?=$periodo_anterior?>
                 </a>
                 <br />
 <?php endif; ?>
 <?php if (!$libro_compras) : ?>
-                <a class="btn btn-danger btn-lg btn-block" href="dte_compras" role="button" title="Ir al libro de compras">
+                <a class="btn btn-info btn-lg btn-block" href="dte_compras" role="button" title="Ir al libro de compras">
                     <i class="fa fa-exclamation-circle"></i>
                     Generar IC <?=$periodo_anterior?>
                 </a>
