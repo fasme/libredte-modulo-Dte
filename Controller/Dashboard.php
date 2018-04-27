@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2018-04-27
      */
     public function index()
     {
@@ -50,6 +50,7 @@ class Controller_Dashboard extends \Controller_App
         $n_recibidos = (new Model_DteRecibidos())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta', 'dte != 52'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count();
         $n_recibidos += (new Model_DteEmitidos())->setWhereStatement(['emisor = :emisor', 'certificacion = :certificacion', 'fecha BETWEEN :desde AND :hasta', 'dte = 46'], [':emisor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta])->count();
         $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion', 'usuario IS NULL'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
+        $documentos_rechazados = (new Model_DteEmitidos())->getTotalRechazados();
         // valores para cuota
         $cuota = $Emisor->getCuota();
         $n_dtes = $cuota ? $Emisor->getTotalDocumentosUsadosPeriodo() : false;
@@ -100,7 +101,7 @@ class Controller_Dashboard extends \Controller_App
             'n_intercambios' => $n_intercambios,
             'libro_ventas' => $libro_ventas,
             'libro_compras' => $libro_compras,
-            'propuesta_f29' => $libro_ventas and $libro_compras and date('d')<=7,
+            'propuesta_f29' => ($libro_ventas and $libro_compras and date('d')<=20),
             'ventas_periodo' => $ventas_periodo,
             'compras_periodo' => $compras_periodo,
             'folios' => $folios,
@@ -108,6 +109,7 @@ class Controller_Dashboard extends \Controller_App
             'cuota' => $cuota,
             'emitidos_estados' => $emitidos_estados,
             'emitidos_eventos' => $emitidos_eventos,
+            'documentos_rechazados' => $documentos_rechazados,
         ]);
     }
 

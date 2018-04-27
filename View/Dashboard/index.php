@@ -107,37 +107,49 @@
 <?php endforeach; ?>
         </div>
         <!-- fin menú módulo -->
-    </div>
-    <!-- FIN PANEL IZQUIERDA -->
-    <!-- PANEL CENTRO -->
-    <div class="col-md-6">
         <!-- alertas envío libro o propuesta f29 -->
         <div class="row">
             <div class="col-xs-12">
 <?php if (!$libro_ventas) : ?>
                 <a class="btn btn-danger btn-lg btn-block" href="dte_ventas" role="button" title="Ir al libro de ventas">
                     <i class="fa fa-exclamation-circle"></i>
-                    Falta generar ventas <?=$periodo_anterior?>
+                    Generar IV <?=$periodo_anterior?>
                 </a>
                 <br />
 <?php endif; ?>
 <?php if (!$libro_compras) : ?>
                 <a class="btn btn-danger btn-lg btn-block" href="dte_compras" role="button" title="Ir al libro de compras">
                     <i class="fa fa-exclamation-circle"></i>
-                    Falta generar compras <?=$periodo_anterior?>
+                    Generar IC <?=$periodo_anterior?>
                 </a>
                 <br />
 <?php endif; ?>
 <?php if ($propuesta_f29) : ?>
                 <a class="btn btn-info btn-lg btn-block" href="informes/impuestos/propuesta_f29/<?=$periodo_anterior?>" role="button" title="Descargar archivo con la propuesta del formulario 29">
                     <i class="fa fa-download"></i>
-                    Descargar propuesta F29 <?=$periodo_anterior?>
+                    Propuesta F29 <?=$periodo_anterior?>
                 </a>
                 <br />
 <?php endif; ?>
             </div>
         </div>
         <!-- fin alertas envío libro o propuesta f29 -->
+    </div>
+    <!-- FIN PANEL IZQUIERDA -->
+    <!-- PANEL CENTRO -->
+    <div class="col-md-6">
+<?php if ($documentos_rechazados) : ?>
+        <!-- alertas documentos rechazados  -->
+        <div class="row">
+            <div class="col-xs-12">
+                <a class="btn btn-danger btn-lg btn-block" href="informes/dte_emitidos/estados/<?=$documentos_rechazados['desde']?>/<?=$hasta?>" role="button" title="Ir al informe de estados de envíos de DTE">
+                    <?=num($documentos_rechazados['total'])?> documento(s) rechazado(s) desde el <?=\sowerphp\general\Utility_Date::format($documentos_rechazados['desde'])?>
+                </a>
+                <br />
+            </div>
+        </div>
+        <!-- fin alertas documentos rechazados -->
+<?php endif; ?>
         <!-- graficos ventas y compras -->
         <div class="row">
             <div class="col-md-6">

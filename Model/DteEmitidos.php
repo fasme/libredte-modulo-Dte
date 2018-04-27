@@ -297,6 +297,25 @@ class Model_DteEmitidos extends \Model_Plural_App
     }
 
     /**
+     * Método que entrega el total de documentos rechazados y desde cuando es el primero
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-27
+     */
+    public function getTotalRechazados()
+    {
+        $aux = $this->db->getRow('
+            SELECT COUNT(folio) AS total, MIN(fecha) AS desde
+            FROM dte_emitido
+            WHERE
+                emisor = :emisor
+                AND dte NOT IN (39, 41)
+                AND certificacion = :certificacion
+                AND SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', self::$revision_estados['rechazados']).'\')
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        return $aux['total'] ? $aux : null;
+    }
+
+    /**
      * Método que actualiza el estado del evento del receptor (si está aceptado o no el DTE)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-12
