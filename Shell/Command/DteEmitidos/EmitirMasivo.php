@@ -177,7 +177,18 @@ class Shell_Command_DteEmitidos_EmitirMasivo extends \Shell_App
                 // enviar DTE real por correo al receptor
                 if ($email) {
                     $DteEmitido = new \website\Dte\Model_DteEmitido($response['body']['emisor'], $response['body']['dte'], $response['body']['folio'], $Emisor->config_ambiente_en_certificacion);
-                    $DteEmitido->email($DteEmitido->getEmails(), null, null, true);
+                    try {
+                        $DteEmitido->email($DteEmitido->getEmails(), null, null, true);
+                    } catch (\Exception $e) {
+                        $this->documentoAgregarResultado(
+                            $datos,
+                            $dte['Encabezado']['IdDoc']['TipoDTE'],
+                            $dte['Encabezado']['IdDoc']['Folio'],
+                            6,
+                            $e->getMessage()
+                        );
+                        continue;
+                    }
                 }
             }
         }
