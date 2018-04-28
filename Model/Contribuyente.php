@@ -3068,7 +3068,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getSucursalUsuario($Usuario)
     {
-        return method_exists($Usuario, 'getSucursal') ? $Usuario->getSucursal($this->rut) : null;
+        return method_exists($Usuario, 'getSucursal') ? $Usuario->getSucursal($this) : null;
     }
 
 }
