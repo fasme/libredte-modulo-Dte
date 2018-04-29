@@ -33,6 +33,8 @@
     <li>Precio del item: monto neto si es factura (sin IVA), monto bruto si es boleta (con IVA) (obligatorio)</li>
     <li>Descuento del item: puede ser 0.5 para indicar 50% de descuento un un monto mayor o igual a 1 para indicar descuento en cantidad (opcional)</li>
     <li>Observación del documento (opcional)</li>
+    <li>Fecha período desde: en formato AAAA-MM-DD (opcional)</li>
+    <li>Fecha período hasta: en formato AAAA-MM-DD (opcional)</li>
 </ul>
 <p>Si el documento tiene más de un item, se agrega una nueva fila donde sólo van las columnas correspondientes al item y las demás vacías.</p>
 <p>El archivo subido se procesará de manera asíncrona y se notificará vía correo electrónico a <?=$_Auth->User->email?> cuando el proceso esté completo. El correo incluirá el mismo archivo CSV que se subió a la plataforma con 2 columnas nuevas que incluirán el código del resultado de la operación para ese documento y la glosa asociada a dicho estado. El significado macro de cada código de estado es:</p>

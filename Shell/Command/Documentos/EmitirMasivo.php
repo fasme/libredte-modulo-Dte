@@ -26,9 +26,9 @@ namespace website\Dte;
 /**
  * Comando que permite emitir masivamente DTE a partir de un archivo CSV
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2018-04-19
+ * @version 2018-04-28
  */
-class Shell_Command_DteEmitidos_EmitirMasivo extends \Shell_App
+class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
 {
 
     private $time_start;
@@ -274,6 +274,18 @@ class Shell_Command_DteEmitidos_EmitirMasivo extends \Shell_App
         }
         if (!empty($datos[19])) {
             $documento['Encabezado']['IdDoc']['TermPagoGlosa'] = mb_substr(trim($datos[19]), 0, 100);
+        }
+        if (!empty($datos[20])) {
+            if (!\sowerphp\general\Utility_Date::check($datos[20])) {
+                throw new \Exception('Fecha período desde '.$datos[20].' es incorrecta, debe ser formato AAAA-MM-DD');
+            }
+            $documento['Encabezado']['IdDoc']['PeriodoDesde'] = $datos[20];
+        }
+        if (!empty($datos[21])) {
+            if (!\sowerphp\general\Utility_Date::check($datos[21])) {
+                throw new \Exception('Fecha período hasta '.$datos[21].' es incorrecta, debe ser formato AAAA-MM-DD');
+            }
+            $documento['Encabezado']['IdDoc']['PeriodoHasta'] = $datos[21];
         }
         $this->agregarItem($documento, array_slice($datos, 11, 9));
         return $documento;
