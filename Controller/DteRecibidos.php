@@ -347,9 +347,45 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
+     * API que permite buscar boletas de honorario electrónicas recibidas en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-28
+     */
+    public function _api_bhe_GET($periodo, $receptor)
+    {
+        // usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear receptor
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/bhe')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // obtener boletas
+        $r = libredte_consume('/sii/boletas_honorarios_recibidas/'.$Receptor->getRUT().'/'.$periodo.'?formato=json', [
+            'auth'=>[
+                'rut' => $Receptor->getRUT(),
+                'clave' => $Receptor->config_sii_pass,
+            ],
+        ]);
+        if ($r['status']['code']!=200) {
+            $this->Api->send('No fue posible obtener las boletas de honorarios desde el SII, intente nuevamente: '.$r['body'], $r['status']['code']);
+        }
+        if (empty($r['body'])) {
+            $this->Api->send('No se encontraron boletas, se recomienda reintentar la consulta ya que a veces no se obtiene la respuesta correcta desde el SII', 416);
+        }
+        $this->Api->send($r['body'], 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
      * Acción que permite buscar boletas de honorario electrónicas recibidas en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2018-04-28
      */
     public function bhe()
     {
@@ -358,18 +394,9 @@ class Controller_DteRecibidos extends \Controller_App
             'Emisor' => $Emisor,
         ]);
         if (isset($_POST['submit'])) {
-            $r = libredte_consume('/sii/boletas_honorarios_recibidas/'.$Emisor->getRUT().'/'.$_POST['periodo'].'?formato=json', [
-                'auth'=>[
-                    'rut' => $Emisor->getRUT(),
-                    'clave' => $Emisor->config_sii_pass,
-                ],
-            ]);
+            $r = $this->consume('/api/dte/dte_recibidos/bhe/'.$_POST['periodo'].'/'.$Emisor->rut);
             if ($r['status']['code']!=200) {
-                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener las boletas de honorarios desde el SII, intente nuevamente: '.$r['body'], 'error');
-                return;
-            }
-            if (empty($r['body'])) {
-                \sowerphp\core\Model_Datasource_Session::message('No se encontraron boletas, se recomienda reintentar la consulta ya que a veces no se obtiene la respuesta correcta desde el SII', 'warning');
+                \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
                 return;
             }
             $this->set('boletas', $r['body']);
@@ -377,9 +404,47 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
+     * API que permite descargar el PDF de una boleta de honorarios electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-28
+     */
+    public function _api_bhe_pdf_GET($codigo, $receptor)
+    {
+        // usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear receptor
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/bhe')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // obtener pdf
+        $r = libredte_consume('/sii/boleta_honorarios_pdf/'.$codigo, [
+            'auth'=>[
+                'rut' => $Receptor->getRUT(),
+                'clave' => $Receptor->config_sii_pass,
+            ],
+        ]);
+        if ($r['status']['code']!=200 or empty($r['body'])) {
+            $this->Api->send('No fue posible descargar el PDF de la boleta de honorarios desde el SII', 500);
+        }
+        header('Content-type: application/pdf');
+        header('Content-Disposition: attachment; filename=bhe_'.$codigo.'.pdf');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        echo $r['body'];
+        exit;
+    }
+
+    /**
      * Acción que permite descargar el PDF de una boleta de honorarios electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2018-04-28
      */
     public function bhe_pdf($codigo)
     {
@@ -387,15 +452,10 @@ class Controller_DteRecibidos extends \Controller_App
         $this->set([
             'Emisor' => $Emisor,
         ]);
-        $r = libredte_consume('/sii/boleta_honorarios_pdf/'.$codigo, [
-            'auth'=>[
-                'rut' => $Emisor->getRUT(),
-                'clave' => $Emisor->config_sii_pass,
-            ],
-        ]);
-        if ($r['status']['code']!=200 or empty($r['body'])) {
-            \sowerphp\core\Model_Datasource_Session::message('No fue posible descargar el PDF de la boleta de honorarios desde el SII', 'error');
-            return;
+        $r = $this->consume('/api/dte/dte_recibidos/bhe_pdf/'.$codigo.'/'.$Emisor->rut);
+        if ($r['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
+            $this->redirect('/dte/dte_recibidos/bhe');
         }
         header('Content-type: application/pdf');
         header('Content-Disposition: attachment; filename=bhe_'.$codigo.'.pdf');
@@ -424,7 +484,7 @@ class Controller_DteRecibidos extends \Controller_App
         if (!$Receptor->exists()) {
             $this->Api->send('Receptor no existe', 404);
         }
-        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         if (strpos($emisor, '-')) {
@@ -466,7 +526,7 @@ class Controller_DteRecibidos extends \Controller_App
         if (!$Receptor->exists()) {
             $this->Api->send('Receptor no existe', 404);
         }
-        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_emitidos/listar')) {
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/listar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // buscar documentos
@@ -503,7 +563,7 @@ class Controller_DteRecibidos extends \Controller_App
         if (!$Receptor->exists()) {
             $this->Api->send('Receptor no existe', 404);
         }
-        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_emitidos/listar')) {
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/listar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // armar datos con firma
