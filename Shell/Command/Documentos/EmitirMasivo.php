@@ -54,7 +54,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         // verificar archivo sea UTF-8
         exec('file -i '.$archivo, $output);
         $aux = explode('charset=', $output[0]);
-        if (!isset($aux[1]) or $aux[1]!='utf-8') {
+        if (!isset($aux[1]) or !in_array($aux[1], ['us-ascii', 'utf-8'])) {
             $this->notificarResultado($Emisor, $Usuario, 'Codificación del archivo es '.$aux[1].' y debe ser utf-8', $dte_real, $email);
             return 1;
         }
