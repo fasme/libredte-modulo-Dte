@@ -3136,7 +3136,7 @@ class Model_Contribuyente extends \Model_App
                     \sowerphp\general\Utility_Date::format($Documento->fecha),
                     $mostrar_pagar ? $links['pagar'] : '',
                     $links['pdf'],
-                    $msg_text,
+                    $msg_text ? str_replace("\n", '</p><p>', $msg_text) : null,
                     !$mostrar_pagado ? 'none' : '',
                     $mostrar_pagado ? \sowerphp\general\Utility_Date::format($Cobro->pagado) : '00/00/0000',
                     $mostrar_pagado ? $Cobro->getMedioPago()->medio_pago : '"sin pago"',
