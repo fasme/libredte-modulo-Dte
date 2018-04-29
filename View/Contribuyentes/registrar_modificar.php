@@ -785,6 +785,29 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
+            <i class="far fa-paper-plane"></i>
+            Correo electrónico
+        </div>
+        <div class="panel-body">
+<?php
+$template_email_dte = '';
+if (isset($Contribuyente)) {
+    if ($Contribuyente->getEmailFromTemplate('dte')) {
+        $template_email_dte_url = \sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$Contribuyente->rut.'/email/dte.html';
+        $template_email_dte = '. <a href="'.$template_email_dte_url.'" target="_blank">Plantilla vigente</a>';
+    }
+}
+echo $f->input([
+    'type' => 'file',
+    'name' => 'template_email_dte',
+    'label' => 'Plantilla envío DTE',
+    'help' => 'Archivo HTML con la plantilla para el correo electrónico de envío de DTE'.$template_email_dte,
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <i class="far fa-file"></i>
             Recepción documentos
         </div>

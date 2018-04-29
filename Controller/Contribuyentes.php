@@ -394,6 +394,18 @@ class Controller_Contribuyentes extends \Controller_App
         if ($config_pdf_detalle_ancho) {
             $_POST['config_pdf_detalle_ancho'] = $config_pdf_detalle_ancho;
         }
+        // subir archivo de plantilla de correo de envío de dte
+        if (!empty($_FILES['template_email_dte']) and !$_FILES['template_email_dte']['error']) {
+            $dir = DIR_PROJECT.'/data/static/contribuyentes/'.(int)$Contribuyente->rut.'/email';
+            if (!is_dir($dir)) {
+                mkdir($dir);
+            }
+            if ($_FILES['template_email_dte']['size']) {
+                move_uploaded_file($_FILES['template_email_dte']['tmp_name'], $dir.'/dte.html');
+            } else {
+                unlink($dir.'/dte.html');
+            }
+        }
         // crear arreglo con datos de contacto comercial
         if (!empty($_POST['config_app_contacto_comercial_email'])) {
             $n_emails = count($_POST['config_app_contacto_comercial_email']);
