@@ -3078,7 +3078,75 @@ class Model_Contribuyente extends \Model_App
      */
     public function getEmailFromTemplate($template, $params = null)
     {
-        return null;
+        // buscar plantilla
+        $file = DIR_PROJECT.'/data/static/contribuyentes/'.(int)$this->rut.'/email/'.$template.'.html';
+        if (!is_readable($file)) {
+            return false;
+        }
+        // buscar parámetros pasados
+        $params = array_slice(func_get_args(), 1);
+        // si no se pasó ningún parámetro sólo se quiere saber si la plantilla existe o no
+        if (!$params) {
+            return true;
+        }
+        // leer archivo
+        $html = file_get_contents($file);
+        // plantilla de envío de DTE
+        if ($template == 'dte') {
+            $Documento = $params[0];
+            $msg_text = !empty($params[1]) ? $params[1] : null;
+            $links = $Documento->getLinks();
+            $class = get_class($Documento);
+            $mostrar_pagado = false;
+            $mostrar_pagar = false;
+            if ($this->config_pagos_habilitado and $Documento->getTipo()->operacion=='S') {
+                if ($class == 'website\Dte\Model_DteTmp') {
+                    $mostrar_pagar = true;
+                } else {
+                    $Cobro = $Documento->getCobro(false);
+                    if (!$Cobro->pagado) {
+                        $mostrar_pagar = true;
+                    } else {
+                        $mostrar_pagado = true;
+                    }
+                }
+            }
+            return str_replace(
+                [
+                    '{dte_cotizacion}',
+                    '{total}',
+                    '{razon_social}',
+                    '{documento}',
+                    '{folio}',
+                    '{fecha_emision}',
+                    '{link_pagar}',
+                    '{link_pdf}',
+                    '{msg_text}',
+                    '{mostrar_pagado}',
+                    '{fecha_pago}',
+                    '{medio_pago}',
+                    '{mostrar_pagar}',
+                ],
+                [
+                    $class == 'website\Dte\Model_DteTmp' ? 'documento' : 'documento tributario electrónico',
+                    num($Documento->total),
+                    $Documento->getReceptor()->razon_social,
+                    $Documento->getTipo()->tipo,
+                    $Documento->getFolio(),
+                    \sowerphp\general\Utility_Date::format($Documento->fecha),
+                    $mostrar_pagar ? $links['pagar'] : '',
+                    $links['pdf'],
+                    $msg_text,
+                    !$mostrar_pagado ? 'none' : '',
+                    $mostrar_pagado ? \sowerphp\general\Utility_Date::format($Cobro->pagado) : '00/00/0000',
+                    $mostrar_pagado ? $Cobro->getMedioPago()->medio_pago : '"sin pago"',
+                    !$mostrar_pagar ? 'none' : '',
+                ],
+                $html
+            );
+        }
+        // no se encontró plantilla
+        return false;
     }
 
 }
