@@ -141,8 +141,8 @@ echo $f->end('Descargar PDF');
 <div role="tabpanel" class="tab-pane" id="email">
 <?php
 $enlace_pagar_cotizacion = $_url.'/pagos/cotizaciones/pagar/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor;
-if ($emails) {
-    $asunto = 'Documento N° '.$DteTmp->getFolio().' de '.$Emisor->razon_social.' ('.$Emisor->getRUT().')';
+$asunto = 'Documento N° '.$DteTmp->getFolio().' de '.$Emisor->razon_social.' ('.$Emisor->getRUT().')';
+if (!$email_html) {
     $mensaje = $Receptor->razon_social.','."\n\n";
     $mensaje .= 'Se adjunta documento N° '.$DteTmp->getFolio().' del día '.\sowerphp\general\Utility_Date::format($DteTmp->fecha).' por un monto total de $'.num($DteTmp->total).'.-'."\n\n";
     if ($Emisor->config_pagos_habilitado and $DteTmp->getDte()->operacion=='S') {
@@ -157,24 +157,31 @@ if ($emails) {
     }
     $mensaje .= $Emisor->giro."\n";
     $contacto = [];
-    if (!empty($Emisor->telefono))
+    if (!empty($Emisor->telefono)) {
         $contacto[] = $Emisor->telefono;
-    if (!empty($Emisor->email))
+    }
+    if (!empty($Emisor->email)) {
         $contacto[] = $Emisor->email;
-    if ($Emisor->config_extra_web)
+    }
+    if ($Emisor->config_extra_web) {
         $contacto[] = $Emisor->config_extra_web;
-    if ($contacto)
+    }
+    if ($contacto) {
         $mensaje .= implode(' - ', $contacto)."\n";
+    }
     $mensaje .= $Emisor->direccion.', '.$Emisor->getComuna()->comuna."\n";
+} else $mensaje = '';
+$f = new \sowerphp\general\View_Helper_Form();
+echo $f->begin(['action'=>$_base.'/dte/dte_tmps/enviar_email/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo, 'id'=>'emailForm', 'onsubmit'=>'Form.check(\'emailForm\')']);
+if ($emails) {
     $table = [];
     $checked = [];
     foreach ($emails as $k => $e) {
         $table[] = [$e, $k];
-        if (strpos($k, 'Contacto comercial')===0)
+        if (strpos($k, 'Contacto comercial')===0) {
             $checked[] = $e;
+        }
     }
-    $f = new \sowerphp\general\View_Helper_Form();
-    echo $f->begin(['action'=>$_base.'/dte/dte_tmps/enviar_email/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo, 'id'=>'emailForm', 'onsubmit'=>'Form.check(\'emailForm\')']);
     echo $f->input([
         'type' => 'tablecheck',
         'name' => 'emails',
@@ -184,13 +191,20 @@ if ($emails) {
         'checked' => $checked,
         'help' => 'Seleccionar emails a los que se enviará el documento',
     ]);
-    echo $f->input(['name'=>'asunto', 'label'=>'Asunto', 'value'=>$asunto, 'check'=>'notempty']);
-    echo $f->input(['type'=>'textarea', 'name'=>'mensaje', 'label'=>'Mensaje', 'value'=>$mensaje, 'rows'=>10, 'check'=>'notempty']);
-    echo $f->input(['type'=>'select', 'name'=>'cotizacion', 'label'=>'Enviar', 'options'=>['Previsualización', 'Cotización'], 'value'=>1]);
-    echo $f->end('Enviar PDF por email');
-} else {
-    echo '<p>No hay emails registrados para el receptor ni el documento.</p>',"\n";
 }
+echo $f->input(['name'=>'para_extra', 'label'=>'Para (extra)', 'check'=>'emails', 'placeholder'=>'correo@empresa.cl, otro@empresa.cl']);
+echo $f->input(['name'=>'asunto', 'label'=>'Asunto', 'value'=>$asunto, 'check'=>'notempty']);
+echo $f->input([
+    'type' => 'textarea',
+    'name' => 'mensaje',
+    'label' => 'Mensaje',
+    'value' => $mensaje,
+    'rows' => !$email_html?10:4,
+    'check' => !$email_html?'notempty':'',
+    'help' => $email_html?('<a href="#" onclick="__.popup(\''.$_base.'/dte/dte_tmps/email_html/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'\', 750, 550); return false">Correo por defecto es HTML</a>, si agrega un mensaje acá será añadido al campo {msg_txt} del mensaje HTML'):'',
+]);
+echo $f->input(['type'=>'select', 'name'=>'cotizacion', 'label'=>'Enviar', 'options'=>['Previsualización', 'Cotización'], 'value'=>1]);
+echo $f->end('Enviar PDF por email');
 ?>
 </div>
 <!-- FIN ENVIAR POR EMAIL -->

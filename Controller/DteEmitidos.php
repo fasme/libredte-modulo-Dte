@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2018-04-29
      */
     public function ver($dte, $folio)
     {
@@ -145,6 +145,7 @@ class Controller_DteEmitidos extends \Controller_App
             'referencia' => $DteEmitido->getPropuestaReferencia(),
             'enviar_sii' => !(in_array($DteEmitido->dte, [39, 41])),
             'Cobro' => (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S') ? $DteEmitido->getCobro(false) : false,
+            'email_html' => $Emisor->getEmailFromTemplate('dte'),
         ]);
     }
 
@@ -398,6 +399,32 @@ class Controller_DteEmitidos extends \Controller_App
         header('Content-Length: '.strlen($json));
         header('Content-Disposition: attachement; filename="'.$file.'"');
         echo $json;
+        exit;
+    }
+
+    /**
+     * Acción que permite ver una vista previa del correo en HTML
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-29
+     */
+    public function email_html($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // tratar de obtener email
+        $email_html = $Emisor->getEmailFromTemplate('dte', $DteEmitido);
+        if (!$email_html) {
+            \sowerphp\core\Model_Datasource_Session::message('No existe correo en HTML para el envío del documento', 'error');
+            $this->redirect(str_replace('email_html', 'ver', $this->request->request));
+        }
+        echo $email_html;
         exit;
     }
 

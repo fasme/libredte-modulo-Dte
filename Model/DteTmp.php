@@ -433,26 +433,35 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que envía el DTE temporal por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-20
+     * @version 2018-04-29
      */
     public function email($to = null, $subject = null, $msg = null, $cotizacion = true)
     {
         $Request = new \sowerphp\core\Network_Request();
         // variables por defecto
-        if (!$to)
+        if (!$to) {
             $to = $this->getEmails();
-        if (!$to)
+        }
+        if (!$to) {
             throw new \Exception('No hay correo a quien enviar el DTE');
-        if (!is_array($to))
+        }
+        if (!is_array($to)) {
             $to = [$to];
-        if (!$subject)
-            $subject = 'Documento N° '.$this->getFolio().' de '.$this->getEmisor()->razon_social.' ('.$this->getEmisor()->getRUT().')';
+        }
+        if (!$subject) {
+            $subject = 'Documento N° '.$this->getFolio().' de '.$this->getEmisor()->getNombre().' ('.$this->getEmisor()->getRUT().')';
+        }
+        // armar cuerpo del correo
+        $msg_html = $this->getEmisor()->getEmailFromTemplate('dte', $this, $msg);
         if (!$msg) {
             $msg .= 'Se adjunta documento N° '.$this->getFolio().' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-'."\n\n";
             if ($this->getEmisor()->config_pagos_habilitado and $this->getDte()->operacion=='S') {
                 $enlace_pagar_cotizacion = $Request->url.'/pagos/cotizaciones/pagar/'.$this->receptor.'/'.$this->dte.'/'.$this->codigo.'/'.$this->emisor;
                 $msg .= 'Enlace pago en línea: '.$enlace_pagar_cotizacion."\n\n";
             }
+        }
+        if ($msg_html) {
+            $msg = ['text' => $msg, 'html' => $msg_html];
         }
         // crear email
         $email = $this->getEmisor()->getEmailSmtp();

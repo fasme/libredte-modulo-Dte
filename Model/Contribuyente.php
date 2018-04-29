@@ -3071,4 +3071,14 @@ class Model_Contribuyente extends \Model_App
         return method_exists($Usuario, 'getSucursal') ? $Usuario->getSucursal($this) : null;
     }
 
+    /**
+     * Método que entrega la plantilla de un correo ya armada con los datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-29
+     */
+    public function getEmailFromTemplate($template, $params = null)
+    {
+        return null;
+    }
+
 }

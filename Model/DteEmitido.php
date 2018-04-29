@@ -893,20 +893,26 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-25
+     * @version 2018-04-29
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
         $Request = new \sowerphp\core\Network_Request();
         // variables por defecto
-        if (!$to)
+        if (!$to) {
             $to = $this->getReceptor()->config_email_intercambio_user;
-        if (!$to)
+        }
+        if (!$to) {
             throw new \Exception('No hay correo a quien enviar el DTE');
-        if (!is_array($to))
+        }
+        if (!is_array($to)) {
             $to = [$to];
-        if (!$subject)
-            $subject = 'EnvioDTE: '.num($this->getEmisor()->rut).'-'.$this->getEmisor()->dv.' - '.$this->getTipo()->tipo.' N° '.$this->folio;
+        }
+        if (!$subject) {
+            $subject = $this->getTipo()->tipo.' N° '.$this->folio.' de '.$this->getEmisor()->getNombre().' ('.$this->getEmisor()->getRUT().')';
+        }
+        // armar cuerpo del correo
+        $msg_html = $this->getEmisor()->getEmailFromTemplate('dte', $this, $msg);
         if (!$msg) {
             $msg = 'Se adjunta '.$this->getTipo()->tipo.' N° '.$this->folio.' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-'."\n\n";
             if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->operacion=='S') {
@@ -919,8 +925,8 @@ class Model_DteEmitido extends Model_Base_Envio
                 }
             }
         }
-        if ($papelContinuo===null) {
-            $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
+        if ($msg_html) {
+            $msg = ['text' => $msg, 'html' => $msg_html];
         }
         // crear email
         $email = $this->getEmisor()->getEmailSmtp();
@@ -931,6 +937,9 @@ class Model_DteEmitido extends Model_Base_Envio
         $email->subject($subject);
         // adjuntar PDF
         if ($pdf) {
+            if ($papelContinuo===null) {
+                $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
+            }
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->getEmisor()->getUsuario()->hash);
             $response = $rest->get($Request->url.'/api/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/'.$this->emisor, [
