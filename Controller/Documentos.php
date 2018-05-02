@@ -185,6 +185,10 @@ class Controller_Documentos extends \Controller_App
             $dte['Encabezado']['Emisor']['DirOrigen'] = $sucursal->direccion;
             $dte['Encabezado']['Emisor']['CmnaOrigen'] = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->get($sucursal->comuna)->comuna;
         }
+        // si no hay detalle del DTE error
+        if (empty($dte['Detalle'])) {
+            $this->Api->send('Debe enviar el detalle del documento', 400);
+        }
         // verificar tipo de documento (evita facturas afectas con puros exetos o exentas con item afecto)
         $dte['Encabezado']['IdDoc']['TipoDTE'] = $this->getTipoDTE(
             $dte['Encabezado']['IdDoc']['TipoDTE'], $dte['Detalle']
