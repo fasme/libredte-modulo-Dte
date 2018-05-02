@@ -247,4 +247,71 @@ class Model_DteCompra extends Model_Base_Libro
         return $datos;
     }
 
+    /**
+     * Método que entrega los totales del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-01
+     */
+    public function getTotales()
+    {
+        $resumen = $this->getResumen();
+        $total = [
+            'TotDoc' => 0,
+            'TotAnulado' => 0,
+            'TotOpExe' => 0,
+            'TotMntExe' => 0,
+            'TotMntNeto' => 0,
+            'TotMntIVA' => 0,
+            'TotMntActivoFijo' => 0,
+            'TotMntIVAActivoFijo' => 0,
+            'TotIVANoRec' => 0,
+            'TotIVAUsoComun' => 0,
+            'TotMntTotal' => 0,
+            'TotIVANoRetenido' => 0,
+            'TotTabPuros' => 0,
+            'TotTabCigarrillos' => 0,
+            'TotTabElaborado' => 0,
+            'TotImpVehiculo' => 0,
+        ];
+        foreach ($resumen as &$r) {
+            // sumar campos que se suman directamente
+            $columnas_siempre_suma = ['TotDoc', 'TotAnulado', 'TotOpExe'];
+            foreach ($columnas_siempre_suma as $c) {
+                $total[$c] += $r[$c];
+            }
+            // sumar o restar campos segun operación
+            $operacion = (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($r['TpoDoc'])->operacion;
+            foreach ($total as $c => $v) {
+                if (!in_array($c, $columnas_siempre_suma)) {
+                    // si es iva no recuperable se extrae (pueden ser varios) // TODO podría haber otro caso que requiera esto
+                    if ($c=='TotIVANoRec' and $r[$c]) {
+                        $TotIVANoRec = $r[$c];
+                        $r[$c] = 0;
+                        foreach ($TotIVANoRec as $tinr) {
+                            $r[$c] += $tinr['TotMntIVANoRec'];
+                        }
+                    }
+                    // sumar o restar según operación
+                    if ($operacion=='S') {
+                        $total[$c] += $r[$c];
+                    } else if ($operacion=='R') {
+                        $total[$c] -= $r[$c];
+                    }
+                }
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Método que entrega el total del neto + exento del período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-25
+     */
+    public function getTotalExentoNeto()
+    {
+        $totales = $this->getTotales();
+        return $totales['TotMntExe'] + $totales['TotMntNeto'];
+    }
+
 }
