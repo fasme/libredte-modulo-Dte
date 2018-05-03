@@ -2932,7 +2932,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega la información del registro de compra y venta del SII
      * del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-12
+     * @version 2018-05-02
      */
     public function getRCV(array $filtros = [])
     {
@@ -2946,13 +2946,20 @@ class Model_Contribuyente extends \Model_App
             'estado' => 'REGISTRO',
             'periodo' => date('Ym'),
             'dte' => null,
+            'tipo' => 'rcv', // tipo de formato a usar cuando se pide el detalle de documentos (rcv o iecv)
         ], $filtros);
         // si se pide el detalle pero no se indicó el tipo de documento se buscan todos los posible
         if ($filtros['detalle']===true) {
             // si no se indicó dte se colocan todos los posibles
             if (!$filtros['dte']) {
-                // TODO
-                throw new \Exception('Debe indicar el tipo de DTE que desea obtener el resumen');
+                $dtes = [];
+                $resumen = $this->getRCV(['operacion' => $filtros['operacion'], 'periodo' => $filtros['periodo'], 'estado' => $filtros['estado'], 'detalle'=>false]);
+                foreach ($resumen as $r) {
+                    if ($r['rsmnTotDoc']) {
+                        $dtes[] = $r['rsmnTipoDocInteger'];
+                    }
+                }
+                $filtros['dte'] = $dtes;
             }
             // si el dte es sólo uno se coloca como arreglo
             else if (!is_array($filtros['dte'])) {
@@ -2981,8 +2988,8 @@ class Model_Contribuyente extends \Model_App
             foreach ($filtros['dte'] as $dte) {
                 $r = libredte_consume(
                     sprintf(
-                        '/sii/rcv_detalle/%d-%d/%s/%d/%d/%s?formato=json&certificacion=%d',
-                        $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion
+                        '/sii/rcv_detalle/%d-%d/%s/%d/%d/%s?formato=json&certificacion=%d&tipo=%s',
+                        $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
                     ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
                 );
                 if ($r['status']['code']!=200) {
@@ -2991,7 +2998,9 @@ class Model_Contribuyente extends \Model_App
                 if ($r['body']['respEstado']['codRespuesta']) {
                     throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta']);
                 }
-                $detalle += $r['body']['data'];
+                debug($r['body']['data']);
+                exit;
+                $detalle = array_merge($detalle, $r['body']['data']);
             }
             return $detalle;
         }

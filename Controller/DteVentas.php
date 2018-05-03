@@ -163,6 +163,7 @@ class Controller_DteVentas extends Controller_Base_Libros
 
     /**
      * Acción que genera el archivo CSV con el registro de ventas
+     * En realidad esto descarga los datos que están localmente y no los del RV del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-03
      */
@@ -360,6 +361,31 @@ class Controller_DteVentas extends Controller_Base_Libros
             $historial_nuevo[$mes] = $total;
         }
         return $historial_nuevo;
+    }
+
+     /**
+     * Acción que permite descargar todo el registro de compras del SII pero
+     * eligiendo el tipo de formato, ya sea por defecto en formato RCV o en
+     * formato IECV (esto permite importar el archivo en LibreDTE u otra app)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-02
+     */
+    public function rcv_csv($periodo, $tipo = 'rcv')
+    {
+        $Emisor = $this->getContribuyente();
+        try {
+            $detalle = $Emisor->getRCV(['operacion' => 'VENTA', 'periodo' => $periodo, 'tipo' => $tipo]);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        if (!$detalle) {
+            \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
+            $this->redirect('/dte/dte_ventas/ver/'.$periodo);
+        }
+        array_unshift($detalle, array_keys($detalle[0]));
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, 'rv_'.$Emisor->rut.'_'.$periodo.'_'.$tipo);
+        exit;
     }
 
 }
