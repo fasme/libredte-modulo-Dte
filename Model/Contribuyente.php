@@ -2480,7 +2480,7 @@ class Model_Contribuyente extends \Model_App
                 AND (
                     revision_estado IS NULL
                     OR revision_estado LIKE \'-%\'
-                    OR SUBSTRING(revision_estado FROM 1 FOR 3) = \'SOK\'
+                    OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\'SOK\', \'CRT\')
                 )
         ', [':rut'=>$this->rut, ':certificacion'=>$certificacion]);
     }
