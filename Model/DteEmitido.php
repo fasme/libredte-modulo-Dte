@@ -450,6 +450,38 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que entrega las referencias que este DTE hace a otros documentos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-03
+     */
+    public function getReferenciados()
+    {
+        $datos = $this->getDatos();
+        if (empty($datos['Referencia'])) {
+            return null;
+        }
+        if (!isset($datos['Referencia'][0])) {
+            $datos['Referencia'] = [$datos['Referencia']];
+        }
+        $referenciados = [];
+        foreach ($datos['Referencia'] as $r) {
+            $referenciados[] = array_merge([
+                'NroLinRef' => false,
+                'TpoDocRef' => false,
+                'IndGlobal' => false,
+                'FolioRef' => false,
+                'RUTOtr' => false,
+                'FchRef' => false,
+                'CodRef' => false,
+                'RazonRef' => false,
+                'CodVndor' => false,
+                'CodCaja' => false,
+            ], $r);
+        }
+        return $referenciados;
+    }
+
+    /**
      * Método que entrega las referencias que existen a este DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-06-26

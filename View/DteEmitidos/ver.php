@@ -382,7 +382,27 @@ if ($cobranza) {
 
 <!-- INICIO REFERENCIAS -->
 <div role="tabpanel" class="tab-pane" id="referencias">
+    <div class="panel panel-default">
+        <div class="panel-heading">Documentos referenciados</div>
+        <div class="panel-body">
 <?php
+// referencias que este documento hace a otros
+if ($referenciados) {
+    array_unshift($referenciados, ['#', 'DTE', 'Ind. Global', 'Folio', 'RUT otro cont.', 'Fecha', 'Código ref.', 'Razón ref.', 'Vendedor', 'Caja']);
+    $t = new \sowerphp\general\View_Helper_Table();
+    $t->setShowEmptyCols(false);
+    echo $t->generate($referenciados);
+} else {
+    echo '<p>Este documento no hace referencia a otros.</p>',"\n";
+}
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Documentos que referencian este</div>
+        <div class="panel-body">
+<?php
+// referencias que tienen otros documentos a este
 if ($referencias) {
     echo '<p>Los siguientes son documentos que hacen referencia a este.</p>',"\n";
     foreach ($referencias as &$r) {
@@ -394,9 +414,11 @@ if ($referencias) {
     array_unshift($referencias, ['Documento', 'Folio', 'Fecha', 'Referencia', 'Razón', 'Acciones']);
     new \sowerphp\general\View_Helper_Table($referencias);
 } else {
-    echo '<p>No hay documentos que referencien a este.</p>',"\n";
+    echo '<p>No hay otros documentos que hacen referencia a este.</p>',"\n";
 }
 ?>
+        </div>
+    </div>
 <div class="row">
 <?php if (!empty($referencia)) : ?>
     <div class="col-md-<?=(!empty($referencia)?6:12)?>">
