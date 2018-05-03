@@ -404,7 +404,6 @@ if ($referenciados) {
 <?php
 // referencias que tienen otros documentos a este
 if ($referencias) {
-    echo '<p>Los siguientes son documentos que hacen referencia a este.</p>',"\n";
     foreach ($referencias as &$r) {
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$r['dte'].'/'.$r['folio'].'" title="Ver documento"><span class="fa fa-search btn btn-default"></span></a>';
         $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$r['dte'].'/'.$r['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
