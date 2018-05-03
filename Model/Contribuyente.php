@@ -2998,8 +2998,6 @@ class Model_Contribuyente extends \Model_App
                 if ($r['body']['respEstado']['codRespuesta']) {
                     throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta']);
                 }
-                debug($r['body']['data']);
-                exit;
                 $detalle = array_merge($detalle, $r['body']['data']);
             }
             return $detalle;
