@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de dte temporales
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-12-13
+ * @version 2018-05-03
  */
 class Controller_DteTmps extends \Controller_App
 {
@@ -695,6 +695,69 @@ class Controller_DteTmps extends \Controller_App
             );
         }
         $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request));
+    }
+
+    /**
+     * Acción que permite realizar una búsqueda avanzada dentro de los DTE
+     * temporales
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-03
+     */
+    public function buscar()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'tipos_dte' => $Emisor->getDocumentosAutorizados(),
+        ]);
+        if (isset($_POST['submit'])) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User->hash);
+            $response = $rest->post($this->request->url.'/api/dte/dte_tmps/buscar/'.$Emisor->rut, [
+                'dte' => $_POST['dte'],
+                'receptor' => $_POST['receptor'],
+                'fecha_desde' => $_POST['fecha_desde'],
+                'fecha_hasta' => $_POST['fecha_hasta'],
+                'total_desde' => $_POST['total_desde'],
+                'total_hasta' => $_POST['total_hasta'],
+            ]);
+            if ($response===false) {
+                \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+            }
+            else if ($response['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            }
+            else {
+                $this->set([
+                    'Emisor' => $Emisor,
+                    'documentos' => $response['body'],
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Acción de la API que permite realizar una búsqueda avanzada dentro de los
+     * DTEs temporales
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-03
+     */
+    public function _api_buscar_POST($emisor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // verificar permisos del usuario autenticado sobre el emisor del DTE
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_tmps/buscar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // buscar documentos
+        $this->Api->send($Emisor->getDocumentosTemporales($this->Api->data, true), 200, JSON_PRETTY_PRINT);
     }
 
 }

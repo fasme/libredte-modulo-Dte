@@ -1112,6 +1112,92 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el listado de documentos temporales por el contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-03
+     */
+    public function getDocumentosTemporales($filtros = [])
+    {
+        // armar filtros
+        $where = ['d.emisor = :rut'];
+        $vars = [':rut'=>$this->rut];
+        foreach (['receptor', 'codigo', 'fecha', 'total'] as $c) {
+            if (!empty($filtros[$c])) {
+                $where[] = 'd.'.$c.' = :'.$c;
+                $vars[':'.$c] = $filtros[$c];
+            }
+        }
+        // filtrar por DTE
+        if (!empty($filtros['dte'])) {
+            if (is_array($filtros['dte'])) {
+                $i = 0;
+                $where_dte = [];
+                foreach ($filtros['dte'] as $filtro_dte) {
+                    $where_dte[] = ':dte'.$i;
+                    $vars[':dte'.$i] = $filtro_dte;
+                    $i++;
+                }
+                $where[] = 'd.dte IN ('.implode(', ', $where_dte).')';
+            } else {
+                $where[] = 'd.dte = :dte';
+                $vars[':dte'] = $filtros['dte'];
+            }
+        }
+        // otros filtros
+        if (!empty($filtros['fecha_desde'])) {
+            $where[] = 'd.fecha >= :fecha_desde';
+            $vars[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+        if (!empty($filtros['fecha_hasta'])) {
+            $where[] = 'd.fecha <= :fecha_hasta';
+            $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+        if (!empty($filtros['total_desde'])) {
+            $where[] = 'd.total >= :total_desde';
+            $vars[':total_desde'] = $filtros['total_desde'];
+        }
+        if (!empty($filtros['total_hasta'])) {
+            $where[] = 'd.total <= :total_hasta';
+            $vars[':total_hasta'] = $filtros['total_hasta'];
+        }
+        if (!empty($filtros['folio'])) {
+            $aux = explode('-', $filtros['folio']);
+            if (!isset($aux[1])) {
+                throw new \Exception('Folio del DTE temporal debe ser en formato DTE-CODIGO_7');
+            }
+            list($dte, $codigo) = $aux;
+            $where[] = 'd.dte = :dte AND SUBSTR(d.codigo,1,7) = :codigo';
+            $vars[':dte'] = (int)$dte;
+            $vars[':codigo'] = strtolower($codigo);
+        }
+        // armar consulta interna (no obtiene razón social verdadera en DTE exportación por que requiere acceder al JSON)
+        $query = '
+            SELECT
+                d.emisor,
+                d.dte,
+                t.tipo,
+                d.codigo,
+                (d.dte || \'-\' || SUBSTR(d.codigo,1,7)) AS folio,
+                d.receptor,
+                r.razon_social,
+                d.fecha,
+                d.total
+            FROM
+                dte_tmp AS d
+                JOIN dte_tipo AS t ON d.dte = t.codigo
+                JOIN contribuyente AS r ON d.receptor = r.rut
+            WHERE '.implode(' AND ', $where).'
+            ORDER BY d.fecha DESC, t.tipo, d.codigo DESC
+        ';
+        // armar límite consulta
+        if (isset($filtros['limit'])) {
+            $query = $this->db->setLimit($query, $filtros['limit'], $filtros['offset']);
+        }
+        // entregar consulta TODO: abrir JSON para consultar razón social verdadera
+        return $this->db->getTable($query, $vars);
+    }
+
+    /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-10-26
