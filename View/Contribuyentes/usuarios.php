@@ -1,5 +1,11 @@
 <ul class="nav nav-pills pull-right">
     <li>
+        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/contribuyente_usuarios/<?=$Contribuyente->rut?>-<?=$Contribuyente->dv?>', 850, 700); return false" title="Ver usuarios del contribuyente en el SII">
+            <span class="fa fa-users"></span>
+            Usuarios en SII
+        </a>
+    </li>
+    <li>
         <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Contribuyente->rut?>" title="Modificar empresa">
             <span class="fa fa-edit"></span>
             Modificar

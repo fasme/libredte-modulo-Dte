@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador para acciones del SII
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-09-08
+ * @version 2018-05-09
  */
 class Controller_Sii extends \Controller_App
 {
@@ -67,6 +67,46 @@ class Controller_Sii extends \Controller_App
                 header('location: https://maullin.sii.cl/cvc_cgi/dte/ad_empresa1');
             } else {
                 header('location: https://palena.sii.cl/cvc_cgi/dte/ad_empresa1');
+            }
+            exit;
+        }
+    }
+
+    /**
+     * Acción que permite obtener los usuarios de la empresa desde el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-09
+     */
+    public function contribuyente_usuarios($rut)
+    {
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            $Emisor = (new Model_Contribuyentes())->get($rut);
+            if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
+                \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
+                $this->redirect('/dte/contribuyentes/seleccionar');
+            }
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            $data = [
+                'firma' => [
+                    'cert-data' => $Firma->getCertificate(),
+                    'key-data' => $Firma->getPrivateKey(),
+                ],
+            ];
+            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $response = libredte_consume(
+                '/sii/dte_contribuyente_usuarios/'.$Emisor->getRUT().'?certificacion='.$certificacion,
+                $data
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se redirecciona al SII
+        else {
+            if (\sasco\LibreDTE\Sii::getAmbiente()) {
+                header('location: https://maullin.sii.cl/cvc_cgi/dte/eu_enrola_usuarios');
+            } else {
+                header('location: https://palena.sii.cl/cvc_cgi/dte/eu_enrola_usuarios');
             }
             exit;
         }
