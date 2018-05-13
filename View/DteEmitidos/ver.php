@@ -322,7 +322,7 @@ if ($Resultado) {
 <?php if (!$Cobro->pagado) : ?>
 <div class="row">
     <div class="col-sm-6">
-    <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+        <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
             Registrar pago
         </a>
     </div>
@@ -346,6 +346,12 @@ if ($Cobro->datos) {
     }
 }
 ?>
+<?php if (!empty($Emisor->config_api_servicios->pagos_notificar->url)) : ?>
+<hr/>
+<a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/pagos/cobros/notificar_pago/<?=$Cobro->codigo?>" role="button" title="Notificar pago a <?=$Emisor->config_api_servicios->pagos_notificar->url?>">
+    Notificar pago a servicio web del emisor
+</a>
+<?php endif; ?>
 <?php endif; ?>
 <?php else : ?>
 <p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
