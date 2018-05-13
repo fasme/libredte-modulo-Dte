@@ -840,17 +840,13 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener la información de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-02
+     * @version 2018-05-11
      */
     public function _api_info_GET($dte, $folio, $emisor)
     {
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
@@ -863,7 +859,21 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
-        $DteEmitido->xml = false;
+        extract($this->Api->getQuery([
+            'getXML' => false,
+            'getDetalle' => false,
+            'getDatosDte' => false,
+        ]));
+        if ($getDetalle) {
+            $DteEmitido->detalle = $DteEmitido->getDetalle();
+        }
+        if ($getDatosDte) {
+            $DteEmitido->datos_dte = $DteEmitido->getDatos();
+            unset($DteEmitido->datos_dte['TED']);
+        }
+        if (!$getXML) {
+            $DteEmitido->xml = false;
+        }
         $this->Api->send($DteEmitido, 200, JSON_PRETTY_PRINT);
     }
 

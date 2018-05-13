@@ -368,14 +368,18 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el objeto del Dte
      * @return \sasco\LibreDTE\Sii\Dte
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-13
+     * @version 2018-05-11
      */
     public function getDte()
     {
         if (!$this->Dte) {
             $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
             $EnvioDte->loadXML(base64_decode($this->xml));
-            $this->Dte = $EnvioDte->getDocumentos()[0];
+            $Documentos = $EnvioDte->getDocumentos();
+            if (!isset($Documentos[0])) {
+                throw new \Exception('No se encontró DTE asociado al documento emitido');
+            }
+            $this->Dte = $Documentos[0];
         }
         return $this->Dte;
     }
@@ -1074,8 +1078,9 @@ class Model_DteEmitido extends Model_Base_Envio
      */
     public function getTotal()
     {
-        if (!in_array($this->dte, [110, 111, 112]))
+        if (!in_array($this->dte, [110, 111, 112])) {
             return $this->total;
+        }
         return $this->getDatos()['Encabezado']['Totales']['MntTotal'];
     }
 
