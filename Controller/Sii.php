@@ -116,6 +116,57 @@ class Controller_Sii extends \Controller_App
     }
 
     /**
+     * Acción que permite obtener si la empresa está o no autorizada para usar facturación electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-16
+     */
+    public function contribuyente_autorizado($rut)
+    {
+        extract($this->Api->getQuery([
+            'certificacion'=>\sasco\LibreDTE\Sii\Navegador::PRODUCCION,
+        ]));
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            $response = libredte_consume(
+                '/sii/dte_contribuyente_autorizado/'.$rut.'?certificacion='.$certificacion
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se redirecciona al SII
+        else {
+            if (\sasco\LibreDTE\Sii::getAmbiente()) {
+                header('location: https://maullin.sii.cl/cvc/dte/ee_empresas_dte.html');
+            } else {
+                header('location: https://palena.sii.cl/cvc/dte/ee_empresas_dte.html');
+            }
+            exit;
+        }
+    }
+
+    /**
+     * Acción que permite obtener la situación tributaria de la empresa desde el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-16
+     */
+    public function contribuyente_situacion_tributaria($rut)
+    {
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            $response = libredte_consume(
+                '/sii/contribuyente_situacion_tributaria/'.$rut.'?formato=web'
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se redirecciona al SII
+        else {
+            header('location: https://zeus.sii.cl/cvc/stc/stc.html');
+            exit;
+        }
+    }
+
+    /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-08-06
