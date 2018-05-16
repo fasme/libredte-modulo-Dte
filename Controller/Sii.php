@@ -75,7 +75,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los usuarios de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-09
+     * @version 2018-05-16
      */
     public function contribuyente_usuarios($rut)
     {
@@ -87,6 +87,9 @@ class Controller_Sii extends \Controller_App
                 $this->redirect('/dte/contribuyentes/seleccionar');
             }
             $Firma = $Emisor->getFirma($this->Auth->User->id);
+            if (!$Firma) {
+                die('No hay firma electrónica asociada al usuario');
+            }
             $data = [
                 'firma' => [
                     'cert-data' => $Firma->getCertificate(),
