@@ -46,21 +46,21 @@ class Model_DteTipos extends \Model_Plural_App
     /**
      * Método que entrega el listado de tipos de documentos tributarios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-19
+     * @version 2018-05-16
      */
     public function getList($all = false)
     {
         if ($all) {
             if (is_array($all)) {
                 return $this->db->getTable('
-                    SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').'
+                    SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').' AS glosa
                     FROM dte_tipo
                     WHERE codigo IN ('.implode(',', $all).')
                     ORDER BY codigo
                 ');
             } else {
                 return $this->db->getTable('
-                    SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').'
+                    SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').' AS glosa
                     FROM dte_tipo
                     WHERE categoria = \'T\'
                     ORDER BY codigo
@@ -68,7 +68,7 @@ class Model_DteTipos extends \Model_Plural_App
             }
         } else {
             return $this->db->getTable('
-                SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').'
+                SELECT codigo, '.$this->db->concat('codigo', ' - ', 'tipo').' AS glosa
                 FROM dte_tipo
                 WHERE categoria = \'T\' AND electronico = true
                 ORDER BY codigo
