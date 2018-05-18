@@ -348,6 +348,10 @@ class Controller_DteFolios extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
             $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
         }
+        if (!$detalle) {
+            \sowerphp\core\Model_Datasource_Session::message('No se encontraron folios con el estado \''.$estado.'\' en el SII para el CAF que inicia en '.$folio, 'warning');
+            $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
+        }
         array_unshift($detalle, ['Folio inicial', 'Folio final', 'Cantidad de folios']);
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, 'folios_'.$estado.'_'.$Emisor->rut.'_'.$dte.'_'.$folio.'_'.date('Y-m-d'));
     }
