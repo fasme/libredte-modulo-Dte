@@ -202,12 +202,12 @@ class Model_DteFolio extends \Model_App
      * Método que entrega el listado de archivos CAF que existen cargados para
      * el tipo de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-19
+     * @version 2018-05-18
      */
     public function getCafs()
     {
         $cafs = $this->db->getTable('
-            SELECT desde, hasta, xml
+            SELECT desde, hasta, (hasta - desde + 1) AS cantidad, xml
             FROM dte_caf
             WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
             ORDER BY desde

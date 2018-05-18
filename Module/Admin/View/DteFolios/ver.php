@@ -50,11 +50,15 @@ $cafs = $DteFolio->getCafs();
 foreach ($cafs as &$caf) {
     $caf['fecha_autorizacion'] = \sowerphp\general\Utility_Date::format($caf['fecha_autorizacion']);
     $caf['en_uso'] = ($DteFolio->siguiente >= $caf['desde'] and $DteFolio->siguiente <= $caf['hasta']) ? 'X' : '';
-    $caf[] = '<a href="../xml/'.$DteFolio->dte.'/'.$caf['desde'].'" title="Descargar CAF que inicia en '.$caf['desde'].' del DTE '.$DteFolio->dte.'"><span class="fa fa-download btn btn-default"></span></a>';
+    $acciones = '<a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/recibidos" title="Descargar folios recibidos en SII del CAF que inicia en '.$caf['desde'].'"><span class="far fa-check-circle btn btn-default"></span></a>';
+    $acciones .= ' <a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/anulados" title="Descargar folios anulados en SII del CAF que inicia en '.$caf['desde'].'"><span class="fas fa-ban btn btn-default"></span></a>';
+    $acciones .= ' <a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/pendientes" title="Descargar folios pendientes en SII del CAF que inicia en '.$caf['desde'].'"><span class="fab fa-creative-commons-share btn btn-default"></span></a>';
+    $acciones .= ' <a href="../xml/'.$DteFolio->dte.'/'.$caf['desde'].'" title="Descargar CAF que inicia en '.$caf['desde'].'"><span class="fas fa-code btn btn-default"></span></a>';
+    $caf[] = $acciones;
 }
-array_unshift($cafs, ['Desde', 'Hasta', 'Fecha autorización', 'Meses autorización', 'En uso', 'Descargar']);
+array_unshift($cafs, ['Desde', 'Hasta', 'Cantidad', 'Fecha autorización', 'Meses autorización', 'En uso', 'Descargar']);
 $t = new \sowerphp\general\View_Helper_Table();
-$t->setColsWidth([null, null, null, null, null, 100]);
+$t->setColsWidth([null, null, null, null, null, null, 200]);
 echo $t->generate($cafs);
 ?>
 </div>
@@ -81,7 +85,7 @@ if ($foliosSinUso) :
 ?>
 <p>Los folios a continuación, que están entre el N° <?=$DteFolio->getPrimerFolio()?> (primer folio emitido en LibreDTE) y el N° <?=$DteFolio->siguiente?> (folio siguiente), se encuentran sin uso en el sistema:</p>
 <p><?=implode(', ', $foliosSinUso)?></p>
-<p>Si estos folios no existen en otro sistema de facturación y no los recuperará, debe <a href="<?=\sasco\LibreDTE\Sii::getURL('/cvc_cgi/dte/af_anular1', $Emisor->config_ambiente_en_certificacion)?>" target="_blank">anularlos en el SII</a>.</p>
+<p>Si estos folios no existen en otro sistema de facturación y no los recuperará, debe <a href="<?=\sasco\LibreDTE\Sii::getURL('/anulacionMsvDteInternet', $Emisor->config_ambiente_en_certificacion)?>" target="_blank">anularlos en el SII</a>.
 <?php else : ?>
 <p>No hay CAF con folios sin uso menores al folio siguiente <?=$DteFolio->siguiente?>.</p>
 <?php endif; ?>

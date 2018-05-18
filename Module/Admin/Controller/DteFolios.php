@@ -325,19 +325,43 @@ class Controller_DteFolios extends \Controller_App
     }
 
     /**
+     * Acción que permite descargar del SII los folios según su estado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    public function descargar($dte, $folio, $estado = 'recibidos')
+    {
+        $Emisor = $this->getContribuyente();
+        $DteCaf = new Model_DteCaf($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion, $folio);
+        if (!$DteCaf->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el CAF solicitado', 'error'
+            );
+            $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
+        }
+        try {
+            $detalle = $DteCaf->{'getFolios'.ucfirst($estado)}();
+        } catch(\sowerphp\core\Exception_Object_Method_Missing $e) {
+            \sowerphp\core\Model_Datasource_Session::message('No es posible descargar el estado de folios '.$estado, 'error');
+            $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
+        } catch(\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
+        }
+        array_unshift($detalle, ['Folio inicial', 'Folio final', 'Cantidad de folios']);
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, 'folios_'.$estado.'_'.$Emisor->rut.'_'.$dte.'_'.$folio.'_'.date('Y-m-d'));
+    }
+
+    /**
      * Recurso que entrega el la información de cierto mantenedor de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-26
      */
     public function _api_info_GET($dte, $emisor)
     {
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new \website\Dte\Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {

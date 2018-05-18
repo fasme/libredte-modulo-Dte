@@ -127,6 +127,16 @@ class Model_DteCaf extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     /**
+     * Método que entrega el objeto del contribuyente asociado al mantenedor de folios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    public function getEmisor()
+    {
+        return (new \website\Dte\Model_Contribuyentes())->get($this->emisor);
+    }
+
+    /**
      * Método que entrega el objeto del CAF
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-08-24
@@ -151,6 +161,68 @@ class Model_DteCaf extends \Model_App
     {
         $Caf = $this->getCAF();
         return $Caf ? $Caf->saveXML() : false;
+    }
+
+    /**
+     * Método que entrega los folios en SII con cierto estado
+     * @param estado String recibidos, anulados o pendientes
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    private function getFoliosByEstadoSII($estado)
+    {
+        // si no hay API de LibreDTE no se puede timbrar
+        if (!\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            throw new \Exception('No hay API de LibreDTE');
+        }
+        // recuperar firma electrónica
+        $Emisor = $this->getEmisor();
+        $Firma = $Emisor->getFirma();
+        if (!$Firma) {
+            throw new \Exception('No hay firma electrónica');
+        }
+        // solicitar listado de folios según estado
+        $data = [
+            'firma' => [
+                'cert-data' => $Firma->getCertificate(),
+                'key-data' => $Firma->getPrivateKey(),
+            ],
+        ];
+        $r = libredte_consume('/sii/caf_folios_estado/'.$Emisor->getRUT().'/'.$this->dte.'/'.$this->desde.'/'.$this->hasta.'/'.$estado.'?certificacion='.(int)$this->certificacion, $data);
+        if ($r['status']['code']!=200) {
+            throw new \Exception($r['body']);
+        }
+        return $r['body'];
+    }
+
+    /**
+     * Método que entrega los folios en SII con estado recibidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    public function getFoliosRecibidos()
+    {
+        return $this->getFoliosByEstadoSII('recibidos');
+    }
+
+    /**
+     * Método que entrega los folios en SII con estado anulados
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    public function getFoliosAnulados()
+    {
+        return $this->getFoliosByEstadoSII('anulados');
+    }
+
+    /**
+     * Método que entrega los folios en SII con estado pendientes
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    public function getFoliosPendientes()
+    {
+        return $this->getFoliosByEstadoSII('pendientes');
     }
 
 }
