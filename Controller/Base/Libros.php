@@ -49,15 +49,15 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que muestra la información del libro para cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2018-05-17
      */
     public function ver($periodo)
     {
         $Emisor = $this->getContribuyente();
-        $detalle = $Emisor->{'get'.$this->config['model']['plural']}($periodo);
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
         $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$detalle and !$Libro->exists()) {
+        $n_detalles = $Emisor->{'count'.$this->config['model']['plural']}($periodo);
+        if (!$n_detalles and !$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No hay documentos ni libro del período '.$periodo, 'error'
             );
@@ -68,17 +68,23 @@ abstract class Controller_Base_Libros extends \Controller_App
         foreach ($resumen as $r) {
             $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipo($r['TpoDoc']))->operacion;
         }
-        foreach ($detalle as &$d) {
-            unset($d['tipo_transaccion']);
-        }
         $this->set([
             'Emisor' => $Emisor,
             'Libro' => $Libro,
             'resumen' => $resumen,
-            'detalle' => $detalle,
-            'libro_cols' => $class::$libro_cols,
             'operaciones' => $operaciones,
+            'n_detalles' => $n_detalles,
         ]);
+        if ($Emisor->config_iecv_pestania_detalle) {
+            $detalle = $Emisor->{'get'.$this->config['model']['plural']}($periodo);
+            foreach ($detalle as &$d) {
+                unset($d['tipo_transaccion']);
+            }
+            $this->set([
+                'detalle' => $detalle,
+                'libro_cols' => $class::$libro_cols,
+            ]);
+        }
     }
 
     /**

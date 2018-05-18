@@ -826,6 +826,24 @@ echo $f->input([
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
+            <i class="fa fa-book"></i>
+            Libros de compra y venta (IECV)
+        </div>
+        <div class="panel-body">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_iecv_pestania_detalle',
+    'label' => '¿Mostrar pestaña con detalle?',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_iecv_pestania_detalle : 0,
+    'help' => '¿Se debe mostrar la pestaña con el detalle de los libros de compra/venta y guías de despacho?',
+]);
+?>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <i class="fa fa-eye"></i>
             SII
         </div>

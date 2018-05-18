@@ -1519,6 +1519,29 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que entrega el total de ventas de un período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-17
+     */
+    public function countVentas($periodo)
+    {
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
+        return $this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_emitido AS e JOIN dte_tipo AS t ON e.dte = t.codigo
+            WHERE
+                e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46 AND t.venta = true
+                AND (e.emisor, e.dte, e.folio, e.certificacion) NOT IN (
+                    SELECT e.emisor, e.dte, e.folio, e.certificacion
+                    FROM
+                        dte_emitido AS e
+                        JOIN dte_referencia AS r ON r.emisor = e.emisor AND r.dte = e.dte AND r.folio = e.folio AND r.certificacion = e.certificacion
+                        WHERE '.$periodo_col.' = :periodo AND r.referencia_dte = 46
+                )
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+    }
+
+    /**
      * Método que entrega las ventas de un período
      * @todo Corregir ID en Extranjero y asignar los NULL por los valores que corresponden (quizás haya que modificar tabla dte_emitido)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -1765,6 +1788,25 @@ class Model_Contribuyente extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-10-12
      */
+    public function countGuias($periodo)
+    {
+        $periodo_col = $this->db->date('Ym', 'e.fecha');
+        return $this->db->getValue('
+            SELECT COUNT(*)
+            FROM
+                dte_emitido AS e
+                LEFT JOIN dte_referencia AS ref ON e.emisor = ref.emisor AND e.dte = ref.referencia_dte AND e.folio = ref.referencia_folio AND e.certificacion = ref.certificacion
+                LEFT JOIN dte_emitido AS re ON re.emisor = ref.emisor AND re.dte = ref.dte AND re.folio = ref.folio AND re.certificacion = ref.certificacion
+            WHERE e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte = 52
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+    }
+
+    /**
+     * Método que entrega el resumen de las guías de un período
+     * @todo Extraer IndTraslado en MariaDB
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-10-12
+     */
     public function getGuias($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
@@ -1799,13 +1841,13 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las guías diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2018-05-17
      */
     public function getGuiasDiarias($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'fecha');
         $dia_col = $this->db->date('d', 'fecha');
-        return $this->db->getAssociativeArray('
+        return $this->db->getTable('
             SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
             FROM dte_emitido
             WHERE emisor = :rut AND certificacion = :certificacion AND '.$periodo_col.' = :periodo AND dte = 52
@@ -2055,6 +2097,45 @@ class Model_Contribuyente extends \Model_App
             )
             ORDER BY periodo DESC
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+    }
+
+    /**
+     * Método que entrega el total de las compras de un período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-17
+     */
+    public function countCompras($periodo)
+    {
+        $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
+        $compras = $this->db->getCol('
+            (
+                SELECT COUNT(*)
+                FROM dte_tipo AS t JOIN dte_recibido AS r ON t.codigo = r.dte
+                WHERE
+                    t.compra = true
+                    AND r.receptor = :rut
+                    AND r.certificacion = :certificacion
+                    AND ((r.periodo IS NULL AND '.$periodo_col.' = :periodo) OR (r.periodo IS NOT NULL AND r.periodo = :periodo))
+            ) UNION (
+                SELECT COUNT(*)
+                FROM dte_tipo AS t JOIN dte_emitido AS r ON t.codigo = r.dte
+                WHERE
+                    r.emisor = :rut
+                    AND r.certificacion = :certificacion
+                    AND '.$periodo_col.' = :periodo
+                    AND (
+                        r.dte = 46
+                        OR (r.emisor, r.dte, r.folio, r.certificacion) IN (
+                            SELECT r.emisor, r.dte, r.folio, r.certificacion
+                            FROM
+                                dte_emitido AS r
+                                JOIN dte_referencia AS re ON re.emisor = r.emisor AND re.dte = r.dte AND re.folio = r.folio AND re.certificacion = r.certificacion
+                                WHERE '.$periodo_col.' = :periodo AND re.referencia_dte = 46
+                        )
+                    )
+            )
+        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        return array_sum($compras);
     }
 
     /**

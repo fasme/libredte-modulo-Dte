@@ -193,4 +193,14 @@ class Model_DteGuia extends Model_Base_Libro
         return $Libro->getFolioNotificacion();
     }
 
+    /**
+     * Método que entrega los documentos por día del libro
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-17
+     */
+    public function getDocumentosPorDia()
+    {
+        return $this->getEmisor()->getGuiasDiarias($this->periodo);
+    }
+
 }

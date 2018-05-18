@@ -18,13 +18,13 @@ $(function() {
 });
 </script>
 
-<?php $n_guias = count($detalle); ?>
-
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
-<?php if ($n_guias) : ?>
+<?php if ($n_detalles) : ?>
+<?php if (isset($detalle)) : ?>
         <li role="presentation"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab">Estadísticas</a></li>
 <?php endif; ?>
         <li role="presentation"><a href="#revision" aria-controls="revision" role="tab" data-toggle="tab">Subir revisión</a></li>
@@ -38,12 +38,12 @@ $(function() {
 <?php
 new \sowerphp\general\View_Helper_Table([
     ['Período', 'Guías emitidas', 'Guías envíadas'],
-    [$Libro->periodo, num($n_guias), num($Libro->documentos)],
+    [$Libro->periodo, num($n_detalles), num($Libro->documentos)],
 ]);
 ?>
         <div class="row">
             <div class="col-md-6">
-                <a class="btn btn-default btn-lg btn-block<?=!$n_guias?' disabled':''?>" href="<?=$_base?>/dte/dte_guias/csv/<?=$Libro->periodo?>" role="button">
+                <a class="btn btn-default btn-lg btn-block<?=!$n_detalles?' disabled':''?>" href="<?=$_base?>/dte/dte_guias/csv/<?=$Libro->periodo?>" role="button">
                     <span class="far fa-file-excel" style="font-size:24px"></span>
                     Descargar detalle en archivo CSV
                 </a>
@@ -77,8 +77,9 @@ new \sowerphp\general\View_Helper_Table([
 </div>
 <!-- FIN DATOS BÁSICOS -->
 
-<?php if ($n_guias) : ?>
+<?php if ($n_detalles) : ?>
 
+<?php if (isset($detalle)) : ?>
 <!-- INICIO DETALLES -->
 <div role="tabpanel" class="tab-pane" id="detalle">
 <?php
@@ -87,10 +88,18 @@ new \sowerphp\general\View_Helper_Table($detalle);
 ?>
 </div>
 <!-- FIN DETALLES -->
+<?php endif; ?>
 
 <!-- INICIO ESTADÍSTICAS -->
 <div role="tabpanel" class="tab-pane" id="estadisticas">
-    <img src="<?=$_base.'/dte/dte_guias/grafico_documentos_diarios/'.$Libro->periodo?>" alt="Gráfico guías diarias del período" class="img-responsive thumbnail center" />
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="far fa-chart-bar fa-fw"></i> Guías por día emitidas con fecha en el período <?=$Libro->periodo?>
+    </div>
+    <div class="panel-body">
+        <div id="grafico-documentos_por_dia"></div>
+    </div>
+</div>
 </div>
 <!-- FIN ESTADÍSTICAS -->
 
@@ -116,3 +125,22 @@ echo $f->end('Subir XML de revisión');
 
     </div>
 </div>
+
+<script>
+var documentos_por_dia = Morris.Line({
+    element: 'grafico-documentos_por_dia',
+    data: <?=json_encode($Libro->getDocumentosPorDia())?>,
+    xkey: 'dia',
+    ykeys: ['documentos'],
+    labels: ['Documentos'],
+    resize: true,
+    parseTime: false
+});
+$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    var target = $(e.target).attr("href");
+    if (target=='#estadisticas') {
+        documentos_por_dia.redraw();
+        $(window).trigger('resize');
+    }
+});
+</script>

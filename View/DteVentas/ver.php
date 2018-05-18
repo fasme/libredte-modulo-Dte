@@ -47,14 +47,14 @@ function get_codigo_reemplazo() {
 }
 </script>
 
-<?php $n_ventas = count($detalle); ?>
-
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
         <li role="presentation"><a href="#resumen" aria-controls="resumen" role="tab" data-toggle="tab">Resumen</a></li>
-<?php if ($n_ventas) : ?>
+<?php if ($n_detalles) : ?>
+<?php if (isset($detalle)) : ?>
         <li role="presentation"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle</a></li>
+<?php endif; ?>
         <li role="presentation"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab">Estadísticas</a></li>
 <?php endif; ?>
 <?php if ($Libro->track_id>0) : ?>
@@ -70,12 +70,12 @@ function get_codigo_reemplazo() {
 <?php
 new \sowerphp\general\View_Helper_Table([
     ['Período', 'Emitidos', 'Envíados'],
-    [$Libro->periodo, num($n_ventas), num($Libro->documentos)],
+    [$Libro->periodo, num($n_detalles), num($Libro->documentos)],
 ]);
 ?>
         <div class="row">
             <div class="col-md-4">
-                <a class="btn btn-default btn-lg btn-block<?=!$n_ventas?' disabled':''?>" href="<?=$_base?>/dte/dte_ventas/csv/<?=$Libro->periodo?>" role="button">
+                <a class="btn btn-default btn-lg btn-block<?=!$n_detalles?' disabled':''?>" href="<?=$_base?>/dte/dte_ventas/csv/<?=$Libro->periodo?>" role="button">
                     <span class="far fa-file-excel" style="font-size:24px"></span>
                     Descargar CSV
                 </a>
@@ -233,8 +233,9 @@ echo $f->end(false);
 </div>
 <!-- FIN RESUMEN -->
 
-<?php if ($n_ventas) : ?>
+<?php if ($n_detalles) : ?>
 
+<?php if (isset($detalle)) : ?>
 <!-- INICIO DETALLES -->
 <div role="tabpanel" class="tab-pane" id="detalle">
 <?php
@@ -243,6 +244,7 @@ new \sowerphp\general\View_Helper_Table($detalle);
 ?>
 </div>
 <!-- FIN DETALLES -->
+<?php endif; ?>
 
 <!-- INICIO ESTADÍSTICAS -->
 <div role="tabpanel" class="tab-pane" id="estadisticas">
