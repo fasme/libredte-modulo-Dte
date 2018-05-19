@@ -35,12 +35,12 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los datos de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-31
+     * @version 2018-05-18
      */
     public function contribuyente_datos($rut)
     {
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
-        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        try {
             $Emisor = (new Model_Contribuyentes())->get($rut);
             if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
                 \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
@@ -62,7 +62,7 @@ class Controller_Sii extends \Controller_App
             exit;
         }
         // se redirecciona al SII
-        else {
+        catch (\Exception $e) {
             if (\sasco\LibreDTE\Sii::getAmbiente()) {
                 header('location: https://maullin.sii.cl/cvc_cgi/dte/ad_empresa1');
             } else {
@@ -75,12 +75,12 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los usuarios de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-16
+     * @version 2018-05-18
      */
     public function contribuyente_usuarios($rut)
     {
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
-        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        try {
             $Emisor = (new Model_Contribuyentes())->get($rut);
             if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
                 \sowerphp\core\Model_Datasource_Session::message('Usted no es el administrador de la empresa solicitada', 'error');
@@ -105,7 +105,7 @@ class Controller_Sii extends \Controller_App
             exit;
         }
         // se redirecciona al SII
-        else {
+        catch (\Exception $e) {
             if (\sasco\LibreDTE\Sii::getAmbiente()) {
                 header('location: https://maullin.sii.cl/cvc_cgi/dte/eu_enrola_usuarios');
             } else {
@@ -118,7 +118,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener si la empresa está o no autorizada para usar facturación electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-16
+     * @version 2018-05-18
      */
     public function contribuyente_autorizado($rut)
     {
@@ -126,7 +126,7 @@ class Controller_Sii extends \Controller_App
             'certificacion'=>\sasco\LibreDTE\Sii\Navegador::PRODUCCION,
         ]));
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
-        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        try {
             $response = libredte_consume(
                 '/sii/dte_contribuyente_autorizado/'.$rut.'?certificacion='.$certificacion
             );
@@ -134,7 +134,7 @@ class Controller_Sii extends \Controller_App
             exit;
         }
         // se redirecciona al SII
-        else {
+        catch (\Exception $e) {
             if (\sasco\LibreDTE\Sii::getAmbiente()) {
                 header('location: https://maullin.sii.cl/cvc/dte/ee_empresas_dte.html');
             } else {
@@ -147,12 +147,12 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener la situación tributaria de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-16
+     * @version 2018-05-18
      */
     public function contribuyente_situacion_tributaria($rut)
     {
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
-        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        try {
             $response = libredte_consume(
                 '/sii/contribuyente_situacion_tributaria/'.$rut.'?formato=web'
             );
@@ -160,7 +160,7 @@ class Controller_Sii extends \Controller_App
             exit;
         }
         // se redirecciona al SII
-        else {
+        catch (\Exception $e) {
             header('location: https://zeus.sii.cl/cvc/stc/stc.html');
             exit;
         }
@@ -169,12 +169,12 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2018-05-18
      */
     public function estado_envio($track_id)
     {
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
-        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        try {
             $Emisor = $this->getContribuyente();
             $Firma = $Emisor->getFirma($this->Auth->User->id);
             $data = [
@@ -192,7 +192,7 @@ class Controller_Sii extends \Controller_App
             exit;
         }
         // se crea enlace directo al SII
-        else {
+        catch (\Exception $e) {
             $this->query('QEstadoEnvio2', ['TrackId' => $track_id, 'NPagina' => 1]);
         }
     }

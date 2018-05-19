@@ -1,4 +1,3 @@
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
 <ul class="nav nav-pills pull-right">
     <li>
         <a href="<?=$_base?>/dte/admin/dte_folios/solicitar_caf/<?=$DteFolio->dte?>" title="Solicitar timbraje electrónico al SII">
@@ -6,7 +5,6 @@
         </a>
     </li>
 </ul>
-<?php endif; ?>
 
 <div class="page-header"><h1>Mantenedor folios <?=$DteFolio->getTipo()->tipo?> <small>código <?=$DteFolio->dte?></small></h1></div>
 

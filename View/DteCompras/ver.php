@@ -9,16 +9,13 @@
                      Buscar y asignar
                 </a>
             </li>
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
             <li>
                 <a href="<?=$_base?>/dte/dte_compras/rcv_sincronizar_tipo_transacciones/<?=$Libro->periodo?>">
                     Sincronizar con SII
                 </a>
             </li>
-<?php endif; ?>
         </ul>
     </li>
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fas fa-university"></span> Ver resumen RC<span class="caret"></span>
@@ -46,7 +43,6 @@
             </li>
         </ul>
     </li>
-<?php endif; ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fa fa-download"></span> Descargar <span class="caret"></span>

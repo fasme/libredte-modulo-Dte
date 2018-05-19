@@ -237,7 +237,7 @@ class Model_DteFolio extends \Model_App
     /**
      * Método que entrega el objeto del contribuyente asociado al mantenedor de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-05
+     * @version 2018-05-18
      */
     public function getEmisor()
     {
@@ -251,10 +251,6 @@ class Model_DteFolio extends \Model_App
      */
     public function timbrar($cantidad = null)
     {
-        // si no hay API de LibreDTE no se puede timbrar
-        if (!\sowerphp\core\Configure::read('proveedores.api.libredte')) {
-            throw new \Exception('No hay API de LibreDTE');
-        }
         // corregir cantidad si no se pasó
         if (!$cantidad) {
             if (!$this->alerta) {

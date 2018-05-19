@@ -34,7 +34,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-12
+     * @version 2018-05-18
      */
     public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
     {
@@ -49,10 +49,10 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 return 1;
             }
         } else {
-            if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+            try {
                 $this->libredte($ambiente, $dia);
                 $this->corregir();
-            } else {
+            } catch (\Exception $e) {
                 $this->sii($ambiente, $dia);
             }
         }

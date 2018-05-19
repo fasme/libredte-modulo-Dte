@@ -17,7 +17,7 @@ new \sowerphp\general\View_Helper_Table($folios);
         </a>
     </div>
     <div class="col-xs-4">
-        <a class="btn btn-default btn-lg btn-block <?=!\sowerphp\core\Configure::read('proveedores.api.libredte')?'disabled':''?>" href="dte_folios/solicitar_caf" role="button">
+        <a class="btn btn-default btn-lg btn-block" href="dte_folios/solicitar_caf" role="button">
             <span class="fa fa-download"></span>
             Solicitar CAF
         </a>

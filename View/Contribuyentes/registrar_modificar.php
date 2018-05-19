@@ -224,7 +224,6 @@ echo $f->input([
     <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="img-responsive thumbnail center" />
     <br/>
 <?php endif; ?>
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
 <?php
 echo $f->input([
     'type' => 'text',
@@ -232,9 +231,9 @@ echo $f->input([
     'label' => 'Contraseña SII',
     'value' => isset($Contribuyente) ? $Contribuyente->config_sii_pass : null,
     'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
+    'help' => 'Permite acceder a ciertas funcionalidades que se conectan al SII',
 ]);
 ?>
-<?php endif; ?>
 </div>
 <!-- FIN DATOS EMPRESA -->
 
@@ -848,7 +847,6 @@ echo $f->input([
             SII
         </div>
         <div class="panel-body">
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
 <?php
 echo $f->input([
     'type' => 'select',
@@ -865,7 +863,6 @@ echo $f->input([
     'help' => 'Se solicitará como cantidad de timbraje automático máximo: [alerta folio] x [multiplicador]',
 ]);
 ?>
-<?php endif; ?>
 <?php
 echo $f->input([
     'type' => 'select',
@@ -1052,9 +1049,7 @@ echo $f->end($boton);
 ?>
 <script>
 $(function() {
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     $('#config_sii_passField').attr('type', 'password');
-<?php endif; ?>
     $('#config_email_sii_passField').attr('type', 'password');
     $('#config_email_intercambio_passField').attr('type', 'password');
     $('input[name="config_api_credenciales[]"]').attr('type', 'password');

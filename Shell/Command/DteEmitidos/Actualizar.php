@@ -38,8 +38,12 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         foreach ($contribuyentes as $rut) {
             $this->actualizarDocumentosEmitidos($rut, $certificacion);
         }
-        if (\sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        try {
             $this->actualizarEventosReceptor($meses, $grupo, $certificacion);
+        } catch(\Exception $e) {
+            if ($this->verbose) {
+                $this->out('<error>'.$e->getMessage().'</error>');
+            }
         }
         $this->showStats();
         return 0;

@@ -171,10 +171,6 @@ class Model_DteCaf extends \Model_App
      */
     private function getFoliosByEstadoSII($estado)
     {
-        // si no hay API de LibreDTE no se puede timbrar
-        if (!\sowerphp\core\Configure::read('proveedores.api.libredte')) {
-            throw new \Exception('No hay API de LibreDTE');
-        }
         // recuperar firma electrónica
         $Emisor = $this->getEmisor();
         $Firma = $Emisor->getFirma();

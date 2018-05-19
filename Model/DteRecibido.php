@@ -525,11 +525,11 @@ class Model_DteRecibido extends \Model_App
     /**
      * Método que determina y envía al SII el tipo de transacción del DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2018-05-18
      */
     public function setTipoTransaccionSII()
     {
-        if (($this->tipo_transaccion or $this->iva_uso_comun or $this->iva_no_recuperable) and \sowerphp\core\Configure::read('proveedores.api.libredte')) {
+        if (($this->tipo_transaccion or $this->iva_uso_comun or $this->iva_no_recuperable)) {
             // determinar códigos
             $codigo_impuesto = 1;
             if ($this->iva_uso_comun) {
@@ -547,21 +547,24 @@ class Model_DteRecibido extends \Model_App
                 $codigo_impuesto = json_decode($this->iva_no_recuperable, true)[0]['codigo'];
             }
             // enviar al SII
-            $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.(int)$this->getReceptor()->config_ambiente_en_certificacion, [
-                'auth'=> [
-                    'rut' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
-                    'clave' => $this->getReceptor()->config_sii_pass,
-                ],
-                'documentos' => [
-                    [$this->getEmisor()->rut.'-'.$this->getEmisor()->dv, $this->dte, $this->folio, $this->tipo_transaccion, $codigo_impuesto]
-                ],
-            ]);
-            if (!empty($r['body']['metaData']['errors'])) {
-                $this->tipo_transaccion = null;
-                parent::save();
-                return false;
+            try {
+                $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.(int)$this->getReceptor()->config_ambiente_en_certificacion, [
+                    'auth'=> [
+                        'rut' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
+                        'clave' => $this->getReceptor()->config_sii_pass,
+                    ],
+                    'documentos' => [
+                        [$this->getEmisor()->rut.'-'.$this->getEmisor()->dv, $this->dte, $this->folio, $this->tipo_transaccion, $codigo_impuesto]
+                    ],
+                ]);
+                if (!empty($r['body']['metaData']['errors'])) {
+                    $this->tipo_transaccion = null;
+                    parent::save();
+                    return false;
+                }
+                return [$this->tipo_transaccion, $codigo_impuesto];
+            } catch (\Exception $e) {
             }
-            return [$this->tipo_transaccion, $codigo_impuesto];
         }
         return false;
     }

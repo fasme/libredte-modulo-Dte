@@ -1,5 +1,4 @@
 <ul class="nav nav-pills pull-right">
-<?php if (\sowerphp\core\Configure::read('proveedores.api.libredte')) : ?>
     <li role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fas fa-university"></span> Recibidos en SII <span class="caret"></span>
@@ -17,7 +16,6 @@
             </li>
         </ul>
     </li>
-<?php endif; ?>
 <?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
     <li>
         <a href="https://www4.sii.cl/consdcvinternetui/#/home" title="Ir al registro de compra y venta en el SII" target="_blank">
