@@ -48,15 +48,18 @@ $cafs = $DteFolio->getCafs();
 foreach ($cafs as &$caf) {
     $caf['fecha_autorizacion'] = \sowerphp\general\Utility_Date::format($caf['fecha_autorizacion']);
     $caf['en_uso'] = ($DteFolio->siguiente >= $caf['desde'] and $DteFolio->siguiente <= $caf['hasta']) ? 'X' : '';
-    $acciones = '<a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/recibidos" title="Descargar folios recibidos en SII del CAF que inicia en '.$caf['desde'].'"><span class="far fa-check-circle btn btn-default"></span></a>';
-    $acciones .= ' <a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/anulados" title="Descargar folios anulados en SII del CAF que inicia en '.$caf['desde'].'"><span class="fas fa-ban btn btn-default"></span></a>';
-    $acciones .= ' <a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/pendientes" title="Descargar folios pendientes en SII del CAF que inicia en '.$caf['desde'].'"><span class="fab fa-creative-commons-share btn btn-default"></span></a>';
-    $acciones .= ' <a href="../xml/'.$DteFolio->dte.'/'.$caf['desde'].'" title="Descargar CAF que inicia en '.$caf['desde'].'"><span class="fas fa-code btn btn-default"></span></a>';
+    $acciones = '';
+    if (!in_array($DteFolio->dte, [39, 41])) {
+        $acciones .= '<a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/recibidos" title="Descargar folios recibidos en SII del CAF que inicia en '.$caf['desde'].'"><span class="far fa-check-circle btn btn-default"></span></a> ';
+        $acciones .= '<a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/anulados" title="Descargar folios anulados en SII del CAF que inicia en '.$caf['desde'].'"><span class="fas fa-ban btn btn-default"></span></a> ';
+        $acciones .= '<a href="../descargar/'.$DteFolio->dte.'/'.$caf['desde'].'/pendientes" title="Descargar folios pendientes en SII del CAF que inicia en '.$caf['desde'].'"><span class="fab fa-creative-commons-share btn btn-default"></span></a> ';
+    }
+    $acciones .= '<a href="../xml/'.$DteFolio->dte.'/'.$caf['desde'].'" title="Descargar CAF que inicia en '.$caf['desde'].'"><span class="fas fa-code btn btn-default"></span></a>';
     $caf[] = $acciones;
 }
 array_unshift($cafs, ['Desde', 'Hasta', 'Cantidad', 'Fecha autorización', 'Meses autorización', 'En uso', 'Descargar']);
 $t = new \sowerphp\general\View_Helper_Table();
-$t->setColsWidth([null, null, null, null, null, null, 200]);
+$t->setColsWidth([null, null, null, null, null, null, !in_array($DteFolio->dte, [39, 41]) ? 200 : 100]);
 echo $t->generate($cafs);
 ?>
 </div>

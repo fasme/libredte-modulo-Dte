@@ -357,6 +357,46 @@ class Controller_DteFolios extends \Controller_App
     }
 
     /**
+     * Acción que permite solicitar el informe de estado de los folios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-19
+     */
+    public function informe_estados()
+    {
+        $Emisor = $this->getContribuyente();
+        $aux = $Emisor->getDocumentosAutorizados();
+        $documentos = [];
+        foreach ($aux as $d) {
+            if (!in_array($d['codigo'], [39, 41])) {
+                $documentos[] = $d;
+            }
+        }
+        $this->set([
+            'documentos' => $documentos,
+        ]);
+        // procesar formulario
+        if (isset($_POST['submit'])) {
+            // si no hay documentos error
+            if (empty($_POST['documentos'])) {
+                \sowerphp\core\Model_Datasource_Session::message('Debe seleccionar al menos un tipo de documento', 'error');
+                return;
+            }
+            if (empty($_POST['estados'])) {
+                \sowerphp\core\Model_Datasource_Session::message('Debe seleccionar al menos un estado', 'error');
+                return;
+            }
+            // lanzar comando
+            $cmd = 'Dte.Admin.DteFolios_Estados '.escapeshellcmd((int)$Emisor->rut).' '.escapeshellcmd(implode(',',$_POST['documentos'])).' '.escapeshellcmd(implode(',',$_POST['estados'])).' '.escapeshellcmd((int)$this->Auth->User->id).' -v';
+            if ($this->shell($cmd)) {
+                \sowerphp\core\Model_Datasource_Session::message('Error al tratar de generar su informe, por favor reintentar', 'error');
+            } else {
+                \sowerphp\core\Model_Datasource_Session::message('Su informe está siendo generado, será enviado a su correo cuando esté listo', 'ok');
+            }
+            $this->redirect('/dte/admin/dte_folios');
+        }
+    }
+
+    /**
      * Recurso que entrega el la información de cierto mantenedor de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-09-26

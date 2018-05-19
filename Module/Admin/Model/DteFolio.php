@@ -410,4 +410,68 @@ class Model_DteFolio extends \Model_App
         ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion, ':primer_folio'=>$primer_folio]);
     }
 
+    /**
+     * Método que entrega el estado de todos los folios asociados a todos los
+     * CAFs del mantenedor de folios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-18
+     */
+    public function getEstadoFolios($estados = 'recibidos,anulados,pendientes', $retry = 100)
+    {
+        $estados = explode(',', $estados);
+        // arreglo para resultado
+        $folios = [];
+        if (in_array('recibidos', $estados)) {
+            $folios['recibidos'] = [];
+        }
+        if (in_array('anulados', $estados)) {
+            $folios['anulados'] = [];
+        }
+        if (in_array('pendientes', $estados)) {
+            $folios['pendientes'] = [];
+        }
+        // obtener todos los cafs existentes
+        $cafs = (new Model_DteCafs())->setWhereStatement(
+            ['emisor = :emisor', 'dte = :dte', 'certificacion = :certificacion'],
+            [':emisor'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>(int)$this->certificacion]
+        )->setOrderByStatement('desde')->getObjects();
+        // recorrer cada caf e ir extrayendo los campos
+        foreach($cafs as $DteCaf) {
+            // obtener folios recibidos
+            if (in_array('recibidos', $estados)) {
+                for ($i=0; $i<$retry; $i++) {
+                    try {
+                        $folios['recibidos'] = array_merge($folios['recibidos'], $DteCaf->getFoliosRecibidos());
+                        break;
+                    } catch (\Exception $e) {
+                        usleep(200000);
+                    }
+                }
+            }
+            // obtener folios anulados
+            if (in_array('anulados', $estados)) {
+                for ($i=0; $i<$retry; $i++) {
+                    try {
+                        $folios['anulados'] = array_merge($folios['anulados'], $DteCaf->getFoliosAnulados());
+                        break;
+                    } catch (\Exception $e) {
+                        usleep(200000);
+                    }
+                }
+            }
+            // obtener folios pendientes
+            if (in_array('pendientes', $estados)) {
+                for ($i=0; $i<$retry; $i++) {
+                    try {
+                        $folios['pendientes'] = array_merge($folios['pendientes'], $DteCaf->getFoliosPendientes());
+                        break;
+                    } catch (\Exception $e) {
+                        usleep(200000);
+                    }
+                }
+            }
+        }
+        return $folios;
+    }
+
 }

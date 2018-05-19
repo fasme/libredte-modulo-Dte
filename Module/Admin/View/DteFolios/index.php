@@ -1,3 +1,10 @@
+<ul class="nav nav-pills pull-right">
+    <li>
+        <a href="<?=$_base?>/dte/admin/dte_folios/informe_estados" title="Generar informe con el estado del SII para los folios">
+            <span class="far fa-file"></span> Informe estado folios
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1>Mantenedor de folios empresa <?=$Emisor->razon_social?></h1></div>
 <p>Aquí podrá administrar los códigos de autorización de folios (CAF) disponibles para la empresa <?=$Emisor->razon_social?>.</p>
 <?php
