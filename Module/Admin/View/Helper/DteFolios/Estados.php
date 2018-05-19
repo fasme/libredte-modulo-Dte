@@ -75,6 +75,8 @@ class View_Helper_DteFolios_Estados extends \sowerphp\general\View_Helper_Spread
                 // pasar a siguiente estado
                 $this->x += 4;
             }
+            // volver a dejar la primera hoja como activa
+            $this->setActiveSheetIndex(0);
             // ancho automático columnas
             $this->setAutoSize($this->getCol(11));
             // avanzar hoja
