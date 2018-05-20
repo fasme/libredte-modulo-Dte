@@ -306,31 +306,41 @@ class Model_DteIntercambio extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     /**
+     * Método que indica si ya existe previamente el documento (mismo archivo)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function existeArchivo()
+    {
+        return (bool)$this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_intercambio
+            WHERE
+                receptor = :receptor
+                AND certificacion = :certificacion
+                AND fecha_hora_firma = :fecha_hora_firma
+                AND archivo_md5 = :archivo_md5
+        ', [
+            'receptor' => $this->receptor,
+            'certificacion' => $this->certificacion,
+            'fecha_hora_firma' => $this->fecha_hora_firma,
+            'archivo_md5' => $this->archivo_md5,
+        ]);
+    }
+
+    /**
      * Método que guarda el enviodte que se ha recibido desde otro contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-18
+     * @version 2018-05-20
      */
     public function save()
     {
         $this->certificacion = (int)$this->certificacion;
         if (!isset($this->codigo)) {
-            // ver si existe una entrada igual
-            $existe = (bool)$this->db->getValue('
-                SELECT COUNT(*)
-                FROM dte_intercambio
-                WHERE
-                    receptor = :receptor
-                    AND certificacion = :certificacion
-                    AND fecha_hora_firma = :fecha_hora_firma
-                    AND archivo_md5 = :archivo_md5
-            ', [
-                'receptor' => $this->receptor,
-                'certificacion' => $this->certificacion,
-                'fecha_hora_firma' => $this->fecha_hora_firma,
-                'archivo_md5' => $this->archivo_md5,
-            ]);
-            if ($existe)
+            // ver si existe una entrada igual (mismo archivo)
+            if ($this->existeArchivo()) {
                 return true;
+            }
             // corregir datos
             $this->archivo = utf8_encode($this->archivo);
             // guardar entrada
@@ -376,8 +386,9 @@ class Model_DteIntercambio extends \Model_App
      */
     public function getDocumentos()
     {
-        if (!isset($this->Documentos))
+        if (!isset($this->Documentos)) {
             $this->Documentos = $this->getEnvioDte()->getDocumentos(false); // usar saveXML en vez de C14N
+        }
         return $this->Documentos;
     }
 
@@ -390,6 +401,19 @@ class Model_DteIntercambio extends \Model_App
     public function getDocumento($emisor, $dte, $folio)
     {
         return $this->getEnvioDte()->getDocumento($emisor, $dte, $folio);
+    }
+
+    /**
+     * Método que entrega el objeto del receptor del intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    public function getReceptor()
+    {
+        if (!isset($this->Receptor)) {
+            $this->Receptor = (new Model_Contribuyentes())->get($this->receptor);
+        }
+        return $this->Receptor;
     }
 
     /**
@@ -417,8 +441,9 @@ class Model_DteIntercambio extends \Model_App
      */
     public function getEstado()
     {
-        if (!isset($this->estado))
+        if (!isset($this->estado)) {
             return (object)['estado'=>null];
+        }
         return (object)['estado'=>\sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'][$this->estado]];
     }
 
@@ -434,6 +459,548 @@ class Model_DteIntercambio extends \Model_App
             FROM dte_recibido
             WHERE receptor = :receptor AND emisor = :emisor AND intercambio = :intercambio
         ', [':receptor'=>$this->receptor, ':emisor'=>$this->emisor, ':intercambio'=>$this->codigo]);
+    }
+
+    /**
+     * Método que busca si los documentos del intercambio ya están en otro intercambio previamente recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    public function recibidoPreviamente()
+    {
+        // ver si existe una entrada igual (mismo archivo)
+        if ($this->existeArchivo()) {
+            return true;
+        }
+        // buscar por documentos (si ya están presentes en otros intercambios)
+        // TODO
+        // no existe el intercambio previamente
+        return false;
+    }
+
+    /**
+     * Método para procesar el intercambio de manera automática si es que así
+     * está configurado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    public function procesarRespuestaAutomatica($silenciosa = true)
+    {
+        $respondido = false;
+        if ($this->getReceptor()->config_recepcion_intercambio_automatico) {
+            // procesar el intercambio usando el servicio web del contribuyente
+            // se espera como respuesta un =true, =false o arreglo (según parámetro de método responder)
+            // si es un string se entenderá como que no se logró determinar qué hacer y se omitirá
+            // la acción
+            $accion = null;
+            $ApiDteIntercambioResponder = $this->getReceptor()->getApiClient('dte_intercambio_responder');
+            if ($ApiDteIntercambioResponder) {
+                $response = $ApiDteIntercambioResponder->post(
+                    $ApiDteIntercambioResponder->url,
+                    ['xml'=>$this->archivo_xml]
+                );
+                if ($response['status']['code']==200 and !is_string($response['body'])) {
+                    if (is_array($response['body'])) {
+                        if (!empty($response['body']['aceptar']) or !empty($response['body']['reclamar'])) {
+                            $accion = $response['body'];
+                        }
+                    } else {
+                        $accion = (bool)$response['body'];
+                    }
+                }
+            }
+            // llamar al trigger de aceptación/rechazo de los intercambios, y si corresponde aceptar o reclamar el DTE
+            // si el trigger entrega 'null' (no existe handler para el trigger o bien el trigger retornó 'null') se deja
+            // sin procesar la acción.
+            // se llama sólo si no se logró determinar la acción usando el servicio web del contribuyente
+            if ($accion===null) {
+                $accion = \sowerphp\core\Trigger::run('dte_dte_intercambio_responder', $this);
+            }
+            // ejecutar acción según se haya indicado
+            if ($accion!==null) {
+                try {
+                    if (is_array($accion) and isset($accion['accion']) and isset($accion['config'])) {
+                        $config = $accion['config'];
+                        $accion = $accion['accion'];
+                    } else {
+                        $config = [];
+                    }
+                    $config['user_id'] = $this->getReceptor()->getUsuario()->id;
+                    $respondido = $this->responder($accion, $config);
+                } catch (\Exception $e) {
+                    // se puede fallar de forma silenciosa (si falla -> $respondido es falso y se notificará como DTE por responder)
+                    // si no se solicitó de manera silenciosa, entonces se generará error
+                    if (!$silenciosa) {
+                        throw new \Exception($e->getMessage());
+                    }
+                }
+            }
+        }
+        return $respondido;
+    }
+
+    /**
+     * Método que genera y envía la respuesta del intercambio
+     * @param accion =true acepta todo el intercambio, =false reclama todo el intercambio, =array procesa los documentos indicados, debe tener índice aceptar y/o reclamar o bien indíce númerico y se asume es el listado de documentos
+     * @param config Configuración global para la respuesta con índices: user_id, NmbContacto, MailContacto, sucursal, Recinto, responder_a, periodo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    public function responder($accion, array $config = [])
+    {
+        // configuración común a todos los DTE que se están respondiendo
+        $config = array_merge([
+            'user_id' => $this->getReceptor()->getUsuario()->id,
+            'NmbContacto' => $this->getReceptor()->getUsuario()->nombre,
+            'MailContacto' => $this->getReceptor()->getUsuario()->email,
+            'sucursal' => 0,
+            'Recinto' => $this->getReceptor()->direccion.', '.$this->getReceptor()->getComuna()->comuna,
+            'responder_a' => $this->de,
+            'periodo' => date('Ym'),
+        ], $config);
+        // obtener firma
+        $Firma = $this->getReceptor()->getFirma($config['user_id']);
+        if (!$Firma) {
+            throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE');
+        }
+        // si es un booleano se acepta o reclaman todos los documentos del intercambio
+        if (is_bool($accion) or is_numeric($accion)) {
+            $docs = $this->getDocumentos();
+            $aceptar = [];
+            $reclamar = [];
+            foreach ($docs as $Dte) {
+                $info = [
+                    'TipoDTE' => $Dte->getTipo(),
+                    'Folio' => $Dte->getFolio(),
+                    'FchEmis' => $Dte->getFechaEmision(),
+                    'RUTEmisor' => $Dte->getEmisor(),
+                    'RUTRecep' => $Dte->getReceptor(),
+                    'MntTotal' => $Dte->getMontoTotal(),
+                ];
+                if ($accion) {
+                    $aceptar[] = $info;
+                } else {
+                    $reclamar[] = $info;
+                }
+            }
+            $accion = ['aceptar'=>$aceptar, 'reclamar'=>$reclamar];
+        }
+        // si es un arreglo con un índice númerico entonces se pasó el arreglo con los documentos directamente
+        else if (is_array($accion) and isset($accion[0])) {
+            $documentos = $accion;
+        }
+        // si no es arreglo o faltan ambos índices aceptar o reclamar -> error
+        else if (!is_array($accion) or (empty($accion['aceptar']) and empty($accion['reclamar']))) {
+            throw new \Exception('Acción no válida para responder el intercambio');
+        }
+        // armar un único arreglo con los documentos a procesar
+        if (empty($documentos)) {
+            $documentos = [];
+            if (!empty($accion['aceptar'])) {
+                foreach ($accion['aceptar'] as &$doc) {
+                    if (empty($doc['EstadoRecepDTE'])) {
+                        $doc['EstadoRecepDTE'] = 'ERM';
+                    }
+                    if (empty($doc['RecepDTEGlosa'])) {
+                        $doc['RecepDTEGlosa'] = 'Otorga recibo de mercaderías o servicios';
+                    }
+                }
+                $documentos = array_merge($documentos, $accion['aceptar']);
+            }
+            if (!empty($accion['reclamar'])) {
+                foreach ($accion['reclamar'] as &$doc) {
+                    if (empty($doc['EstadoRecepDTE'])) {
+                        $doc['EstadoRecepDTE'] = 'RCD';
+                    }
+                    if (empty($doc['RecepDTEGlosa'])) {
+                        $doc['RecepDTEGlosa'] = 'Reclamo al contenido del documento';
+                    }
+                }
+                $documentos = array_merge($documentos, $accion['reclamar']);
+            }
+        }
+        // procesar los documentos
+        $guardar_dte = [];
+        foreach ($documentos as &$dte) {
+            // validar datos requeridos
+            if (empty($dte['TipoDTE']) or empty($dte['Folio'])) {
+                throw new \Exception('Falta tipo o folio del DTE');
+            }
+            // si no están los ruts se agregan
+            // WARNING si el EnvioDTE pudiese contener más de un emisor de DTE
+            // este if sería un problema (¿fix? -> se recomienda entregar siempre
+            // el RUTEmisor a este método). La verificación de abajo del Dte
+            // existiendo filtra un poco, pero hay un caso de borde donde en el
+            // intercambio vengan 2 DTE de 2 emisores diferentes con el mismo
+            // tipo y folio (si ocurriese, habría problema) ¿puede ocurrir Sres SII?
+            if (empty($dte['RUTEmisor'])) {
+                $dte['RUTEmisor'] = $this->emisor.'-'.\sowerphp\app\Utility_Rut::dv($this->emisor);
+            }
+            if (empty($dte['RUTRecep'])) {
+                $dte['RUTRecep'] = $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor);
+            }
+            // verificar que el DTE solicitado exista en el envío
+            $Dte = $this->getDocumento($dte['RUTEmisor'], $dte['TipoDTE'], $dte['Folio']);
+            if (!$Dte) {
+                throw new \Exception('DTE T'.$dte['TipoDTE'].'F'.$dte['Folio'].' no existe en el intercambio');
+            }
+            // agregar datos que no están pero que se pueden buscar en el documento de intercambio
+            if (empty($dte['FchEmis']) or !isset($dte['MntTotal'])) {
+                if (empty($dte['FchEmis'])) {
+                    $dte['FchEmis'] = $Dte->getFechaEmision();
+                }
+                if (!isset($dte['MntTotal'])) {
+                    $dte['MntTotal'] = $Dte->getMontoTotal();
+                }
+            }
+            // asignar si se debe o no hacer acuse de recibo del DTE (sólo estado ERM)
+            $dte['acuse'] = (int)($dte['EstadoRecepDTE']=='ERM');
+            // si tiene acuse de recibo, el DTE se marca para ser guardado
+            if ($dte['acuse']) {
+                $guardar_dte[] = 'T'.$dte['TipoDTE'].'F'.$dte['Folio'];
+            }
+        }
+        // generar los 3 XML con las respuestas
+        $xmlRecepcionDte = $this->crearXmlRecepcionDte($documentos, $config, $Firma);
+        $xmlEnvioRecibos = $this->crearXmlEnvioRecibos($documentos, $config, $Firma);
+        $xmlResultadoDte = $this->crearXmlResultadoDte($documentos, $config, $Firma);
+        // enviar respuesta al SII
+        $resultado_rc = $this->enviarRespuestaSII($documentos, $Firma);
+        // guardar estado del intercambio y usuario que lo procesó
+        $RecepcionDte = new \sasco\LibreDTE\XML();
+        $RecepcionDte->loadXML($xmlRecepcionDte);
+        $this->estado = $RecepcionDte->toArray()['RespuestaDTE']['Resultado']['RecepcionEnvio']['EstadoRecepEnv'];
+        $this->recepcion_xml = base64_encode($xmlRecepcionDte);
+        $this->recibos_xml = $xmlEnvioRecibos ? base64_encode($xmlEnvioRecibos) : null;
+        $this->resultado_xml = base64_encode($xmlResultadoDte);
+        $this->fecha_hora_respuesta = date('Y-m-d H:i:s');
+        $this->usuario = $config['user_id'];
+        $this->save();
+        // guardar los documentos con acuse de recibo
+        $this->guardarDocumentosRecibidos($guardar_dte, $resultado_rc['accion'], $config);
+        // enviar XML al emisor del intercambio por corre electrónico
+        $resultado_email = $this->enviarEmailRespuestaXML($config['responder_a'], $xmlRecepcionDte, $xmlEnvioRecibos, $xmlResultadoDte);
+        // todo ok, intercambio fue respondido (independientemente del tipo de respuesta)
+        return ['rc'=>$resultado_rc, 'email'=>$resultado_email];
+    }
+
+    /**
+     * Método que crea el XML RecepcionDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function crearXmlRecepcionDte($documentos, $config, $Firma)
+    {
+        $RecepcionDTE = [];
+        $EstadoRecepEnv = 99;
+        foreach ($documentos as $dte) {
+            if (in_array($dte['EstadoRecepDTE'], ['ACD', 'ERM'])) {
+                $EstadoRecepDTE = 0;
+                $EstadoRecepEnv = 0;
+            } else {
+                $EstadoRecepDTE = 99;
+            }
+            $RecepcionDTE[] = [
+                'TipoDTE' => $dte['TipoDTE'],
+                'Folio' => $dte['Folio'],
+                'FchEmis' => $dte['FchEmis'],
+                'RUTEmisor' => $dte['RUTEmisor'],
+                'RUTRecep' => $dte['RUTRecep'],
+                'MntTotal' => $dte['MntTotal'],
+                'EstadoRecepDTE' => $EstadoRecepDTE,
+                'RecepDTEGlosa' => $dte['RecepDTEGlosa'],
+            ];
+        }
+        // armar respuesta de envío
+        $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
+        $EnvioDte->loadXML(base64_decode($this->archivo_xml));
+        $RespuestaEnvio = new \sasco\LibreDTE\Sii\RespuestaEnvio();
+        $RespuestaEnvio->agregarRespuestaEnvio([
+            'NmbEnvio' => $this->archivo,
+            'CodEnvio' => $this->codigo,
+            'EnvioDTEID' => $EnvioDte->getID(),
+            'Digest' => $EnvioDte->getDigest(),
+            'RutEmisor' => $EnvioDte->getEmisor(),
+            'RutReceptor' => $EnvioDte->getReceptor(),
+            'EstadoRecepEnv' => $EstadoRecepEnv,
+            'RecepEnvGlosa' => !$EstadoRecepEnv ? 'EnvioDTE recibido' : 'No se aceptaron los DTE del EnvioDTE',
+            'NroDTE' => count($RecepcionDTE),
+            'RecepcionDTE' => $RecepcionDTE,
+        ]);
+        // asignar carátula y Firma
+        $RespuestaEnvio->setCaratula([
+            'RutResponde' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
+            'RutRecibe' => $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor),
+            'IdRespuesta' => $this->codigo,
+            'NmbContacto' => $config['NmbContacto'],
+            'MailContacto' => $config['MailContacto'],
+        ]);
+        $RespuestaEnvio->setFirma($Firma);
+        // generar y validar XML
+        $RecepcionDTE_xml = $RespuestaEnvio->generar();
+        if (!$RespuestaEnvio->schemaValidate()) {
+            throw new \Exception('No fue posible generar RecepcionDTE.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+        }
+        // entregar XML
+        return $RecepcionDTE_xml;
+    }
+
+    /**
+     * Método que crea el XML EnvioRecibos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function crearXmlEnvioRecibos($documentos, $config, $Firma)
+    {
+        $EnvioRecibos = new \sasco\LibreDTE\Sii\EnvioRecibos();
+        $EnvioRecibos->setCaratula([
+            'RutResponde' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
+            'RutRecibe' => $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor),
+            'NmbContacto' => $config['NmbContacto'],
+            'MailContacto' => $config['MailContacto'],
+        ]);
+        $EnvioRecibos->setFirma($Firma);
+        // procesar cada DTE
+        $EnvioRecibos_r = [];
+        foreach ($documentos as $dte) {
+            if ($dte['acuse']) {
+                $EnvioRecibos->agregar([
+                    'TipoDoc' => $dte['TipoDTE'],
+                    'Folio' => $dte['Folio'],
+                    'FchEmis' => $dte['FchEmis'],
+                    'RUTEmisor' => $dte['RUTEmisor'],
+                    'RUTRecep' => $dte['RUTRecep'],
+                    'MntTotal' => $dte['MntTotal'],
+                    'Recinto' => $config['Recinto'],
+                    'RutFirma' => $Firma->getID(),
+                ]);
+                $EnvioRecibos_r[] = 'T'.$dte['TipoDTE'].'F'.$dte['Folio'];
+            }
+        }
+        // generar y validar XML
+        if ($EnvioRecibos_r) {
+            $EnvioRecibos_xml = $EnvioRecibos->generar();
+            if (!$EnvioRecibos->schemaValidate()) {
+                throw new \Exception('No fue posible generar EnvioRecibos.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            // entregar XML
+            return $EnvioRecibos_xml;
+        }
+        return false;
+    }
+
+    /**
+     * Método que crea el XML ResultadoDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function crearXmlResultadoDte($documentos, $config, $Firma)
+    {
+        // objeto para la respuesta
+        $RespuestaEnvio = new \sasco\LibreDTE\Sii\RespuestaEnvio();
+        // procesar cada DTE
+        $i = 1;
+        foreach ($documentos as $dte) {
+            $estado = in_array($dte['EstadoRecepDTE'], ['ACD', 'ERM']) ? 0 : 2;
+            $RespuestaEnvio->agregarRespuestaDocumento([
+                'TipoDTE' => $dte['TipoDTE'],
+                'Folio' => $dte['Folio'],
+                'FchEmis' => $dte['FchEmis'],
+                'RUTEmisor' => $dte['RUTEmisor'],
+                'RUTRecep' => $dte['RUTRecep'],
+                'MntTotal' => $dte['MntTotal'],
+                'CodEnvio' => $i++,
+                'EstadoDTE' => $estado,
+                'EstadoDTEGlosa' => \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['respuesta_documento'][$estado],
+            ]);
+        }
+        // asignar carátula y Firma
+        $RespuestaEnvio->setCaratula([
+            'RutResponde' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
+            'RutRecibe' => $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor),
+            'IdRespuesta' => $this->codigo,
+            'NmbContacto' => $config['NmbContacto'],
+            'MailContacto' => $config['MailContacto'],
+        ]);
+        $RespuestaEnvio->setFirma($Firma);
+        // generar y validar XML
+        $ResultadoDTE_xml = $RespuestaEnvio->generar();
+        if (!$RespuestaEnvio->schemaValidate()) {
+            throw new \Exception('No fue posible generar ResultadoDTE.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+        }
+        // entregar XML
+        return $ResultadoDTE_xml;
+    }
+
+    /**
+     * Método que envía los 3 XML (si existen) por correo electrónico al emisor del intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function enviarEmailRespuestaXML($responder_a, $xmlRecepcionDte, $xmlEnvioRecibos, $xmlResultadoDte)
+    {
+        $email = $this->getReceptor()->getEmailSmtp();
+        $email->to($responder_a);
+        $email->subject($this->getReceptor()->rut.'-'.$this->getReceptor()->dv.' - Respuesta intercambio DTE N° '.$this->codigo);
+        foreach (['RecepcionDte', 'EnvioRecibos', 'ResultadoDte'] as $xml) {
+            if (${'xml'.$xml}) {
+                $email->attach([
+                    'data' => ${'xml'.$xml},
+                    'name' => $xml.'_'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'_'.$this->codigo.'.xml',
+                    'type' => 'application/xml',
+                ]);
+            }
+        }
+        return $email->send('Se adjuntan XMLs de respuesta a intercambio de DTE.');
+    }
+
+    /**
+     * Método que permite ingresar las acciones (respuestas) al registro de compras del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function enviarRespuestaSII($documentos, $Firma)
+    {
+        $resultado = ['estado'=>[], 'accion'=>[]];
+        try {
+            $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        } catch (\Exception $e) {
+            throw new \Exception('No fue posible informar al SII, por favor reintentar. El error fue: '.$e->getMessage());
+        }
+        foreach ($documentos as $dte) {
+            if (in_array($dte['TipoDTE'], array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) {
+                list($emisor_rut, $emisor_dv) = explode('-', $dte['RUTEmisor']);
+                $r = $RCV->ingresarAceptacionReclamoDoc($emisor_rut, $emisor_dv, $dte['TipoDTE'], $dte['Folio'], $dte['EstadoRecepDTE']);
+                $resultado['estado'][] = 'T'.$dte['TipoDTE'].'F'.$dte['Folio'].': '.$r['glosa'];
+                if (!$r['codigo']) {
+                    $resultado['accion']['T'.$dte['TipoDTE'].'F'.$dte['Folio']] = $dte['EstadoRecepDTE'];
+                }
+            }
+        }
+        return $resultado;
+    }
+
+    /**
+     * Método que guarda los documentos que han sido aceptados (con acuse de recibo)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function guardarDocumentosRecibidos(array $guardar_dte, array $rc_accion, array $config)
+    {
+        if ($guardar_dte) {
+            // actualizar datos del emisor si no tine usuario asociado
+            $EmisorIntercambio = $this->getEmisor();
+            if (!$EmisorIntercambio->usuario) {
+                $emisor = $this->getDocumentos()[0]->getDatos()['Encabezado']['Emisor'];
+                $EmisorIntercambio->razon_social = $emisor['RznSoc'];
+                if (!empty($emisor['GiroEmis'])) {
+                    $EmisorIntercambio->giro = $emisor['GiroEmis'];
+                }
+                if (!empty($emisor['CorreoEmisor'])) {
+                    $EmisorIntercambio->email = $emisor['CorreoEmisor'];
+                }
+                if (!empty($emisor['Acteco'])) {
+                    $actividad_economica = $EmisorIntercambio->actividad_economica;
+                    $EmisorIntercambio->actividad_economica = $emisor['Acteco'];
+                    // dejar como estaba originalmente si no existe la actividad del XML
+                    if (!$EmisorIntercambio->getActividadEconomica()->exists()) {
+                        $EmisorIntercambio->actividad_economica = $actividad_economica;
+                    }
+                }
+                $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName($emisor['CmnaOrigen']);
+                if ($comuna) {
+                    $EmisorIntercambio->direccion = $emisor['DirOrigen'];
+                    $EmisorIntercambio->comuna = $comuna;
+                }
+                $EmisorIntercambio->modificado = date('Y-m-d H:i:s');
+                try {
+                    $EmisorIntercambio->save();
+                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                }
+            }
+            // guardar documentos que han sido aceptados como dte recibidos
+            $Documentos = $this->getDocumentos();
+            foreach ($Documentos as $Dte) {
+                $dte_id = $Dte->getID(true);
+                if (in_array($dte_id, $guardar_dte)) {
+                    // procesar DTE recibido
+                    $resumen = $Dte->getResumen();
+                    $DteRecibido = new Model_DteRecibido($this->getEmisor()->rut, $resumen['TpoDoc'], $resumen['NroDoc'], (int)$this->certificacion);
+                    $DteRecibido->rcv_accion = !empty($rc_accion[$dte_id]) ? $rc_accion[$dte_id] : ($DteRecibido->rcv_accion ? $DteRecibido->rcv_accion : '000');
+                    if (!$DteRecibido->exists()) {
+                        $DteRecibido->receptor = $this->getReceptor()->rut;
+                        $DteRecibido->tasa = (int)$resumen['TasaImp'];
+                        $DteRecibido->fecha = $resumen['FchDoc'];
+                        $DteRecibido->sucursal_sii = (int)$resumen['CdgSIISucur'];
+                        if ($resumen['MntExe']) {
+                            $DteRecibido->exento = $resumen['MntExe'];
+                        }
+                        if ($resumen['MntNeto']) {
+                            $DteRecibido->neto = $resumen['MntNeto'];
+                        }
+                        $DteRecibido->iva = (int)$resumen['MntIVA'];
+                        $DteRecibido->total = (int)$resumen['MntTotal'];
+                        $DteRecibido->usuario = $config['user_id'];
+                        $DteRecibido->intercambio = $this->codigo;
+                        $DteRecibido->impuesto_tipo = 1; // se asume siempre que es IVA
+                        $periodo_dte = (int)substr(str_replace('-', '', $DteRecibido->fecha), 0, 6);
+                        if (!empty($config['periodo']) and $config['periodo']>$periodo_dte) {
+                            $DteRecibido->periodo = $config['periodo'];
+                        }
+                        if (!empty($config['sucursal'])) {
+                            $DteRecibido->sucursal_sii_receptor = $config['sucursal'];
+                        }
+                        // si hay IVA y esta fuera de plazo se marca como no recuperable
+                        if ($DteRecibido->iva and $DteRecibido->periodo) {
+                            $meses = \sowerphp\general\Utility_Date::countMonths($periodo_dte, $DteRecibido->periodo);
+                            if ($meses > 2) {
+                                $DteRecibido->iva_no_recuperable = json_encode([
+                                    ['codigo'=>2, 'monto'=>$DteRecibido->iva]
+                                ]);
+                            }
+                        }
+                        // copiar impuestos adicionales
+                        $datos = $Dte->getDatos();
+                        if (!empty($datos['Encabezado']['Totales']['ImptoReten'])) {
+                            if (!isset($datos['Encabezado']['Totales']['ImptoReten'][0])) {
+                                $datos['Encabezado']['Totales']['ImptoReten'] = [$datos['Encabezado']['Totales']['ImptoReten']];
+                            }
+                            $DteRecibido->impuesto_adicional = [];
+                            $impuesto_sin_credito = 0;
+                            foreach ($datos['Encabezado']['Totales']['ImptoReten'] as $ia) {
+                                if ($this->getReceptor()->config_extra_impuestos_sin_credito and in_array($ia['TipoImp'], $this->getReceptor()->config_extra_impuestos_sin_credito)) {
+                                    $impuesto_sin_credito += $ia['MontoImp'];
+                                } else {
+                                    $DteRecibido->impuesto_adicional[] = [
+                                        'codigo' => $ia['TipoImp'],
+                                        'tasa' => !empty($ia['TasaImp']) ? $ia['TasaImp'] : null,
+                                        'monto' => $ia['MontoImp'],
+                                    ];
+                                }
+                            }
+                            if ($DteRecibido->impuesto_adicional) {
+                                $DteRecibido->impuesto_adicional = json_encode($DteRecibido->impuesto_adicional);
+                            }
+                            if ($impuesto_sin_credito) {
+                                $DteRecibido->impuesto_sin_credito = $impuesto_sin_credito;
+                            }
+                        }
+                        // si es empresa exenta el IVA es no recuperable
+                        if ($DteRecibido->iva and $this->getReceptor()->config_extra_exenta) {
+                            $DteRecibido->iva_no_recuperable = json_encode([
+                                ['codigo'=>1, 'monto'=>$DteRecibido->iva]
+                            ]);
+                        }
+                    }
+                    // si ya estaba recibido y no existe intercambio se asigna
+                    else if (!$DteRecibido->intercambio) {
+                        $DteRecibido->intercambio = $this->codigo;
+                    }
+                    // guardar DTE recibido (actualiza acción RCV si existe)
+                    $DteRecibido->save();
+                }
+            }
+        }
     }
 
 }

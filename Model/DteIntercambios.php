@@ -28,8 +28,8 @@ namespace website\Dte;
  * Clase para mapear la tabla dte_intercambio de la base de datos
  * Comentario de la tabla:
  * Esta clase permite trabajar sobre un conjunto de registros de la tabla dte_intercambio
- * @author SowerPHP Code Generator
- * @version 2015-09-26 18:53:51
+ * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+ * @version 2018-05-19
  */
 class Model_DteIntercambios extends \Model_Plural_App
 {
@@ -37,5 +37,270 @@ class Model_DteIntercambios extends \Model_Plural_App
     // Datos para la conexión a la base de datos
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_intercambio'; ///< Tabla del modelo
+
+    /**
+     * Método que entrega la tabla con los casos de intercambio del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-19
+     */
+    public function buscar(array $filter = [])
+    {
+        $filter = array_merge([
+            'soloPendientes' => true,
+            'p' => 0,
+        ], $filter);
+        //$soloPendientes = true, $page = 0
+        $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
+        $select = $filter['soloPendientes'] ? '' : ', i.estado, u.usuario';
+        $where = [];
+        $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
+        if ($filter['soloPendientes']) {
+            $where[] = 'i.estado IS NULL';
+        }
+        if (!empty($filter['emisor'])) {
+            if (strpos($filter['emisor'], '-') or is_numeric($filter['emisor'])) {
+                if (strpos($filter['emisor'], '-')) {
+                    $filter['emisor'] = explode('-', str_replace('.', '', $filter['emisor']))[0];
+                }
+                $where[] = 'i.emisor = :emisor';
+                $vars['emisor'] = $filter['emisor'];
+            } else {
+                $where[] = 'LOWER(e.razon_social) LIKE :emisor';
+                $vars['emisor'] = '%'.strtolower($filter['emisor']).'%';
+            }
+        }
+        if (!empty($filter['folio'])) {
+            $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
+            $where[] = $folio_where.' LIKE :folio';
+            $vars['folio'] = $filter['folio'];
+        }
+        if ($filter['p']) {
+            $limit = \sowerphp\core\Configure::read('app.registers_per_page');
+            $offset = ($filter['p'] - 1) * $limit;
+            $limit = 'LIMIT '.$limit.' OFFSET '.$offset;
+        } else {
+            $limit = '';
+        }
+        $intercambios = $this->db->getTable('
+            SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos, i.documentos AS n_documentos'.$select.'
+            FROM dte_intercambio AS i LEFT JOIN contribuyente AS e ON i.emisor = e.rut LEFT JOIN usuario AS u ON i.usuario = u.id
+            WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.($where?(' AND '.implode(' AND ',$where)):'').'
+            ORDER BY i.fecha_hora_firma DESC
+            '.$limit.'
+        ', $vars);
+        foreach ($intercambios as &$i) {
+            if (!empty($i['razon_social']))
+                $i['emisor'] = $i['razon_social'];
+            if (isset($i['estado']))
+                $i['estado'] = \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'][$i['estado']];
+            if (!empty($i['documentos'])) {
+                $nuevo_dte = true;
+                $n_letras = strlen($i['documentos']);
+                for ($j=0; $j<$n_letras; $j++) {
+                    if ($i['documentos'][$j]==',') {
+                        $nuevo_dte = !$nuevo_dte;
+                        if ($nuevo_dte) {
+                            $i['documentos'][$j] = '|';
+                        }
+                    }
+                }
+                $documentos = explode('|', $i['documentos']);
+                foreach ($documentos as &$d) {
+                    $aux = explode(',', $d);
+                    if (isset($aux[1])) {
+                        list($tipo, $folio) = $aux;
+                        $d = 'T'.$tipo.'F'.$folio;
+                    }
+                }
+                $i['documentos'] = $documentos;
+            } else {
+                $i['documentos'] = $i['n_documentos'];
+            }
+            unset($i['razon_social'], $i['n_documentos']);
+        }
+        return $intercambios;
+    }
+
+    /**
+     * Método para actualizar la bandeja de intercambio. Guarda los DTEs
+     * recibidos por intercambio y guarda los acuses de recibos de DTEs
+     * enviados por otros contribuyentes
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-19
+     */
+    public function actualizar($dias = 7)
+    {
+        // ejecutar trigger para verificar cosas previo a actualizar bandeja
+        $trigger_actualizar = \sowerphp\core\Trigger::run('dte_dte_intercambio_actualizar', $this->getContribuyente());
+        // si el trigger entrega false la bandeja no se actualizará de manera silenciosa
+        if ($trigger_actualizar===false) {
+            return ['n_uids'=>0, 'omitidos'=>0, 'n_EnvioDTE'=>0, 'n_EnvioRecibos'=>0, 'n_RecepcionEnvio'=>0, 'n_ResultadoDTE'=>0];
+        }
+        // si el trigger entrega un arreglo es el resultado de la actualización de la bandeja
+        else if (is_array($trigger_actualizar)) {
+            return $trigger_actualizar;
+        }
+        // obtener correo
+        $Imap = is_object($trigger_actualizar) ? $trigger_actualizar : $this->getContribuyente()->getEmailImap();
+        if (!$Imap) {
+            throw new \sowerphp\core\Exception(
+                'No fue posible conectar mediante IMAP a '.$this->getContribuyente()->config_email_intercambio_imap.', verificar mailbox, usuario y/o contraseña de correo de intercambio:<br/>'.implode('<br/>', imap_errors()), 500
+            );
+        }
+        // obtener mensajes sin leer
+        if ($dias) {
+            $hoy = date('Y-m-d');
+            $since = \sowerphp\general\Utility_Date::getPrevious($hoy, 'D', (int)$dias);
+            $uids = $Imap->search('UNSEEN SINCE "'.$since.'"');
+        } else {
+            $uids = $Imap->search();
+        }
+        if (!$uids) {
+            if ($dias) {
+                throw new \sowerphp\core\Exception('No se encontraron documentos sin leer en los últimos '.num($dias).' días en el correo de intercambio', 204);
+            } else {
+                throw new \sowerphp\core\Exception('No se encontraron documentos sin leer en el correo de intercambio', 204);
+            }
+        }
+        // procesar cada mensaje sin leer
+        $n_EnvioDTE = $n_acuse = $n_EnvioRecibos = $n_RecepcionEnvio = $n_ResultadoDTE = 0;
+        foreach ($uids as &$uid) {
+            $m = $Imap->getMessage($uid, ['subtype'=>['PLAIN', 'HTML', 'XML'], 'extension'=>['xml']]);
+            if ($m and isset($m['attachments'][0])) {
+                $email_date = !empty($m['header']->date) ? date('Y-m-d H:i:s', strtotime($m['header']->date)) : date('Y-m-d H:i:s', $Imap->getHeaderInfo($uid)->udate);
+                $datos_email = [
+                    'fecha_hora_email' => $email_date,
+                    'asunto' => !empty($m['header']->subject) ? substr($m['header']->subject, 0, 100) : 'Sin asunto',
+                    'de' => substr($m['header']->from[0]->mailbox.'@'.$m['header']->from[0]->host, 0, 80),
+                    'mensaje' => $m['body']['plain'] ? base64_encode($m['body']['plain']) : null,
+                    'mensaje_html' => $m['body']['html'] ? base64_encode($m['body']['html']) : null,
+                ];
+                if (isset($m['header']->reply_to[0])) {
+                    $datos_email['responder_a'] = substr($m['header']->reply_to[0]->mailbox.'@'.$m['header']->reply_to[0]->host, 0, 80);
+                }
+                $acuseContado = false;
+                $procesado = false;
+                foreach ($m['attachments'] as $file) {
+                    if ($this->procesarEnvioDTE($datos_email, $file, $n_EnvioDTE)) {
+                        $procesado = true;
+                    }
+                    else if ((new Model_DteIntercambioRecibo())->saveXML($this->getContribuyente(), $file['data'])) {
+                        $n_EnvioRecibos++;
+                        if (!$acuseContado) {
+                            $acuseContado = true;
+                            $n_acuse++;
+                        }
+                        $procesado = true;
+                    }
+                    else if ((new Model_DteIntercambioRecepcion())->saveXML($this->getContribuyente(), $file['data'])) {
+                        $n_RecepcionEnvio++;
+                        if (!$acuseContado) {
+                            $acuseContado = true;
+                            $n_acuse++;
+                        }
+                        $procesado = true;
+                    }
+                    else if ((new Model_DteIntercambioResultado())->saveXML($this->getContribuyente(), $file['data'])) {
+                        $n_ResultadoDTE++;
+                        if (!$acuseContado) {
+                            $acuseContado = true;
+                            $n_acuse++;
+                        }
+                        $procesado = true;
+                    }
+                }
+                // marcar email como leído si fue procesado
+                if ($procesado) {
+                    $Imap->setSeen($uid);
+                }
+            }
+        }
+        $n_uids = count($uids);
+        $omitidos = $n_uids - $n_EnvioDTE - $n_acuse;
+        return compact('n_uids', 'omitidos', 'n_EnvioDTE', 'n_EnvioRecibos', 'n_RecepcionEnvio', 'n_ResultadoDTE');
+    }
+
+    /**
+     * Método que procesa el archivo EnvioDTE recibido desde un contribuyente
+     * @param receptor RUT del receptor sin puntos ni dígito verificador
+     * @param datos_email Arreglo con los índices: fecha_hora_email, asunto, de, mensaje, mensaje_html
+     * @param file Arreglo con los índices: name, data, size y type
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    private function procesarEnvioDTE(array $datos_email, array $file, &$n_EnvioDTE)
+    {
+        // preparar datos
+        $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
+        if (empty($file['data']) or !$EnvioDte->loadXML($file['data']) or !$EnvioDte->getID() or $EnvioDte->esBoleta()) {
+            return null;
+        }
+        $caratula = $EnvioDte->getCaratula();
+        if (((int)(bool)!$caratula['NroResol'])!=(int)$this->getContribuyente()->config_ambiente_en_certificacion) {
+            return false;
+        }
+        if (substr($caratula['RutReceptor'], 0, -2) != $this->getContribuyente()->rut) {
+            return false;
+        }
+        if (!isset($caratula['SubTotDTE'][0])) {
+            $caratula['SubTotDTE'] = [$caratula['SubTotDTE']];
+        }
+        $documentos = 0;
+        foreach($caratula['SubTotDTE'] as $SubTotDTE) {
+            $documentos += $SubTotDTE['NroDTE'];
+        }
+        if (!$documentos) {
+            return null;
+        }
+        // preparar datos que se guardarán
+        if (empty($file['name'])) {
+            $file['name'] = md5($file['data']).'.xml';
+        }
+        $datos_enviodte = [
+            'certificacion' => (int)(bool)!$caratula['NroResol'],
+            'emisor' => substr($caratula['RutEmisor'], 0, -2),
+            'fecha_hora_firma' => date('Y-m-d H:i:s', strtotime($caratula['TmstFirmaEnv'])),
+            'documentos' => $documentos,
+            'archivo' => $file['name'],
+            'archivo_xml' => base64_encode($file['data']),
+        ];
+        $datos_enviodte['archivo_md5'] = md5($datos_enviodte['archivo_xml']);
+        // crear objeto de intercambio
+        $DteIntercambio = new Model_DteIntercambio();
+        $DteIntercambio->set($datos_email + $datos_enviodte);
+        $DteIntercambio->receptor = $this->getContribuyente()->rut;
+        // si el documento ya existe en la bandeja de intercambio se omite y se entrega true (para marcar como procesado)
+        if ($DteIntercambio->recibidoPreviamente()) {
+            return true;
+        }
+        // guardar envío de intercambio
+        if (!$DteIntercambio->save()) {
+            return false;
+        }
+        // si no se procesó el intercambio de manera automática se marca como DTE agregado para ser reportado
+        if (!$DteIntercambio->procesarRespuestaAutomatica()) {
+            $n_EnvioDTE++;
+        }
+        // todo ok
+        return true;
+    }
+
+    /**
+     * Método que entrega la cantidad de intercambios que se han recibido en el periodo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    public function countPeriodo($periodo = null)
+    {
+        if (!$periodo) {
+            $periodo = date('Ym');
+        }
+        $periodo_col = $this->db->date('Ym', 'fecha_hora_email');
+        return (int)$this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_intercambio
+            WHERE receptor = :receptor AND '.$periodo_col.' = :periodo
+        ', [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo]);
+    }
 
 }

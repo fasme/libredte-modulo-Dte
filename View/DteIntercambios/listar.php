@@ -62,17 +62,7 @@
 
 <?php
 foreach ($intercambios as &$i) {
-    if (!is_numeric($i['documentos'])) {
-        $documentos = explode('|', $i['documentos']);
-        foreach ($documentos as &$d) {
-            $aux = explode(',', $d);
-            if (isset($aux[1])) {
-                list($tipo, $folio) = $aux;
-                $d = 'T'.$tipo.'F'.$folio;
-            }
-        }
-        $i['documentos'] = implode('<br/>', $documentos);
-    }
+    $i['documentos'] = is_array($i['documentos']) ? implode('<br/>', $i['documentos']) : num($i['documentos']);
     if ($soloPendientes) {
         $i[] = '';
         $i[] = '';

@@ -35,13 +35,6 @@ $(function() {
         $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
     }
 });
-/*function intercambio_aceptar() {
-    $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
-        $('select[name="rcv_accion_codigo[]"]').get(i).value = 'ACD';
-        $('input[name="rcv_accion_glosa[]"]').get(i).value = 'Acepta contenido del documento';
-    });
-    $('#btnRespuesta').click();
-}*/
 function intercambio_recibir() {
     $('select[name="rcv_accion_codigo[]"]').each(function (i, e) {
         $('select[name="rcv_accion_codigo[]"]').get(i).value = 'ERM';

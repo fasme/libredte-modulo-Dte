@@ -433,7 +433,7 @@ echo $f->input([
 echo $f->input([
     'type' => 'select',
     'name' => 'config_emision_asignar_folio',
-    'label' => '¿Folio manual?',
+    'label' => 'Folio manual',
     'options' => [
         'Ningún usuario puede asignar manualmente el folio',
         'Sólo administradores pueden asignar manualmente el folio',
@@ -711,7 +711,7 @@ echo $f->input([
 echo $f->input([
     'type' => 'select',
     'name' => 'config_pdf_disposition',
-    'label' => '¿Descargar PDF?',
+    'label' => 'Descargar PDF',
     'options' => ['Si, descargar PDF', 'No, mostrar PDF en el navegador'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_disposition : 0,
     'help' => '¿El PDF generado se debe descargar al equipo o se debe mostrar en el navegador?',
@@ -814,6 +814,14 @@ echo $f->input([
 <?php
 echo $f->input([
     'type' => 'select',
+    'name' => 'config_recepcion_intercambio_automatico',
+    'label' => 'Responder intercambio automáticamente',
+    'options' => ['No, se hará siempre manualmente o sincronizado con SII', 'Si, usar reglas definidas o servicio web propio para aceptar o reclamar los DTE'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_recepcion_intercambio_automatico : 0,
+    'help' => '¿Se debe procesar y responder automáticamente un intercambio de DTE cuando es recibido?',
+]);
+echo $f->input([
+    'type' => 'select',
     'name' => 'config_recepcion_omitir_verificacion_sii',
     'label' => 'Verificar DTE',
     'options' => ['Verificar documento recibido contra el SII (recomendado)', 'Permitir ingresar documentos sin verificar (no recomendado)'],
@@ -833,7 +841,7 @@ echo $f->input([
 echo $f->input([
     'type' => 'select',
     'name' => 'config_iecv_pestania_detalle',
-    'label' => '¿Mostrar pestaña con detalle?',
+    'label' => 'Mostrar pestaña con detalle',
     'options' => ['No', 'Si'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_iecv_pestania_detalle : 0,
     'help' => '¿Se debe mostrar la pestaña con el detalle de los libros de compra/venta y guías de despacho?',
@@ -851,7 +859,7 @@ echo $f->input([
 echo $f->input([
     'type' => 'select',
     'name' => 'config_sii_timbraje_automatico',
-    'label' => '¿Timbraje automático?',
+    'label' => 'Timbraje automático',
     'options' => ['Nunca timbrar automáticamente', 'Timbrar automáticamente cuando se llegue a la alerta de folios'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_sii_timbraje_automatico : 0,
     'help' => '¿Se debe timbrar automáticamente folios cuando se alcance la alerta? Si se activa, debe asignar multiplicador (abajo)',
