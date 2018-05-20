@@ -253,7 +253,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Método que muestra el estado de un DTE en el registro de compras y ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-29
+     * @version 2018-05-19
      */
     public function dte_rcv($emisor, $dte, $folio)
     {
@@ -266,7 +266,6 @@ class Controller_Sii extends \Controller_App
             );
             $this->redirect('/dte');
         }
-        $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
         $this->layout = 'popup';
         $this->set([
             'Emisor' => new \website\Dte\Model_Contribuyente($emisor_rut),
@@ -274,10 +273,14 @@ class Controller_Sii extends \Controller_App
             'folio' => $folio,
         ]);
         try {
+            $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+            $eventos = $RCV->listarEventosHistDoc($emisor_rut, $emisor_dv, $dte, $folio);
+            $cedible = $RCV->consultarDocDteCedible($emisor_rut, $emisor_dv, $dte, $folio);
+            $fecha_recepcion = $RCV->consultarFechaRecepcionSii($emisor_rut, $emisor_dv, $dte, $folio);
             $this->set([
-                'eventos' => $RCV->listarEventosHistDoc($emisor_rut, $emisor_dv, $dte, $folio),
-                'cedible' => $RCV->consultarDocDteCedible($emisor_rut, $emisor_dv, $dte, $folio),
-                'fecha_recepcion' => $RCV->consultarFechaRecepcionSii($emisor_rut, $emisor_dv, $dte, $folio),
+                'eventos' => $eventos!==false ? $eventos : null,
+                'cedible' => $cedible!==false ? $cedible : null,
+                'fecha_recepcion' => $fecha_recepcion!==false ? $fecha_recepcion : null,
             ]);
         } catch (\Exception $e) {
             $this->set('error', $e->getMessage());
