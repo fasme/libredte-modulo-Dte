@@ -26,22 +26,29 @@ namespace website\Dte;
 /**
  * Comando que limpia las bandejas de intercambio de los contribuyentes
  * Básicamente elimina:
- *   - Documentos recibidos de certificación mayores a 1 mes
- *   - Guías recibidas que fueron emitidas por el mismo contribuyente que las recibe
- *   - Intercambios de certificación mayores a 1 mes
- *   - Intercambios donde el emisor es igual al receptor
- *   - Intercambios no procesados recibidos hace más de 12 meses
- *   - Intercambios marcados como rechazados/reclamados mayores a 3 meses
- *   - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
- *   - Intercambios duplicados que no estén asociados a ningún DTE recibido
- * Sólo se eliminan intercambios que NO estén asociados a un DTE recibido
+ *  - Documentos recibidos de certificación mayores a 1 mes
+ *  - Guías recibidas que fueron emitidas por el mismo contribuyente que las recibe
+ *  - Intercambios de certificación mayores a 1 mes
+ *  - Intercambios donde el emisor es igual al receptor
+ *  - Intercambios no procesados recibidos hace más de 12 meses
+ *  - Intercambios marcados como rechazados/reclamados mayores a 3 meses
+ *  - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
+ *  - Intercambios duplicados que no estén asociados a ningún DTE recibido (TODO)
+ * Sólo se eliminan intercambios que NO estén asociados a un DTE recibido,
+ * esto se asegura con una restricción en la base de datos, en la tabla dte_recibido
+ * debe estar la regla de llave foránea con RESTRICT para los DELETE. Así:
+ *  ALTER TABLE dte_recibido ADD CONSTRAINT
+ *    "dte_recibido_intercambio_fk"
+ *    FOREIGN KEY (receptor, intercambio, certificacion)
+ *    REFERENCES dte_intercambio(receptor, codigo, certificacion)
+ *    ON UPDATE CASCADE ON DELETE RESTRICT;
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
  * @version 2018-05-21
  */
 class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
 {
 
-    private $eliminar_sql = [
+    private $reglas = [
         'Recibidos certificación >1 mes' => 'DELETE FROM dte_recibido WHERE certificacion = true AND fecha < (NOW() - INTERVAL \'1 MONTH\')',
         'Guías recibidas con receptor igual al emisor' => 'DELETE FROM dte_recibido WHERE emisor = receptor and dte = 52',
         'Intercambios certificación >1 mes' => 'DELETE FROM dte_intercambio WHERE certificacion = true AND fecha_hora_email < (NOW() - INTERVAL \'1 MONTH\')',
@@ -59,7 +66,7 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
         $this->db->beginTransaction();
         // ejecutar consultas estándares de limpieza
         $total = 0;
-        foreach ($this->eliminar_sql as $name => $query) {
+        foreach ($this->reglas as $name => $query) {
             $rows = $this->eliminar($name, $query);
             $total += $rows;
             if ($this->verbose) {
@@ -102,9 +109,23 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
         }
     }
 
+    /**
+     * Método que elimina intercambios duplicados que no están asociados a ningún
+     * DTE recibido
+     * Nota: este método es deseable, pero no es "obligatorio" considerar que
+     * según las reglas ya definidas este tipo de XML podría ser eliminado en el
+     * futuro por cualquiera de las reglas existentes, especialmente:
+     *  - Intercambios no procesados recibidos hace más de 12 meses
+     *  - Intercambios marcados como rechazados/reclamados mayores a 3 meses
+     *  - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
+     * Por lo anterior, si bien este métood podría ser necesario para limpiar la
+     * base de datos HOY con las reglas definidas, en el peor caso, la base de
+     * datos quedará limpia en un año.
+     * @todo Programar método si hay interés en resolver esto HOY
+     * @return int filas de registros que fueron eliminadas
+     */
     private function eliminarDuplicados()
     {
-        // TODO: desarrollar método
         return 0;
     }
 
