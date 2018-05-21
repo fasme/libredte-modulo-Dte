@@ -126,7 +126,7 @@ class Model_DteIntercambios extends \Model_Plural_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-19
+     * @version 2018-05-20
      */
     public function actualizar($dias = 7)
     {
@@ -179,38 +179,63 @@ class Model_DteIntercambios extends \Model_Plural_App
                     $datos_email['responder_a'] = substr($m['header']->reply_to[0]->mailbox.'@'.$m['header']->reply_to[0]->host, 0, 80);
                 }
                 $acuseContado = false;
-                $procesado = false;
+                $n_attachments = count($m['attachments']);
+                $procesados = 0;
                 foreach ($m['attachments'] as $file) {
-                    if ($this->procesarEnvioDTE($datos_email, $file, $n_EnvioDTE)) {
-                        $procesado = true;
+                    // si el archivo no tiene datos se omite
+                    if (empty($file['data'])) {
+                        $procesados++;
+                        continue;
                     }
-                    else if ((new Model_DteIntercambioRecibo())->saveXML($this->getContribuyente(), $file['data'])) {
-                        $n_EnvioRecibos++;
-                        if (!$acuseContado) {
-                            $acuseContado = true;
-                            $n_acuse++;
+                    // tratar de procesar como EnvioDTE
+                    $procesarEnvioDTE = $this->procesarEnvioDTE($datos_email, $file);
+                    if ($procesarEnvioDTE!==null) {
+                        if ($procesarEnvioDTE) {
+                            $n_EnvioDTE++;
                         }
-                        $procesado = true;
+                        $procesados++;
+                        continue;
                     }
-                    else if ((new Model_DteIntercambioRecepcion())->saveXML($this->getContribuyente(), $file['data'])) {
-                        $n_RecepcionEnvio++;
-                        if (!$acuseContado) {
-                            $acuseContado = true;
-                            $n_acuse++;
+                    // tratar de procesar como Recibo
+                    $procesarRecibo = (new Model_DteIntercambioRecibo())->saveXML($this->getContribuyente(), $file['data']);
+                    if ($procesarRecibo!==null) {
+                        if ($procesarRecibo) {
+                            $n_EnvioRecibos++;
+                            if (!$acuseContado) {
+                                $acuseContado = true;
+                                $n_acuse++;
+                            }
                         }
-                        $procesado = true;
+                        $procesados++;
+                        continue;
                     }
-                    else if ((new Model_DteIntercambioResultado())->saveXML($this->getContribuyente(), $file['data'])) {
-                        $n_ResultadoDTE++;
-                        if (!$acuseContado) {
-                            $acuseContado = true;
-                            $n_acuse++;
+                    // tratar de procesar como Recepción
+                    $procesarRecepcion = (new Model_DteIntercambioRecepcion())->saveXML($this->getContribuyente(), $file['data']);
+                    if ($procesarRecepcion!==null) {
+                        if ($procesarRecepcion) {
+                            $n_RecepcionEnvio++;
+                            if (!$acuseContado) {
+                                $acuseContado = true;
+                                $n_acuse++;
+                            }
                         }
-                        $procesado = true;
+                        $procesados++;
+                        continue;
+                    }
+                    $procesarResultado = (new Model_DteIntercambioResultado())->saveXML($this->getContribuyente(), $file['data']);
+                    if ($procesarResultado!==null) {
+                        if ($procesarResultado) {
+                            $n_ResultadoDTE++;
+                            if (!$acuseContado) {
+                                $acuseContado = true;
+                                $n_acuse++;
+                            }
+                        }
+                        $procesados++;
                     }
                 }
-                // marcar email como leído si fue procesado
-                if ($procesado) {
+                // marcar email como leído si fueron procesados todos los archivos adjuntos
+                if ($procesados==$n_attachments) {
                     $Imap->setSeen($uid);
                 }
             }
@@ -228,12 +253,15 @@ class Model_DteIntercambios extends \Model_Plural_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-05-20
      */
-    private function procesarEnvioDTE(array $datos_email, array $file, &$n_EnvioDTE)
+    private function procesarEnvioDTE(array $datos_email, array $file)
     {
         // preparar datos
         $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
-        if (empty($file['data']) or !$EnvioDte->loadXML($file['data']) or !$EnvioDte->getID() or $EnvioDte->esBoleta()) {
-            return null;
+        if (!$EnvioDte->loadXML($file['data']) or !$EnvioDte->getID()) {
+            return null; // no es un EnvioDTE, no se procesa
+        }
+        if ($EnvioDte->esBoleta()) {
+            return false;
         }
         $caratula = $EnvioDte->getCaratula();
         if (((int)(bool)!$caratula['NroResol'])!=(int)$this->getContribuyente()->config_ambiente_en_certificacion) {
@@ -250,7 +278,7 @@ class Model_DteIntercambios extends \Model_Plural_App
             $documentos += $SubTotDTE['NroDTE'];
         }
         if (!$documentos) {
-            return null;
+            return false;
         }
         // preparar datos que se guardarán
         if (empty($file['name'])) {
@@ -271,18 +299,14 @@ class Model_DteIntercambios extends \Model_Plural_App
         $DteIntercambio->receptor = $this->getContribuyente()->rut;
         // si el documento ya existe en la bandeja de intercambio se omite y se entrega true (para marcar como procesado)
         if ($DteIntercambio->recibidoPreviamente()) {
-            return true;
+            return false;
         }
         // guardar envío de intercambio
         if (!$DteIntercambio->save()) {
             return false;
         }
         // si no se procesó el intercambio de manera automática se marca como DTE agregado para ser reportado
-        if (!$DteIntercambio->procesarRespuestaAutomatica()) {
-            $n_EnvioDTE++;
-        }
-        // todo ok
-        return true;
+        return !$DteIntercambio->procesarRespuestaAutomatica() ? true : false;
     }
 
     /**
@@ -301,6 +325,48 @@ class Model_DteIntercambios extends \Model_Plural_App
             FROM dte_intercambio
             WHERE receptor = :receptor AND '.$periodo_col.' = :periodo
         ', [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo]);
+    }
+
+    /**
+     * Método que busca el o los intercambios asociados a un DTE
+     * @warning Esta función es muy costosa, ya que debe buscar en los XML y además abrir luego cada intercambio para confirmar que el DTE que se encontró es correcto
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-20
+     */
+    public function buscarIntercambiosDte($emisor, $dte, $folio)
+    {
+        $dte_col = $this->db->xml('archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE', 'http://www.sii.cl/SiiDte');
+        $folio_col = $this->db->xml('archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
+        if (!$dte_col or !$folio_col) { // parche para base de datos que no soportan consultas a los XML (ej: MariaDB)
+            return null;
+        }
+        // buscar intercambios que probablemente sean
+        $intercambios = (new Model_DteIntercambios())->setWhereStatement(
+            [
+                'receptor = :receptor',
+                'certificacion = :certificacion',
+                'emisor = :emisor',
+                $dte_col.' LIKE :dte',
+                $folio_col.' LIKE :folio',
+            ],
+            [
+                ':receptor' => $this->getContribuyente()->rut,
+                ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+                ':emisor' => $emisor,
+                ':dte' => '%'.$dte.'%',
+                ':folio' => '%'.$folio.'%',
+            ]
+        )->getObjects();
+        // verificar que el DTE solicitado esté en cada intercambio encontrado
+        // esto es necesario porque la búsqueda no hace match perfecto entre TIPO DTE y FOLIO y podría haber elegido
+        // una tupla incorrecta (¿se podría mejorar esto? -> revisar consultas a XML desde PostgreSQL)
+        $intercambios_reales = [];
+        foreach ($intercambios as $DteIntercambio) {
+            if ($DteIntercambio->getDocumento($emisor, $dte, $folio)) {
+                $intercambios_reales[] = $DteIntercambio;
+            }
+        }
+        return $intercambios_reales;
     }
 
 }

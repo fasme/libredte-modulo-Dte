@@ -151,14 +151,18 @@ class Model_DteIntercambioRecibo extends \Model_App
     /**
      * Método que guarda el XML del Recibo de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-04
+     * @version 2018-05-20
      */
     public function saveXML($Emisor, $xml) {
         // crear recibo
         $EnvioRecibos = new \sasco\LibreDTE\Sii\EnvioRecibos();
         $EnvioRecibos->loadXML($xml);
-        if (!$EnvioRecibos->getID())
-            return null;
+        if (!$EnvioRecibos->getID()) {
+            return null; // no es SetRecibos se debe procesar otro archivo
+        }
+        if (!$EnvioRecibos->schemaValidate()) {
+            return false; // no cumple con esquema XML del SII (no se procesa)
+        }
         $Caratula = $EnvioRecibos->toArray()['EnvioRecibos']['SetRecibos']['Caratula'];
         if (explode('-', $Caratula['RutRecibe'])[0] != $Emisor->rut or empty($Caratula['TmstFirmaEnv'])) {
             return false;
@@ -214,12 +218,7 @@ class Model_DteIntercambioRecibo extends \Model_App
             if (!empty($Recibo['DocumentoRecibo']['TmstFirmaRecibo'])) {
                 $DteIntercambioReciboDte->fecha_hora = str_replace('T', ' ', $Recibo['DocumentoRecibo']['TmstFirmaRecibo']);
             }
-            try {
-                if (!$DteIntercambioReciboDte->save()) {
-                    $this->db->rollback();
-                    return false;
-                }
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            if (!$DteIntercambioReciboDte->save()) {
                 $this->db->rollback();
                 return false;
             }

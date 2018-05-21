@@ -26,16 +26,21 @@ namespace website\Dte;
 /**
  * Comando para actualizar la bandeja de intercambio de los contribuyentes
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-03-31
+ * @version 2018-05-20
  */
 class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
 {
 
-    public function main($grupo = null, $dias = 7)
+    public function main($grupo = null, $dias = 7, $meses = 2)
     {
         $contribuyentes = $this->getContribuyentes($grupo);
         foreach ($contribuyentes as $rut) {
-            $this->actualizarIntercambio($rut, $dias);
+            if ($dias) {
+                $this->actualizarIntercambio($rut, $dias);
+            }
+            if ($meses) {
+                $this->sincronizarConRegistroComprasSII($rut, $meses);
+            }
         }
         $this->showStats();
         return 0;
@@ -43,7 +48,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
 
     private function actualizarIntercambio($rut, $dias)
     {
-        $Contribuyente = new Model_Contribuyente($rut);
+        $Contribuyente = (new Model_Contribuyentes())->get($rut);
         if (!$Contribuyente->exists() or !$Contribuyente->getEmailImap()) {
             return false;
         }
@@ -61,6 +66,24 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
         } catch (\Exception $e) {
             if ($this->verbose) {
                 $this->out('  '.$e->getMessage());
+            }
+        }
+    }
+
+    private function sincronizarConRegistroComprasSII($rut, $meses)
+    {
+        $Contribuyente = (new Model_Contribuyentes())->get($rut);
+        if (!$Contribuyente->exists() or !$Contribuyente->config_sii_pass) {
+            return false;
+        }
+        if ($this->verbose) {
+            $this->out('Sincronizando registro compras SII del contribuyente '.$Contribuyente->razon_social);
+        }
+        try {
+            (new Model_DteCompras())->setContribuyente($Contribuyente)->sincronizarRegistroComprasSII();
+        } catch (\Exception $e) {
+            if ($this->verbose) {
+                $this->out(' '.$e->getMessage());
             }
         }
     }

@@ -175,22 +175,28 @@ class Model_DteIntercambioRecepcion extends \Model_App
     /**
      * Método que guarda el XML de la Recepción de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-07
+     * @version 2018-05-20
      */
     public function saveXML($Emisor, $xml) {
 
         $RespuestaEnvio = new \sasco\LibreDTE\Sii\RespuestaEnvio();
         $RespuestaEnvio->loadXML($xml);
-        if (!$RespuestaEnvio->esRecepcionEnvio())
-            return null;
+        if (!$RespuestaEnvio->esRecepcionEnvio()) {
+            return null; // no es RecepcionEnvio se debe procesar otro archivo
+        }
+        if (!$RespuestaEnvio->schemaValidate()) {
+            return false; // no cumple con esquema XML del SII (no se procesa)
+        }
         $Resultado = $RespuestaEnvio->toArray()['RespuestaDTE']['Resultado'];
-        if (explode('-', $Resultado['Caratula']['RutRecibe'])[0] != $Emisor->rut)
+        if (explode('-', $Resultado['Caratula']['RutRecibe'])[0] != $Emisor->rut) {
             return false;
+        }
         // guardar recepción
         $this->db->beginTransaction();
         $this->responde = explode('-', $Resultado['Caratula']['RutResponde'])[0];
-        if (!is_numeric($this->responde)) // parche por SII que envía en RutResponde: DESCONOCIDO
+        if (!is_numeric($this->responde)) { // parche por SII que envía en RutResponde: DESCONOCIDO
             return false;
+        }
         $this->recibe = $Emisor->rut;
         $this->codigo = md5($xml);
         $this->contacto = !empty($Resultado['Caratula']['NmbContacto']) ? substr($Resultado['Caratula']['NmbContacto'], 0, 40) : null;
@@ -236,12 +242,7 @@ class Model_DteIntercambioRecepcion extends \Model_App
             if (!empty($Recepcion['RecepDTEGlosa']) and is_string($Recepcion['RecepDTEGlosa'])) {
                 $DteIntercambioRecepcionDte->glosa = substr($Recepcion['RecepDTEGlosa'], 0, 256);
             }
-            try {
-                if (!$DteIntercambioRecepcionDte->save()) {
-                    $this->db->rollback();
-                    return false;
-                }
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            if (!$DteIntercambioRecepcionDte->save()) {
                 $this->db->rollback();
                 return false;
             }

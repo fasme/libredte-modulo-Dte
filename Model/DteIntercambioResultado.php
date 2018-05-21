@@ -151,17 +151,22 @@ class Model_DteIntercambioResultado extends \Model_App
     /**
      * Método que guarda el XML del Resultado de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-21
+     * @version 2018-05-20
      */
     public function saveXML($Emisor, $xml) {
         // crear respuesta
         $RespuestaEnvio = new \sasco\LibreDTE\Sii\RespuestaEnvio();
         $RespuestaEnvio->loadXML($xml);
-        if (!$RespuestaEnvio->esResultadoDTE())
-            return null;
+        if (!$RespuestaEnvio->esResultadoDTE()) {
+            return null; // no es ResultadoDTE se debe procesar otro archivo
+        }
+        if (!$RespuestaEnvio->schemaValidate()) {
+            return false; // no cumple con esquema XML del SII (no se procesa)
+        }
         $Resultado = $RespuestaEnvio->toArray()['RespuestaDTE']['Resultado'];
-        if (explode('-', $Resultado['Caratula']['RutRecibe'])[0] != $Emisor->rut)
+        if (explode('-', $Resultado['Caratula']['RutRecibe'])[0] != $Emisor->rut) {
             return false;
+        }
         // guardar recepción
         $this->db->beginTransaction();
         $this->responde = explode('-', $Resultado['Caratula']['RutResponde'])[0];

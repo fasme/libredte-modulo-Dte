@@ -473,7 +473,20 @@ class Model_DteIntercambio extends \Model_App
             return true;
         }
         // buscar por documentos (si ya están presentes en otros intercambios)
-        // TODO
+        $documentos = $this->getDocumentos();
+        $n_documentos = count($documentos);
+        $existen = 0;
+        $DteIntercambios = (new Model_DteIntercambios())->setContribuyente($this->getReceptor());
+        foreach ($documentos as $Dte) {
+            if ($DteIntercambios->buscarIntercambiosDte(substr($Dte->getEmisor(),0,-2), $Dte->getTipo(), $Dte->getFolio())) {
+                $existen++;
+            }
+        }
+        // si todos los documentos existen se omiten
+        // (si a lo menos uno no existe, se deja el intercambio)
+        if ($existen == $n_documentos) {
+            return true;
+        }
         // no existe el intercambio previamente
         return false;
     }
