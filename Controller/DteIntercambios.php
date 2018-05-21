@@ -128,7 +128,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción que permite eliminar un intercambio desde la bandeja
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-10
+     * @version 2018-05-21
      */
     public function eliminar($codigo)
     {
@@ -144,7 +144,7 @@ class Controller_DteIntercambios extends \Controller_App
         // verificar que el intercambio no esté en uso en los documentos recibidos
         if ($DteIntercambio->recibido()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'El intercambio solicitado fue recibido, no se puede eliminar', 'error'
+                'El intercambio tiene a lo menos un DTE recibido asociado, no se puede eliminar', 'error'
             );
             $this->redirect('/dte/dte_intercambios/ver/'.$codigo);
         }
