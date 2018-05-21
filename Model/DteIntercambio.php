@@ -448,17 +448,17 @@ class Model_DteIntercambio extends \Model_App
     }
 
     /**
-     * Método que indica si intercambio se encuentra recibido
+     * Método que indica si intercambio se encuentra asociado a un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-10
+     * @version 2018-05-21
      */
     public function recibido()
     {
         return (bool)$this->db->getValue('
             SELECT COUNT(*)
             FROM dte_recibido
-            WHERE receptor = :receptor AND emisor = :emisor AND intercambio = :intercambio
-        ', [':receptor'=>$this->receptor, ':emisor'=>$this->emisor, ':intercambio'=>$this->codigo]);
+            WHERE receptor = :receptor AND emisor = :emisor AND certificacion = :certificacion AND intercambio = :intercambio
+        ', [':receptor'=>$this->receptor, ':emisor'=>$this->emisor, ':certificacion'=>(int)$this->certificacion, ':intercambio'=>$this->codigo]);
     }
 
     /**
