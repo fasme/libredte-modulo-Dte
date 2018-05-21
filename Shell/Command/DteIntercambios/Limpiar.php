@@ -32,6 +32,7 @@ namespace website\Dte;
  *   - Intercambios donde el emisor es igual al receptor
  *   - Intercambios no procesados recibidos hace más de 12 meses
  *   - Intercambios marcados como rechazados/reclamados mayores a 3 meses
+ *   - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
  *   - Intercambios duplicados que no estén asociados a ningún DTE recibido
  * Sólo se eliminan intercambios que NO estén asociados a un DTE recibido
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -47,6 +48,7 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
         'Receptor igual al emisor en intercambio' => 'DELETE FROM dte_intercambio WHERE emisor = receptor',
         'Intercambios sin estado >12 meses' => 'DELETE FROM dte_intercambio WHERE estado IS NULL AND fecha_hora_email < (NOW() - INTERVAL \'12 MONTH\')',
         'Intercambios rechazados >3 meses' => 'DELETE FROM dte_intercambio WHERE estado IS NOT NULL AND estado != 0 AND fecha_hora_email < (NOW() - INTERVAL \'3 MONTH\')',
+        'Intercambios aceptados sin DTE recibido asociado' => 'DELETE FROM dte_intercambio WHERE (receptor, emisor, certificacion, codigo) NOT IN (SELECT receptor, emisor, certificacion, intercambio FROM dte_recibido WHERE intercambio IS NOT NULL) AND estado = 0',
     ];
 
     public function main($commit = false)
