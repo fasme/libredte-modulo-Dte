@@ -495,7 +495,7 @@ class Model_DteIntercambio extends \Model_App
      * Método para procesar el intercambio de manera automática si es que así
      * está configurado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2018-05-21
      */
     public function procesarRespuestaAutomatica($silenciosa = true)
     {
@@ -514,7 +514,7 @@ class Model_DteIntercambio extends \Model_App
                 );
                 if ($response['status']['code']==200 and !is_string($response['body'])) {
                     if (is_array($response['body'])) {
-                        if (!empty($response['body']['aceptar']) or !empty($response['body']['reclamar'])) {
+                        if (!empty($response['body']['recibir']) or !empty($response['body']['reclamar'])) {
                             $accion = $response['body'];
                         }
                     } else {
@@ -554,10 +554,10 @@ class Model_DteIntercambio extends \Model_App
 
     /**
      * Método que genera y envía la respuesta del intercambio
-     * @param accion =true acepta todo el intercambio, =false reclama todo el intercambio, =array procesa los documentos indicados, debe tener índice aceptar y/o reclamar o bien indíce númerico y se asume es el listado de documentos
+     * @param accion =true recibir todo el intercambio, =false reclama todo el intercambio, =array procesa los documentos indicados, debe tener índice recibir y/o reclamar o bien indíce númerico y se asume es el listado de documentos
      * @param config Configuración global para la respuesta con índices: user_id, NmbContacto, MailContacto, sucursal, Recinto, responder_a, periodo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2018-05-21
      */
     public function responder($accion, array $config = [])
     {
@@ -579,7 +579,7 @@ class Model_DteIntercambio extends \Model_App
         // si es un booleano se acepta o reclaman todos los documentos del intercambio
         if (is_bool($accion) or is_numeric($accion)) {
             $docs = $this->getDocumentos();
-            $aceptar = [];
+            $recibir = [];
             $reclamar = [];
             foreach ($docs as $Dte) {
                 $info = [
@@ -591,26 +591,26 @@ class Model_DteIntercambio extends \Model_App
                     'MntTotal' => $Dte->getMontoTotal(),
                 ];
                 if ($accion) {
-                    $aceptar[] = $info;
+                    $recibir[] = $info;
                 } else {
                     $reclamar[] = $info;
                 }
             }
-            $accion = ['aceptar'=>$aceptar, 'reclamar'=>$reclamar];
+            $accion = ['recibir'=>$recibir, 'reclamar'=>$reclamar];
         }
         // si es un arreglo con un índice númerico entonces se pasó el arreglo con los documentos directamente
         else if (is_array($accion) and isset($accion[0])) {
             $documentos = $accion;
         }
         // si no es arreglo o faltan ambos índices aceptar o reclamar -> error
-        else if (!is_array($accion) or (empty($accion['aceptar']) and empty($accion['reclamar']))) {
+        else if (!is_array($accion) or (empty($accion['recibir']) and empty($accion['reclamar']))) {
             throw new \Exception('Acción no válida para responder el intercambio');
         }
         // armar un único arreglo con los documentos a procesar
         if (empty($documentos)) {
             $documentos = [];
-            if (!empty($accion['aceptar'])) {
-                foreach ($accion['aceptar'] as &$doc) {
+            if (!empty($accion['recibir'])) {
+                foreach ($accion['recibir'] as &$doc) {
                     if (empty($doc['EstadoRecepDTE'])) {
                         $doc['EstadoRecepDTE'] = 'ERM';
                     }
@@ -618,7 +618,7 @@ class Model_DteIntercambio extends \Model_App
                         $doc['RecepDTEGlosa'] = 'Otorga recibo de mercaderías o servicios';
                     }
                 }
-                $documentos = array_merge($documentos, $accion['aceptar']);
+                $documentos = array_merge($documentos, $accion['recibir']);
             }
             if (!empty($accion['reclamar'])) {
                 foreach ($accion['reclamar'] as &$doc) {

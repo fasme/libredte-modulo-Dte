@@ -251,7 +251,7 @@ class Model_DteIntercambios extends \Model_Plural_App
      * @param datos_email Arreglo con los índices: fecha_hora_email, asunto, de, mensaje, mensaje_html
      * @param file Arreglo con los índices: name, data, size y type
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2018-05-21
      */
     private function procesarEnvioDTE(array $datos_email, array $file)
     {
@@ -265,7 +265,7 @@ class Model_DteIntercambios extends \Model_Plural_App
         }
         $caratula = $EnvioDte->getCaratula();
         if (((int)(bool)!$caratula['NroResol'])!=(int)$this->getContribuyente()->config_ambiente_en_certificacion) {
-            return false;
+            return null; // se deja sin procesar ya que no es del ambiente correcto
         }
         if (substr($caratula['RutReceptor'], 0, -2) != $this->getContribuyente()->rut) {
             return false;
