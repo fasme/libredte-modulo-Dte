@@ -66,7 +66,7 @@ class Model_DteCompras extends \Model_Plural_App
     /**
      * Método que agrega masivamente documentos recibidos y acepta los intercambios asociados al DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-21
+     * @version 2018-05-22
      */
     private function agregarMasivo($documentos, array $config = [])
     {
@@ -89,7 +89,7 @@ class Model_DteCompras extends \Model_Plural_App
                     }
                 }
             }
-            // agregar el documento recibido si no existe (si no se encontró intercambio)
+            // agregar el documento recibido si no existe
             $DteRecibido = new Model_DteRecibido(substr($doc['rut'],0,-2), $doc['dte'], $doc['folio'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
             if (!$DteRecibido->usuario) {
                 $DteRecibido->tasa = $doc['tasa'];
@@ -120,6 +120,14 @@ class Model_DteCompras extends \Model_Plural_App
                 $DteRecibido->receptor = $this->getContribuyente()->rut;
                 $DteRecibido->usuario = $this->getContribuyente()->getUsuario()->id;
                 $DteRecibido->save();
+            }
+            // si el documento existe
+            else {
+                // corregir periodo si tenía uno incorrecto
+                if ($DteRecibido->periodo != $config['periodo']) {
+                    $DteRecibido->periodo = $config['periodo'];
+                    $DteRecibido->save();
+                }
             }
         }
     }
