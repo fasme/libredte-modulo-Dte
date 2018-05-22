@@ -84,7 +84,7 @@ class Model_DteCompras extends \Model_Plural_App
             $intercambios = $DteIntercambios->buscarIntercambiosDte(substr($doc['rut'],0,-2), $doc['dte'], $doc['folio']);
             if ($intercambios) {
                 foreach ($intercambios as $DteIntercambio) {
-                    if ($DteIntercambio->documentos == 1) {
+                    if (!$DteIntercambio->usuario and $DteIntercambio->documentos == 1) {
                         $DteIntercambio->responder(true, $config);
                     }
                 }
