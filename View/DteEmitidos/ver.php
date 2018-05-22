@@ -26,7 +26,7 @@
 </ul>
 
 <div class="page-header"><h1>Documento T<?=$DteEmitido->dte?>F<?=$DteEmitido->folio?></h1></div>
-<p>Esta es la página del documento <?=$DteEmitido->getTipo()->tipo?> (<?=$DteEmitido->dte?>) folio número <?=$DteEmitido->folio?> de la empresa <?=$Emisor->razon_social?> emitido a <?=$Receptor->razon_social?> (<?=$Receptor->rut.'-'.$Receptor->dv?>).</p>
+<p>Esta es la página del documento <?=$DteEmitido->getTipo()->tipo?> (<?=$DteEmitido->dte?>) folio número <?=$DteEmitido->folio?> de la empresa <?=$Emisor->razon_social?> emitido a <?=$Receptor->razon_social?> (<?=$Receptor->rut.'-'.$Receptor->dv?>) en la sucursal <?=$Emisor->getSucursal($DteEmitido->sucursal_sii)->sucursal?>.</p>
 
 <script type="text/javascript">
 $(function() {
@@ -603,6 +603,30 @@ echo $f->end('Modificar Track ID');
     </div>
 </div>
 <?php endif; ?>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fas fa-map-marker-alt"></i>
+        Cambiar sucursal
+    </div>
+    <div class="panel-body">
+<?php
+echo $f->begin([
+    'action' => $_base.'/dte/dte_emitidos/avanzado_sucursal/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id' => 'avanzadoSucursalForm',
+    'onsubmit' => 'Form.check(\'avanzadoSucursalForm\')'
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'sucursal',
+    'label' => 'Sucursal',
+    'options' => $sucursales,
+    'value' => $DteEmitido->sucursal_sii,
+    'help' => 'El cambio de sucursal sólo afecta al registro de LibreDTE, el DTE (XML y PDF) seguirán con la sucursal originalmente asignada. Si desea un cambio en la sucursal del DTE deberá anular el documento y emitir uno nuevo.',
+]);
+echo $f->end('Modificar sucursal');
+?>
+    </div>
+</div>
 <p style="margin-top:2em;font-size:0.8em" class="text-right">Documento timbrado el <?=str_replace('T', ' ', $DteEmitido->getDte()->getDatos()['TED']['DD']['TSTED'])?></p>
 </div>
 <!-- FIN AVANZADO -->

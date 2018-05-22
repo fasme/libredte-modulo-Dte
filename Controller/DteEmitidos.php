@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-03
+     * @version 2018-05-22
      */
     public function ver($dte, $folio)
     {
@@ -147,6 +147,7 @@ class Controller_DteEmitidos extends \Controller_App
             'enviar_sii' => !(in_array($DteEmitido->dte, [39, 41])),
             'Cobro' => (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S') ? $DteEmitido->getCobro(false) : false,
             'email_html' => $Emisor->getEmailFromTemplate('dte'),
+            'sucursales' => $Emisor->getSucursales(),
         ]);
     }
 
@@ -665,6 +666,58 @@ class Controller_DteEmitidos extends \Controller_App
         $DteEmitido->anulado = (int)$this->Api->data['anulado'];
         $DteEmitido->save();
         return (int)$DteEmitido->anulado;
+    }
+
+    /**
+     * Acción que permite cambiar la sucursal de un DTE emitido (pero no del XML)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-22
+     */
+    public function avanzado_sucursal($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        $r = $this->consume('/api/dte/dte_emitidos/avanzado_sucursal/'.$dte.'/'.$folio.'/'.$Emisor->rut, $_POST);
+        if ($r['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                str_replace("\n", '<br/>', $r['body']), 'error'
+            );
+            if ($r['status']['code']==404) {
+                $this->redirect('/dte/dte_emitidos/listar');
+            } else {
+                $this->redirect(str_replace('avanzado_sucursal', 'ver', $this->request->request).'#avanzado');
+            }
+        }
+        \sowerphp\core\Model_Datasource_Session::message('Se cambió la sucursal', 'ok');
+        $this->redirect(str_replace('avanzado_sucursal', 'ver', $this->request->request).'#avanzado');
+    }
+
+    /**
+     * Recurso de la API que permite cambiar la sucursal de un DTE (pero no del XML)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-05-22
+     */
+    public function _api_avanzado_sucursal_POST($dte, $folio, $emisor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // obtener DTE
+        $Emisor = new Model_Contribuyente($emisor);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            $this->Api->send('No existe el DTE solicitado', 404);
+        }
+        // verificar que la sucursal exista
+        $codigo_sucursal = $Emisor->getSucursal($this->Api->data['sucursal'])->codigo;
+        if ($codigo_sucursal != $this->Api->data['sucursal']) {
+            $this->Api->send('No existe el código de sucursal solicitado', 400);
+        }
+        // cambiar estado anulado del documento
+        $DteEmitido->sucursal_sii = (int)$this->Api->data['sucursal'];
+        $DteEmitido->save();
+        return (int)$DteEmitido->sucursal_sii;
     }
 
     /**
