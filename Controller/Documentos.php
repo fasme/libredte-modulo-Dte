@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para todas las acciones asociadas a documentos (incluyendo API)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-08-16
+ * @version 2018-05-22
  */
 class Controller_Documentos extends \Controller_App
 {
@@ -51,6 +51,22 @@ class Controller_Documentos extends \Controller_App
         4 => 'Factura exportación de servicios de hotelería o boleta de espectáculos emitida por cuenta de terceros',
         5 => 'Factura exportación de servicios de transporte internacional',
     ]; ///< Tipos de indicadores de servicios
+
+    private $TpoTranCompra = [
+        1 => 'Compra del giro',
+        2 => 'Compra en supermercados o similares',
+        3 => 'Compra bien raíz',
+        4 => 'Compra activo fijo',
+        5 => 'Compra con IVA uso común',
+        6 => 'Compra sin derecho a crédito',
+        7 => 'Compra que no corresponde incluir',
+    ]; //< Tipos de transacción para el comprador (es una sugerencia, el comprador lo puede cambiar)
+
+    private $TpoTranVenta = [
+        1 => 'Venta del giro',
+        2 => 'Venta activo fijo',
+        3 => 'Venta bien raíz',
+    ]; /// Tipos de transacción para el vendedor
 
     private $monedas = [
         'DOLAR USA' => 'DOLAR USA',
@@ -323,7 +339,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-27
+     * @version 2018-05-22
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -400,6 +416,8 @@ class Controller_Documentos extends \Controller_App
             'IndTraslado' => $this->IndTraslado,
             'IndServicio' => $this->IndServicio,
             'monedas' => $this->monedas,
+            'TpoTranCompra' => $this->TpoTranCompra,
+            'TpoTranVenta' => $this->TpoTranVenta,
             'nacionalidades' => \sasco\LibreDTE\Sii\Aduana::getNacionalidades(),
             'codigos' => (new \website\Dte\Admin\Model_Itemes())->getCodigos($Emisor->rut),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getListContribuyente($Emisor->config_extra_impuestos_adicionales),
@@ -478,6 +496,8 @@ class Controller_Documentos extends \Controller_App
                     'TipoDTE' => $_POST['TpoDoc'],
                     'Folio' => !empty($_POST['Folio']) ? $_POST['Folio'] : 0,
                     'FchEmis' => $_POST['FchEmis'],
+                    'TpoTranCompra' => !empty($_POST['TpoTranCompra']) ? $_POST['TpoTranCompra'] : false,
+                    'TpoTranVenta' => !empty($_POST['TpoTranVenta']) ? $_POST['TpoTranVenta'] : false,
                     'FmaPago' => !empty($_POST['FmaPago']) ? $_POST['FmaPago'] : false,
                     'FchCancel' => $_POST['FchVenc'] < $_POST['FchEmis'] ? $_POST['FchVenc'] : false,
                     'PeriodoDesde' => !empty($_POST['PeriodoDesde']) ? $_POST['PeriodoDesde'] : false,

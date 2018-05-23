@@ -280,9 +280,18 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     <!-- TÉRMINOS DEL PAGO -->
     <div class="row" id="terminosPago">
         <div class="form-group col-md-12">
-            <?=$f->input(['name'=>'TermPagoGlosa', 'placeholder'=>'Glosa que describe las condiciones del pago del DTE (opcional)', 'attr'=>'maxlength="100"', !empty($datos['Encabezado']['IdDoc']['TermPagoGlosa'])?$datos['Encabezado']['IdDoc']['TermPagoGlosa']:''])?>
+            <?=$f->input(['name'=>'TermPagoGlosa', 'placeholder'=>'Glosa que describe las condiciones del pago del DTE (opcional)', 'attr'=>'maxlength="100"', 'value'=>!empty($datos['Encabezado']['IdDoc']['TermPagoGlosa'])?$datos['Encabezado']['IdDoc']['TermPagoGlosa']:''])?>
         </div>
     </div>
+    <div class="row" id="terminosPago">
+        <div class="form-group col-md-6">
+            <?=$f->input(['type'=>'select', 'name'=>'TpoTranVenta', 'options'=>[''=>'¿Tipo de transacción para el vendedor?']+$TpoTranVenta, 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoTranVenta'])?$datos['Encabezado']['IdDoc']['TpoTranVenta']:''])?>
+        </div>
+        <div class="form-group col-md-6">
+            <?=$f->input(['type'=>'select', 'name'=>'TpoTranCompra', 'options'=>[''=>'¿Tipo de transacción para el receptor?']+$TpoTranCompra, 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoTranCompra'])?$datos['Encabezado']['IdDoc']['TpoTranCompra']:''])?>
+        </div>
+    </div>
+    <!-- TIPOS DE TRANSACCIONES -->
     <!-- DATOS DE PAGOS EN CASO QUE SEA VENTA A CRÉDITO -->
     <div class="row" id="datosPagos" style="display:none">
         <div class="form-group col-md-12">
