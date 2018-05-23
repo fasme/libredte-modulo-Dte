@@ -40,6 +40,7 @@ $(function() {
 
 <!-- INICIO USUARIOS AUTORIZADOS -->
 <div role="tabpanel" class="tab-pane active" id="usuarios">
+<p>Aquí puede autorizar a otros usuarios, previamente registrados, a trabajar con la empresa. El usuario se debe <a href="<?=$_base?>/usuarios/registrar">registrar aquí</a>.</p>
 <?php
 // inputs y ayuda
 $inputs = [['name'=>'usuario', 'check'=>'notempty']];
@@ -183,7 +184,7 @@ echo $f->input([
     'label' => 'Usuario',
     'value' => $Contribuyente->getUsuario()->usuario,
     'check' => 'notempty',
-    'help' => 'Usuario que actúa como administrador de la empresa en LibreDTE',
+    'help' => 'Usuario que actúa como administrador principal de la empresa en LibreDTE',
 ]);
 echo $f->end('Cambiar usuario administrador');
 ?>
