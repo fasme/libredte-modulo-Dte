@@ -188,8 +188,6 @@ class Model_Contribuyente extends \Model_App
         'sii_pass',
         'email_sii_pass',
         'email_intercambio_pass',
-        'api_auth_user',
-        'api_auth_pass',
     ]; ///< columnas de la configuración que se deben encriptar para guardar en la base de datos
 
     public static $defaultConfig = [
