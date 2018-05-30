@@ -431,7 +431,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-09
+     * @version 2018-05-30
      */
     public function previsualizacion()
     {
@@ -463,7 +463,7 @@ class Controller_Documentos extends \Controller_App
         }
         // revisar datos mínimos
         $datos_minimos = ['FchEmis', 'GiroEmis', 'Acteco', 'DirOrigen', 'CmnaOrigen', 'RUTRecep', 'RznSocRecep', 'DirRecep', 'NmbItem'];
-        if (!in_array($_POST['TpoDoc'], [110, 111, 112])) {
+        if (!in_array($_POST['TpoDoc'], [56, 61, 110, 111, 112])) {
             $datos_minimos[] = 'GiroRecep';
             $datos_minimos[] = 'CmnaRecep';
         }

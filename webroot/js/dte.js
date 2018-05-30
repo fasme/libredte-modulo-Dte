@@ -146,6 +146,12 @@ Receptor.setDatos = function (form) {
             console.log(jqXHR.responseJSON);
         }
     });
+    // si el RUT es de exportación o boleta no nominativa se quita obligatoriedad campos
+    if (rut==55555555 || rut==66666666) {
+        $('#CmnaRecepField').removeClass('check notempty');
+    } else {
+        $('#CmnaRecepField').addClass('check notempty');
+    }
 }
 
 function DTE() {
