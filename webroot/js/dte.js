@@ -136,7 +136,7 @@ Receptor.setDatos = function (form) {
         dataType: "json",
         success: function (c) {
             f.RznSocRecep.value = c.razon_social;
-            f.GiroRecep.value = c.giro.substr(0, 40);
+            f.GiroRecep.value = (c.giro!==undefined && c.giro) ? c.giro.substr(0, 40) : '';
             f.DirRecep.value = (c.direccion!==undefined && c.direccion) ? c.direccion : '';
             f.CmnaRecep.value = (c.comuna!==undefined && c.comuna) ? c.comuna : '';
             f.Contacto.value = (c.telefono!==undefined && c.telefono) ? c.telefono : '';
