@@ -119,8 +119,9 @@ Receptor.setDatos = function (form) {
     if (f.RUTSolicita !== undefined)
         f.RUTSolicita.value = "";
     // si no se indicó el rut no se hace nada más
-    if (__.empty(f.RUTRecep.value))
+    if (__.empty(f.RUTRecep.value)) {
         return;
+    }
     // verificar validez del rut
     if (Form.check_rut(f.RUTRecep) !== true) {
         alert('RUT receptor es incorrecto');
@@ -136,7 +137,7 @@ Receptor.setDatos = function (form) {
         dataType: "json",
         success: function (c) {
             f.RznSocRecep.value = c.razon_social;
-            f.GiroRecep.value = c.giro.substr(0, 40);
+            f.GiroRecep.value = (c.giro!==undefined && c.giro) ? c.giro.substr(0, 40) : '';
             f.DirRecep.value = (c.direccion!==undefined && c.direccion) ? c.direccion : '';
             f.CmnaRecep.value = (c.comuna!==undefined && c.comuna) ? c.comuna : '';
             f.Contacto.value = (c.telefono!==undefined && c.telefono) ? c.telefono : '';
@@ -146,6 +147,13 @@ Receptor.setDatos = function (form) {
             console.log(jqXHR.responseJSON);
         }
     });
+    // si el RUT es de extranjero se limpia el campo comuna y se desactiva
+    if (rut==55555555) {
+        f.CmnaRecep.value = '';
+        $('#CmnaRecepField').attr('disabled', 'disabled');
+    } else {
+        $('#CmnaRecepField').removeAttr('disabled');
+    }
 }
 
 function DTE() {
