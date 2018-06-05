@@ -777,7 +777,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método de la API que permite obtener la configuración de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-22
+     * @version 2018-06-05
      */
     public function _api_config_GET($rut)
     {
@@ -793,6 +793,7 @@ class Controller_Contribuyentes extends \Controller_App
             $this->Api->send('Usted no es el administrador de la empresa solicitada', 401);
         }
         $config = [
+            'ambiente_en_certificacion' => (int)$Contribuyente->config_ambiente_en_certificacion,
             'documentos_autorizados' => $Contribuyente->getDocumentosAutorizados(),
         ];
         $this->Api->send($config, 200, JSON_PRETTY_PRINT);
