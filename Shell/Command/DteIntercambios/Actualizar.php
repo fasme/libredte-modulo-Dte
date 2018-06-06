@@ -80,7 +80,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
             $this->out('Sincronizando registro compras SII del contribuyente '.$Contribuyente->razon_social);
         }
         try {
-            (new Model_DteCompras())->setContribuyente($Contribuyente)->sincronizarRegistroComprasSII();
+            (new Model_DteCompras())->setContribuyente($Contribuyente)->sincronizarRegistroComprasSII($meses);
         } catch (\Exception $e) {
             if ($this->verbose) {
                 $this->out(' '.$e->getMessage());
