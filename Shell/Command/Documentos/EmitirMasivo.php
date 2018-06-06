@@ -287,7 +287,9 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             }
             $documento['Encabezado']['IdDoc']['PeriodoHasta'] = $datos[21];
         }
-        $this->agregarItem($documento, array_slice($datos, 11, 9));
+        $this->agregarItem($documento, array_slice($datos, 11, 8));
+        $this->agregarTransporte($documento, array_slice($datos, 22, 6));
+        $this->agregarReferencia($documento, array_slice($datos, 28, 5));
         return $documento;
     }
 
@@ -333,6 +335,68 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         }
         // agregar detalle al documento
         $documento['Detalle'][] = $detalle;
+    }
+
+    private function agregarTransporte(&$documento, $transporte)
+    {
+        $vacios = true;
+        foreach ($transporte as $t) {
+            if (!empty($t)) {
+                $vacios = false;
+            }
+        }
+        if ($vacios) {
+            return;
+        }
+        if ($transporte[0]) {
+            $documento['Encabezado']['Transporte']['Patente'] = mb_substr(trim($transporte[0]),0,8);
+        }
+        if ($transporte[1]) {
+            $documento['Encabezado']['Transporte']['RUTTrans'] = mb_substr(str_replace('.','',trim($transporte[1])),0,10);
+        }
+        if ($transporte[2] and $transporte[3]) {
+            $documento['Encabezado']['Transporte']['Chofer']['RUTChofer'] = mb_substr(str_replace('.','',trim($transporte[2])),0,10);
+            $documento['Encabezado']['Transporte']['Chofer']['NombreChofer'] = mb_substr(trim($transporte[3]),0,30);
+        }
+        if ($transporte[4]) {
+            $documento['Encabezado']['Transporte']['DirDest'] = mb_substr(trim($transporte[4]),0,70);
+        }
+        if ($transporte[5]) {
+            $documento['Encabezado']['Transporte']['CmnaDest'] = mb_substr(trim($transporte[5]),0,20);
+        }
+    }
+
+    private function agregarReferencia(&$documento, $referencia)
+    {
+        $Referencia = [];
+        $vacios = true;
+        foreach ($referencia as $r) {
+            if (!empty($r)) {
+                $vacios = false;
+            }
+        }
+        if ($vacios) {
+            return;
+        }
+        if (empty($referencia[0])) {
+            throw new \Exception('Tipo del documento de referencia no puede estar vacío');
+        }
+        $Referencia['TpoDocRef'] = mb_substr(trim($referencia[0]),0,3);
+        if (empty($referencia[1])) {
+            throw new \Exception('Folio del documento de referencia no puede estar vacío');
+        }
+        $Referencia['FolioRef'] = mb_substr(trim($referencia[1]),0,18);
+        if (empty($referencia[2]) or !\sowerphp\general\Utility_Date::check($referencia[2])) {
+            throw new \Exception('Fecha del documento de referencia debe ser en formato AAAA-MM-DD');
+        }
+        $Referencia['FchRef'] = $referencia[2];
+        if (!empty($referencia[3])) {
+                $Referencia['CodRef'] = (int)$referencia[3];
+        }
+        if (!empty($referencia[4])) {
+                $Referencia['RazonRef'] = mb_substr(trim($referencia[4]),0,90);
+        }
+        $documento['Referencia'][] = $Referencia;
     }
 
     private function documentoAgregarResultado(&$datos, $tipo_dte, $folio, $resultado_codigo, $resultado_glosa)
