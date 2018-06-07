@@ -130,10 +130,12 @@ echo $f->input([
 ]);
 echo $f->end('Descargar PDF');
 $links = $DteTmp->getLinks();
+if ($DteTmp->getTipo()->permiteCobro()) :
 ?>
     <a class="btn btn-primary btn-lg btn-block" href="<?=$links['pdf']?>" role="button">
         Enlace público a la cotización
     </a>
+<?php endif; ?>
 </div>
 <!-- FIN PDF -->
 
