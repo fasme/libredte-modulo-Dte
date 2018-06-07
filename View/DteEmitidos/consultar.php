@@ -34,7 +34,7 @@ echo $f->input([
 echo $f->end('Consultar DTE');
 
 // si se encontró un DTE se muestra
-if (isset($DteEmitido)) : ?>
+if (isset($DteEmitido)) : $links = $DteEmitido->getLinks(); ?>
 <h2><?=$DteEmitido->getTipo()->tipo?> #<?=$DteEmitido->folio?> a <?=\sowerphp\app\Utility_Rut::addDV($DteEmitido->receptor)?></h2>
 <div class="row">
     <div class="col-md-<?=$DteEmitido->track_id?9:12?>">
@@ -46,13 +46,13 @@ if (isset($DteEmitido)) : ?>
 ?>
         <div class="row">
             <div class="col-md-6">
-                <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/0/<?=$DteEmitido->emisor?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>" role="button">
+                <a class="btn btn-default btn-lg btn-block" href="<?=$links['pdf']?>" role="button">
                     <span class="far fa-file-pdf" style="font-size:24px"></span>
                     Descargar PDF del DTE
                 </a>
             </div>
             <div class="col-md-6">
-                <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->emisor?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->total?>" role="button">
+                <a class="btn btn-default btn-lg btn-block" href="<?=$links['xml']?>" role="button">
                     <span class="far fa-file-code" style="font-size:24px"></span>
                     Descargar XML del DTE
                 </a>
@@ -68,9 +68,9 @@ if (isset($DteEmitido)) : ?>
 <?php endif; ?>
 </div>
 
-<?php if (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getEmisor()->config_pagos_habilitado) : ?>
+<?php if (!empty($links['pagar'])) : ?>
 <div class="row" style="margin-top:2em">
-    <a class="btn btn-info btn-lg btn-block" href="<?=$_url.'/pagos/documentos/pagar/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$DteEmitido->emisor.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total?>" role="button">
+    <a class="btn btn-info btn-lg btn-block" href="<?=$links['pagar']?>" role="button">
         Ir a la página de pago del documento
     </a>
 </div>
