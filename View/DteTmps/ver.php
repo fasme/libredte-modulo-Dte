@@ -129,8 +129,9 @@ echo $f->input([
     'check' => 'notempty',
 ]);
 echo $f->end('Descargar PDF');
+$links = $DteTmp->getLinks();
 ?>
-    <a class="btn btn-primary btn-lg btn-block" href="<?=$DteTmp->getLinks()['pdf']?>" role="button">
+    <a class="btn btn-primary btn-lg btn-block" href="<?=$links['pdf']?>" role="button">
         Enlace público a la cotización
     </a>
 </div>
@@ -139,13 +140,12 @@ echo $f->end('Descargar PDF');
 <!-- INICIO ENVIAR POR EMAIL -->
 <div role="tabpanel" class="tab-pane" id="email">
 <?php
-$enlace_pagar_cotizacion = $_url.'/pagos/cotizaciones/pagar/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor;
 $asunto = 'Documento N° '.$DteTmp->getFolio().' de '.$Emisor->razon_social.' ('.$Emisor->getRUT().')';
 if (!$email_html) {
     $mensaje = $Receptor->razon_social.','."\n\n";
     $mensaje .= 'Se adjunta documento N° '.$DteTmp->getFolio().' del día '.\sowerphp\general\Utility_Date::format($DteTmp->fecha).' por un monto total de $'.num($DteTmp->total).'.-'."\n\n";
-    if ($Emisor->config_pagos_habilitado and $DteTmp->getDte()->operacion=='S') {
-        $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_cotizacion."\n\n";
+    if (!empty($links['pagar'])) {
+        $mensaje .= 'Enlace pago en línea: '.$links['pagar']."\n\n";
     }
     $mensaje .= 'Saluda atentamente,'."\n\n";
     $mensaje .= '-- '."\n";
@@ -219,7 +219,7 @@ echo $f->end('Enviar PDF por email');
         </a>
     </div>
     <div class="col-sm-6">
-        <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_cotizacion?>" role="button">
+        <a class="btn btn-info btn-lg btn-block" href="<?=$links['pagar']?>" role="button">
             Enlace público para pagar
         </a>
     </div>
