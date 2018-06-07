@@ -110,7 +110,6 @@ function pdf_set_action(documento) {
 }
 </script>
 <?php
-$pdf_publico = $_url.'/dte/dte_tmps/cotizacion/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor;
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['action'=>$_base.'/dte/dte_tmps/cotizacion/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo, 'id'=>'pdfForm', 'onsubmit'=>'Form.check(\'pdfForm\')']);
 echo $f->input([
@@ -131,7 +130,7 @@ echo $f->input([
 ]);
 echo $f->end('Descargar PDF');
 ?>
-    <a class="btn btn-primary btn-lg btn-block" href="<?=$pdf_publico?>" role="button">
+    <a class="btn btn-primary btn-lg btn-block" href="<?=$DteTmp->getLinks()['pdf']?>" role="button">
         Enlace público a la cotización
     </a>
 </div>

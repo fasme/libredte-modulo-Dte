@@ -929,7 +929,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-29
+     * @version 2018-06-06
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -951,11 +951,11 @@ class Model_DteEmitido extends Model_Base_Envio
         $msg_html = $this->getEmisor()->getEmailFromTemplate('dte', $this, $msg);
         if (!$msg) {
             $msg = 'Se adjunta '.$this->getTipo()->tipo.' N° '.$this->folio.' del día '.\sowerphp\general\Utility_Date::format($this->fecha).' por un monto total de $'.num($this->total).'.-'."\n\n";
-            if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->operacion=='S') {
+            $links = $this->getLinks();
+            if (!empty($links['pagar'])) {
                 $Cobro = $this->getCobro(false);
                 if (!$Cobro->pagado) {
-                    $enlace_pagar_dte = $Request->url.'/pagos/documentos/pagar/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
-                    $msg .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
+                    $msg .= 'Enlace pago en línea: '.$links['pagar']."\n\n";
                 } else {
                     $msg .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->medio_pago."\n\n";
                 }
@@ -1098,7 +1098,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega los enlaces públicos del documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2018-06-06
      */
     public function getLinks()
     {
@@ -1107,10 +1107,11 @@ class Model_DteEmitido extends Model_Base_Envio
         $links['ver'] = $Request->url.'/dte/dte_emitidos/ver/'.$this->dte.'/'.$this->folio;
         $links['pdf'] = $Request->url.'/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/1/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
         $links['xml'] = $Request->url.'/dte/dte_emitidos/xml/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
-        if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->operacion=='S') {
+        if ($this->getEmisor()->config_pagos_habilitado and $this->getTipo()->permiteCobro()) {
             $links['pagar'] = $Request->url.'/pagos/documentos/pagar/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
         }
-        return $links;
+        $links_trigger = \sowerphp\core\Trigger::run('dte_dte_emitido_links', $this, $links);
+        return $links_trigger ? $links_trigger : $links;
     }
 
 }

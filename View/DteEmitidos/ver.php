@@ -128,7 +128,8 @@ new \sowerphp\general\View_Helper_Table([
 <!-- INICIO PDF -->
 <div role="tabpanel" class="tab-pane" id="pdf">
 <?php
-$pdf_publico = $_url.'/dte/dte_emitidos/pdf/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/0/'.$Emisor->rut.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total;
+$links = $DteEmitido->getLinks();
+$pdf_publico = $links['pdf'];
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['action'=>$_base.'/dte/dte_emitidos/pdf/'.$DteEmitido->dte.'/'.$DteEmitido->folio, 'id'=>'pdfForm', 'onsubmit'=>'Form.check(\'pdfForm\')']);
 echo $f->input([
@@ -152,12 +153,12 @@ echo $f->end('Descargar PDF');
 <!-- INICIO ENVIAR POR EMAIL -->
 <div role="tabpanel" class="tab-pane" id="email">
 <?php
-$enlace_pagar_dte = $_url.'/pagos/documentos/pagar/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$Emisor->rut.'/'.$DteEmitido->fecha.'/'.$DteEmitido->total;
+$enlace_pagar_dte = !empty($links['pagar']) ? $links['pagar'] : null;
 $asunto = $DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' de '.$Emisor->getNombre().' ('.$Emisor->getRUT().')';
 if (!$email_html) {
     $mensaje = $Receptor->razon_social.','."\n\n";
     $mensaje .= 'Se adjunta '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' del día '.\sowerphp\general\Utility_Date::format($DteEmitido->fecha).' por un monto total de $'.num($DteEmitido->total).'.-'."\n\n";
-    if ($Emisor->config_pagos_habilitado and $DteEmitido->getTipo()->operacion=='S') {
+    if ($enlace_pagar_dte) {
         if (!$Cobro->pagado) {
             $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
         } else {

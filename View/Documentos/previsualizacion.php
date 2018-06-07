@@ -41,8 +41,8 @@ new \sowerphp\general\View_Helper_Table([
     </div>
 </div>
 <div style="float:right;margin-bottom:1em;margin-top:2em;font-size:0.8em">
-<?php if ($DteTmp->getTipo()->permiteCobro()) : ?>
-    <a href="<?=$_base?>/pagos/cotizaciones/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>/<?=$DteTmp->emisor?>">Enlace público para pago</a> /
+<?php $links = $DteTmp->getLinks(); if (!empty($links['pagar'])) : ?>
+    <a href="<?=$links['pagar']?>">Enlace público para pago</a> /
 <?php endif; ?>
     <a href="<?=$_base?>/dte/dte_tmps/ver/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>">Ver página del documento temporal</a> /
     <a href="<?=$_base?>/dte/dte_tmps/ver/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>#email">Enviar por correo</a> /
