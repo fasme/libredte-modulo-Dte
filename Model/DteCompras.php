@@ -39,6 +39,47 @@ class Model_DteCompras extends \Model_Plural_App
     protected $_table = 'dte_compra'; ///< Tabla del modelo
 
     /**
+     * Método que indica si el libro para cierto periodo está o no generado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-06-14
+     */
+    public function libroGenerado($periodo)
+    {
+        return $this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_compra
+            WHERE receptor = :receptor AND periodo = :periodo AND certificacion = :certificacion AND track_id IS NOT NULL
+        ', [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion]);
+    }
+
+    /**
+     * Método que entrega el total de documentos asociados a compras
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-06-14
+     */
+    public function getTotalMensual($periodo)
+    {
+        $desde = \sowerphp\general\Utility_Date::normalize($periodo.'01');
+        $hasta = \sowerphp\general\Utility_Date::lastDayPeriod($periodo);
+        $n_recibidos = $this->db->getCol('
+            (
+                SELECT COUNT(*)
+                FROM dte_recibido
+                WHERE
+                    receptor = :receptor
+                    AND certificacion = :certificacion
+                    AND dte != 52
+                    AND ((periodo IS NULL AND fecha BETWEEN :desde AND :hasta) OR (periodo = :periodo))
+            ) UNION (
+                SELECT COUNT(*)
+                FROM dte_emitido
+                WHERE emisor = :receptor AND certificacion = :certificacion AND fecha BETWEEN :desde AND :hasta AND dte = 46
+            )
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion, ':periodo'=>$periodo, ':desde'=>$desde, ':hasta'=>$hasta]);
+        return array_sum($n_recibidos);
+    }
+
+    /**
      * Método que sincroniza el libro de compras local con el registro de compras del SII
      * - Se agregan documentos "registrados" en el registro de compras del SII
      * - Se eliminan documentos que están en el SII marcados como "no incluir" o "reclamados"

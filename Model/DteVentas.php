@@ -39,6 +39,36 @@ class Model_DteVentas extends \Model_Plural_App
     protected $_table = 'dte_venta'; ///< Tabla del modelo
 
     /**
+     * Método que indica si el libro para cierto periodo está o no generado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-06-14
+     */
+    public function libroGenerado($periodo)
+    {
+        return $this->getValue('
+            SELECT COUNT(*)
+            FROM dte_venta
+            WHERE emisor = :emisor AND periodo = :periodo AND certificacion = :certificacion AND track_id IS NOT NULL
+        ', [':emisor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+    }
+
+    /**
+     * Método que entrega el total de documentos asociados a ventas
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-06-14
+     */
+    public function getTotalMensual($periodo)
+    {
+        $desde = \sowerphp\general\Utility_Date::normalize($periodo.'01');
+        $hasta = \sowerphp\general\Utility_Date::lastDayPeriod($periodo);
+        return $this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_emitido
+            WHERE emisor = :emisor AND certificacion = :certificacion AND fecha BETWEEN :desde AND :hasta AND dte NOT IN (46, 52)
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    /**
      * Método que entrega el total mensual del libro de ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-04-25

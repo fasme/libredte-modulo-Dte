@@ -39,6 +39,20 @@ class Model_DteIntercambios extends \Model_Plural_App
     protected $_table = 'dte_intercambio'; ///< Tabla del modelo
 
     /**
+     * Método que entrega el total de documentos de intercambio pendientes de ser procesados
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-06-14
+     */
+    public function getTotalPendientes()
+    {
+        return $this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_intercambio
+            WHERE receptor = :receptor AND certificacion = :certificacion AND usuario IS NULL
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion]);
+    }
+
+    /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-05-19

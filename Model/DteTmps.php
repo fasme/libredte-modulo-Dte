@@ -38,4 +38,18 @@ class Model_DteTmps extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_tmp'; ///< Tabla del modelo
 
+    /**
+     * Método que entrega el total de documentos temporales del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-06-14
+     */
+    public function getTotal()
+    {
+        return $this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_tmp
+            WHERE emisor = :emisor
+        ', [':emisor'=>$this->getContribuyente()->rut]);
+    }
+
 }
