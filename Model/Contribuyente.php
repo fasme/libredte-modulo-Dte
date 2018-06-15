@@ -2873,7 +2873,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega la información del registro de compra y venta del SII
      * del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-02
+     * @version 2018-06-15
      */
     public function getRCV(array $filtros = [])
     {
@@ -2907,6 +2907,13 @@ class Model_Contribuyente extends \Model_App
                 $filtros['dte'] = [$filtros['dte']];
             }
         }
+        // errores
+        $errores = [
+            1 => 'Error de negocio',
+            2 => 'Error de aplicación',
+            3 => 'Sin datos',
+            99 => 'Consulta no válida',
+        ];
         // consumir servicio web de resumen
         if (!$filtros['detalle']) {
             $r = libredte_consume(
@@ -2919,7 +2926,8 @@ class Model_Contribuyente extends \Model_App
                 throw new \Exception('Error al obtener el resumen del RCV: '.$r['body']);
             }
             if ($r['body']['respEstado']['codRespuesta']) {
-                throw new \Exception('No fue posible obtener el resumen: '.$r['body']['respEstado']['msgeRespuesta']);
+                $error = isset($errores[$r['body']['respEstado']['codRespuesta']]) ? $errores[$r['body']['respEstado']['codRespuesta']] : ('Código '.$r['body']['respEstado']['codRespuesta']);
+                throw new \Exception('No fue posible obtener el resumen: '.$r['body']['respEstado']['msgeRespuesta'].' ('.$error.')');
             }
             return $r['body']['data'];
         }
@@ -2937,7 +2945,8 @@ class Model_Contribuyente extends \Model_App
                     throw new \Exception('Error al obtener el detalle del RCV: '.$r['body']);
                 }
                 if ($r['body']['respEstado']['codRespuesta']) {
-                    throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta']);
+                    $error = isset($errores[$r['body']['respEstado']['codRespuesta']]) ? $errores[$r['body']['respEstado']['codRespuesta']] : ('Código '.$r['body']['respEstado']['codRespuesta']);
+                    throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta'].' ('.$error.')');
                 }
                 $detalle = array_merge($detalle, $r['body']['data']);
             }
