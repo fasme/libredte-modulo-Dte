@@ -2918,7 +2918,7 @@ class Model_Contribuyente extends \Model_App
         if (!$filtros['detalle']) {
             $r = libredte_consume(
                 sprintf(
-                    '/sii/rcv_resumen/%d-%d/%s/%d/%s?formato=json&certificacion=%d',
+                    '/sii/rcv_resumen/%d-%s/%s/%d/%s?formato=json&certificacion=%d',
                     $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $filtros['estado'], (int)$this->config_ambiente_en_certificacion
                 ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
             );
@@ -2937,7 +2937,7 @@ class Model_Contribuyente extends \Model_App
             foreach ($filtros['dte'] as $dte) {
                 $r = libredte_consume(
                     sprintf(
-                        '/sii/rcv_detalle/%d-%d/%s/%d/%d/%s?formato=json&certificacion=%d&tipo=%s',
+                        '/sii/rcv_detalle/%d-%s/%s/%d/%d/%s?formato=json&certificacion=%d&tipo=%s',
                         $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
                     ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
                 );
