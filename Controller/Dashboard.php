@@ -45,19 +45,17 @@ class Controller_Dashboard extends \Controller_App
         // contadores
         $desde = date('Y-m-01');
         $hasta = date('Y-m-d');
-        $DteVentas = (new Model_DteVentas())->setContribuyente($Emisor);
-        $DteCompras = (new Model_DteCompras())->setContribuyente($Emisor);
         $n_temporales = (new Model_DteTmps())->setContribuyente($Emisor)->getTotal();
-        $n_emitidos = $DteVentas->getTotalMensual($periodo);
-        $n_recibidos = $DteCompras->getTotalMensual($periodo);
+        $n_emitidos = $Emisor->countVentas($periodo);
+        $n_recibidos = $Emisor->countCompras($periodo);
         $n_intercambios = (new Model_DteIntercambios())->setContribuyente($Emisor)->getTotalPendientes();
         $documentos_rechazados = (new Model_DteEmitidos())->setContribuyente($Emisor)->getTotalRechazados();
         // valores para cuota
         $cuota = $Emisor->getCuota();
         $n_dtes = $cuota ? $Emisor->getTotalDocumentosUsadosPeriodo() : false;
         // libros pendientes de enviar del período anterior
-        $libro_ventas_existe = $DteVentas->libroGenerado($periodo_anterior);
-        $libro_compras_existe = $DteCompras->libroGenerado($periodo_anterior);
+        $libro_ventas_existe = (new Model_DteVentas())->setContribuyente($Emisor)->libroGenerado($periodo_anterior);
+        $libro_compras_existe = (new Model_DteCompras())->setContribuyente($Emisor)->libroGenerado($periodo_anterior);
         // ventas
         $ventas_periodo_aux = $Emisor->getVentasPorTipo($periodo);
         $ventas_periodo = [];
