@@ -227,6 +227,18 @@ DTE.setFormaPago = function (tipo) {
     }
 }
 
+DTE.setMedioPago = function (medio) {
+    if (medio == 'PE') {
+        document.getElementById("BcoPagoField").value = BcoPago;
+        document.getElementById("TpoCtaPagoField").value = TpoCtaPago;
+        document.getElementById("NumCtaPagoField").value = NumCtaPago;
+    } else {
+        document.getElementById("BcoPagoField").value = "";
+        document.getElementById("TpoCtaPagoField").value = "";
+        document.getElementById("NumCtaPagoField").value = "";
+    }
+}
+
 DTE.setItem = function (contribuyente, codigo) {
     var f = document.getElementById("emitir_dte");
     var cols = codigo.parentNode.parentNode.parentNode.parentNode.childNodes;

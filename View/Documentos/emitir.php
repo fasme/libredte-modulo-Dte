@@ -283,15 +283,21 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
             <?=$f->input(['name'=>'TermPagoGlosa', 'placeholder'=>'Glosa que describe las condiciones del pago del DTE (opcional)', 'attr'=>'maxlength="100"', 'value'=>!empty($datos['Encabezado']['IdDoc']['TermPagoGlosa'])?$datos['Encabezado']['IdDoc']['TermPagoGlosa']:''])?>
         </div>
     </div>
-    <div class="row" id="terminosPago">
-        <div class="form-group col-md-6">
-            <?=$f->input(['type'=>'select', 'name'=>'TpoTranVenta', 'options'=>[''=>'¿Tipo de transacción para el vendedor?']+$TpoTranVenta, 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoTranVenta'])?$datos['Encabezado']['IdDoc']['TpoTranVenta']:''])?>
+    <!-- MEDIO DE PAGO -->
+    <div class="row" id="medioPago">
+        <div class="form-group col-md-3">
+            <?=$f->input(['name'=>'MedioPago', 'type'=>'select', 'options'=>[''=>'Cualquier medio de pago']+$MedioPago, 'value'=>!empty($datos['Encabezado']['IdDoc']['MedioPago'])?$datos['Encabezado']['IdDoc']['MedioPago']:'', 'attr'=>'onblur="DTE.setMedioPago(this.value)"'])?>
         </div>
-        <div class="form-group col-md-6">
-            <?=$f->input(['type'=>'select', 'name'=>'TpoTranCompra', 'options'=>[''=>'¿Tipo de transacción para el receptor?']+$TpoTranCompra, 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoTranCompra'])?$datos['Encabezado']['IdDoc']['TpoTranCompra']:''])?>
+        <div class="form-group col-md-3">
+            <?=$f->input(['name'=>'BcoPago', 'placeholder'=>'Banco', 'value'=>!empty($datos['Encabezado']['IdDoc']['BcoPago'])?$datos['Encabezado']['IdDoc']['BcoPago']:'', 'attr'=>'maxlength="40"'])?>
+        </div>
+        <div class="form-group col-md-3">
+            <?=$f->input(['name'=>'TpoCtaPago', 'type'=>'select', 'options'=>[''=>'Sin cuenta bancaria', 'CORRIENTE'=>'Cuenta corriente', 'VISTA'=>'Cuenta vista', 'AHORRO'=>'Cuenta de ahorro'], 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoCtaPago'])?$datos['Encabezado']['IdDoc']['TpoCtaPago']:''])?>
+        </div>
+        <div class="form-group col-md-3">
+            <?=$f->input(['name'=>'NumCtaPago', 'placeholder'=>'Número cuenta bancaria', 'value'=>!empty($datos['Encabezado']['IdDoc']['NumCtaPago'])?$datos['Encabezado']['IdDoc']['NumCtaPago']:'', 'attr'=>'maxlength="20"'])?>
         </div>
     </div>
-    <!-- TIPOS DE TRANSACCIONES -->
     <!-- DATOS DE PAGOS EN CASO QUE SEA VENTA A CRÉDITO -->
     <div class="row" id="datosPagos" style="display:none">
         <div class="form-group col-md-12">
@@ -308,6 +314,15 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     'accesskey' => 'P',
     'values' => [],
 ])?>
+        </div>
+    </div>
+    <!-- TIPOS DE TRANSACCIONES -->
+    <div class="row" id="tiposTransacciones">
+        <div class="form-group col-md-6">
+            <?=$f->input(['type'=>'select', 'name'=>'TpoTranVenta', 'options'=>[''=>'¿Tipo de transacción para el vendedor?']+$TpoTranVenta, 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoTranVenta'])?$datos['Encabezado']['IdDoc']['TpoTranVenta']:''])?>
+        </div>
+        <div class="form-group col-md-6">
+            <?=$f->input(['type'=>'select', 'name'=>'TpoTranCompra', 'options'=>[''=>'¿Tipo de transacción para el receptor?']+$TpoTranCompra, 'value'=>!empty($datos['Encabezado']['IdDoc']['TpoTranCompra'])?$datos['Encabezado']['IdDoc']['TpoTranCompra']:''])?>
         </div>
     </div>
     <!-- OPCIONES ADICIONALES DEL DOCUMENTO -->
@@ -427,3 +442,14 @@ echo $t->generate($clientes);
 <link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
 <script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
 <script type="text/javascript"> $(document).ready(function(){ dataTable("#clientes", [{"sWidth":120}, null, null]); }); </script>
+<script>
+<?php if ($Emisor->config_pagos_cuenta_rut == $Emisor->getRUT()) : ?>
+    var BcoPago = "<?=substr((new \website\Sistema\General\Model_Bancos())->get($Emisor->config_pagos_cuenta_banco)->banco,0,40)?>";
+    var TpoCtaPago = "<?=['C'=>'CORRIENTE', 'V'=>'VISTA', 'A'=>'AHORRO'][$Emisor->config_pagos_cuenta_tipo]?>";
+    var NumCtaPago = "<?=substr($Emisor->config_pagos_cuenta_numero,0,20)?>";
+<?php else : ?>
+    var BcoPago = "";
+    var TpoCtaPago = "";
+    var NumCtaPago = "";
+<?php endif; ?>
+</script>

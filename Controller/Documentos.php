@@ -73,6 +73,16 @@ class Controller_Documentos extends \Controller_App
         'EURO' => 'EURO',
     ]; // Tipo moneda para documentos de exportación
 
+    private $MedioPago = [
+        'EF' => 'Efectivo',
+        'PE' => 'Depósito o transferencia',
+        'TC' => 'Tarjeta de crédito o débito',
+        'CH' => 'Cheque',
+        'CF' => 'Cheque a fecha',
+        'LT' => 'Letra',
+        'OT' => 'Otro',
+    ]; // Medios de pago
+
     /**
      * Método que corrije el tipo de documento en caso de ser factura o boleta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -339,7 +349,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-22
+     * @version 2018-06-15
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -416,6 +426,7 @@ class Controller_Documentos extends \Controller_App
             'IndTraslado' => $this->IndTraslado,
             'IndServicio' => $this->IndServicio,
             'monedas' => $this->monedas,
+            'MedioPago' => $this->MedioPago,
             'TpoTranCompra' => $this->TpoTranCompra,
             'TpoTranVenta' => $this->TpoTranVenta,
             'nacionalidades' => \sasco\LibreDTE\Sii\Aduana::getNacionalidades(),
@@ -431,7 +442,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-30
+     * @version 2018-06-15
      */
     public function previsualizacion()
     {
@@ -502,6 +513,10 @@ class Controller_Documentos extends \Controller_App
                     'FchCancel' => $_POST['FchVenc'] < $_POST['FchEmis'] ? $_POST['FchVenc'] : false,
                     'PeriodoDesde' => !empty($_POST['PeriodoDesde']) ? $_POST['PeriodoDesde'] : false,
                     'PeriodoHasta' => !empty($_POST['PeriodoHasta']) ? $_POST['PeriodoHasta'] : false,
+                    'MedioPago' => !empty($_POST['MedioPago']) ? $_POST['MedioPago'] : false,
+                    'TpoCtaPago' => !empty($_POST['TpoCtaPago']) ? $_POST['TpoCtaPago'] : false,
+                    'NumCtaPago' => !empty($_POST['NumCtaPago']) ? $_POST['NumCtaPago'] : false,
+                    'BcoPago' => !empty($_POST['BcoPago']) ? $_POST['BcoPago'] : false,
                     'TermPagoGlosa' => !empty($_POST['TermPagoGlosa']) ? $_POST['TermPagoGlosa'] : false,
                     'FchVenc' => $_POST['FchVenc'] > $_POST['FchEmis'] ? $_POST['FchVenc'] : false,
                 ],
