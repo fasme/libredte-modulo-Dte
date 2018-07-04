@@ -1201,14 +1201,14 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-26
+     * @version 2018-07-04
      */
     public function getDocumentosEmitidos($filtros = [])
     {
         // armar filtros
         $where = ['d.emisor = :rut', 'd.certificacion = :certificacion'];
         $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
-        foreach (['folio', 'receptor', 'fecha', 'total', 'usuario'] as $c) {
+        foreach (['folio', 'fecha', 'total', 'usuario'] as $c) {
             if (!empty($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
                 $vars[':'.$c] = $filtros[$c];
@@ -1225,9 +1225,25 @@ class Model_Contribuyente extends \Model_App
                     $i++;
                 }
                 $where[] = 'd.dte IN ('.implode(', ', $where_dte).')';
-            } else {
+            }
+            else if ($filtros['dte'][0]=='!') {
+                $where[] = 'd.dte != :dte';
+                $vars[':dte'] = substr($filtros['dte'],1);
+            }
+            else {
                 $where[] = 'd.dte = :dte';
                 $vars[':dte'] = $filtros['dte'];
+            }
+        }
+        // receptor
+        if (!empty($filtros['receptor'])) {
+            if ($filtros['receptor'][0]=='!') {
+                $where[] = 'd.receptor != :receptor';
+                $vars[':receptor'] = substr($filtros['receptor'],1);
+            }
+            else {
+                $where[] = 'd.receptor = :receptor';
+                $vars[':receptor'] = $filtros['receptor'];
             }
         }
         // otros filtros
@@ -1325,17 +1341,58 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el total de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-03
+     * @version 2018-07-04
      */
     public function countDocumentosEmitidos($filtros = [])
     {
         $where = ['d.emisor = :rut', 'd.certificacion = :certificacion'];
         $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
-        foreach (['dte', 'folio', 'receptor', 'fecha', 'total', 'usuario'] as $c) {
+        foreach (['folio', 'total', 'fecha', 'usuario'] as $c) {
             if (isset($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
                 $vars[':'.$c] = $filtros[$c];
             }
+        }
+        // dte
+        if (!empty($filtros['dte'])) {
+            if (is_array($filtros['dte'])) {
+                $i = 0;
+                $where_dte = [];
+                foreach ($filtros['dte'] as $filtro_dte) {
+                    $where_dte[] = ':dte'.$i;
+                    $vars[':dte'.$i] = $filtro_dte;
+                    $i++;
+                }
+                $where[] = 'd.dte IN ('.implode(', ', $where_dte).')';
+            }
+            else if ($filtros['dte'][0]=='!') {
+                $where[] = 'd.dte != :dte';
+                $vars[':dte'] = substr($filtros['dte'],1);
+            }
+            else {
+                $where[] = 'd.dte = :dte';
+                $vars[':dte'] = $filtros['dte'];
+            }
+        }
+        // receptor
+        if (!empty($filtros['receptor'])) {
+            if ($filtros['receptor'][0]=='!') {
+                $where[] = 'd.receptor != :receptor';
+                $vars[':receptor'] = substr($filtros['receptor'],1);
+            }
+            else {
+                $where[] = 'd.receptor = :receptor';
+                $vars[':receptor'] = $filtros['receptor'];
+            }
+        }
+        // otros filtros
+        if (!empty($filtros['fecha_desde'])) {
+            $where[] = 'd.fecha >= :fecha_desde';
+            $vars[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+        if (!empty($filtros['fecha_hasta'])) {
+            $where[] = 'd.fecha <= :fecha_hasta';
+            $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
         return $this->db->getValue(
             'SELECT COUNT(*) FROM dte_emitido AS d WHERE '.implode(' AND ', $where),
