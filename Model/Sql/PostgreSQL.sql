@@ -203,6 +203,8 @@ CREATE TABLE dte_tmp (
 	fecha DATE NOT NULL,
 	total INTEGER NOT NULL,
 	datos TEXT NOT NULL,
+	sucursal_sii INTEGER,
+	usuario INTEGER NOT NULL,
 	CONSTRAINT dte_tmp_pkey PRIMARY KEY (emisor, receptor, dte, codigo),
 	CONSTRAINT dte_tmp_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL
@@ -212,8 +214,13 @@ CREATE TABLE dte_tmp (
 		ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT dte_tmp_dte_fk FOREIGN KEY (dte)
 		REFERENCES dte_tipo (codigo) MATCH FULL
+		ON UPDATE CASCADE ON DELETE RESTRICT,
+	CONSTRAINT dte_tmp_usuario_fk FOREIGN KEY (usuario)
+		REFERENCES usuario (id) MATCH FULL
 		ON UPDATE CASCADE ON DELETE RESTRICT
 );
+CREATE INDEX dte_tmp_sucursal_sii_idx ON dte_tmp (sucursal_sii);
+CREATE INDEX dte_tmp_usuario_idx ON dte_tmp (usuario);
 
 -- tabla para dte emitido
 DROP TABLE IF EXISTS dte_emitido CASCADE;

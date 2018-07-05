@@ -46,6 +46,8 @@ class Model_DteTmp extends \Model_App
     public $fecha; ///< date() NOT NULL DEFAULT ''
     public $total; ///< integer(32) NOT NULL DEFAULT ''
     public $datos; ///< text() NOT NULL DEFAULT ''
+    public $sucursal_sii; ///< integer(32) NULL DEFAULT ''
+    public $usuario; ///< integer(32) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -125,6 +127,28 @@ class Model_DteTmp extends \Model_App
             'auto'      => false,
             'pk'        => false,
             'fk'        => null
+        ),
+        'sucursal_sii' => array(
+            'name'      => 'Sucursal SII',
+            'comment'   => '',
+            'type'      => 'integer',
+            'length'    => 32,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'usuario' => array(
+            'name'      => 'Usuario',
+            'comment'   => '',
+            'type'      => 'integer',
+            'length'    => 32,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => array('table' => 'usuario', 'column' => 'id')
         ),
 
     );
