@@ -169,7 +169,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2018-07-10
      */
     public function estado_envio($track_id)
     {
@@ -177,6 +177,9 @@ class Controller_Sii extends \Controller_App
         try {
             $Emisor = $this->getContribuyente();
             $Firma = $Emisor->getFirma($this->Auth->User->id);
+            if (!$Firma) {
+                die('No hay firma electrónica asociada al usuario');
+            }
             $data = [
                 'firma' => [
                     'cert-data' => $Firma->getCertificate(),
