@@ -446,7 +446,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para generar y mostrar previsualización de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-15
+     * @version 2018-08-02
      */
     public function previsualizacion()
     {
@@ -548,8 +548,8 @@ class Controller_Documentos extends \Controller_App
                 'RUTSolicita' => !empty($_POST['RUTSolicita']) ? str_replace('.', '', $_POST['RUTSolicita']) : false,
             ],
         ];
-        // agregar pagos programados si es venta a crédito
-        if ($_POST['FmaPago']==2) {
+        // agregar pagos programados si es venta a crédito y no es boleta
+        if ($_POST['FmaPago']==2 and !in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
             // si no hay pagos explícitos se copia la fecha de vencimiento y el
             // monto total se determinará en el proceso de normalización
             if (empty($_POST['FchPago'])) {
