@@ -72,7 +72,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
         <div class="form-group col-md-9"><?=$f->input(['name' => 'RznSocRecep', 'placeholder' => 'Razón social del receptor', 'check' => 'notempty', 'attr' => 'maxlength="100"', 'value'=>!empty($datos['Encabezado']['Receptor']['RznSocRecep'])?$datos['Encabezado']['Receptor']['RznSocRecep']:''])?></div>
     </div>
     <div class="row">
-        <div class="form-group col-md-6"><?=$f->input(['name' => 'GiroRecep', 'placeholder' => 'Giro del receptor', 'check' => 'notempty', 'attr' => 'maxlength="40"', 'value'=>!empty($datos['Encabezado']['Receptor']['GiroRecep'])?substr($datos['Encabezado']['Receptor']['GiroRecep'],0,40):''])?></div>
+        <div class="form-group col-md-6"><?=$f->input(['name' => 'GiroRecep', 'placeholder' => 'Giro del receptor', 'check' => 'notempty', 'attr' => 'maxlength="40"', 'value'=>!empty($datos['Encabezado']['Receptor']['GiroRecep'])?mb_substr($datos['Encabezado']['Receptor']['GiroRecep'],0,40):''])?></div>
         <div class="form-group col-md-3"><?=$f->input([ 'name' => 'DirRecep', 'placeholder' => 'Dirección del receptor', 'check' => 'notempty', 'attr' => 'maxlength="70"', 'value'=>!empty($datos['Encabezado']['Receptor']['DirRecep'])?$datos['Encabezado']['Receptor']['DirRecep']:''])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'select', 'name' => 'CmnaRecep', 'options' => [''=>'Comuna del receptor'] + $comunas, 'check' => 'notempty', 'value'=>!empty($datos['Encabezado']['Receptor']['CmnaRecep'])?$datos['Encabezado']['Receptor']['CmnaRecep']:''])?></div>
     </div>
@@ -444,9 +444,9 @@ echo $t->generate($clientes);
 <script type="text/javascript"> $(document).ready(function(){ dataTable("#clientes", [{"sWidth":120}, null, null]); }); </script>
 <script>
 <?php if ($Emisor->config_pagos_cuenta_rut == $Emisor->getRUT()) : ?>
-    var BcoPago = "<?=substr((new \website\Sistema\General\Model_Bancos())->get($Emisor->config_pagos_cuenta_banco)->banco,0,40)?>";
+    var BcoPago = "<?=mb_substr((new \website\Sistema\General\Model_Bancos())->get($Emisor->config_pagos_cuenta_banco)->banco,0,40)?>";
     var TpoCtaPago = "<?=['C'=>'CORRIENTE', 'V'=>'VISTA', 'A'=>'AHORRO'][$Emisor->config_pagos_cuenta_tipo]?>";
-    var NumCtaPago = "<?=substr($Emisor->config_pagos_cuenta_numero,0,20)?>";
+    var NumCtaPago = "<?=mb_substr($Emisor->config_pagos_cuenta_numero,0,20)?>";
 <?php else : ?>
     var BcoPago = "";
     var TpoCtaPago = "";
