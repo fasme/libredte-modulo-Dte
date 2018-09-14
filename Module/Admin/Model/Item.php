@@ -235,7 +235,7 @@ class Model_Item extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     /**
-     * Método que guarda el item del inventario
+     * Método que guarda el item de facturación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-09-14
      */
