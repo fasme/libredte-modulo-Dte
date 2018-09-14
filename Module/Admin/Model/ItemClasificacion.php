@@ -125,6 +125,17 @@ class Model_ItemClasificacion extends \Model_App
     }
 
     /**
+     * Método que guarda la clasificación del item
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-09-14
+     */
+    public function save()
+    {
+        $this->codigo = trim(str_replace(['/', '"', '\'', ' ', '&', '%'], '_', $this->codigo));
+        return parent::save();
+    }
+
+    /**
      * Método que entrega la clasificación superior de la clasificación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-02-24
