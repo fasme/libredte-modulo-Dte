@@ -410,7 +410,7 @@ class Controller_Documentos extends \Controller_App
                 'datos' => $datos,
                 'referencia' => isset($_GET['copiar']) ? 'copia' : 'referencia',
                 'referencia_codigo' => (int)$referencia_codigo,
-                'referencia_razon' => substr(urldecode($referencia_razon), 0, 90),
+                'referencia_razon' => mb_substr(urldecode($referencia_razon), 0, 90),
             ]);
         }
         // variables para la vista
@@ -496,7 +496,7 @@ class Controller_Documentos extends \Controller_App
         $Receptor->dv = $dv;
         $Receptor->razon_social = $_POST['RznSocRecep'];
         if (!empty($_POST['GiroRecep'])) {
-            $Receptor->giro = substr($_POST['GiroRecep'], 0, 40);
+            $Receptor->giro = mb_substr($_POST['GiroRecep'], 0, 40);
         }
         $Receptor->telefono = $_POST['Contacto'];
         $Receptor->email = $_POST['CorreoRecep'];
@@ -914,7 +914,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-04
+     * @version 2018-09-26
      */
     private function guardarReceptor($datos)
     {
@@ -929,23 +929,23 @@ class Controller_Documentos extends \Controller_App
         }
         $Receptor->dv = $dv;
         if (!empty($datos['RznSocRecep'])) {
-            $Receptor->razon_social = substr($datos['RznSocRecep'], 0, 100);
+            $Receptor->razon_social = mb_substr($datos['RznSocRecep'], 0, 100);
         }
         if (!empty($datos['GiroRecep'])) {
-            $Receptor->giro = substr($datos['GiroRecep'], 0, 80);
+            $Receptor->giro = mb_substr($datos['GiroRecep'], 0, 80);
         }
         if (!empty($datos['Contacto'])) {
             if (strpos($datos['Contacto'], '@')) {
-                $Receptor->email = substr($datos['Contacto'], 0, 80);
+                $Receptor->email = mb_substr($datos['Contacto'], 0, 80);
             } else {
-                $Receptor->telefono = substr($datos['Contacto'], 0, 20);
+                $Receptor->telefono = mb_substr($datos['Contacto'], 0, 20);
             }
         }
         if (!empty($datos['CorreoRecep'])) {
-            $Receptor->email = substr($datos['CorreoRecep'], 0, 80);
+            $Receptor->email = mb_substr($datos['CorreoRecep'], 0, 80);
         }
         if (!empty($datos['DirRecep'])) {
-            $Receptor->direccion = substr($datos['DirRecep'], 0, 70);
+            $Receptor->direccion = mb_substr($datos['DirRecep'], 0, 70);
         }
         if (!empty($datos['CmnaRecep'])) {
             if (is_numeric($datos['CmnaRecep'])) {
