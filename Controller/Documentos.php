@@ -306,20 +306,22 @@ class Controller_Documentos extends \Controller_App
         }
         // si es DTE de exportación, se saca el total del MntTotOtrMnda en PESOS CL
         else {
-            $total = false;
-            if (!empty($datos_dte['Encabezado']['OtraMoneda'])) {
-                if (!isset($datos_dte['Encabezado']['OtraMoneda'][0])) {
-                    $datos_dte['Encabezado']['OtraMoneda'] = [$dte['Encabezado']['OtraMoneda']];
-                }
-                foreach ($datos_dte['Encabezado']['OtraMoneda'] as $OtraMoneda) {
-                    if ($OtraMoneda['TpoMoneda'] == 'PESO CL' and !empty($OtraMoneda['MntTotOtrMnda'])) {
-                        $total = $OtraMoneda['MntTotOtrMnda'];
-                        break;
+            $total = 0;
+            if ($resumen['MntTotal']) {
+                if (!empty($datos_dte['Encabezado']['OtraMoneda'])) {
+                    if (!isset($datos_dte['Encabezado']['OtraMoneda'][0])) {
+                        $datos_dte['Encabezado']['OtraMoneda'] = [$dte['Encabezado']['OtraMoneda']];
+                    }
+                    foreach ($datos_dte['Encabezado']['OtraMoneda'] as $OtraMoneda) {
+                        if ($OtraMoneda['TpoMoneda'] == 'PESO CL' and !empty($OtraMoneda['MntTotOtrMnda'])) {
+                            $total = $OtraMoneda['MntTotOtrMnda'];
+                            break;
+                        }
                     }
                 }
-            }
-            if (!$total) {
-                $this->Api->send('No fue posible determinar el valor total en pesos del DTE', 400);
+                if (!$total) {
+                    $this->Api->send('No fue posible determinar el valor total en pesos del DTE', 400);
+                }
             }
             $DteTmp->total = round($total);
         }
