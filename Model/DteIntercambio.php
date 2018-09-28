@@ -743,7 +743,7 @@ class Model_DteIntercambio extends \Model_App
         // asignar carátula y Firma
         $RespuestaEnvio->setCaratula([
             'RutResponde' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
-            'RutRecibe' => $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor),
+            'RutRecibe' => $this->emisor.'-'.\sowerphp\app\Utility_Rut::dv($this->emisor),
             'IdRespuesta' => $this->codigo,
             'NmbContacto' => $config['NmbContacto'],
             'MailContacto' => $config['MailContacto'],
@@ -768,7 +768,7 @@ class Model_DteIntercambio extends \Model_App
         $EnvioRecibos = new \sasco\LibreDTE\Sii\EnvioRecibos();
         $EnvioRecibos->setCaratula([
             'RutResponde' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
-            'RutRecibe' => $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor),
+            'RutRecibe' => $this->emisor.'-'.\sowerphp\app\Utility_Rut::dv($this->emisor),
             'NmbContacto' => $config['NmbContacto'],
             'MailContacto' => $config['MailContacto'],
         ]);
@@ -830,7 +830,7 @@ class Model_DteIntercambio extends \Model_App
         // asignar carátula y Firma
         $RespuestaEnvio->setCaratula([
             'RutResponde' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
-            'RutRecibe' => $this->receptor.'-'.\sowerphp\app\Utility_Rut::dv($this->receptor),
+            'RutRecibe' => $this->emisor.'-'.\sowerphp\app\Utility_Rut::dv($this->emisor),
             'IdRespuesta' => $this->codigo,
             'NmbContacto' => $config['NmbContacto'],
             'MailContacto' => $config['MailContacto'],
