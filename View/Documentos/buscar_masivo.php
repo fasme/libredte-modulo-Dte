@@ -16,7 +16,7 @@ echo $f->input([
     'name' => 'archivo',
     'label' => 'Documentos',
     'check' => 'notempty',
-    'help' => 'Archivo CSV, codificación UTF-8, con los documentos que se deben buscar masivamente. <a href="'.$_base.'/dte/archivos/emision_masiva.csv">Ejemplo formato</a>',
+    'help' => 'Archivo CSV (separado por punto y coma, codificado en UTF-8) con los documentos que se deben buscar masivamente. <a href="'.$_base.'/dte/archivos/emision_masiva.csv" download="emision_masiva.csv">Ejemplo formato</a>',
 ]);
 echo $f->input([
     'type' => 'select',

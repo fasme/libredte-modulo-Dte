@@ -13,7 +13,7 @@
     </li>
 </ul>
 <div class="page-header"><h1>Emitir DTE masivo <small><?=$Emisor->getNombre()?></small></h1></div>
-<p>Aquí podrá solicitar la emisión masiva de DTE a partir de un archivo CSV. El archivo debe estar codificado en UTF-8 y tener el <a href="<?=$_base?>/dte/archivos/emision_masiva.csv">siguiente formato</a>:</p>
+<p>Aquí podrá solicitar la emisión masiva de DTE a partir de un archivo CSV (separado por punto y coma, codificado en UTF-8). El archivo debe tener el <a href="<?=$_base?>/dte/archivos/emision_masiva.csv" download="emision_masiva.csv">siguiente formato</a>:</p>
 <ul>
     <li>Tipo DTE: código del tipo de documento (ej: 33 para factura o 39 para boletas) (obligatorio)</li>
     <li>Folio: número que identifica de manera única dentro del CSV al DTE. Este folio sólo se usará para la emisión si así está configurado (obligatorio)</li>
@@ -74,7 +74,7 @@ echo $f->input([
     'name' => 'archivo',
     'label' => 'Documentos',
     'check' => 'notempty',
-    'help' => 'Archivo CSV, codificación UTF-8, con los documentos que se deben emitir masivamente. <a href="'.$_base.'/dte/archivos/emision_masiva.csv">Ejemplo formato</a>',
+    'help' => 'Archivo CSV (separado por punto y coma, codificado en UTF-8) con los documentos que se deben emitir masivamente. <a href="'.$_base.'/dte/archivos/emision_masiva.csv" download="emision_masiva.csv">Ejemplo formato</a>',
 ]);
 echo $f->input([
     'type' => 'select',
