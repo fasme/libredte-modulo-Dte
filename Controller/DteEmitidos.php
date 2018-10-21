@@ -1461,7 +1461,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite buscar y consultar un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-06
+     * @version 2018-10-16
      */
     public function consultar($dte = null)
     {
@@ -1470,8 +1470,9 @@ class Controller_DteEmitidos extends \Controller_App
             'dtes' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
             'dte' => isset($_POST['dte']) ? $_POST['dte'] : $dte,
         ]);
+        $this->layout = 'popup';
         // si se solicitó un documento se busca
-        if (isset($_POST['submit'])) {
+        if (isset($_POST['emisor'])) {
             $r = $this->consume('/api/dte/dte_emitidos/consultar?getXML=0', $_POST);
             if ($r['status']['code']!=200) {
                 \sowerphp\core\Model_Datasource_Session::message(

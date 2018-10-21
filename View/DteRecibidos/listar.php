@@ -1,29 +1,28 @@
-<ul class="nav nav-pills pull-right">
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fas fa-university"></span> Recibidos en SII <span class="caret"></span>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item" class="dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-university"></i> Recibidos en SII
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII">
-                     DTE recibidos en SII
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_recibidos/bhe" title="Buscar las boletas de honorarios electrónicas recibidas en el SII">
-                    Boletas honorarios en SII
-                </a>
-            </li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="dropdown-item">
+                Registro de compras
+            </a>
+            <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII" class="dropdown-item">
+                    DTE recibidos en SII (previo a RC)
+            </a>
+            <a href="<?=$_base?>/dte/dte_recibidos/bhe" title="Buscar las boletas de honorarios electrónicas recibidas en el SII" class="dropdown-item">
+                Boletas honorarios en SII
+            </a>
+        </div>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras/importar" title="Importar libro IEC desde archivo CSV">
-            <span class="fa fa-upload"></span> Importar CSV
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/importar" title="Importar libro IEC desde archivo CSV" class="nav-link">
+            <i class="fa fa-upload"></i> Importar CSV
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_recibidos/agregar">
-            <span class="fa fa-plus"></span> Agregar documento
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_recibidos/agregar" class="nav-link">
+            <i class="fa fa-plus"></i> Agregar documento
         </a>
     </li>
 </ul>
@@ -33,10 +32,11 @@
 
 <?php
 foreach ($documentos as &$d) {
-    $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-search"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="far fa-file-pdf"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-default"><span class="fa fa-edit"></span></a>';
+    $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-primary'.(!$d['intercambio']?' disabled':'').'" role="button"><i class="fa fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-primary'.(!$d['intercambio']?' disabled':'').'" role="button"><i class="far fa-file-pdf fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
     $d[] = $acciones;
+    $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
     $d['total'] = num($d['total']);
     unset($d['emisor'], $d['dte'], $d['intercambio']);
 }
@@ -48,7 +48,7 @@ array_unshift($documentos, [
     $f->input(['type'=>'date', 'name'=>'fecha', 'value'=>(isset($search['fecha'])?$search['fecha']:''), 'check'=>'date']),
     $f->input(['name'=>'total', 'value'=>(isset($search['total'])?$search['total']:''), 'check'=>'integer']),
     $f->input(['type'=>'select', 'name'=>'usuario', 'options'=>[''=>'Todos'] + $usuarios, 'value'=>(isset($search['usuario'])?$search['usuario']:'')]),
-    '<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>',
+    '<button type="submit" class="btn btn-primary"><i class="fa fa-search fa-fw" aria-hidden="true"></i></button>',
 ]);
 array_unshift($documentos, ['Documento', 'Folio', 'Emisor', 'Fecha', 'Total', 'Usuario', 'Acciones']);
 
@@ -58,5 +58,5 @@ $maintainer = new \sowerphp\app\View_Helper_Maintainer([
     'linkEnd' => $searchUrl,
 ]);
 $maintainer->setId('dte_recibidos_'.$Emisor->rut);
-$maintainer->setColsWidth([null, null, null, null, null, null, 150]);
+$maintainer->setColsWidth([null, null, null, null, null, null, 160]);
 echo $maintainer->listar ($documentos, $paginas, $pagina, false);

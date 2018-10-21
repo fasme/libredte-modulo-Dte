@@ -1,82 +1,59 @@
-<ul class="nav nav-pills pull-right">
-     <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fas fa-download"></span> Descargar<span class="caret"></span>
+<ul class="nav nav-pills float-right">
+     <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-download"></i> Descargar
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/rcv">
-                     Registrados formato RC
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/rcv">
-                    Pendientes formato RC
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/NO_INCLUIR/rcv">
-                    No incluídos formato RC
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/RECLAMADO/rcv">
-                    Reclamados formato RC
-                </a>
-            </li>
-            <li class="divider"></li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/iecv">
-                     Registrados formato IEC
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/iecv">
-                    Pendientes formato IEC
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/NO_INCLUIR/iecv">
-                    No incluídos formato IEC
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/RECLAMADO/iecv">
-                    Reclamados formato IEC
-                </a>
-            </li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/rcv" class="dropdown-item">
+                    Registrados formato RC
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/rcv" class="dropdown-item">
+                Pendientes formato RC
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/NO_INCLUIR/rcv" class="dropdown-item">
+                No incluídos formato RC
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/RECLAMADO/rcv" class="dropdown-item">
+                Reclamados formato RC
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/iecv" class="dropdown-item">
+                    Registrados formato IEC
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/iecv" class="dropdown-item">
+                Pendientes formato IEC
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/NO_INCLUIR/iecv" class="dropdown-item">
+                No incluídos formato IEC
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/RECLAMADO/iecv" class="dropdown-item">
+                Reclamados formato IEC
+            </a>
+        </div>
     </li>
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fas fa-university"></span> Ver resumen RC<span class="caret"></span>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-university"></i> Ver resumen RC
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>">
-                     Registrados
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/PENDIENTE">
-                    Pendientes
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/NO_INCLUIR">
-                    No incluídos
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/RECLAMADO">
-                    Reclamados
-                </a>
-            </li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>" class="dropdown-item">
+                Registrados
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/PENDIENTE" class="dropdown-item">
+                Pendientes
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/NO_INCLUIR" class="dropdown-item">
+                No incluídos
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/RECLAMADO" class="dropdown-item">
+                Reclamados
+            </a>
+        </div>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras/ver/<?=$periodo?>" title="Volver al IEC de <?=$periodo?>">
-            Volver al período
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/ver/<?=$periodo?>" title="Ir al libro de compras (IEC) de <?=$periodo?>" class="nav-link">
+            <i class="fa fa-book"></i>
+            Libro de compras <?=$periodo?>
         </a>
     </li>
 </ul>
@@ -87,7 +64,7 @@ foreach ($resumen as &$r) {
     foreach(['rsmnMntExe', 'rsmnMntNeto', 'rsmnMntIVA', 'rsmnMntIVANoRec', 'rsmnIVAUsoComun', 'rsmnMntTotal', 'rsmnTotDoc'] as $col) {
         $r[$col] = num($r[$col]);
     }
-    $r[] = $r['rsmnLink'] ? ('<a href="'.$_base.'/dte/dte_compras/rcv_detalle/'.$periodo.'/'.$r['rsmnTipoDocInteger'].'/'.$estado.'" title="Ver detalles de los documentos"><span class="fa fa-search btn btn-default"></a>') : '';
+    $r[] = $r['rsmnLink'] ? ('<a href="'.$_base.'/dte/dte_compras/rcv_detalle/'.$periodo.'/'.$r['rsmnTipoDocInteger'].'/'.$estado.'" title="Ver detalles de los documentos" class="btn btn-primary"><i class="fa fa-search fa-fw"></a>') : '';
     unset($r['dcvCodigo'], $r['rsmnCodigo'], $r['rsmnTipoDocInteger'], $r['rsmnLink'], $r['dcvOperacion'], $r['rsmnEstadoContab'], $r['rsmnTotalRutEmisor']);
 }
 array_unshift($resumen, ['DTE', 'Ingreso', 'Exento', 'Neto', 'IVA', 'IVA no rec.', 'IVA uso común', 'Total', 'Docs', 'Ver']);

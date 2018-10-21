@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_ventas/rcv_resumen/<?=$periodo?>" title="Volver al resumen del RV de <?=$periodo?>">
-            Volver al resumen
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_ventas/rcv_resumen/<?=$periodo?>" title="Ir al resumen del RV de <?=$periodo?>" class="nav-link">
+            <i class="fa fa-university"></i>
+            Resumen RV <?=$periodo?>
         </a>
     </li>
 </ul>
@@ -21,6 +22,4 @@ foreach ($keys as &$k) {
 array_unshift($detalle, $keys);
 new \sowerphp\general\View_Helper_Table($detalle, 'rv_detalle_'.$periodo.'_'.$DteTipo->codigo, true);
 ?>
-<link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
-<script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
 <script type="text/javascript"> $(document).ready(function(){ dataTable("#<?='rv_detalle_'.$periodo.'_'.$DteTipo->codigo?>"); }); </script>

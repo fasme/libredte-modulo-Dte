@@ -1,17 +1,17 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal">
-            <span class="fa fa-edit"></span> Emitir documento
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal" class="nav-link">
+            <i class="fa fa-edit"></i> Emitir documento
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_emitidos/cargar_xml" title="Cargar un XML emitido externamente">
-            <span class="fa fa-upload"></span> Cargar XML
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_emitidos/cargar_xml" title="Cargar un XML emitido externamente" class="nav-link">
+            <i class="fa fa-upload"></i> Cargar XML
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_emitidos/buscar" title="Búsqueda avanzada de documentos emitidos">
-            <span class="fa fa-search"></span> Buscar
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_emitidos/buscar" title="Búsqueda avanzada de documentos emitidos" class="nav-link">
+            <i class="fa fa-search"></i> Buscar
         </a>
     </li>
 </ul>
@@ -19,12 +19,13 @@
 <p>Aquí podrá consultar todos los documentos emitidos por la empresa <?=$Emisor->razon_social?>.</p>
 <?php
 foreach ($documentos as &$d) {
-    $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento"><span class="fa fa-search btn btn-default"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
+    $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary"><i class="fas fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
     $d[] = $acciones;
+    $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
     $d['total'] = num($d['total']);
     $d['sucursal_sii'] = $Emisor->getSucursal($d['sucursal_sii'])->sucursal;
-    unset($d['dte']);
+    unset($d['dte'], $d['intercambio']);
 }
 $f = new \sowerphp\general\View_Helper_Form(false);
 array_unshift($documentos, [
@@ -34,12 +35,11 @@ array_unshift($documentos, [
     $f->input(['type'=>'date', 'name'=>'fecha', 'value'=>(isset($search['fecha'])?$search['fecha']:''), 'check'=>'date']),
     $f->input(['name'=>'total', 'value'=>(isset($search['total'])?$search['total']:''), 'check'=>'integer']),
     '',
-    '',
     $f->input(['type'=>'select', 'name'=>'sucursal_sii', 'options'=>[''=>'Todas'] + $sucursales, 'value'=>(isset($search['sucursal_sii'])?$search['sucursal_sii']:$sucursal)]),
     $f->input(['type'=>'select', 'name'=>'usuario', 'options'=>[''=>'Todos'] + $usuarios, 'value'=>(isset($search['usuario'])?$search['usuario']:'')]),
-    '<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>',
+    '<button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>',
 ]);
-array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Intercambio', 'Sucursal', 'Usuario', 'Acciones']);
+array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Sucursal', 'Usuario', 'Acciones']);
 
 // renderizar el mantenedor
 $maintainer = new \sowerphp\app\View_Helper_Maintainer([
@@ -47,5 +47,5 @@ $maintainer = new \sowerphp\app\View_Helper_Maintainer([
     'linkEnd' => $searchUrl,
 ]);
 $maintainer->setId('dte_emitidos_'.$Emisor->rut);
-$maintainer->setColsWidth([null, null, null, null, null, null, null, null, null, 100]);
+$maintainer->setColsWidth([null, null, null, null, null, null, null, null, 110]);
 echo $maintainer->listar ($documentos, $paginas, $pagina, false);

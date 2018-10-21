@@ -1,26 +1,22 @@
-<ul class="nav nav-pills pull-right">
-<?php if (!$Emisor->config_ambiente_en_certificacion) : ?>
-    <li>
-        <a href="https://www4.sii.cl/registrorechazodteInternet" title="Ir al registro de aceptación o reclamos de un DTE en el SII" target="_blank">
-            Aceptar/rechazar en SII
-        </a>
-    </li>
-<?php endif; ?>
+<ul class="nav nav-pills float-right">
 <?php if ($DteIntercambio->codigo!=1): ?>
-    <li>
-        <a href="<?=$_base?>/dte/dte_intercambios/ver/<?=($DteIntercambio->codigo-1)?>" title="Ver intercambio N° <?=($DteIntercambio->codigo-1)?>">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_intercambios/ver/<?=($DteIntercambio->codigo-1)?>" title="Ver intercambio N° <?=($DteIntercambio->codigo-1)?>" class="nav-link">
+            <i class="fa fa-arrow-left"></i>
             Anterior
         </a>
     </li>
 <?php endif; ?>
-    <li>
-        <a href="<?=$_base?>/dte/dte_intercambios/ver/<?=($DteIntercambio->codigo+1)?>" title="Ver intercambio N° <?=($DteIntercambio->codigo+1)?>">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_intercambios/ver/<?=($DteIntercambio->codigo+1)?>" title="Ver intercambio N° <?=($DteIntercambio->codigo+1)?>" class="nav-link">
+            <i class="fa fa-arrow-right"></i>
             Siguiente
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_intercambios/listar" title="Volver a la bandeja de intercambio entre contribuyentes">
-            Volver a bandeja intercambio
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_intercambios/listar" title="Ir a la bandeja de intercambio entre contribuyentes" class="nav-link">
+            <i class="fa fa-exchange-alt"></i>
+            Bandeja intercambio
         </a>
     </li>
 </ul>
@@ -32,7 +28,7 @@
 $(function() {
     var url = document.location.toString();
     if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+        $('#'+url.split('#')[1]+'-tab').tab('show');
     }
 });
 function intercambio_recibir() {
@@ -53,11 +49,11 @@ function intercambio_reclamar() {
 
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Email recibido y PDF</a></li>
-        <li role="presentation"><a href="#documentos" aria-controls="documentos" role="tab" data-toggle="tab">Recepción y acuse de recibo</a></li>
-        <li role="presentation"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab">Avanzado</a></li>
+        <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link active" aria-selected="true">Email recibido y PDF</a></li>
+        <li class="nav-item"><a href="#documentos" aria-controls="documentos" role="tab" data-toggle="tab" id="documentos-tab" class="nav-link">Recepción y acuse de recibo</a></li>
+        <li class="nav-item"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab" id="avanzado-tab" class="nav-link">Avanzado</a></li>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
 <div role="tabpanel" class="tab-pane active" id="email">
@@ -66,35 +62,48 @@ $de = $DteIntercambio->de;
 if ($DteIntercambio->de!=$DteIntercambio->responder_a)
     $de .= '<br/><span>'.$DteIntercambio->responder_a.'</span>';
 new \sowerphp\general\View_Helper_Table([
-    ['Recibido', 'De', 'Emisor', 'Firma', 'Documentos', 'Estado', 'Usuario'],
-    [$DteIntercambio->fecha_hora_email, $de, $DteIntercambio->getEmisor()->razon_social, $DteIntercambio->fecha_hora_firma, num($DteIntercambio->documentos), $DteIntercambio->getEstado()->estado, $DteIntercambio->getUsuario()->usuario],
+    ['Recibido', 'De', 'Emisor', 'Firma', 'Documentos', 'Estado', 'Procesado'],
+    [
+        \sowerphp\general\Utility_Date::format($DteIntercambio->fecha_hora_email, 'd/m/Y H:i'),
+        $de,
+        $DteIntercambio->getEmisor()->razon_social,
+        \sowerphp\general\Utility_Date::format($DteIntercambio->fecha_hora_firma, 'd/m/Y H:i'),
+        num($DteIntercambio->documentos),
+        $DteIntercambio->getEstado()->estado,
+        $DteIntercambio->getUsuario()->usuario
+    ],
 ]);
 ?>
-<p><strong>Asunto</strong>: <?=$DteIntercambio->asunto?></p>
-<p><?=str_replace("\n", '<br/>', strip_tags(base64_decode($DteIntercambio->mensaje)))?></p>
+<div class="card mb-4">
+    <div class="card-header"><?=$DteIntercambio->asunto?></div>
+    <div class="card-body">
+        <p><?=$DteIntercambio->mensaje?str_replace("\n", '<br/>', strip_tags(base64_decode($DteIntercambio->mensaje))):(!$DteIntercambio->mensaje_html?'Sin mensaje del emisor.':'')?></p>
+    </div>
+</div>
+
 <?php if ($DteIntercambio->mensaje_html) : ?>
-<a class="btn btn-default btn-lg btn-block" href="javascript:__.popup('<?=$_base?>/dte/dte_intercambios/html/<?=$DteIntercambio->codigo?>', 800, 600)" role="button">
-    <span class="fab fa-html5" style="font-size:24px"></span>
-    Ver mensaje del correo electrónico del intercambio
-</a>
-<br/>
+        <a class="btn btn-primary btn-lg btn-block mb-4" href="javascript:__.popup('<?=$_base?>/dte/dte_intercambios/html/<?=$DteIntercambio->codigo?>', 800, 600)" role="button">
+            <i class="fab fa-html5"></i>
+            Ver mensaje del correo electrónico del intercambio
+        </a>
 <?php endif; ?>
+
 <div class="row">
-    <div class="col-md-4">
-        <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/pdf/<?=$DteIntercambio->codigo?>" role="button">
-            <span class="far fa-file-pdf" style="font-size:24px"></span>
+    <div class="col-md-4 mb-2">
+        <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/pdf/<?=$DteIntercambio->codigo?>" role="button">
+            <i class="far fa-file-pdf"></i>
             Descargar PDF del intercambio
         </a>
     </div>
-    <div class="col-md-4">
-        <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/xml/<?=$DteIntercambio->codigo?>" role="button">
-            <span class="far fa-file-code" style="font-size:24px"></span>
+    <div class="col-md-4 mb-2">
+        <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/xml/<?=$DteIntercambio->codigo?>" role="button">
+            <i class="far fa-file-code"></i>
             Descargar XML del intercambio
         </a>
     </div>
-    <div class="col-md-4">
-        <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/resultados_xml/<?=$DteIntercambio->codigo?>" role="button">
-            <span class="far fa-file-code" style="font-size:24px"></span>
+    <div class="col-md-4 mb-2">
+        <a class="btn btn-primary btn-lg btn-block<?=!$DteIntercambio->usuario?' disabled':''?>" href="<?=$_base?>/dte/dte_intercambios/resultados_xml/<?=$DteIntercambio->codigo?>" role="button">
+            <i class="far fa-file-code"></i>
             Descargar XML de resultados
         </a>
     </div>
@@ -185,11 +194,11 @@ foreach ($Documentos as $Dte) {
     $accion = '';
     $acciones = '';
     if ($dte_existe) {
-        $acciones .= '<a href="'.$_base.'/dte/dte_recibidos/modificar/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio.'" title="Editar el DTE recibido"><span class="fa fa-edit btn btn-default"></span></a> ';
+        $acciones .= '<a href="'.$_base.'/dte/dte_recibidos/modificar/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio.'" title="Editar el DTE recibido" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a> ';
     }
-    $acciones .= '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII"><span class="fa fa-search btn btn-default"></span></a>';
-    $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII"><span class="fa fa-eye btn btn-default"></span></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
+    $acciones .= '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$DteIntercambio->codigo.'/0/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'" title="Ver PDF del documento" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
     $RecepcionDTE[] = [
         'TipoDTE' => $Dte->getTipo(),
         'Folio' => $Dte->getFolio(),
@@ -216,14 +225,22 @@ echo $f->input([
         ['name'=>'RUTEmisor', 'type'=>'hidden'],
         ['name'=>'RUTRecep', 'type'=>'hidden'],
         ['name'=>'MntTotal', 'attr'=>'readonly="readonly" size="10"'],
-        ['name'=>'rcv_accion_codigo', 'type'=>'select', 'options'=>[''=>'']+\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones, 'check' => 'notempty', 'attr'=>'onchange="this.parentNode.parentNode.parentNode.childNodes[7].firstChild.firstChild.value=this.selectedOptions[0].textContent"'],
+        ['name'=>'rcv_accion_codigo', 'type'=>'select', 'options'=>[''=>'']+\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones, 'check' => 'notempty', 'attr'=>'onchange="this.parentNode.parentNode.parentNode.childNodes[7].firstChild.firstChild.value=this.selectedOptions[0].textContent" style="width:200px"'],
         ['name'=>'rcv_accion_glosa', 'check' => 'notempty'],
         ['type'=>'div', 'name'=>'recibido'],
         ['type'=>'div', 'name'=>'acciones'],
     ],
     'values' => $RecepcionDTE,
 ]);
-echo '<p>Sólo aquellos documentos <strong>con acuse de recibo serán agregados</strong> a los documentos recibidos de ',$Emisor->razon_social,'. Documentos <strong>aceptados no serán agregados</strong> a los documentos recibidos, pero podrán ser agregados en el futuro si se hace el recibo de mercaderías o servicios. Documentos <strong>con reclamo no serán agregados</strong> a los documentos recibidos y no podrán ser agregados en el futuro ya que serán informados como rechazados al SII.</p>',"\n";
+?>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-exclamation-circle text-warning"></i> ¿Recibir, aceptar o reclamar un DTE?</div>
+    <div class="card-body">
+        <p>Sólo aquellos documentos <strong>con acuse de recibo serán agregados</strong> a los documentos recibidos de <?=$Emisor->getNombre()?>. Documentos <strong>aceptados no serán agregados</strong> a los documentos recibidos, pero podrán ser agregados en el futuro si se hace el recibo de mercaderías o servicios. Documentos <strong>con reclamo no serán agregados</strong> a los documentos recibidos y no podrán ser agregados en el futuro ya que serán informados como rechazados al SII.</p>
+        <p>LibreDTE no permite marcar como <strong>no incluir</strong> un DTE, si requiere dicha opción, deberá hacerlo directamente en el SII.</p>
+    </div>
+</div>
+<?php
 echo '<div class="text-center">';
 echo $f->input([
     'type' => 'submit',

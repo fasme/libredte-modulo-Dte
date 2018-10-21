@@ -1,73 +1,56 @@
-<ul class="nav nav-pills pull-right">
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fas fa-exchange-alt"></span> Tipo transacciones<span class="caret"></span>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-exchange-alt"></i> Tipo transacciones
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/tipo_transacciones_asignar/<?=$Libro->periodo?>">
-                     Buscar y asignar
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_sincronizar_tipo_transacciones/<?=$Libro->periodo?>">
-                    Sincronizar con SII
-                </a>
-            </li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/tipo_transacciones_asignar/<?=$Libro->periodo?>" class="dropdown-item">
+                    Buscar y asignar
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_sincronizar_tipo_transacciones/<?=$Libro->periodo?>" class="dropdown-item">
+                Sincronizar con SII
+            </a>
+        </div>
     </li>
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fas fa-university"></span> Ver resumen RC<span class="caret"></span>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-university"></i> Ver resumen RC
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>">
-                     Registrados
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/PENDIENTE">
-                    Pendientes
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/NO_INCLUIR">
-                    No incluídos
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/RECLAMADO">
-                    Reclamados
-                </a>
-            </li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>" class="dropdown-item">
+                    Registrados
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/PENDIENTE" class="dropdown-item">
+                Pendientes
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/NO_INCLUIR" class="dropdown-item">
+                No incluídos
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$Libro->periodo?>/RECLAMADO" class="dropdown-item">
+                Reclamados
+            </a>
+        </div>
     </li>
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-download"></span> Descargar <span class="caret"></span>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-download"></i> Descargar
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/descargar_registro_compra/<?=$Libro->periodo?>" title="Descargar CSV con los documentos recibidos que forman el registro de compras">
-                     Registro de compras
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/descargar_registro_compra/<?=$Libro->periodo?>/0" title="Descargar CSV con los documentos no electrónicos recibidos que son parte del registro de compras">
-                     Documentos no electrónicos
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/descargar_tipo_transacciones/<?=$Libro->periodo?>" title="Descargar CSV con los documentos que tienen tipo de transacción definida">
-                    Tipos de transacciones
-                </a>
-            </li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/descargar_registro_compra/<?=$Libro->periodo?>" title="Descargar CSV con los documentos recibidos que forman el registro de compras" class="dropdown-item">
+                    Registro de compras
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/descargar_registro_compra/<?=$Libro->periodo?>/0" title="Descargar CSV con los documentos no electrónicos recibidos que son parte del registro de compras" class="dropdown-item">
+                    Documentos no electrónicos
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/descargar_tipo_transacciones/<?=$Libro->periodo?>" title="Descargar CSV con los documentos que tienen tipo de transacción definida" class="dropdown-item">
+                Tipos de transacciones
+            </a>
+        </div>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras" title="Volver a IEC">
-            Volver a IEC
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras" title="Ir al libro de compras (IEC)" class="nav-link">
+            <i class="fa fa-book"></i>
+            Libro de compras
         </a>
     </li>
 </ul>
@@ -79,29 +62,26 @@
 $(function() {
     var url = document.location.toString();
     if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+        $('#'+url.split('#')[1]+'-tab').tab('show');
     }
 });
 </script>
 
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
-        <li role="presentation"><a href="#resumen" aria-controls="resumen" role="tab" data-toggle="tab">Resumen</a></li>
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
+        <li class="nav-item"><a href="#resumen" aria-controls="resumen" role="tab" data-toggle="tab" id="resumen-tab" class="nav-link">Resumen</a></li>
 <?php if ($n_detalles) : ?>
 <?php if (isset($detalle)) : ?>
-        <li role="presentation"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab">Detalle</a></li>
+        <li class="nav-item"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab" id="detalle-tab" class="nav-link">Detalle</a></li>
 <?php endif; ?>
-        <li role="presentation"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab">Estadísticas</a></li>
-<?php endif; ?>
-<?php if ($Libro->track_id>0) : ?>
-        <li role="presentation"><a href="#revision" aria-controls="revision" role="tab" data-toggle="tab">Subir revisión</a></li>
+        <li class="nav-item"><a href="#estadisticas" aria-controls="estadisticas" role="tab" data-toggle="tab" id="estadisticas-tab" class="nav-link">Estadísticas</a></li>
 <?php endif; ?>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
-<div role="tabpanel" class="tab-pane active" id="datos">
+<div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
     <div class="row">
         <div class="col-md-9">
 <?php
@@ -110,54 +90,57 @@ new \sowerphp\general\View_Helper_Table([
     [$Libro->periodo, num($n_detalles), num($Libro->documentos)],
 ]);
 ?>
-        <div class="row">
-            <div class="col-md-4">
-                <a class="btn btn-default btn-lg btn-block<?=!$n_detalles?' disabled':''?>" href="<?=$_base?>/dte/dte_compras/csv/<?=$Libro->periodo?>" role="button">
-                    <span class="far fa-file-excel" style="font-size:24px"></span>
-                    Descargar CSV
-                </a>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-default btn-lg btn-block<?=!$Libro->xml?' disabled':''?>" href="<?=$_base?>/dte/dte_compras/pdf/<?=$Libro->periodo?>" role="button">
-                    <span class="far fa-file-pdf" style="font-size:24px"></span>
-                    Descargar PDF
-                </a>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-default btn-lg btn-block<?=!$Libro->xml?' disabled':''?>" href="<?=$_base?>/dte/dte_compras/xml/<?=$Libro->periodo?>" role="button">
-                    <span class="far fa-file-code" style="font-size:24px"></span>
-                    Descargar XML
-                </a>
+            <div class="row">
+                <div class="col-md-4">
+                    <a class="btn btn-primary btn-lg btn-block<?=!$n_detalles?' disabled':''?>" href="<?=$_base?>/dte/dte_compras/csv/<?=$Libro->periodo?>" role="button">
+                        <i class="far fa-file-excel"></i>
+                        Descargar CSV
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a class="btn btn-primary btn-lg btn-block<?=!$Libro->xml?' disabled':''?>" href="<?=$_base?>/dte/dte_compras/pdf/<?=$Libro->periodo?>" role="button">
+                        <i class="far fa-file-pdf"></i>
+                        Descargar PDF
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a class="btn btn-primary btn-lg btn-block<?=!$Libro->xml?' disabled':''?>" href="<?=$_base?>/dte/dte_compras/xml/<?=$Libro->periodo?>" role="button">
+                        <i class="far fa-file-code"></i>
+                        Descargar XML
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3 center bg-info">
-
-        <span class="lead">Track ID SII: <?=$Libro->track_id?></span>
-        <p><strong><?=$Libro->revision_estado?></strong></p>
-        <p><?=str_replace("\n", '<br/>', $Libro->revision_detalle)?></p>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-header lead text-center">Track ID SII: <?=$Libro->track_id?></div>
+                <div class="card-body text-center">
+                    <p><strong><?=$Libro->revision_estado?></strong></p>
+                    <p><?=str_replace("\n", '<br/>', $Libro->revision_detalle)?></p>
 <?php if ($Libro->track_id and $Libro->getEstado()!='LRH') : ?>
-        <p>
+                    <p>
 <?php if ($Libro->track_id!=-1) : ?>
-            <a class="btn btn-info" href="<?=$_base?>/dte/dte_compras/actualizar_estado/<?=$Libro->periodo?>" role="button">Actualizar estado</a><br/>
-            <span style="font-size:0.8em">
-                <a href="<?=$_base?>/dte/dte_compras/solicitar_revision/<?=$Libro->periodo?>" title="Solicitar nueva revisión del libro al SII">solicitar nueva revisión</a><br/>
-                <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$Libro->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
-                <a href="<?=$_base?>/dte/dte_compras/enviar_rectificacion/<?=$Libro->periodo?>" title="Enviar rectificación del libro al SII">enviar rectificación</a>
-            </span>
+                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_compras/actualizar_estado/<?=$Libro->periodo?>" role="button">Actualizar estado</a><br/>
+                        <span class="small">
+                            <a href="<?=$_base?>/dte/dte_compras/solicitar_revision/<?=$Libro->periodo?>" title="Solicitar nueva revisión del libro al SII">solicitar nueva revisión</a><br/>
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$Libro->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
+                            <a href="<?=$_base?>/dte/dte_compras/enviar_rectificacion/<?=$Libro->periodo?>" title="Enviar rectificación del libro al SII">enviar rectificación</a>
+                        </span>
 <?php else : ?>
-            <span style="font-size:0.8em">
-                <a href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>">Generar nuevo libro</a>
-            </span>
+                        <span class="small">
+                            <a href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>">Generar nuevo libro</a>
+                        </span>
 <?php endif; ?>
-        </p>
+                    </p>
 <?php else: ?>
-<?php if ($Libro->periodo<201708) : ?>
-        <p><a class="btn btn-info" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">Enviar libro al SII</a></p>
-<?php else : ?>
-        <p><a class="btn btn-info" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">Generar libro local</a></p>
+                    <p>
+                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">
+                            <?=$Libro->periodo<201708?'Enviar libro al SII':'Generar libro local'?>
+                        </a>
+                    </p>
 <?php endif; ?>
-<?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -166,12 +149,12 @@ new \sowerphp\general\View_Helper_Table([
 <?php if ($n_detalles) : ?>
 
 <!-- INICIO RESUMEN -->
-<div role="tabpanel" class="tab-pane" id="resumen">
-    <div class="panel panel-default">
-        <div class="panel-heading">
+<div role="tabpanel" class="tab-pane" id="resumen" aria-labelledby="resumen-tab">
+    <div class="card mt-4">
+        <div class="card-header">
             Documentos con detalle registrado
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 $titulos = [];
 $total = ['TpoDoc' => '<strong>Total</strong>'];
@@ -231,7 +214,7 @@ echo $t->generate($resumen);
 
 <?php if (isset($detalle)) : ?>
 <!-- INICIO DETALLES -->
-<div role="tabpanel" class="tab-pane" id="detalle">
+<div role="tabpanel" class="tab-pane" id="detalle" aria-labelledby="detalle-tab">
 <?php
 array_unshift($detalle, $libro_cols);
 new \sowerphp\general\View_Helper_Table($detalle);
@@ -241,20 +224,20 @@ new \sowerphp\general\View_Helper_Table($detalle);
 <?php endif; ?>
 
 <!-- INICIO ESTADÍSTICAS -->
-<div role="tabpanel" class="tab-pane" id="estadisticas">
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div role="tabpanel" class="tab-pane" id="estadisticas" aria-labelledby="estadisticas-tab">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="far fa-chart-bar fa-fw"></i> Documentos por día recibidos con fecha en el período <?=$Libro->periodo?>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div id="grafico-documentos_por_dia"></div>
     </div>
 </div>
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="far fa-chart-bar fa-fw"></i> Documentos por tipo recibidos con fecha en el período <?=$Libro->periodo?>
     </div>
-    <div class="panel-body">
+    <div class="card-body">
         <div id="grafico-documentos_por_tipo"></div>
     </div>
 </div>
@@ -288,26 +271,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
 </div>
 <!-- FIN ESTADÍSTICAS -->
 
-<?php endif; ?>
-
-<?php if ($Libro->track_id>0) : ?>
-<!-- INICIO REVISIÓN -->
-<div role="tabpanel" class="tab-pane" id="revision">
-<p>Aquí puede subir el XML con el resultado de la revisión del libro de compras envíado al SII.</p>
-<?php
-$f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['action'=>$_base.'/dte/dte_compras/subir_revision/'.$Libro->periodo, 'onsubmit'=>'Form.check()']);
-echo $f->input([
-    'type' => 'file',
-    'name' => 'xml',
-    'label' => 'XML revisión',
-    'check' => 'notempty',
-    'attr' => 'accept=".xml"',
-]);
-echo $f->end('Subir XML de revisión');
-?>
-</div>
-<!-- FIN REVISIÓN -->
 <?php endif; ?>
 
     </div>

@@ -1,19 +1,22 @@
-<ul class="nav nav-pills pull-right">
+<ul class="nav nav-pills float-right">
 <?php if (isset($DteRecibido) and in_array($DteRecibido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
-    <li>
-        <a href="<?=$_base?>/dte/dte_intercambios/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_intercambios/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII" class="nav-link">
+            <i class="fa fa-edit"></i>
             Ingresar RCV
         </a>
     </li>
-    <li>
-        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>', 750, 550)" title="Ver datos del registro de compra/venta en el SII">
+    <li class="nav-item">
+        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>', 750, 550)" title="Ver datos del registro de compra/venta en el SII" class="nav-link">
+            <i class="fa fa-eye"></i>
             Ver RCV
         </a>
     </li>
 <?php endif; ?>
-    <li>
-        <a href="<?=$_base?>/dte/dte_recibidos/listar" title="Volver a los documentos recibidos">
-            Volver a documentos recibidos
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_recibidos/listar" title="Ir a los documentos recibidos" class="nav-link">
+            <i class="fa fa-sign-in-alt"></i>
+            Documentos recibidos
         </a>
     </li>
 </ul>
@@ -262,7 +265,7 @@ echo $f->input([
 // fin formulario
 $f->setStyle(false);
 echo '<div class="row">',"\n";
-echo '<div class="col-md-4 col-md-offset-',(!isset($DteRecibido)?4:2),'">',"\n";
+echo '<div class="col-md-4 offset-md-',(!isset($DteRecibido)?4:2),'">',"\n";
 echo $f->input([
     'type' => 'submit',
     'name' => 'submit',

@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar" title="Volver a libro de guías de despacho">
-            Volver a RCOF
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar" title="Ir al listado de RCOF" class="nav-link">
+            <i class="fa fa-archive"></i>
+            Consumo de folios
         </a>
     </li>
 </ul>

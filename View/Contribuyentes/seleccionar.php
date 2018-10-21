@@ -5,10 +5,10 @@ foreach ($empresas as &$e) {
     // agregar acciones
     $acciones = '';
     if ($e['administrador']) {
-        $acciones .= '<a href="modificar/'.$e['rut'].'" title="Editar empresa '.$e['razon_social'].'"><span class="fa fa-edit btn btn-default"></span></a>';
-        $acciones .= ' <a href="usuarios/'.$e['rut'].'" title="Mantenedor usuarios autorizados a operar con la empresa '.$e['razon_social'].'"><span class="fa fa-users btn btn-default"></span></a> ';
+        $acciones .= '<a href="modificar/'.$e['rut'].'" title="Editar empresa '.$e['razon_social'].'" class="btn btn-primary"><i class="fas fa-edit fa-fw"></i></a>';
+        $acciones .= ' <a href="usuarios/'.$e['rut'].'" title="Mantenedor usuarios autorizados a operar con la empresa '.$e['razon_social'].'" class="btn btn-primary"><i class="fa fa-users fa-fw"></i></a> ';
     }
-    $acciones .= '<a href="seleccionar/'.$e['rut'].'" title="Operar con la empresa '.$e['razon_social'].'"><span class="fa fa-check btn btn-default"></span></a>';
+    $acciones .= '<a href="seleccionar/'.$e['rut'].'" title="Operar con la empresa '.$e['razon_social'].'" class="btn btn-primary"><i class="fa fa-check fa-fw"></i></a>';
     $e[] = '<div class="text-right">'.$acciones.'</div>';
     // modificar columnas
     $e['rut'] = num($e['rut']).'-'.$e['dv'];

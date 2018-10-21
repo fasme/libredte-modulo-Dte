@@ -1,59 +1,64 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?copiar" title="Crear DTE con los mismos datos de este">
-            Copiar DTE
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?copiar" title="Crear DTE con los mismos datos de este" class="nav-link">
+            <i class="fa fa-copy"></i>
+            Copiar
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?reemplazar" title="Eliminar este documento y crear un DTE con los mismos datos de este">
-            Reemplazar DTE
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?reemplazar" title="Eliminar este documento y crear un DTE con los mismos datos de este" class="nav-link">
+            <i class="fa fa-clone"></i>
+            Reemplazar
         </a>
     </li>
 <?php if (\sowerphp\core\Module::loaded('Crm')) :?>
-    <li>
-        <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>">
-            Ir al CRM
+    <li class="nav-item">
+        <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>" class="nav-link">
+            <i class="fa fa-users"></i>
+            CRM
         </a>
     </li>
 <?php endif; ?>
-    <li>
-        <a href="javascript:__.popup('<?=$_base?>/dte/dte_tmps/vale/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>', 280, 180)">
+    <li class="nav-item">
+        <a href="javascript:__.popup('<?=$_base?>/dte/dte_tmps/vale/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>', 280, 180)" class="nav-link">
+            <i class="fa fa-file-invoice-dollar"></i>
             Ver vale
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_tmps" title="Volver a los documentos temporales">
-            Volver
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_tmps" title="Ir a los documentos temporales" class="nav-link">
+            <i class="far fa-file"></i>
+            Documentos temporales
         </a>
     </li>
 </ul>
 
-<div class="page-header"><h1>Documento temporal <?=$DteTmp->getFolio()?></h1></div>
+<div class="page-header"><h1>Documento <?=$DteTmp->getFolio()?></h1></div>
 <p>Esta es la página del documento temporal <?=$DteTmp->getTipo()->tipo?> folio <?=$DteTmp->getFolio()?> de la empresa <?=$Emisor->razon_social?> emitido a <?=$Receptor->razon_social?> (<?=$Receptor->rut.'-'.$Receptor->dv?>).</p>
 
 <script type="text/javascript">
 $(function() {
     var url = document.location.toString();
     if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+        $('#'+url.split('#')[1]+'-tab').tab('show');
     }
 });
 </script>
 
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
-        <li role="presentation"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab">PDF</a></li>
-        <li role="presentation"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Enviar por email</a></li>
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
+        <li class="nav-item"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab" id="pdf-tab" class="nav-link">PDF</a></li>
+        <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link">Enviar por email</a></li>
 <?php if ($DteTmp->getTipo()->permiteCobro()): ?>
-        <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
+        <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
 <?php endif; ?>
-        <li role="presentation"><a href="#actualizar_fecha" aria-controls="actualizar_fecha" role="tab" data-toggle="tab">Actualizar fecha</a></li>
+        <li class="nav-item"><a href="#actualizar_fecha" aria-controls="actualizar_fecha" role="tab" data-toggle="tab" id="actualizar_fecha-tab" class="nav-link">Actualizar fecha</a></li>
 <?php if ($_Auth->User->inGroup('soporte')): ?>
-        <li role="presentation"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab">Avanzado</a></li>
+        <li class="nav-item"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab" id="avanzado-tab" class="nav-link">Avanzado</a ></li>
 <?php endif; ?>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
 <div role="tabpanel" class="tab-pane active" id="datos">
@@ -64,37 +69,37 @@ new \sowerphp\general\View_Helper_Table([
 ]);
 ?>
     <div class="row">
-        <div class="col-md-3">
-            <a class="btn btn-default btn-lg btn-block<?=!$DteTmp->getTipo()->permiteCotizacion()?' disabled':''?>" href="<?=$_base?>/dte/dte_tmps/cotizacion/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="far fa-file" style="font-size:24px"></span>
+        <div class="col-md-3 mb-2">
+            <a class="btn btn-primary btn-lg btn-block<?=!$DteTmp->getTipo()->permiteCotizacion()?' disabled':''?>" href="<?=$_base?>/dte/dte_tmps/cotizacion/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+                <i class="far fa-file"></i>
                 Cotización
             </a>
         </div>
-        <div class="col-md-3">
-            <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pdf/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="far fa-file-pdf" style="font-size:24px"></span>
+        <div class="col-md-3 mb-2">
+            <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pdf/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+                <i class="far fa-file-pdf"></i>
                 Previsualización
             </a>
         </div>
-        <div class="col-md-3">
-            <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/xml/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="far fa-file-code" style="font-size:24px"></span>
+        <div class="col-md-3 mb-2">
+            <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/xml/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+                <i class="far fa-file-code"></i>
                 XML sin firmar
             </a>
         </div>
-        <div class="col-md-3">
-            <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/json/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-                <span class="far fa-file-code" style="font-size:24px"></span>
+        <div class="col-md-3 mb-2">
+            <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/json/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+                <i class="far fa-file-code"></i>
                 Archivo JSON
             </a>
         </div>
     </div>
     <br/>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 mb-2">
             <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/documentos/generar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button" onclick="return Form.checkSend('Confirmar la generación del DTE real')">Generar DTE real</a>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 mb-2">
             <a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/eliminar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" title="Eliminar documento" onclick="return Form.checkSend('Confirmar la eliminación del documento temporal')">Eliminar documento</a>
         </div>
     </div>
@@ -215,12 +220,12 @@ echo $f->end('Enviar PDF por email');
 <div role="tabpanel" class="tab-pane" id="pagar">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
 <div class="row">
-    <div class="col-sm-6">
+    <div class="col-sm-6 mb-2">
     <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
             Registrar pago
         </a>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-6 mb-2">
         <a class="btn btn-info btn-lg btn-block" href="<?=$links['pagar']?>" role="button">
             Enlace público para pagar
         </a>

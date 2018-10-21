@@ -1,7 +1,7 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/admin/itemes/listar" title="Volver al mantenedor de items">
-            <span class="fa fa-cubes"></span> Volver a items
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/itemes/listar" title="Ir al mantenedor de items" class="nav-link">
+            <i class="fa fa-cubes"></i> Listado de items
         </a>
     </li>
 </ul>

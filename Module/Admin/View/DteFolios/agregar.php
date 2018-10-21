@@ -1,3 +1,10 @@
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/dte_folios" title="Ir al mantenedor de folios" class="nav-link">
+            <i class="fas fa-cube"></i> Folios
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1>Crear mantenedor de folios</h1></div>
 <p>Aquí podrá agregar un mantenedor de folios para un nuevo tipo de documento. En el paso siguiente se le pedirá que suba el primer archio CAF.</p>
 <?php
@@ -14,11 +21,7 @@ echo $f->input([
     'name' => 'alerta',
     'label' => 'Cantidad alerta',
     'value' => 0,
-    'help' => 'Cuando los folios disponibles sean igual a esta cantidad se notificará al administrador de la empresa',
+    'help' => 'Cuando los folios disponibles sean igual a esta cantidad se tratará de timbrar automáticamente o se notificará al administrador de la empresa',
     'check' => 'notempty integer',
 ]);
 echo $f->end('Crear mantenedor de folios e ir al paso siguiente');
-?>
-<div style="float:right;margin-bottom:1em;font-size:0.8em">
-    <a href="<?=$_base?>/dte/admin/dte_folios">Volver al mantenedor de folios</a>
-</div>

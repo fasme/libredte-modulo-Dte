@@ -37,5 +37,8 @@ class Controller_ImpuestoAdicionales extends \Controller_Maintainer
 {
 
     protected $namespace = __NAMESPACE__; ///< Namespace del controlador y modelos asociados
+    protected $columnsView = [
+        'listar'=>['codigo', 'nombre', 'tipo', 'tasa']
+    ]; ///< Columnas que se deben mostrar en las vistas
 
 }

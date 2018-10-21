@@ -1,15 +1,15 @@
-<ul class="nav nav-pills pull-right">
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fa fa-search"></span> Filtrar <span class="caret"></span>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-search"></span> Filtrar
         </a>
-        <ul class="dropdown-menu">
-            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencidos">Vencidos <span class="badge"><?=num($cobranza_resumen['vencidos'])?></a></li>
-            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencen_hoy">Vencen hoy <span class="badge"><?=num($cobranza_resumen['vencen_hoy'])?></a></li>
-            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vigentes">Vigentes <span class="badge"><?=num($cobranza_resumen['vigentes'])?></a></li>
-            <li class="divider"></li>
-            <li><a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar">Limpiar búsqueda</a></li>
-        </ul>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencidos" class="dropdown-item">Vencidos <span class="badge badge-primary float-right"><?=num($cobranza_resumen['vencidos'])?></span></a>
+            <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencen_hoy" class="dropdown-item">Vencen hoy <span class="badge badge-primary float-right"><?=num($cobranza_resumen['vencen_hoy'])?></span></a>
+            <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vigentes" class="dropdown-item">Vigentes <span class="badge badge-primary float-right"><?=num($cobranza_resumen['vigentes'])?></span></a>
+            <div class="dropdown-divider"></div>
+            <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar" class="dropdown-item">Limpiar búsqueda</a>
+        </div>
     </li>
 </ul>
 <div class="page-header"><h1>Buscar pagos programados ventas a crédito</h1></div>
@@ -41,8 +41,7 @@ echo $f->end('Buscar');
 
 if (isset($cobranza)) {
     foreach ($cobranza as &$c) {
-        $c[] = '<a href="'.$_base.'/dte/cobranzas/cobranzas/ver/'.$c['dte'].'/'.$c['folio'].'/'.$c['fecha_pago'].'" title="Ver pago"><span class="fa fa-search btn btn-default"></span></a>';
-        $c['rut'] = \sowerphp\app\Utility_Rut::addDV($c['rut']);
+        $c[] = '<a href="'.$_base.'/dte/cobranzas/cobranzas/ver/'.$c['dte'].'/'.$c['folio'].'/'.$c['fecha_pago'].'" title="Ver pago" class="btn btn-primary"><span class="fa fa-search fa-fw"></span></a>';
         $c['fecha_emision'] = \sowerphp\general\Utility_Date::format($c['fecha_emision']);
         $c['fecha_pago'] = \sowerphp\general\Utility_Date::format($c['fecha_pago']);
         $c['total'] = num($c['total']);
@@ -50,8 +49,8 @@ if (isset($cobranza)) {
         if ($c['pagado']!==null) {
             $c['pagado'] = num($c['pagado']);
         }
-        unset($c['dte']);
+        unset($c['dte'], $c['rut']);
     }
-    array_unshift($cobranza, ['Receptor', 'RUT receptor', 'Emisión', 'Documento', 'Folio', 'Total', 'Fecha pago', 'Monto pago', 'Glosa', 'Pago parcial', 'Acciones']);
+    array_unshift($cobranza, ['Receptor', 'Emisión', 'Documento', 'Folio', 'Total', 'Fecha pago', 'Monto', 'Glosa', 'Parcial', 'Ver']);
     new \sowerphp\general\View_Helper_Table($cobranza, 'pagos_programados_pendientes', true);
 }

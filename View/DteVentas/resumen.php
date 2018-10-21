@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_ventas" title="Volver a IEV">
-            Volver a IEV
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_ventas" title="Ir al libro de ventas (IEV)" class="nav-link">
+            <i class="fa fa-book"></i>
+            Libro de ventas
         </a>
     </li>
 </ul>
@@ -63,7 +64,14 @@ if (isset($resumen)) {
     $resumen[] = $total;
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setShowEmptyCols(false);
-    echo $t->generate($resumen);
+?>
+<div class="card mb-4">
+    <div class="card-header">Resumen año <?=$anio?> por tipo de documento</div>
+    <div class="card-body">
+<?=$t->generate($resumen);?>
+    </div>
+</div>
+<?php
     // totales mensuales
     foreach ($totales_mensuales as &$r) {
         // dar formato de número
@@ -75,5 +83,12 @@ if (isset($resumen)) {
     }
     $titulos = ['Período', '# docs', 'Anulados', 'Op. exen.', 'Exento', 'Neto', 'IVA', 'IVA propio', 'IVA terc.', 'Ley 18211', 'Monto total', 'No fact.', 'Total periodo'];
     array_unshift($totales_mensuales, $titulos);
-    echo $t->generate($totales_mensuales);
+?>
+<div class="card mb-4">
+    <div class="card-header">Resumen mensual para el año <?=$anio?></div>
+    <div class="card-body">
+<?=$t->generate($totales_mensuales);?>
+    </div>
+</div>
+<?php
 }

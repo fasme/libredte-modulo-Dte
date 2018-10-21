@@ -97,13 +97,14 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite subir un caf para un tipo de folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2018-10-20
      */
     public function subir_caf()
     {
         $Emisor = $this->getContribuyente();
         $this->set([
             'Emisor' => $Emisor,
+            'servidor_sii' => \sasco\LibreDTE\Sii::getServidor(),
         ]);
         // procesar solo si se envió el formulario
         if (isset($_POST['submit'])) {
@@ -252,12 +253,13 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite solicitar un archivo CAF al SII y cargarlo en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-05
+     * @version 2018-10-20
      */
     public function solicitar_caf($dte = null)
     {
         $Emisor = $this->getContribuyente();
         $this->set([
+            'Emisor' => $Emisor,
             'dte_tipos' => $Emisor->getDocumentosAutorizados(),
             'dte' => $dte,
         ]);

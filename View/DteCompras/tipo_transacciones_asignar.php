@@ -1,7 +1,7 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras/ver/<?=$periodo?>" title="Volver a la IEC del período <?=$periodo?>">
-            Volver al período
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/ver/<?=$periodo?>" title="Ir al libro de compras (IEC) del período <?=$periodo?>" class="nav-link">
+            IEC <?=$periodo?>
         </a>
     </li>
 </ul>
@@ -20,9 +20,10 @@ echo $f->end('Buscar documentos');
 if (!empty($documentos)) {
     echo '<hr/>',"\n";
     foreach ($documentos as &$d) {
-        $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="fa fa-search"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$d['intercambio'].'/0/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$d['intercambio']?' disabled':'').'" role="button"><span class="far fa-file-pdf"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-default"><span class="fa fa-edit"></span></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-primary'.(!$d['intercambio']?' disabled':'').'"><i class="fa fa-search"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$d['intercambio'].'/0/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-primary'.(!$d['intercambio']?' disabled':'').'"><i class="far fa-file-pdf"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-primary"><i class="fa fa-edit"></i></a>';
+        $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d[] = $acciones;
         $d['total'] = num($d['total']);
         unset($d['emisor'], $d['dte'], $d['intercambio']);

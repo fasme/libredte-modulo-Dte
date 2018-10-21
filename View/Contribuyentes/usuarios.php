@@ -1,19 +1,19 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/contribuyente_usuarios/<?=$Contribuyente->rut?>-<?=$Contribuyente->dv?>', 850, 700); return false" title="Ver usuarios del contribuyente en el SII">
-            <span class="fa fa-users"></span>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/contribuyente_usuarios/<?=$Contribuyente->rut?>-<?=$Contribuyente->dv?>', 850, 700); return false" title="Ver usuarios del contribuyente en el SII" class="nav-link">
+            <i class="fa fa-users"></i>
             Usuarios en SII
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Contribuyente->rut?>" title="Modificar empresa">
-            <span class="fa fa-edit"></span>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Contribuyente->rut?>" title="Modificar empresa" class="nav-link">
+            <i class="fa fa-edit"></i>
             Modificar
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/contribuyentes/seleccionar/<?=$Contribuyente->rut?>" title="Seleccionar empresa">
-            <span class="fa fa-check"></span>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/contribuyentes/seleccionar/<?=$Contribuyente->rut?>" title="Seleccionar empresa" class="nav-link">
+            <i class="fa fa-check"></i>
             Seleccionar
         </a>
     </li>
@@ -25,22 +25,23 @@
 $(function() {
     var url = document.location.toString();
     if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+        $('#'+url.split('#')[1]+'-tab').tab('show');
     }
 });
 </script>
 
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#usuarios" aria-controls="usuarios" role="tab" data-toggle="tab">Usuarios autorizados</a></li>
-        <li role="presentation"><a href="#dtes" aria-controls="dtes" role="tab" data-toggle="tab">Documentos por usuario</a></li>
-        <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
+        <li class="nav-item"><a href="#usuarios" aria-controls="usuarios" role="tab" data-toggle="tab" id="usuarios-tab" class="nav-link active" aria-selected="true">Usuarios autorizados</a></li>
+        <li class="nav-item"><a href="#dtes" aria-controls="dtes" role="tab" data-toggle="tab" id="dtes-tab" class="nav-link">Documentos por usuario</a></li>
+        <li class="nav-item"><a href="#general" aria-controls="general" role="tab" data-toggle="tab" id="general-tab" class="nav-link">General</a></li>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content pt-4">
 
 <!-- INICIO USUARIOS AUTORIZADOS -->
-<div role="tabpanel" class="tab-pane active" id="usuarios">
-<p>Aquí puede autorizar a otros usuarios, previamente registrados, a trabajar con la empresa. El usuario se debe <a href="<?=$_base?>/usuarios/registrar">registrar aquí</a>.</p>
+<div role="tabpanel" class="tab-pane active" id="usuarios" aria-labelledby="usuarios-tab">
+<p>Aquí puede autorizar a otros usuarios, previamente registrados, a trabajar con la empresa.</p>
+<p>El usuario se debe <a href="<?=$_base?>/usuarios/registrar">registrar aquí</a> (cierre su sesión primero si desea registrar usted mismo al usuario).</p>
 <?php
 // inputs y ayuda
 $inputs = [['name'=>'usuario', 'check'=>'notempty']];
@@ -77,15 +78,17 @@ echo $f->input([
 $f->setStyle('horizontal');
 echo $f->end('Modificar usuarios autorizados');
 ?>
-<div class="well">
-<p>Debe ingresar el nombre del usuario que desea autorizar y alguno de los permisos:</p>
-<?=$permisos_ayuda,"\n"?>
+<div class="card">
+    <div class="card-body">
+        <p>Debe ingresar el nombre del usuario que desea autorizar y alguno de los permisos:</p>
+        <?=$permisos_ayuda,"\n"?>
+    </div>
 </div>
 </div>
 <!-- FIN USUARIOS AUTORIZADOS -->
 
 <!-- INICIO DOCUMENTOS POR USUARIOS -->
-<div role="tabpanel" class="tab-pane" id="dtes">
+<div role="tabpanel" class="tab-pane" id="dtes" aria-labelledby="dtes-tab">
 <p>Aquí puede asignar los documentos que un usuario puede emitir.</p>
 <?php
 echo $f->begin([
@@ -128,25 +131,27 @@ echo $f->input([
 $f->setStyle('horizontal');
 echo $f->end('Guardar documentos por usuarios');
 ?>
-<div class="well">
-<p>Documentos que la empresa tiene autorizados en LibreDTE:</p>
-<ul>
+<div class="card">
+    <div class="card-body">
+        <p>Documentos que la empresa tiene autorizados en LibreDTE:</p>
+        <ul>
 <?php foreach ($documentos_autorizados as $codigo => $tipo) : ?>
-    <li><strong><?=$codigo?></strong>: <?=$tipo?></li>
+            <li><strong><?=$codigo?></strong>: <?=$tipo?></li>
 <?php endforeach; ?>
-</ul>
+        </ul>
+    </div>
 </div>
 </div>
 <!-- FIN DOCUMENTOS POR USUARIOS -->
 
 <!-- INICIO GENERAL -->
-<div role="tabpanel" class="tab-pane" id="general">
-    <div class="panel panel-default">
-        <div class="panel-heading">
+<div role="tabpanel" class="tab-pane" id="general" aria-labelledby="general-tab">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fa fa-cogs"></i>
             Configuración general usuarios
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([
@@ -166,12 +171,12 @@ echo $f->end('Guardar configuración');
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fa fa-user-secret"></i>
             Administrador de la empresa
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([

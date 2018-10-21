@@ -10,15 +10,15 @@ function buscar(q) {
     }
 }
 </script>
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal">
-            <span class="fa fa-edit"></span> Emitir documento
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal" class="nav-link">
+            <i class="fa fa-edit"></i> Emitir documento
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_tmps/buscar" title="Búsqueda avanzada de documentos temporales">
-            <span class="fa fa-search"></span> Buscar
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_tmps/buscar" title="Búsqueda avanzada de documentos temporales" class="nav-link">
+            <i class="fa fa-search"></i> Buscar
         </a>
     </li>
 </ul>
@@ -27,22 +27,22 @@ function buscar(q) {
 <form name="buscador" onsubmit="buscar(this.q); return false">
     <div class="form-group">
         <label class="control-label sr-only" for="qField">Buscar por folio</label>
-        <div class="input-group input-group-sm">
+        <div class="input-group input-group-sm mb-4">
             <input type="text" name="q" class="form-control" id="qField" placeholder="Buscar por folio..." autofocus="autofocus" />
-            <span class="input-group-btn">
-                <button class="btn btn-secondary" type="button" onclick="buscar(document.buscador.q); return false">
-                    <span class="fa fa-search"></span>
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" onclick="buscar(document.buscador.q); return false">
+                    <i class="fa fa-search"></i>
                 </button>
-            </span>
+            </div>
         </div>
     </div>
 </form>
 <?php
 $documentos = [['Receptor', 'RUT', 'Documento', 'Folio', 'Fecha', 'Total', 'Acciones']];
 foreach ($dtes as &$dte) {
-    $acciones = '<a href="dte_tmps/ver/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Ver el documento temporal" id="dte_'.$dte->getFolio().'"><span class="fa fa-search btn btn-default"></span></a>';
-    $acciones .= ' <a href="dte_tmps/eliminar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Eliminar DTE temporal"><span class="fa fa-times-circle btn btn-default" onclick="return eliminar(\'DteTmp\', \''.$dte->receptor.', '.$dte->dte.', '.$dte->codigo.'\')"></span></a>';
-    $acciones .= ' <a href="documentos/generar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Generar DTE y enviar al SII" onclick="return Form.checkSend(\'¿Está seguro de querer generar el DTE?\')"><span class="far fa-paper-plane btn btn-default"></span></a>';
+    $acciones = '<a href="dte_tmps/ver/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Ver el documento temporal" id="dte_'.$dte->getFolio().'" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="dte_tmps/eliminar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Eliminar DTE temporal" onclick="return eliminar(\'DteTmp\', \''.$dte->receptor.', '.$dte->dte.', '.$dte->codigo.'\')" class="btn btn-primary"><i class="fas fa-times fa-fw"></i></a>';
+    $acciones .= ' <a href="documentos/generar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Generar DTE y enviar al SII" onclick="return Form.checkSend(\'¿Está seguro de querer generar el DTE?\')" class="btn btn-primary"><i class="far fa-paper-plane fa-fw"></i></a>';
     $documentos[] = [
         $dte->getReceptor()->razon_social,
         $dte->getReceptor()->rut.'-'.$dte->getReceptor()->dv,
@@ -54,7 +54,7 @@ foreach ($dtes as &$dte) {
     ];
 }
 $t = new \sowerphp\general\View_Helper_Table();
-$t->setColsWidth([null, null, null, null, null, null, 150]);
+$t->setColsWidth([null, null, null, null, null, null, 160]);
 $t->setID('dte_tmps_'.$Emisor->rut);
 $t->setExport(true);
 echo $t->generate($documentos);

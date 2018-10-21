@@ -45,7 +45,7 @@ class Model_IvaNoRecuperable extends \Model_App
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
         'codigo' => array(
-            'name'      => 'Codigo',
+            'name'      => 'Código',
             'comment'   => 'Código asignado por el SII al tipo de IVA',
             'type'      => 'smallint',
             'length'    => 16,

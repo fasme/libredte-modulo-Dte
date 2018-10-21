@@ -2,12 +2,12 @@
 <?php if (!$Emisor->config_respaldos_dropbox) : ?>
 <p>Aquí podrá conectar LibreDTE con Dropbox para que se realicen respalos automáticos del contribuyente <?=$Emisor->razon_social?>.</p>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-6 mb-2">
         <a class="btn btn-primary btn-lg btn-block" href="https://db.tt/328o5XBy" role="button" target="_blank">
             Crear cuenta en Dropbox
         </a>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 mb-2">
         <a class="btn btn-success btn-lg btn-block" href="<?=$authUrl?>" role="button">
             Conectar LibreDTE con Dropbox
         </a>

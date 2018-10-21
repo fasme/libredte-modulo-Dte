@@ -128,7 +128,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
             'fk'        => null
         ),
         'revision_detalle' => array(
-            'name'      => 'Detalle revisión',
+            'name'      => 'Recepción SII',
             'comment'   => '',
             'type'      => 'text',
             'length'    => null,

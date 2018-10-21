@@ -1,6 +1,7 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir_masivo" title="Emitir DTE de manera masiva">
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir_masivo" title="Emitir DTE de manera masiva" class="nav-link">
+            <i class="fa fa-upload"></i>
             Emitir DTE masivo
         </a>
     </li>

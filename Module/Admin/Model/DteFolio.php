@@ -202,15 +202,15 @@ class Model_DteFolio extends \Model_App
      * Método que entrega el listado de archivos CAF que existen cargados para
      * el tipo de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2018-10-20
      */
-    public function getCafs()
+    public function getCafs($order = 'ASC')
     {
         $cafs = $this->db->getTable('
             SELECT desde, hasta, (hasta - desde + 1) AS cantidad, xml
             FROM dte_caf
             WHERE emisor = :rut AND dte = :dte AND certificacion = :certificacion
-            ORDER BY desde
+            ORDER BY desde '.($order=='ASC'?'ASC':'DESC').'
         ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
         foreach ($cafs as &$caf) {
             $xml = \website\Dte\Utility_Data::decrypt($caf['xml']);
@@ -337,9 +337,9 @@ class Model_DteFolio extends \Model_App
     /**
      * Método que entrega el uso mensual de los folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2018-10-20
      */
-    public function getUsoMensual($limit = 12)
+    public function getUsoMensual($limit = 12, $order = 'ASC')
     {
         $periodo_col = $this->db->date('Ym', 'fecha');
         return $this->db->getTable('
@@ -350,7 +350,7 @@ class Model_DteFolio extends \Model_App
                 GROUP BY '.$periodo_col.'
                 ORDER BY '.$periodo_col.' DESC
                 LIMIT '.(int)$limit.'
-            ) AS t ORDER BY mes
+            ) AS t ORDER BY mes '.($order=='ASC'?'ASC':'DESC').'
         ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':certificacion'=>$this->certificacion]);
     }
 

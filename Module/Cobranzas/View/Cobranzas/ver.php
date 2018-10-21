@@ -1,7 +1,7 @@
 <div class="page-header"><h1>Pago programado <small><?=$Pago->getDte()->getTipo()->tipo?> N° <?=$Pago->folio?></small></h1></div>
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <i class="fa fa-info"></i>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fa fa-info fa-fw"></i>
         Información del pago programado
     </div>
     <div class="panel-body">
@@ -73,9 +73,9 @@ echo $f->end('Guardar');
 ?>
     </div>
     <div class="col-md-7">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <i class="fa fa-location-arrow"></i>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa fa-location-arrow fa-fw"></i>
                 Datos de contacto
             </div>
             <div class="panel-body">
@@ -91,9 +91,9 @@ new \sowerphp\general\View_Helper_Table([
 ?>
             </div>
         </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <i class="fas fa-calendar-alt"></i>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt fa-fw"></i>
                 Otros pagos programados asociados al DTE
             </div>
             <div class="panel-body">
@@ -111,19 +111,19 @@ new \sowerphp\general\View_Helper_Table($otros);
         </div>
         <div class="row">
                 <div class="col-md-4">
-                    <a class="btn btn-default btn-block" href="<?=$_base?>/dte/dte_emitidos/ver/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>" role="button">
+                    <a class="btn btn-primary btn-block" href="<?=$_base?>/dte/dte_emitidos/ver/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>" role="button">
                         <span class="fa fa-search"></span>
                         Ver DTE
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a class="btn btn-default btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
+                    <a class="btn btn-primary btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
                         <span class="far fa-file-pdf"></span>
                         Ver PDF
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a class="btn btn-default btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>" role="button">
+                    <a class="btn btn-primary btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$Pago->getDte()->dte?>/<?=$Pago->getDte()->folio?>" role="button">
                         <span class="far fa-file-code"></span>
                         Ver XML
                     </a>

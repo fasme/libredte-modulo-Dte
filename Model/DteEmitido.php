@@ -662,10 +662,12 @@ class Model_DteEmitido extends Model_Base_Envio
         // o aun no se sabe su estado)
         if ($this->track_id and $this->getEstado()!='R') {
             $msg = 'DTE no puede ser reenviado ya que ';
-            if (!$this->revision_estado)
+            if (!$this->revision_estado) {
                 $msg .= 'aun no se ha verificado su estado';
-            else if ($this->getEstado()!='R')
+            }
+            else if ($this->getEstado()!='R') {
                 $msg .= 'no está rechazado';
+            }
             throw new \Exception($msg);
         }
         // obtener firma

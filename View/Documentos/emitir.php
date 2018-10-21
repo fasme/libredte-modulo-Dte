@@ -1,6 +1,7 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir_masivo" title="Emitir DTE de manera masiva">
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir_masivo" title="Emitir DTE de manera masiva" class="nav-link">
+            <i class="fa fa-upload"></i>
             Emitir DTE masivo
         </a>
     </li>
@@ -56,7 +57,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
         <div class="form-group col-md-3">
 <?php if (!isset($datos) or $datos['Encabezado']['Receptor']['RUTRecep']=='66666666-6' or $referencia == 'copia') : ?>
             <div class="input-group">
-                <div class="input-group-addon"><a href="#" title="Buscar RUT del receptor [B]" data-toggle="modal" data-target=".modal-buscar-receptor" accesskey="B" id="modalBuscar">buscar</a></div>
+                <div class="input-group-prepend"><span class="input-group-text"><a href="#" title="Buscar RUT del receptor [B]" data-toggle="modal" data-target=".modal-buscar-receptor" accesskey="B" id="modalBuscar"><i class="fas fa-search"></i></a></span></div>
                 <input type="text" name="RUTRecep" id="RUTRecepField" class="check notempty rut form-control" placeholder="RUT del receptor" maxlength="12" onblur="Receptor.setDatos('emitir_dte')" value="<?=!empty($datos['Encabezado']['Receptor']['RUTRecep'])?$datos['Encabezado']['Receptor']['RUTRecep']:$RUTRecep?>" />
             </div>
             <input type="hidden" name="dte_referencia_defecto" id="dte_referencia_defecto" value="0" />
@@ -337,7 +338,7 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     </div>
     <!-- BOTÓN PARA GENERAR DOCUMENTO -->
     <div class="row">
-        <div class="form-group col-md-offset-4 col-md-4">
+        <div class="form-group offset-md-4 col-md-4">
             <button type="submit" name="submit" class="btn btn-primary" style="width:100%">
                 Generar documento
             </button>
@@ -398,8 +399,8 @@ $(function() {
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Buscar receptor</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
             </div>
         <div class="modal-body">
 <?php

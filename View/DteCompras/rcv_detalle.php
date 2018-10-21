@@ -1,42 +1,29 @@
-<ul class="nav nav-pills pull-right">
+<ul class="nav nav-pills float-right">
 <?php if ($estado=='REGISTRO') : ?>
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras/rcv_diferencias/<?=$periodo?>/<?=$DteTipo->codigo?>" title="Descargar diferencias del período <?=$periodo?> entre el RC del SII y el IEC de LibreDTE">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/rcv_diferencias/<?=$periodo?>/<?=$DteTipo->codigo?>" title="Descargar diferencias del período <?=$periodo?> entre el RC del SII y el IEC de LibreDTE" class="nav-link">
             <span class="fa fa-download"></span> Diferencias
         </a>
     </li>
 <?php endif; ?>
-    <li role="presentation" class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <span class="fas fa-university"></span> Ver resumen RC<span class="caret"></span>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <span class="fas fa-university"></span> Ver resumen RC
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>">
-                     Registrados
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/PENDIENTE">
-                    Pendientes
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/NO_INCLUIR">
-                    No incluídos
-                </a>
-            </li>
-            <li>
-                <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/RECLAMADO">
-                    Reclamados
-                </a>
-            </li>
-        </ul>
-    </li>
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/<?=$estado?>" title="Volver al resumen del RC de <?=$periodo?>">
-            Volver al resumen
-        </a>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>" class="dropdown-item">
+                Registrados
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/PENDIENTE" class="dropdown-item">
+                Pendientes
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/NO_INCLUIR" class="dropdown-item">
+                No incluídos
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_resumen/<?=$periodo?>/RECLAMADO" class="dropdown-item">
+                Reclamados
+            </a>
+        </div>
     </li>
 </ul>
 <div class="page-header"><h1>Detalle RC período <?=$periodo?> <small>estado: <?=$estado?></small></h1></div>
@@ -55,6 +42,4 @@ foreach ($keys as &$k) {
 array_unshift($detalle, $keys);
 new \sowerphp\general\View_Helper_Table($detalle, 'rc_detalle_'.$periodo.'_'.$DteTipo->codigo.'_'.$estado, true);
 ?>
-<link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
-<script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
-<script type="text/javascript"> $(document).ready(function(){ dataTable("#<?='rc_detalle_'.$periodo.'_'.$DteTipo->codigo.'_'.$estado?>"); }); </script>
+<script> $(document).ready(function(){ dataTable("#<?='rc_detalle_'.$periodo.'_'.$DteTipo->codigo.'_'.$estado?>"); }); </script>

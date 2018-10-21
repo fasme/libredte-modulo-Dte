@@ -49,7 +49,7 @@ class Model_ImpuestoAdicional extends \Model_App
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
         'codigo' => array(
-            'name'      => 'Codigo',
+            'name'      => 'Código',
             'comment'   => 'Código asignado por el SII al impuesto',
             'type'      => 'smallint',
             'length'    => 16,
@@ -60,7 +60,7 @@ class Model_ImpuestoAdicional extends \Model_App
             'fk'        => null
         ),
         'retencion_total' => array(
-            'name'      => 'Retencion Total',
+            'name'      => 'Retención total',
             'comment'   => 'Código asignado por el SII al impuesto en caso de ser retención total',
             'type'      => 'smallint',
             'length'    => 16,
@@ -104,7 +104,7 @@ class Model_ImpuestoAdicional extends \Model_App
             'fk'        => null
         ),
         'descripcion' => array(
-            'name'      => 'Descripcion',
+            'name'      => 'Descripción',
             'comment'   => 'Descripción del impuesto (según ley que aplica al mismo)',
             'type'      => 'text',
             'length'    => null,

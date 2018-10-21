@@ -1,14 +1,14 @@
 <?php if (isset($Contribuyente)) : ?>
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/contribuyentes/usuarios/<?=$Contribuyente->rut?>" title="Usuarios autorizados">
-            <span class="fa fa-users"></span>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/contribuyentes/usuarios/<?=$Contribuyente->rut?>" title="Usuarios autorizados" class="nav-link">
+            <i class="fa fa-users"></i>
             Usuarios
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/contribuyentes/seleccionar/<?=$Contribuyente->rut?>" title="Seleccionar empresa">
-            <span class="fa fa-check"></span>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/contribuyentes/seleccionar/<?=$Contribuyente->rut?>" title="Seleccionar empresa" class="nav-link">
+            <i class="fa fa-check"></i>
             Seleccionar
         </a>
     </li>
@@ -28,26 +28,26 @@ var impuestos_adicionales_tasa = <?=json_encode($impuestos_adicionales_tasa)?>;
 $(function() {
     var url = document.location.toString();
     if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+        $('#'+url.split('#')[1]+'-tab').tab('show');
     }
 });
 </script>
 
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Empresa</a></li>
-        <li role="presentation"><a href="#ambientes" aria-controls="ambientes" role="tab" data-toggle="tab">Ambientes</a></li>
-        <li role="presentation"><a href="#correos" aria-controls="correos" role="tab" data-toggle="tab">Correos</a></li>
-        <li role="presentation"><a href="#facturacion" aria-controls="facturacion" role="tab" data-toggle="tab">Facturación</a></li>
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Empresa</a></li>
+        <li class="nav-item"><a href="#ambientes" aria-controls="ambientes" role="tab" data-toggle="tab" id="ambientes-tab" class="nav-link">Ambientes</a></li>
+        <li class="nav-item"><a href="#correos" aria-controls="correos" role="tab" data-toggle="tab" id="correos-tab" class="nav-link">Correos</a></li>
+        <li class="nav-item"><a href="#facturacion" aria-controls="facturacion" role="tab" data-toggle="tab" id="facturacion-tab" class="nav-link">Facturación</a></li>
 <?php if (isset($Contribuyente)) : ?>
-        <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API</a></li>
-        <li role="presentation"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
+        <li class="nav-item"><a href="#api" aria-controls="api" role="tab" data-toggle="tab" id="api-tab" class="nav-link">API</a></li>
+        <li class="nav-item"><a href="#general" aria-controls="general" role="tab" data-toggle="tab" id="general-tab" class="nav-link">General</a></li>
 <?php endif; ?>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content pt-4">
 
 <!-- INICIO DATOS EMPRESA -->
-<div role="tabpanel" class="tab-pane active" id="datos">
+<div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
 <?php
 if ($form_id=='registrarContribuyente') {
     echo $f->input([
@@ -221,8 +221,10 @@ echo $f->input([
 ]);
 ?>
 <?php if (isset($Contribuyente)) : ?>
-    <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="img-responsive thumbnail center" />
-    <br/>
+<div class="text-center">
+    <img src="../logo/<?=$Contribuyente->rut?>.png" alt="Logo <?=$Contribuyente->razon_social?>" class="img-fluid img-thumbnail" />
+    <br/><br/>
+</div>
 <?php endif; ?>
 <?php
 echo $f->input([
@@ -238,7 +240,7 @@ echo $f->input([
 <!-- FIN DATOS EMPRESA -->
 
 <!-- INICIO AMBIENTES -->
-<div role="tabpanel" class="tab-pane" id="ambientes">
+<div role="tabpanel" class="tab-pane" id="ambientes" aria-labelledby="ambientes-tab">
 <?php
 echo $f->input([
     'type' => 'select',
@@ -281,19 +283,19 @@ echo $f->input([
 <!-- FIN AMBIENTES -->
 
 <!-- INICIO EMAILS -->
-<div role="tabpanel" class="tab-pane" id="correos">
+<div role="tabpanel" class="tab-pane" id="correos" aria-labelledby="correos-tab">
     <p>Aquí debe configurar las dos casillas de correo para operar con facturación electrónica. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/sowerphp/config/email">documentación de las casillas de correo</a> para obtener detalles de qué opciones debe usar.</p>
 <?php if (isset($Contribuyente) and $Contribuyente->getFirma()) : ?>
     <p>Los correos deben coincidir con los registrados en el SII, los debe verificar en <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/contribuyente_datos/<?=$Contribuyente->rut?>-<?=$Contribuyente->dv?>', 750, 550); return false" title="Ver datos del contribuyente en el SII">el sitio del web de impuestos internos</a>.</p>
 <?php endif; ?>
     <div class="row">
         <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
+            <div class="card mb-4">
+                <div class="card-header">
                     <i class="fa fa-envelope"></i>
                     Correo contacto SII
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
 <?php
 $f->setColsLabel(3);
 echo $f->input([
@@ -331,12 +333,12 @@ echo $f->input([
             </div>
         </div>
         <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
+            <div class="card mb-4">
+                <div class="card-header">
                     <i class="far fa-envelope"></i>
                     Correo contacto empresas (intercambio)
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
 <?php
 echo $f->input([
     'name' => 'config_email_intercambio_user',
@@ -378,13 +380,13 @@ $f->setColsLabel();
 <!-- FIN EMAILS -->
 
 <!-- INICIO CONFIGURACIÓN FACTURACIÓN -->
-<div role="tabpanel" class="tab-pane" id="facturacion">
-    <div class="panel panel-default">
-        <div class="panel-heading">
+<div role="tabpanel" class="tab-pane" id="facturacion" aria-labelledby="facturacion-tab">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="far fa-paper-plane"></i>
             Emisión documentos
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
 <?php
@@ -596,12 +598,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="far fa-file-pdf"></i>
             PDF
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
 <?php
@@ -723,7 +725,7 @@ echo $f->input([
 $f->setColsLabel();
 $f->setStyle(false);
 ?>
-            <div class="form-group required">
+            <div class="form-group row required">
                 <label class="col-sm-2 control-label">Ancho columnas</label>
                 <div class="col-sm-10">
                 <?php new \sowerphp\general\View_Helper_Table([
@@ -782,12 +784,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="far fa-paper-plane"></i>
             Correo electrónico
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 $template_email_dte = '';
 if (isset($Contribuyente)) {
@@ -805,12 +807,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="far fa-file"></i>
             Recepción documentos
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'select',
@@ -831,12 +833,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fa fa-book"></i>
             Libros de compra y venta (IECV)
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'select',
@@ -849,12 +851,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fa fa-eye"></i>
             SII
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'select',
@@ -889,13 +891,13 @@ echo $f->input([
 <?php if (isset($Contribuyente)) : ?>
 
 <!-- INICIO API -->
-<div role="tabpanel" class="tab-pane" id="api">
-    <div class="panel panel-default">
-        <div class="panel-heading">
+<div role="tabpanel" class="tab-pane" id="api" aria-labelledby="api-tab">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fas fa-exchange-alt"></i>
             Servicios web del contribuyente
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <p>LibreDTE puede comunicarse con la aplicación de su empresa u otros sitios a través de servicios web. A continuación puede ingresar las URL para consultas que se podrían hacer a su aplicación. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/sowerphp/integracion">documentación de la integración</a> para obtener detalles de las entradas y salidas esperadas para cada consulta.</p>
 <?php
 $api_servicios_disponibles = (array)\sowerphp\core\Configure::read('api_contribuyentes');
@@ -936,13 +938,13 @@ $f->setStyle('horizontal');
 <!-- FIN API -->
 
 <!-- INICIO CONFIGURACIÓN GENERAL -->
-<div role="tabpanel" class="tab-pane" id="general">
-    <div class="panel panel-default">
-        <div class="panel-heading">
+<div role="tabpanel" class="tab-pane" id="general" aria-labelledby="general-tab">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fa fa-cogs"></i>
             Configuración LibreDTE
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'div',
@@ -964,12 +966,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="far fa-envelope"></i>
             Datos de contacto
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 $config_app_contacto_comercial = [];
 foreach ((array)$Contribuyente->config_app_contacto_comercial as $c) {
@@ -995,12 +997,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="fas fa-link"></i>
             Enlaces personalizados
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 $config_extra_links = [];
 foreach ((array)$Contribuyente->config_extra_links as $l) {
@@ -1026,12 +1028,12 @@ echo $f->input([
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card mb-4">
+        <div class="card-header">
             <i class="far fa-life-ring"></i>
             Soporte
         </div>
-        <div class="panel-body">
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'select',

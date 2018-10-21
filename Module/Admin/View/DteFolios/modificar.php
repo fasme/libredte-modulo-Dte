@@ -1,4 +1,16 @@
-<div class="page-header"><h1>Modificar mantenedor de folios DTE <?=$DteFolio->dte?></h1></div>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/dte_folios/ver/<?=$DteFolio->dte?>" title="Ver el mantenedor de folios" class="nav-link">
+            <i class="fas fa-search"></i> <?=$DteFolio->getTipo()->tipo?>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/dte_folios" title="Ir al mantenedor de folios" class="nav-link">
+            <i class="fas fa-cube"></i> Folios
+        </a>
+    </li>
+</ul>
+<div class="page-header"><h1>Modificar mantenedor <?=$DteFolio->getTipo()->tipo?></h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Form.check()']);
@@ -13,11 +25,7 @@ echo $f->input([
     'name' => 'alerta',
     'label' => 'Cantidad alerta',
     'value' => $DteFolio->alerta,
-    'help' => 'Cuando los folios disponibles sean igual a esta cantidad se notificará al administrador de la empresa',
+    'help' => 'Cuando los folios disponibles sean igual a esta cantidad se tratará de timbrar automáticamente o se notificará al administrador de la empresa',
     'check' => 'notempty integer',
 ]);
 echo $f->end('Modificar mantenedor de folios');
-?>
-<div style="float:right;margin-bottom:1em;font-size:0.8em">
-    <a href="<?=$_base?>/dte/admin/dte_folios">Volver al mantenedor de folios</a>
-</div>

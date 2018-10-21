@@ -57,7 +57,7 @@ class Model_ContribuyenteDte extends \Model_App
             'fk'        => array('table' => 'contribuyente', 'column' => 'rut')
         ),
         'dte' => array(
-            'name'      => 'Dte',
+            'name'      => 'DTE',
             'comment'   => '',
             'type'      => 'smallint',
             'length'    => 16,
@@ -68,7 +68,7 @@ class Model_ContribuyenteDte extends \Model_App
             'fk'        => array('table' => 'dte_tipo', 'column' => 'codigo')
         ),
         'activo' => array(
-            'name'      => 'Activo',
+            'name'      => '¿Activo?',
             'comment'   => 'Indica si el documento está o no activo',
             'type'      => 'boolean',
             'length'    => null,

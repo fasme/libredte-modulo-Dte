@@ -1,22 +1,45 @@
+<ul class="nav nav-pills float-right">
 <?php if (isset($Obj)) : ?>
-<ul class="nav nav-pills pull-right">
 <?php if (\sowerphp\core\Module::loaded('Inventario')) : ?>
-    <li>
-        <a href="<?=$_base?>/inventario/inventario_itemes/editar/<?=$Obj->codigo?>/<?=$Obj->codigo_tipo?>" title="Editar item en el inventario">
-            <span class="fa fa-cubes"></span> Editar en inventario
+    <li class="nav-item">
+        <a href="<?=$_base?>/inventario/inventario_itemes/editar/<?=$Obj->codigo?>/<?=$Obj->codigo_tipo?>" title="Editar item en el inventario" class="nav-link">
+            <i class="fa fa-cubes"></i> Editar en inventario
         </a>
     </li>
 <?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Tienda')) : ?>
-    <li>
-        <a href="<?=$_base?>/tienda/admin/tienda_itemes/editar/<?=$Obj->codigo?>/<?=$Obj->codigo_tipo?>" title="Editar item la tienda">
-            <span class="fa fa-shopping-cart"></span> Editar en la tienda
+    <li class="nav-item">
+        <a href="<?=$_base?>/tienda/admin/tienda_itemes/editar/<?=$Obj->codigo?>/<?=$Obj->codigo_tipo?>" title="Editar item la tienda" class="nav-link">
+            <i class="fa fa-shopping-cart"></i> Editar en la tienda
         </a>
     </li>
 <?php endif; ?>
-</ul>
 <?php endif; ?>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/itemes/listar" title="Ir al mantenedor de items" class="nav-link">
+            <i class="fa fa-cubes"></i> Listado de items
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1><?=$accion?> producto o servicio</h1></div>
+<script type="text/javascript">
+$(function() {
+    var url = document.location.toString();
+    if (url.match('#')) {
+        $('#'+url.split('#')[1]+'-tab').tab('show');
+    }
+});
+</script>
+
+<div role="tabpanel">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
+        <li class="nav-item"><a href="#precios" aria-controls="precios" role="tab" data-toggle="tab" id="precios-tab" class="nav-link">Lista de precios</a></li>
+    </ul>
+    <div class="tab-content pt-4">
+
+<!-- INICIO DATOS BASICOS -->
+<div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
 <?php
 $f = new \sowerphp\general\View_Helper_Form ();
 echo $f->begin(array('onsubmit'=>'Form.check()'));
@@ -125,9 +148,19 @@ echo $f->input([
     'value' => isset($Obj)?$Obj->activo:1,
     'check' => 'notempty',
 ]);
-echo $f->end('Guardar');
 ?>
-<div style="float:left;color:red">* campo es obligatorio</div>
-<div style="float:right;margin-bottom:1em;font-size:0.8em">
-    <a href="<?=$_base.$listarUrl?>">Volver al listado de registros</a>
 </div>
+<!-- FIN DATOS BASICOS -->
+
+<!-- INICIO LISTA DE PRECIOS -->
+<div role="tabpanel" class="tab-pane active" id="precios" aria-labelledby="precios-tab">
+
+</div>
+<!-- FIN LISTA DE PRECIOS -->
+
+    </div>
+</div>
+
+<?=$f->end('Guardar')?>
+
+<div style="float:left;color:red">* campo es obligatorio</div>

@@ -335,51 +335,6 @@ abstract class Controller_Base_Libros extends \Controller_App
     }
 
     /**
-     * Acción que permite subir un XML con el resultado de la revisión
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-26
-     */
-    public function subir_revision($periodo)
-    {
-        $Emisor = $this->getContribuyente();
-        // obtener libro envíado
-        $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$Libro->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Aun no se ha generado el libro del período '.$periodo, 'error'
-            );
-            $this->redirect(str_replace('subir_revision', 'ver', $this->request->request));
-        }
-        // si no tiene track id error
-        if (!$Libro->track_id) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Libro del período '.$periodo.' no tiene Track ID, primero debe enviarlo al SII', 'error'
-            );
-            $this->redirect(str_replace('subir_revision', 'ver', $this->request->request));
-        }
-        // si no se viene por post o el archivo no se subió o dió error
-        if (!isset($_POST['submit']) or !isset($_FILES['xml']) or $_FILES['xml']['error']) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Debe subir archivo XML con la revisión', 'ok'
-            );
-            $this->redirect(str_replace('subir_revision', 'ver', $this->request->request).'#revision');
-        }
-        // guardar revisión
-        $status = $Libro->saveRevision(file_get_contents($_FILES['xml']['tmp_name']));
-        if ($status===true) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Se actualizó el estado del envío del libro', 'ok'
-            );
-        } else {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible guardar el estado del libro en la base de datos<br/>'.$status, 'error'
-            );
-        }
-        $this->redirect(str_replace('subir_revision', 'ver', $this->request->request));
-    }
-
-    /**
      * Recurso de la API que entrega el código de reemplazo de libro para cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-08-06

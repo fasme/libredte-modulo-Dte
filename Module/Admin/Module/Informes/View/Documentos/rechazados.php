@@ -30,7 +30,7 @@ echo $f->end('Buscar documentos');
 if (isset($documentos)) {
     foreach ($documentos as &$d) {
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
-        $d[] = '<a href="'.$_base.'/dte/contribuyentes/seleccionar/'.$d['rut'].'/'.base64_encode('/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio']).'" title="Ver documento emitido" class="btn btn-default"><span class="fa fa-search"></span></a>';
+        $d[] = '<a href="'.$_base.'/dte/contribuyentes/seleccionar/'.$d['rut'].'/'.base64_encode('/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio']).'" title="Ver documento emitido" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
         unset($d['rut'], $d['dte']);
     }
     array_unshift($documentos, ['Razón social', 'Fecha', 'Documento', 'Folio', 'Estado', 'Detalle', 'Ver']);

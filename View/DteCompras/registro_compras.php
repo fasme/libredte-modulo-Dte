@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras" title="Volver a IEC">
-            Volver a IEC
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras" class="nav-link">
+            <i class="fa fa-book"></i>
+            Libro de compras
         </a>
     </li>
 </ul>

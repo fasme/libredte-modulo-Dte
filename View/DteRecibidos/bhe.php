@@ -1,7 +1,7 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_recibidos/listar">
-            Volver
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_recibidos/listar" class="nav-link">
+            Documentos recibidos
         </a>
     </li>
 </ul>
@@ -20,7 +20,7 @@ echo $f->end('Buscar boletas');
 
 if (isset($boletas)) {
     foreach ($boletas as &$b) {
-        $b[] = '<a href="'.$_base.'/dte/dte_recibidos/bhe_pdf/'.$b['codigo'].'" title="Descargar PDF boleta honorarios electrónica" class="btn btn-default" target="_blank"><span class="far fa-file-pdf"></span></a>';
+        $b[] = '<a href="'.$_base.'/dte/dte_recibidos/bhe_pdf/'.$b['codigo'].'" title="Descargar PDF boleta honorarios electrónica" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
         if ($b['anulada']) {
             $b['anulada'] = \sowerphp\general\Utility_Date::format($b['anulada']);
         }
@@ -34,8 +34,6 @@ if (isset($boletas)) {
     array_unshift($boletas, ['N°', 'RUT', 'Nombre', 'Fecha', 'Honor.', 'Retenc.', 'Líquido', 'Nula', 'PDF']);
     new \sowerphp\general\View_Helper_Table($boletas, 'bhe_'.$Emisor->rut.'_'.$_POST['periodo'], true);
 ?>
-<link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
-<script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
 <script type="text/javascript"> $(document).ready(function(){ dataTable("#bhe_<?=$Emisor->rut?>_<?=$_POST['periodo']?>"); }); </script>
 <?php
 }

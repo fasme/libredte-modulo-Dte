@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_tmps" title="Volver a los documentos temporales">
-            Volver a documentos temporales
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_tmps" title="Ir a los documentos temporales" class="nav-link">
+            <i class="far fa-file"></i>
+            Documentos temporales
         </a>
     </li>
 </ul>
@@ -21,7 +22,7 @@ echo $f->begin(['onsubmit'=>'Form.check()']);
     <div class="form-group col-md-3"><?=$f->input(['name'=>'total_desde', 'placeholder'=>'Total desde', 'check'=>'integer'])?></div>
     <div class="form-group col-md-3"><?=$f->input(['name'=>'total_hasta', 'placeholder'=>'Total hasta', 'check'=>'integer'])?></div>
 </div>
-<div class="center"><?=$f->input(['type'=>'submit', 'name'=>'submit', 'value'=>'Buscar documentos'])?></div>
+<div class="text-center"><?=$f->input(['type'=>'submit', 'name'=>'submit', 'value'=>'Buscar documentos'])?></div>
 <?php
 echo $f->end(false);
 // mostrar documentos
@@ -30,8 +31,8 @@ if (isset($documentos)) {
     $aux = $documentos;
     $documentos = [['Receptor', 'RUT', 'Documento', 'Folio', 'Fecha', 'Total', 'Acciones']];
     foreach ($aux as &$d) {
-        $acciones = '<a href="'.$_base.'/dte/dte_tmps/ver/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'" title="Ver documento"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/pdf/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_tmps/ver/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'" title="Ver documento"><span class="fa fa-search fa-fw"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/pdf/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf fa-fw"></span></a>';
         $documentos[] = [
             $d['razon_social'],
             $d['receptor'].'-'.\sowerphp\app\Utility_Rut::dv($d['receptor']),

@@ -1,5 +1,14 @@
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/dte_folios" title="Ir al mantenedor de folios" class="nav-link">
+            <i class="fas fa-cube"></i> Folios
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1>Solicitar CAF al SII</h1></div>
 <p>Aquí podrá solicitar un archivo de folios (CAF) al SII y cargarlo automáticamente a LibreDTE.</p>
+<div class="row">
+    <div class="col-md-8">
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Form.check()']);
@@ -19,7 +28,17 @@ echo $f->input([
 ]);
 echo $f->end('Solicitar folios al SII y cargar en LibreDTE');
 ?>
-<div style="float:right;margin-bottom:1em;font-size:0.8em">
-    <a href="<?=$_base?>/dte/admin/dte_folios">Volver al mantenedor de folios</a>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header"><i class="fa fa-exclamation-circle text-warning"></i> ¿Primer timbraje electrónico?</div>
+            <div class="card-body">
+                <p>Si no ha timbrado folios para este tipo de documento en el SII, o sea, es el primer CAF a generar, debe hacerlo en el sitio del SII y luego <a href="<?=$_base?>/dte/admin/dte_folios/subir_caf">subir el archivo del CAF</a>. Timbrajes futuros se pueden realizar acá o de manera automática.</p>
+                <p>Si usted era usuario del portal de facturación MiPyME del SII y ya emitió el documento antes, puede solicitar directamente aquí.</p>
+            </div>
+        </div>
+    </div>
 </div>
-<p><strong>Importante</strong>: si no ha timbrado folios para este tipo de documento en el SII, o sea, es el primer CAF a generar, debe hacerlo en el sitio del SII, no acá. Timbrajes futuros se pueden realizar acá o de manera automática.</p>
+<?php if (!$Emisor->config_sii_timbraje_automatico) : ?>
+        <div class="alert alert-warning text-center">¿Has considerado activar el timbraje automático? ¡Revisa la configuración de la empresa!</div>
+<?php endif; ?>

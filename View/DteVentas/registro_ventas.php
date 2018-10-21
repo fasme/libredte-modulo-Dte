@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_ventas" title="Volver a IEV">
-            Volver a IEV
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_ventas" title="Ir al libro de ventas (IEV)" class="nav-link">
+            <i class="fa fa-book"></i>
+            Libro de ventas
         </a>
     </li>
 </ul>

@@ -1,7 +1,8 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/dte_compras/ver/<?=$periodo?>" title="Volver a la IEC del período <?=$periodo?>">
-            Volver a la IEC <?=$periodo?>
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/ver/<?=$periodo?>" title="Ir al libro de compras (IEC) del período <?=$periodo?>" class="nav-link">
+            <i class="fa fa-book"></i>
+            Libro de compras <?=$periodo?>
         </a>
     </li>
 </ul>
@@ -22,7 +23,7 @@ echo $f->begin([
 echo $f->input([
     'name' => 'CodAutRec',
     'label'=>'Autorización rectificación',
-    'help' => 'Código de autorización de rectificación obtenido desde el SII <a href="#" onclick="get_codigo_reemplazo()">[solicitar código aquí]</a>',
+    'help' => 'Código de autorización de rectificación obtenido desde el SII. <a href="#" onclick="get_codigo_reemplazo()">Solicitar código aquí</a>',
     'check'=>'notempty',
 ]);
 echo $f->end('Enviar rectificación');

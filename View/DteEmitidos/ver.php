@@ -1,26 +1,30 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>?copiar" title="Crear DTE con los mismos datos de este">
-            Copiar DTE
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>?copiar" title="Crear DTE con los mismos datos de este" class="nav-link">
+            <i class="fa fa-copy"></i>
+            Copiar
         </a>
     </li>
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
-    <li>
-        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII">
+    <li class="nav-item">
+        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="nav-link">
+            <i class="fa fa-eye"></i>
             Ver RCV
         </a>
     </li>
 <?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Crm')) : ?>
-    <li>
-        <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>">
-            Ir al CRM
+    <li class="nav-item">
+        <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>" class="nav-link">
+            <i class="fa fa-users"></i>
+            CRM
         </a>
     </li>
 <?php endif; ?>
-    <li>
-        <a href="<?=$_base?>/dte/dte_emitidos/listar" title="Volver a los documentos emitidos">
-            Volver
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_emitidos/listar" title="Ir a los documentos emitidos" class="nav-link">
+            <i class="fa fa-sign-out-alt"></i>
+            Documentos emitidos
         </a>
     </li>
 </ul>
@@ -32,28 +36,28 @@
 $(function() {
     var url = document.location.toString();
     if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+        $('#'+url.split('#')[1]+'-tab').tab('show');
     }
 });
 </script>
 
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab">Datos básicos</a></li>
-        <li role="presentation"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab">PDF</a></li>
-        <li role="presentation"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Enviar por email</a></li>
-        <li role="presentation"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab">Resultado intercambio</a></li>
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
+        <li class="nav-item"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab" id="pdf-tab" class="nav-link">PDF</a></li>
+        <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link">Enviar por email</a></li>
+        <li class="nav-item"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab" id="intercambio-tab" class="nav-link">Resultado intercambio</a></li>
 <?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
-        <li role="presentation"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab">Pagar</a></li>
+        <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
 <?php endif; ?>
-        <li role="presentation"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab">Cobranza</a></li>
-        <li role="presentation"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab">Referencias</a></li>
+        <li class="nav-item"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab" id="cobranza-tab" class="nav-link">Cobranza</a></li>
+        <li class="nav-item"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab" id="referencias-tab" class="nav-link">Referencias</a></li>
 <?php if ($DteEmitido->getTipo()->cedible) : ?>
-        <li role="presentation"><a href="#cesion" aria-controls="cesion" role="tab" data-toggle="tab">Cesión</a></li>
+        <li class="nav-item"><a href="#cesion" aria-controls="cesion" role="tab" data-toggle="tab" id="cesion-tab" class="nav-link">Cesión</a></li>
 <?php endif; ?>
-        <li role="presentation"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab">Avanzado</a></li>
+        <li class="nav-item"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab" id="avanzado-tab" class="nav-link">Avanzado</a></li>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
 <div role="tabpanel" class="tab-pane active" id="datos">
@@ -65,60 +69,64 @@ new \sowerphp\general\View_Helper_Table([
     [$DteEmitido->getTipo()->tipo, $DteEmitido->folio, \sowerphp\general\Utility_Date::format($DteEmitido->fecha), $Receptor->razon_social, num($DteEmitido->exento), num($DteEmitido->neto), num($DteEmitido->iva), num($DteEmitido->total)],
 ]);
 ?>
-            <div class="row">
-                <div class="col-md-4">
-                    <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
-                        <span class="far fa-file-pdf" style="font-size:24px"></span>
+            <div class="row mt-2">
+                <div class="col-md-4 mb-2">
+                    <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
+                        <span class="far fa-file-pdf"></span>
                         Descargar PDF
                     </a>
                 </div>
-                <div class="col-md-4">
-                    <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
-                        <span class="far fa-file-code" style="font-size:24px"></span>
+                <div class="col-md-4 mb-2">
+                    <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+                        <span class="far fa-file-code"></span>
                         Descargar XML
                     </a>
                 </div>
-                <div class="col-md-4">
-                    <a class="btn btn-default btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/json/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
-                        <span class="far fa-file-code" style="font-size:24px"></span>
+                <div class="col-md-4 mb-2">
+                    <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/json/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+                        <span class="far fa-file-code"></span>
                         Descargar JSON
                     </a>
                 </div>
             </div>
         </div>
 <?php if ($enviar_sii) : ?>
-        <div class="col-md-3 center bg-info">
-            <span class="lead">Track ID SII: <?=$DteEmitido->track_id?></span>
-            <p><strong><?=$DteEmitido->revision_estado?></strong></p>
-            <p><?=$DteEmitido->revision_detalle?></p>
+        <div class="col-md-3">
+            <div class="card mb-4 bg-light">
+                <div class="card-header lead text-center">Track ID SII: <?=$DteEmitido->track_id?></div>
+                <div class="card-body text-center">
+                    <p><strong><?=$DteEmitido->revision_estado?></strong></p>
+                    <p><?=$DteEmitido->revision_detalle?></p>
 <?php if ($DteEmitido->track_id) : ?>
-            <p>
-                <a class="btn btn-info<?=$DteEmitido->track_id==-1?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
-                <span style="font-size:0.8em">
+                    <p>
+                        <a class="btn btn-primary<?=$DteEmitido->track_id==-1?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
+                        <span style="font-size:0.8em">
 <?php if (!$Emisor->config_sii_estado_dte_webservice and $DteEmitido->track_id!=-1) : ?>
-                    <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII">solicitar nueva revisión</a>
-                    <br/>
+                            <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII">solicitar nueva revisión</a>
+                            <br/>
 <?php endif; ?>
 <?php if ($DteEmitido->track_id!=-1) : ?>
-                    <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$DteEmitido->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$DteEmitido->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
 <?php endif; ?>
-                    <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
 <?php if ($DteEmitido->getEstado()=='R' or $DteEmitido->track_id==-1) : ?>
-                    <br/>
-                    <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
+                            <br/>
+                            <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
 <?php endif; ?>
-                </span>
-            </p>
+                        </span>
+                    </p>
 <?php else: ?>
-            <p>
-                <a class="btn btn-info" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
-                <br/>
-                <span style="font-size:0.8em">
-                    <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
-                    <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
-                </span>
-            </p>
+                    <p>
+                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
+                        <br/>
+                        <span style="font-size:0.8em">
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
+                            <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
+                        </span>
+                    </p>
 <?php endif; ?>
+                </div>
+            </div>
         </div>
 <?php endif; ?>
     </div>
@@ -239,7 +247,7 @@ if ($email_enviados) {
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
 <?php
 $color = [
-    '' => 'default',
+    '' => 'light',
     'A' => 'primary',
     'C' => 'success',
     'P' => 'warning',
@@ -267,7 +275,7 @@ if ($Recibo) {
             $Recibo->recinto,
             $Recibo->firma,
             $Recibo->fecha_hora,
-            '<a href="'.$_base.'/dte/dte_intercambio_recibos/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="far fa-file-code btn btn-default"></span></a>',
+            '<a href="'.$_base.'/dte/dte_intercambio_recibos/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>',
         ],
     ]);
 } else {
@@ -287,7 +295,7 @@ if ($Recepcion) {
             $Sobre->estado.': '.$Sobre->glosa,
             $Recepcion->estado.': '.$Recepcion->glosa,
             $Sobre->fecha_hora,
-            '<a href="'.$_base.'/dte/dte_intercambio_recepciones/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="far fa-file-code btn btn-default"></span></a>',
+            '<a href="'.$_base.'/dte/dte_intercambio_recepciones/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>',
         ],
     ]);
 } else {
@@ -306,7 +314,7 @@ if ($Resultado) {
             $Sobre->email,
             $Resultado->estado.': '.$Resultado->glosa,
             $Sobre->fecha_hora,
-            '<a href="'.$_base.'/dte/dte_intercambio_resultados/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button"><span class="far fa-file-code btn btn-default"></span></a>',
+            '<a href="'.$_base.'/dte/dte_intercambio_resultados/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>',
         ],
     ]);
 } else {
@@ -322,12 +330,12 @@ if ($Resultado) {
 <?php if ($Emisor->config_pagos_habilitado) : ?>
 <?php if (!$Cobro->pagado) : ?>
 <div class="row">
-    <div class="col-sm-6">
+    <div class="col-sm-6 mb-2">
         <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
             Registrar pago
         </a>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-6 mb-2">
         <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
             Enlace público para pagar
         </a>
@@ -368,7 +376,7 @@ $cobranza = $DteEmitido->getCobranza();
 if ($cobranza) {
     echo '<p>El documento emitido tiene los siguientes pagos programados asociados.</p>',"\n";
     foreach ($cobranza as &$c) {
-        $c[] = '<a href="'.$_base.'/dte/cobranzas/cobranzas/ver/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$c['fecha'].'" title="Ver pago"><span class="fa fa-search btn btn-default"></span></a>';
+        $c[] = '<a href="'.$_base.'/dte/cobranzas/cobranzas/ver/'.$DteEmitido->dte.'/'.$DteEmitido->folio.'/'.$c['fecha'].'" title="Ver pago" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
         $c['fecha'] = \sowerphp\general\Utility_Date::format($c['fecha']);
         $c['monto'] = num($c['monto']);
         if ($c['pagado']!==null) {
@@ -389,9 +397,9 @@ if ($cobranza) {
 
 <!-- INICIO REFERENCIAS -->
 <div role="tabpanel" class="tab-pane" id="referencias">
-    <div class="panel panel-default">
-        <div class="panel-heading">Documentos referenciados</div>
-        <div class="panel-body">
+    <div class="card mb-4">
+        <div class="card-header">Documentos referenciados</div>
+        <div class="card-body">
 <?php
 // referencias que este documento hace a otros
 if ($referenciados) {
@@ -405,15 +413,15 @@ if ($referenciados) {
 ?>
         </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">Documentos que referencian este</div>
-        <div class="panel-body">
+    <div class="card mb-4">
+        <div class="card-header">Documentos que referencian este</div>
+        <div class="card-body">
 <?php
 // referencias que tienen otros documentos a este
 if ($referencias) {
     foreach ($referencias as &$r) {
-        $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$r['dte'].'/'.$r['folio'].'" title="Ver documento"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$r['dte'].'/'.$r['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf btn btn-default"></span></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$r['dte'].'/'.$r['folio'].'" title="Ver documento" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$r['dte'].'/'.$r['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
         $r[] = $acciones;
         unset($r['dte']);
     }
@@ -427,13 +435,13 @@ if ($referencias) {
     </div>
 <div class="row">
 <?php if (!empty($referencia)) : ?>
-    <div class="col-md-<?=(!empty($referencia)?6:12)?>">
+    <div class="col-md-<?=(!empty($referencia)?6:12)?> mb-2">
         <a class="btn btn-<?=$referencia['color']?> btn-lg btn-block" href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$referencia['dte']?>/<?=$referencia['codigo']?>/<?=urlencode($referencia['razon'])?>" role="button">
             <?=$referencia['titulo']?>
         </a>
     </div>
 <?php endif; ?>
-    <div class="col-md-<?=(!empty($referencia)?6:12)?>">
+    <div class="col-md-<?=(!empty($referencia)?6:12)?> mb-2">
         <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
             Crear referencia
         </a>
@@ -497,12 +505,12 @@ endif;
 // si es nota de crédito permitir marcar iva como fuera de plazo
 if ($DteEmitido->dte == 61) :
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="fa fa-ban"></i>
         IVA fuera de plazo (no recuperable)
     </div>
-    <div class="panel-body">
+    <div class="card-body">
 <?php
 echo $f->begin([
     'action' => $_base.'/dte/dte_emitidos/avanzado_iva_fuera_plazo/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
@@ -526,12 +534,12 @@ echo $f->end('Guardar');
 // si es guía de despacho permitir anular
 if ($DteEmitido->dte == 52) :
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="fa fa-ban"></i>
         Anular DTE
     </div>
-    <div class="panel-body">
+    <div class="card-body">
 <?php
 echo $f->begin([
     'action' => $_base.'/dte/dte_emitidos/avanzado_anular/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
@@ -555,12 +563,12 @@ echo $f->end('Guardar');
 // si es exportación permitir cambiar tipo de cambio (sólo si es usuario administrador)
 if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()->esExportacion()) :
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="fas fa-dollar-sign"></i>
         Tipo de cambio para valor en pesos (CLP)
     </div>
-    <div class="panel-body">
+    <div class="card-body">
 <?php
     echo $f->begin([
         'action' => $_base.'/dte/dte_emitidos/avanzado_tipo_cambio/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
@@ -579,12 +587,12 @@ if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()-
 </div>
 <?php endif; ?>
 <?php if ($DteEmitido->getTipo()->enviar) : ?>
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="far fa-paper-plane"></i>
         Track ID o identificador del envío
     </div>
-    <div class="panel-body">
+    <div class="card-body">
 <?php
 // permitir cambiar el track id
 echo $f->begin([
@@ -604,12 +612,12 @@ echo $f->end('Modificar Track ID');
     </div>
 </div>
 <?php endif; ?>
-<div class="panel panel-default">
-    <div class="panel-heading">
+<div class="card mt-4">
+    <div class="card-header">
         <i class="fas fa-map-marker-alt"></i>
         Cambiar sucursal
     </div>
-    <div class="panel-body">
+    <div class="card-body">
 <?php
 echo $f->begin([
     'action' => $_base.'/dte/dte_emitidos/avanzado_sucursal/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
