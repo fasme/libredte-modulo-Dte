@@ -1,17 +1,17 @@
-<ul class="nav nav-pills pull-right">
-    <li>
-        <a href="<?=$_base?>/dte/admin/itemes/listar?search=activo:1" title="Volver al mantenedor de items">
-            <span class="fa fa-cubes"></span> Volver a items
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/item_clasificaciones/exportar" title="Exportar clasificaciones desde archivo CSV" class="nav-link">
+            <i class="fa fa-download"></i> Exportar
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/admin/item_clasificaciones/exportar" title="Exportar clasificaciones desde archivo CSV">
-            <span class="fa fa-download"></span> Exportar
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/item_clasificaciones/importar" title="Importar clasificaciones desde archivo CSV" class="nav-link">
+            <i class="fa fa-upload"></i> Importar
         </a>
     </li>
-    <li>
-        <a href="<?=$_base?>/dte/admin/item_clasificaciones/importar" title="Importar clasificaciones desde archivo CSV">
-            <span class="fa fa-upload"></span> Importar
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/itemes/listar?search=activo:1" title="Ir al mantenedor de items" class="nav-link">
+            <i class="fa fa-cubes"></i> Listado de items
         </a>
     </li>
 </ul>
@@ -26,8 +26,8 @@ $titles = [];
 $colsWidth = [];
 foreach ($columns as $column => $info) {
     $titles[] = $info['name'].' '.
-        '<div class="pull-right"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><span class="fas fa-sort-alpha-down"></span></a>'.
-        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><span class="fas fa-sort-alpha-up"></span></a></div>'
+        '<div class="float-right"><a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/A'.$searchUrl.'" title="Ordenar ascendentemente por '.$info['name'].'"><i class="fas fa-sort-alpha-down"></i></a>'.
+        ' <a href="'.$_base.$module_url.$controller.'/listar/'.$page.'/'.$column.'/D'.$searchUrl.'" title="Ordenar descendentemente por '.$info['name'].'"><i class="fas fa-sort-alpha-up"></i></a></div>'
     ;
     $colsWidth[] = null;
 }
@@ -72,7 +72,7 @@ foreach ($columns as $column => &$info) {
         $row[] = $form->input(array('name'=>$column, 'value'=>(isset($search[$column])?$search[$column]:'')));
     }
 }
-$row[] = '<button type="submit" class="btn btn-default"><span class="fa fa-search"></span></button>';
+$row[] = '<button type="submit" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></button>';
 $data[] = $row;
 
 // crear filas de la tabla
@@ -82,7 +82,7 @@ foreach ($Objs as &$obj) {
         // si es un archivo
         if ($info['type']=='file') {
             if ($obj->{$column.'_size'})
-                $row[] = '<a href="'.$_base.$module_url.$controller.'/d/'.$column.'/'.urlencode($obj->id).'"><span class="fa fa-download"></span></a>';
+                $row[] = '<a href="'.$_base.$module_url.$controller.'/d/'.$column.'/'.urlencode($obj->id).'" class="btn btn-primary"><i class="fa fa-download"></i></a>';
             else
                 $row[] = '';
         }
@@ -110,12 +110,12 @@ foreach ($Objs as &$obj) {
     $actions = '';
     if (!empty($extraActions)) {
         foreach ($extraActions as $a => $i) {
-            $actions .= '<a href="'.$_base.$module_url.$controller.'/'.$a.'/'.$pkURL.$listarFilterUrl.'" title="'.(isset($i['desc'])?$i['desc']:'').'"><span class="'.$i['icon'].' btn btn-default"></span></a> ';
+            $actions .= '<a href="'.$_base.$module_url.$controller.'/'.$a.'/'.$pkURL.$listarFilterUrl.'" title="'.(isset($i['desc'])?$i['desc']:'').'" class="btn btn-primary"><i class="'.$i['icon'].' fa-fw"></i></a> ';
         }
     }
-    $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$obj->codigo.$listarFilterUrl.'" title="Editar"><span class="fa fa-edit btn btn-default"></span></a>';
+    $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$obj->codigo.$listarFilterUrl.'" title="Editar" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
     if ($deleteRecord) {
-        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(\''.$model.'\', \''.implode(', ', $pkValues).'\')"><span class="fas fa-times btn btn-default"></span></a>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(\''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-primary"><i class="fas fa-times fa-fw"></i></a>';
     }
     $row[] = $actions;
     $data[] = $row;

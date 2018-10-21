@@ -1,3 +1,10 @@
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/item_clasificaciones/listar" title="Ir al mantenedor de clasificaciones de items" class="nav-link">
+            <i class="fa fa-list-alt"></i> Clasificaciones
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1><?=$accion?> clasificación de items</h1></div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form ();
@@ -35,6 +42,3 @@ echo $f->input([
 echo $f->end('Guardar');
 ?>
 <div style="float:left;color:red">* campo es obligatorio</div>
-<div style="float:right;margin-bottom:1em;font-size:0.8em">
-    <a href="<?=$_base.$listarUrl?>">Volver al listado de registros</a>
-</div>

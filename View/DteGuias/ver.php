@@ -1,6 +1,6 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_guias" title="Ir al libro de guías de despacho" class="pull-right" class="nav-link">
+        <a href="<?=$_base?>/dte/dte_guias" title="Ir al libro de guías de despacho" class="nav-link">
             <i class="fa fa-book"></i>
             Libro guías
         </a>
