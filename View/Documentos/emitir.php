@@ -440,8 +440,6 @@ echo $t->generate($clientes);
         </div>
     </div>
 </div>
-<link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
-<script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
 <script type="text/javascript"> $(document).ready(function(){ dataTable("#clientes", [{"sWidth":120}, null, null]); }); </script>
 <script>
 <?php if ($Emisor->config_pagos_cuenta_rut == $Emisor->getRUT()) : ?>

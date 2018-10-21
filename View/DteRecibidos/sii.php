@@ -79,8 +79,6 @@ if (isset($documentos)) {
     $t->setColsWidth([null, null, null, null, null, null, null, null, null, 120]);
     echo $t->generate($documentos);
 ?>
-<link rel="stylesheet" type="text/css" href="<?=$_base?>/css/jquery.dataTables.css" />
-<script type="text/javascript" src="<?=$_base?>/js/jquery.dataTables.js"></script>
 <script type="text/javascript"> $(document).ready(function(){ dataTable("#dte_recibidos_sii_<?=$Emisor->rut?>_<?=$_POST['desde']?>_<?=$_POST['hasta']?>"); }); </script>
 <?php
 }
