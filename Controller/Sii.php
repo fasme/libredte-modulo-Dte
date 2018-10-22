@@ -256,7 +256,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Método que muestra el estado de un DTE en el registro de compras y ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-19
+     * @version 2018-10-22
      */
     public function dte_rcv($emisor, $dte, $folio)
     {
@@ -269,7 +269,7 @@ class Controller_Sii extends \Controller_App
             );
             $this->redirect('/dte');
         }
-        $this->layout = 'popup';
+        $this->layout .= '.min';
         $this->set([
             'Emisor' => new \website\Dte\Model_Contribuyente($emisor_rut),
             'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),

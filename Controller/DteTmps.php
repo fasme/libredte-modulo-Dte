@@ -580,7 +580,7 @@ class Controller_DteTmps extends \Controller_App
      * Acción que permite generar un vale para imprimir con la identificación
      * del DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-04
+     * @version 2018-10-22
      */
     public function vale($receptor, $dte, $codigo)
     {
@@ -594,7 +594,7 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         // pasar datos a la vista
-        $this->layout = 'popup';
+        $this->layout .= '.min';
         $this->set('DteTmp', $DteTmp);
     }
 

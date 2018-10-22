@@ -1470,7 +1470,7 @@ class Controller_DteEmitidos extends \Controller_App
             'dtes' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
             'dte' => isset($_POST['dte']) ? $_POST['dte'] : $dte,
         ]);
-        $this->layout = 'popup';
+        $this->layout .= '.min';
         // si se solicitó un documento se busca
         if (isset($_POST['emisor'])) {
             $r = $this->consume('/api/dte/dte_emitidos/consultar?getXML=0', $_POST);
