@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Facturación electrónica</h1></div>
+<div class="page-header"><h1>Facturación</h1></div>
 
 <?php
 echo View_Helper_Dashboard::cards([
