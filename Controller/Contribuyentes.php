@@ -249,7 +249,7 @@ class Controller_Contribuyentes extends \Controller_App
             'impuestos_adicionales' => $impuestos_adicionales,
             'impuestos_adicionales_tasa' => $impuestos_adicionales_tasa,
             'impuestos_adicionales_todos' => $impuestos_adicionales_todos,
-            'titulo' => 'Modificar empresa '.$Contribuyente->razon_social,
+            'titulo' => 'Configuración de la empresa',
             'descripcion' => 'Aquí podrá modificar los datos de la empresa '.$Contribuyente->razon_social.' RUT '.num($Contribuyente->rut).'-'.$Contribuyente->dv.', para la cual usted es el usuario administrador.',
             'form_id' => 'modificarContribuyente',
             'boton' => 'Modificar empresa',

@@ -20,7 +20,7 @@
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Mantenedor de folios <small><?=$Emisor->getNombre()?></small></h1></div>
+<div class="page-header"><h1>Mantenedor de timbraje (CAF)</h1></div>
 <p>Aquí podrá administrar los códigos de autorización de folios (CAF) disponibles para la empresa <?=$Emisor->getNombre()?>.</p>
 <?php
 foreach ($folios as &$f) {

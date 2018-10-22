@@ -6,7 +6,7 @@
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Emitir DTE <small><?=$Emisor->getNombre()?></small></h1></div>
+<div class="page-header"><h1>Emitir DTE</h1></div>
 <?php if (isset($datos)) : ?>
 <script type="text/javascript">
     $(function() {

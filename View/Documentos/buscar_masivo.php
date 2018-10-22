@@ -6,7 +6,7 @@
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Buscar DTE masivo <small><?=$Emisor->getNombre()?></small></h1></div>
+<div class="page-header"><h1>Buscar DTE masivo</h1></div>
 <p>Aquí puede buscar documentos emitidos (temporales o reales) emitidos de manera masiva usando el mismo formato del archivo de emisión masiva.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
