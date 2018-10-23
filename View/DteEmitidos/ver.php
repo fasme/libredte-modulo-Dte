@@ -60,7 +60,7 @@ $(function() {
     <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
-<div role="tabpanel" class="tab-pane active" id="datos">
+<div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
     <div class="row">
         <div class="col-md-<?=$enviar_sii?9:12?>">
 <?php
@@ -134,7 +134,7 @@ new \sowerphp\general\View_Helper_Table([
 <!-- FIN DATOS BÁSICOS -->
 
 <!-- INICIO PDF -->
-<div role="tabpanel" class="tab-pane" id="pdf">
+<div role="tabpanel" class="tab-pane" id="pdf" aria-labelledby="pdf-tab">
 <?php
 $links = $DteEmitido->getLinks();
 $pdf_publico = $links['pdf'];
@@ -159,7 +159,7 @@ echo $f->end('Descargar PDF');
 <!-- FIN PDF -->
 
 <!-- INICIO ENVIAR POR EMAIL -->
-<div role="tabpanel" class="tab-pane" id="email">
+<div role="tabpanel" class="tab-pane" id="email" aria-labelledby="email-tab">
 <?php
 $enlace_pagar_dte = !empty($links['pagar']) ? $links['pagar'] : null;
 $asunto = $DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.' de '.$Emisor->getNombre().' ('.$Emisor->getRUT().')';
@@ -243,7 +243,7 @@ if ($email_enviados) {
 <!-- FIN ENVIAR POR EMAIL -->
 
 <!-- INICIO INTERCAMBIO -->
-<div role="tabpanel" class="tab-pane" id="intercambio">
+<div role="tabpanel" class="tab-pane" id="intercambio" aria-labelledby="intercambio-tab">
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
 <?php
 $color = [
@@ -326,7 +326,7 @@ if ($Resultado) {
 
 <?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
 <!-- INICIO PAGAR -->
-<div role="tabpanel" class="tab-pane" id="pagar">
+<div role="tabpanel" class="tab-pane" id="pagar" aria-labelledby="pagar-tab">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
 <?php if (!$Cobro->pagado) : ?>
 <div class="row">
@@ -370,7 +370,7 @@ if ($Cobro->datos) {
 <?php endif; ?>
 
 <!-- INICIO COBRANZA -->
-<div role="tabpanel" class="tab-pane" id="cobranza">
+<div role="tabpanel" class="tab-pane" id="cobranza" aria-labelledby="cobranza-tab">
 <?php
 $cobranza = $DteEmitido->getCobranza();
 if ($cobranza) {
@@ -396,7 +396,7 @@ if ($cobranza) {
 <!-- FIN COBRANZA -->
 
 <!-- INICIO REFERENCIAS -->
-<div role="tabpanel" class="tab-pane" id="referencias">
+<div role="tabpanel" class="tab-pane" id="referencias" aria-labelledby="referencias-tab">
     <div class="card mb-4">
         <div class="card-header">Documentos referenciados</div>
         <div class="card-body">
@@ -452,7 +452,7 @@ if ($referencias) {
 
 <?php if ($DteEmitido->getTipo()->cedible) : ?>
 <!-- INICIO CESIÓN -->
-<div role="tabpanel" class="tab-pane" id="cesion">
+<div role="tabpanel" class="tab-pane" id="cesion" aria-labelledby="cesion-tab">
 <?php if ($DteEmitido->cesion_track_id) : ?>
 <div class="bg-info lead center" style="padding:0.5em">
     Documento tiene track id de cesión: <?=$DteEmitido->cesion_track_id?>
@@ -500,7 +500,7 @@ endif;
 <?php endif; ?>
 
 <!-- INICIO AVANZADO -->
-<div role="tabpanel" class="tab-pane" id="avanzado">
+<div role="tabpanel" class="tab-pane" id="avanzado" aria-labelledby="avanzado-tab">
 <?php
 // si es nota de crédito permitir marcar iva como fuera de plazo
 if ($DteEmitido->dte == 61) :

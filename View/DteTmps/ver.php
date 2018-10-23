@@ -61,7 +61,7 @@ $(function() {
     <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
-<div role="tabpanel" class="tab-pane active" id="datos">
+<div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
 <?php
 new \sowerphp\general\View_Helper_Table([
     ['Documento', 'Folio', 'Fecha', 'Receptor', 'Total'],
@@ -107,7 +107,7 @@ new \sowerphp\general\View_Helper_Table([
 <!-- FIN DATOS BÁSICOS -->
 
 <!-- INICIO PDF -->
-<div role="tabpanel" class="tab-pane" id="pdf">
+<div role="tabpanel" class="tab-pane" id="pdf" aria-labelledby="pdf-tab">
 <script>
 function pdf_set_action(documento) {
     var action = '<?=$_url.'/dte/dte_tmps/{documento}/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor?>';
@@ -145,7 +145,7 @@ if ($DteTmp->getTipo()->permiteCobro()) :
 <!-- FIN PDF -->
 
 <!-- INICIO ENVIAR POR EMAIL -->
-<div role="tabpanel" class="tab-pane" id="email">
+<div role="tabpanel" class="tab-pane" id="email" aria-labelledby="email-tab">
 <?php
 $asunto = 'Documento N° '.$DteTmp->getFolio().' de '.$Emisor->razon_social.' ('.$Emisor->getRUT().')';
 if (!$email_html) {
@@ -217,7 +217,7 @@ echo $f->end('Enviar PDF por email');
 
 <?php if ($DteTmp->getTipo()->permiteCobro()): ?>
 <!-- INICIO PAGAR -->
-<div role="tabpanel" class="tab-pane" id="pagar">
+<div role="tabpanel" class="tab-pane" id="pagar" aria-labelledby="pagar-tab">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
 <div class="row">
     <div class="col-sm-6 mb-2">
@@ -239,7 +239,7 @@ echo $f->end('Enviar PDF por email');
 <?php endif; ?>
 
 <!-- INICIO ACTUALIZAR FECHA -->
-<div role="tabpanel" class="tab-pane" id="actualizar_fecha">
+<div role="tabpanel" class="tab-pane" id="actualizar_fecha" aria-labelledby="actualizar_fecha-tab">
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([
@@ -269,7 +269,7 @@ echo $f->end('Actualizar fecha');
 
 <?php if ($_Auth->User->inGroup('soporte')): ?>
 <!-- INICIO AVANZADO -->
-<div role="tabpanel" class="tab-pane" id="avanzado">
+<div role="tabpanel" class="tab-pane" id="avanzado" aria-labelledby="avanzado-tab">
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([

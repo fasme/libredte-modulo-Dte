@@ -56,7 +56,7 @@ function intercambio_reclamar() {
     <div class="tab-content pt-4">
 
 <!-- INICIO DATOS BÁSICOS -->
-<div role="tabpanel" class="tab-pane active" id="email">
+<div role="tabpanel" class="tab-pane active" id="email" aria-labelledby="email-tab">
 <?php
 $de = $DteIntercambio->de;
 if ($DteIntercambio->de!=$DteIntercambio->responder_a)
@@ -112,7 +112,7 @@ new \sowerphp\general\View_Helper_Table([
 <!-- FIN DATOS BÁSICOS -->
 
 <!-- INICIO DOCUMENTOS -->
-<div role="tabpanel" class="tab-pane" id="documentos">
+<div role="tabpanel" class="tab-pane" id="documentos" aria-labelledby="documentos-tab">
 <div class="row" style="margin-bottom:1em">
     <div class="col-sm-7">
         <p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
@@ -255,7 +255,7 @@ echo $f->end(false);
 <!-- FIN DOCUMENTOS -->
 
 <!-- INICIO AVANZADO -->
-<div role="tabpanel" class="tab-pane" id="avanzado">
+<div role="tabpanel" class="tab-pane" id="avanzado" aria-labelledby="avanzado-tab">
 
 <?php
 if ($estado_enviodte==1) {
