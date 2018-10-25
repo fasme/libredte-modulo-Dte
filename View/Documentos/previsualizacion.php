@@ -50,7 +50,7 @@ new \sowerphp\general\View_Helper_Table([
 </div>
 <?php if ($DteTmp->getEmisor()->config_emision_previsualizacion_automatica) : ?>
 <div class="row" style="margin-top:2em">
-    <div class="col-xs-12">
+    <div class="col-sm-12">
         <iframe src="../dte_tmps/pdf/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>/inline" style="border:0;width:100%;height:500px"></iframe>
     </div>
 </div>
