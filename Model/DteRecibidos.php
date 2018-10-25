@@ -42,7 +42,7 @@ class Model_DteRecibidos extends \Model_Plural_App
      * Método que entrega el listado de documentos que tienen compras de
      * activos fijos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-03
+     * @version 2018-10-25
      */
     public function getActivosFijos($filtros)
     {
@@ -58,7 +58,7 @@ class Model_DteRecibidos extends \Model_Plural_App
         ];
         if (isset($filtros['sucursal'])) {
             if ($filtros['sucursal']) {
-                $where[] = 'r.sucursal_sii_receptor IS NULL';
+                $where[] = 'r.sucursal_sii_receptor = :sucursal';
                 $vars[':sucursal'] = $filtros['sucursal'];
             } else {
                 $where[] = 'r.sucursal_sii_receptor IS NULL';

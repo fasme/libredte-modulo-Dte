@@ -36,8 +36,8 @@ if (isset($compras)) {
         $c['monto_activo_fijo'] = num($c['monto_activo_fijo']);
         $c['items'] = implode('<br/>', $c['items']);
         $c['precios'] = implode('<br/>', array_map('num', $c['precios']));
-        $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$c['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-default'.(!$c['intercambio']?' disabled':'').'"><span class="fa fa-search"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$c['intercambio'].'/0/'.$c['emisor'].'/'.$c['dte'].'/'.$c['folio'].'" title="Descargar PDF del documento" class="btn btn-default'.(!$c['intercambio']?' disabled':'').'"><span class="far fa-file-pdf"></span></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$c['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-primary'.(!$c['intercambio']?' disabled':'').'"><i class="fa fa-search fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$c['intercambio'].'/0/'.$c['emisor'].'/'.$c['dte'].'/'.$c['folio'].'" title="Descargar PDF del documento" class="btn btn-primary'.(!$c['intercambio']?' disabled':'').'"><i class="far fa-file-pdf fa-fw"></i></a>';
         $c[] = $acciones;
         unset($c['emisor'], $c['intercambio'], $c['dte']);
     }
@@ -45,7 +45,7 @@ if (isset($compras)) {
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setID('activos_fijos_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta']);
     $t->setExport(true);
-    $t->setColsWidth([null, null, null, null, null, null, null, null, null, null, 100]);
+    $t->setColsWidth([null, null, null, null, null, null, null, null, null, null, 110]);
     echo '<div class="well lead text-center">Total monto activo fijo del período: $',num($total_activo_fijo),'.-</div>',"\n";
     echo $t->generate($compras);
 }

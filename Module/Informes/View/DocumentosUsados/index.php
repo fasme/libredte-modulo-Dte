@@ -14,22 +14,30 @@ foreach ($documentos as &$d) {
     }
 }
 ?>
-<div class="row">
-    <div class="col-sm-3 col-xs-6 text-center well">
-        <span class="text-info lead"><?=num($emitidos)?></span><br/>
-        <small>emitidos</small>
+<div class="card-deck">
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <span class="text-info lead"><?=num($emitidos)?></span><br/>
+            <small>emitidos</small>
+        </div>
     </div>
-    <div class="col-sm-3 col-xs-6 text-center well">
-        <span class="text-info lead"><?=num($recibidos)?></span><br/>
-        <small>recibidos</small>
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <span class="text-info lead"><?=num($recibidos)?></span><br/>
+            <small>recibidos</small>
+        </div>
     </div>
-    <div class="col-sm-3 col-xs-6 text-center well">
-        <span class="text-info lead"><?=num($total)?></span><br/>
-        <small>total</small>
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <span class="text-info lead"><?=num($total)?></span><br/>
+            <small>total</small>
+        </div>
     </div>
-    <div class="col-sm-3 col-xs-6 text-center well">
-        <span class="text-info lead"><?=num($sobre_cuota)?></span><br/>
-        <small>sobre la cuota</small>
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <span class="text-info lead"><?=num($sobre_cuota)?></span><br/>
+            <small>sobre la cuota</small>
+        </div>
     </div>
 </div>
 <?php
