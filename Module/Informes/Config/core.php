@@ -24,12 +24,12 @@
 // Menú para el módulo
 Configure::write('nav.module', array(
     '/dte_emitidos' => [
-        'name' => 'Documentos emitidos',
+        'name' => 'Gráficos y detalle documentos emitidos',
         'desc' => 'Informe de documentos emitidos',
         'icon' => 'fas fa-sign-out-alt',
     ],
     '/despachos' => [
-        'name' => 'Despachos diarios',
+        'name' => 'Despachos diarios y mapa guías',
         'desc' => 'Informe diario de guías de despachos a realizar (incluye mapa)',
         'icon' => 'fa fa-map',
     ],
@@ -38,18 +38,18 @@ Configure::write('nav.module', array(
         'desc' => 'Propuesta para el formulario 29',
         'icon' => 'fa fa-file',
     ],
+    '/dte_emitidos/sin_enviar' => [
+        'name' => 'DTEs sin enviar al SII',
+        'desc' => 'Documentos emitidos y que no han sido envíados al SII',
+        'icon' => 'far fa-paper-plane',
+    ],
     '/dte_emitidos/sin_intercambio' => [
-        'name' => 'Emitidos sin intercambio',
+        'name' => 'DTEs sin enviar al receptor',
         'desc' => 'Documentos emitidos que no han sido enviados en el proceso de intercambio',
         'icon' => 'far fa-envelope',
     ],
-    '/dte_emitidos/intercambio' => [
-        'name' => 'Respuesta intercambio DTE',
-        'desc' => 'Respuestas del proceso de intercambio para DTE emitidos a clientes',
-        'icon' => 'fas fa-exchange-alt',
-    ],
     '/dte_emitidos/estados' => [
-        'name' => 'Estado DTEs emitidos',
+        'name' => 'Estado envío DTEs al SII',
         'desc' => 'Estados de documentos emitidos y envíados al SII',
         'icon' => 'far fa-copy',
     ],
@@ -58,10 +58,10 @@ Configure::write('nav.module', array(
         'desc' => 'Eventos registrados por los receptores de los documentos emitidos',
         'icon' => 'fas fa-user-secret',
     ],
-    '/dte_emitidos/sin_enviar' => [
-        'name' => 'Documentos sin enviar al SII',
-        'desc' => 'Documentos emitidos y que no han sido envíados al SII',
-        'icon' => 'far fa-paper-plane',
+    '/dte_emitidos/intercambio' => [
+        'name' => 'Intercambio DTEs emitidos',
+        'desc' => 'Respuestas del proceso de intercambio para DTE emitidos a clientes',
+        'icon' => 'fas fa-exchange-alt',
     ],
     '/documentos_usados' => [
         'name' => 'Documentos usados',

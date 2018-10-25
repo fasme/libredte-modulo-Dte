@@ -79,7 +79,7 @@ echo View_Helper_Dashboard::cards([
 <?php if ($documentos_rechazados) : ?>
         <!-- alertas documentos rechazados  -->
         <div class="row">
-            <div class="col-xs-12">
+            <div class="col-sm-12">
                 <a class="btn btn-danger btn-lg btn-block" href="informes/dte_emitidos/estados/<?=$documentos_rechazados['desde']?>/<?=$hasta?>" role="button" title="Ir al informe de estados de envíos de DTE">
                     <?=num($documentos_rechazados['total'])?> documento(s) rechazado(s) desde el <?=\sowerphp\general\Utility_Date::format($documentos_rechazados['desde'])?>
                 </a>

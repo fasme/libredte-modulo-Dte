@@ -3,7 +3,7 @@
 <?php
 foreach ($documentos as &$d) {
     $d['total'] = num($d['total']);
-    $d[] = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'#intercambio"><span class="fa fa-search btn btn-default"></span></a>';
+    $d[] = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'#intercambio" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
     unset($d['dte']);
 }
 array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado envío SII', 'Sucursal', 'Usuario', 'Ver']);

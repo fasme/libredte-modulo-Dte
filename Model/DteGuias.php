@@ -41,14 +41,14 @@ class Model_DteGuias extends \Model_Plural_App
     /**
      * Método que entrega los despachos de un contribuyente para cierta fecha
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-26
+     * @version 2018-10-25
      */
     public function getDespachos(array $filtros = [])
     {
         if (empty($filtros['fecha'])) {
             $filtros['fecha'] = date('Y-m-d');
         }
-        $where = ['e.fecha = :fecha'];
+        $where = ['e.fecha = :fecha', 'e.anulado = false'];
         $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':fecha' => $filtros['fecha']];
         if (!empty($filtros['receptor'])) {
             $where[] = 'e.receptor = :receptor';
@@ -98,9 +98,9 @@ class Model_DteGuias extends \Model_Plural_App
             ORDER BY '.$comuna.', e.folio
         ', $vars);
         foreach ($despachos as &$d) {
-            $d['direccion'] = utf8_decode($d['direccion']);
-            $d['comuna'] = utf8_decode($d['comuna']);
-            $d['items'] = explode('","', utf8_decode($d['items']));
+            $d['direccion'] = $d['direccion'];
+            $d['comuna'] = $d['comuna'];
+            $d['items'] = explode('","', $d['items']);
             if (!empty($filtros['mapa'])) {
                 list($latitud, $longitud) = (new \sowerphp\general\Utility_Mapas_Google())->getCoordenadas($d['direccion'].', '.$d['comuna']);
                 $d['latitud'] = $latitud;

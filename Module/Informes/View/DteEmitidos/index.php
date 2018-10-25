@@ -22,71 +22,71 @@ echo $f->end('Generar informe de documentos emitidos');
 <?php if (isset($_POST['submit'])) : ?>
 <div class="row">
     <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por día
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_dia"></div>
             </div>
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por hora
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_hora"></div>
             </div>
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por sucursal
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_sucursal"></div>
             </div>
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por usuario
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_usuario"></div>
             </div>
         </div>
     </div>
     <div class="col-sm-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por tipo de documento
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_tipo"></div>
             </div>
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por nacionalidad (sólo exportación)
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_nacionalidad"></div>
             </div>
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card mb-4">
+            <div class="card-header">
                 <i class="far fa-chart-bar fa-fw"></i> Emitidos por moneda (sólo exportación)
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div id="grafico-por_moneda"></div>
             </div>
         </div>

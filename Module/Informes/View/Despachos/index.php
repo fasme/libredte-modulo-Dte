@@ -19,6 +19,7 @@ echo $f->input([
     'name' => 'sucursal',
     'label' => 'Sucursal',
     'options' => $sucursales,
+    'value' => $sucursal,
     'check' => 'notempty',
     'help' => 'Sucursal que genera el despacho',
 ]);
@@ -71,8 +72,8 @@ echo $f->end('Generar reporte');
 if (isset($despachos)) {
     $despachos_mapa = [];
     foreach ($despachos as &$d) {
-        $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/52/'.$d['folio'].'"><span class="fa fa-search btn btn-default"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$d['folio'].'"><span class="far fa-file-pdf btn btn-default"></span></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/52/'.$d['folio'].'" class="btn btn-primary"><span class="fa fa-search fa-fw"></span></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$d['folio'].'" class="btn btn-primary"><span class="far fa-file-pdf fa-fw"></span></a>';
         $d[] = $acciones;
         $d['direccion'] .= ', '.$d['comuna'];
         $d['total'] = num($d['total']);

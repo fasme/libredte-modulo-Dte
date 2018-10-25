@@ -22,7 +22,7 @@ echo $f->end('Buscar');
 if ($documentos) {
     foreach ($documentos as &$d) {
         $d['total'] = num($d['total']);
-        $d[] = '<a href="'.$_base.'/dte/informes/dte_emitidos/eventos_detalle/'.$desde.'/'.$hasta.'/'.urlencode($d['evento']).'"><span class="fa fa-search btn btn-default"></span></a>';
+        $d[] = '<a href="'.$_base.'/dte/informes/dte_emitidos/eventos_detalle/'.$desde.'/'.$hasta.'/'.urlencode($d['evento']).'" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
         $d['evento'] = isset(\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$d['evento']]) ? \sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$d['evento']] : 'Sin evento registrado';
     }
     array_unshift($documentos, ['Evento', 'Documentos', 'Ver detalle']);

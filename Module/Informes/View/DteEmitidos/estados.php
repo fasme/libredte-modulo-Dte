@@ -22,7 +22,7 @@ echo $f->end('Buscar');
 if ($documentos) {
     foreach ($documentos as &$d) {
         $d['total'] = num($d['total']);
-        $d[] = '<a href="'.$_base.'/dte/informes/dte_emitidos/estados_detalle/'.$desde.'/'.$hasta.'/'.urlencode($d['estado']).'"><span class="fa fa-search btn btn-default"></span></a>';
+        $d[] = '<a href="'.$_base.'/dte/informes/dte_emitidos/estados_detalle/'.$desde.'/'.$hasta.'/'.urlencode($d['estado']).'" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
     }
     array_unshift($documentos, ['Estado', 'Documentos', 'Ver detalle']);
     new \sowerphp\general\View_Helper_Table($documentos, 'emitidos_estados_'.$Emisor->rut, true);
