@@ -275,7 +275,7 @@ class Model_Item extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-07-31
      */
-    public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = 0)
+    public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = null)
     {
         if ($bruto) {
             return $this->getPrecioBruto($fecha, $moneda, $decimales);
@@ -291,11 +291,7 @@ class Model_Item extends \Model_App
         if ($moneda == $this->moneda) {
             return $precio;
         }
-        if (!$fecha) {
-            $fecha = date('Y-m-d');
-        }
-        $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, $moneda, $fecha))->valor;
-        return round($precio * $cambio, $decimales);
+        return (new \sowerphp\app\Sistema\General\Model_MonedaCambios())->convertir($this->moneda, $moneda, $precio, $fecha, $decimales);
     }
 
     /**
@@ -307,7 +303,7 @@ class Model_Item extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-07-31
      */
-    public function getPrecioBruto($fecha = null, $moneda = 'CLP', $decimales = 0)
+    public function getPrecioBruto($fecha = null, $moneda = 'CLP', $decimales = null)
     {
         if ($this->bruto and $this->moneda==$moneda) {
             return $this->precio;
@@ -323,9 +319,9 @@ class Model_Item extends \Model_App
      * @param moneda Tipo de moneda en la que se desea obtener el descuento del item
      * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el descuento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-25
+     * @version 2018-10-26
      */
-    public function getDescuento($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = 0)
+    public function getDescuento($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = null)
     {
         // si el descuento es en porcentaje se entrega directamente ya que no se ve afectado por los parámetros o si es o no bruto
         if ($this->descuento_tipo == '%') {
@@ -347,11 +343,7 @@ class Model_Item extends \Model_App
         if ($moneda == $this->moneda) {
             return $descuento;
         }
-        if (!$fecha) {
-            $fecha = date('Y-m-d');
-        }
-        $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, $moneda, $fecha))->valor;
-        return round($descuento * $cambio, $decimales);
+        return (new \sowerphp\app\Sistema\General\Model_MonedaCambios())->convertir($this->moneda, $moneda, $descuento, $fecha, $decimales);
     }
 
     /**
@@ -362,7 +354,7 @@ class Model_Item extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-10-25
      */
-    public function getDescuentoBruto($fecha = null, $moneda = 'CLP', $decimales = 0)
+    public function getDescuentoBruto($fecha = null, $moneda = 'CLP', $decimales = null)
     {
         if ($this->descuento_tipo == '%' or ($this->bruto and $this->moneda==$moneda)) {
             return $this->descuento;

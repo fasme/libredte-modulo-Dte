@@ -99,11 +99,18 @@ class Controller_Itemes extends \Controller_Maintainer
      * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
      * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-25
+     * @version 2018-10-26
      */
     public function _api_info_GET($empresa, $codigo)
     {
-        extract($this->Api->getQuery(['fecha', 'tipo', 'bruto'=>false, 'moneda'=>'CLP', 'campo'=>'libredte']));
+        extract($this->Api->getQuery([
+            'fecha' => date('Y-m-d'),
+            'tipo' => 'INT1',
+            'bruto' => false,
+            'moneda' => 'CLP',
+            'decimales' => null,
+            'campo' => 'libredte'
+        ]));
         // obtener usuario autenticado
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -136,10 +143,10 @@ class Controller_Itemes extends \Controller_Maintainer
                 'DscItem' => $Item->descripcion,
                 'IndExe' => $Item->exento,
                 'UnmdItem' => $Item->unidad,
-                'PrcItem' => $Item->getPrecio($fecha, $bruto, $moneda),
+                'PrcItem' => $Item->getPrecio($fecha, $bruto, $moneda, $decimales),
                 'Moneda' => $moneda,
                 'MntBruto' => (bool)$bruto,
-                'ValorDR' => $Item->getDescuento($fecha, $bruto, $moneda),
+                'ValorDR' => $Item->getDescuento($fecha, $bruto, $moneda, $decimales),
                 'TpoValor' => $Item->descuento_tipo,
                 'CodImpAdic' => $Item->impuesto_adicional,
             ], 200, JSON_PRETTY_PRINT);
