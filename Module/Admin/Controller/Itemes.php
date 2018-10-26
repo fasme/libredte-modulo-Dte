@@ -99,7 +99,7 @@ class Controller_Itemes extends \Controller_Maintainer
      * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
      * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-06
+     * @version 2018-10-25
      */
     public function _api_info_GET($empresa, $codigo)
     {
@@ -139,7 +139,7 @@ class Controller_Itemes extends \Controller_Maintainer
                 'PrcItem' => $Item->getPrecio($fecha, $bruto, $moneda),
                 'Moneda' => $moneda,
                 'MntBruto' => (bool)$bruto,
-                'ValorDR' => $Item->descuento,
+                'ValorDR' => $Item->getDescuento($fecha, $bruto, $moneda),
                 'TpoValor' => $Item->descuento_tipo,
                 'CodImpAdic' => $Item->impuesto_adicional,
             ], 200, JSON_PRETTY_PRINT);

@@ -270,7 +270,7 @@ class Model_Item extends \Model_App
      * @param fecha Permite solicitar el precio para una fecha en particular (sirve cuando el precio no está en CLP)
      * @param bruto =false se obtendrá el valor neto del item, =true se obtendrá el valor bruto (con impuestos)
      * @param moneda Tipo de moneda en la que se desea obtener el precio del item
-     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtnener el precio
+     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el precio
      * @todo Calcular monto neto/bruto cuando hay impuestos específicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-07-31
@@ -291,17 +291,18 @@ class Model_Item extends \Model_App
         if ($moneda == $this->moneda) {
             return $precio;
         }
-        if (!$fecha)
+        if (!$fecha) {
             $fecha = date('Y-m-d');
+        }
         $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, $moneda, $fecha))->valor;
         return round($precio * $cambio, $decimales);
     }
 
     /**
-     * Método que entrega el bruto del item
+     * Método que entrega el precio bruto del item
      * @param fecha Permite solicitar el precio para una fecha en particular (sirve cuando el precio no está en CLP)
      * @param moneda Tipo de moneda en la que se desea obtener el precio del item
-     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtnener el precio
+     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el precio
      * @todo Calcular monto neto/bruto cuando hay impuestos específicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-07-31
@@ -312,6 +313,61 @@ class Model_Item extends \Model_App
             return $this->precio;
         }
         $neto = $this->getPrecio($fecha, false, $moneda, $decimales);
+        return !$this->exento ? $neto*1.19 : $neto;
+    }
+
+    /**
+     * Método que entrega el descuento del item
+     * @param fecha Permite solicitar el descuento para una fecha en particular (sirve cuando el descuento no está en CLP)
+     * @param bruto =false se obtendrá el descuento neto del item, =true se obtendrá el descuento bruto (con impuestos)
+     * @param moneda Tipo de moneda en la que se desea obtener el descuento del item
+     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el descuento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-10-25
+     */
+    public function getDescuento($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = 0)
+    {
+        // si el descuento es en porcentaje se entrega directamente ya que no se ve afectado por los parámetros o si es o no bruto
+        if ($this->descuento_tipo == '%') {
+            return $this->descuento;
+        }
+        // si es descuento bruto se llama al métood getDescuentoBruto
+        if ($bruto) {
+            return $this->getDescuentoBruto($moneda, $decimales);
+        }
+        // si es descuento neto se revisa según moneda solicitada
+        if ($moneda == 'CLP') {
+            $descuento = $this->bruto ? $this->descuento/1.19 : $this->descuento;
+            if ($this->moneda=='CLP') {
+                return round($descuento, $decimales);
+            }
+        } else {
+            $descuento = $this->bruto ? round($this->descuento/1.19, $this->moneda!='CLP'?3:0) : $this->descuento;
+        }
+        if ($moneda == $this->moneda) {
+            return $descuento;
+        }
+        if (!$fecha) {
+            $fecha = date('Y-m-d');
+        }
+        $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($this->moneda, $moneda, $fecha))->valor;
+        return round($descuento * $cambio, $decimales);
+    }
+
+    /**
+     * Método que entrega el descuento bruto del item
+     * @param fecha Permite solicitar el descuento para una fecha en particular (sirve cuando el descuento no está en CLP)
+     * @param moneda Tipo de moneda en la que se desea obtener el descuento del item
+     * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el descuento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-10-25
+     */
+    public function getDescuentoBruto($fecha = null, $moneda = 'CLP', $decimales = 0)
+    {
+        if ($this->descuento_tipo == '%' or ($this->bruto and $this->moneda==$moneda)) {
+            return $this->descuento;
+        }
+        $neto = $this->getDescuento($fecha, false, $moneda, $decimales);
         return !$this->exento ? $neto*1.19 : $neto;
     }
 
