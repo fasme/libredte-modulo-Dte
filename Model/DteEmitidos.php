@@ -133,12 +133,10 @@ class Model_DteEmitidos extends \Model_Plural_App
                 $d['nacionalidad'] = \sasco\LibreDTE\Sii\Aduana::getNacionalidad($d['nacionalidad']);
             }
             if ($detalle) {
-                if ($d['id']=='T33F514' and strpos($d['items'][0]['cantidad'], ',')) {
+                if (strpos($d['items'][0]['cantidad'], ',')) {
                     $d['items'][0]['nombre'] = str_replace('","', '|||', $d['items'][0]['nombre']);
                     $d['items'][0]['nombre'] = str_replace(['",', ',"'], '|||', $d['items'][0]['nombre']);
                     $d['items'][0]['nombre'] = str_replace('|||', '","', $d['items'][0]['nombre']);
-
-
                     $items = [];
                     $partes = [];
                     foreach ($d['items'][0] as $key => $value) {
