@@ -44,10 +44,11 @@ class Model_DteEmitidos extends \Model_Plural_App
 
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
+     * @warning Sólo está sacando un item del DTE, si hay varios no los saca
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2018-10-27
      */
-    public function getDetalle($desde, $hasta)
+    public function getDetalle($desde, $hasta, $detalle)
     {
         // datos del xml
         list($razon_social, $nacionalidad, $moneda, $moneda_total, $fecha_hora) = $this->db->xml('e.xml', [
@@ -58,9 +59,36 @@ class Model_DteEmitidos extends \Model_Plural_App
             '/*/SetDTE/Caratula/TmstFirmaEnv',
         ], 'http://www.sii.cl/SiiDte');
         $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social.' END AS razon_social';
+        if ($detalle) {
+            list($item_codigo, $item_nombre, $item_cantidad, $item_unidad, $item_es_exento, $item_precio, $item_descuento_p, $item_descuento_m, $item_subtotal) = $this->db->xml('e.xml', [
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/CdgItem/VlrCodigo',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/NmbItem',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/QtyItem',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/UnmdItem',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/IndExe',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/PrcItem',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/DescuentoPct',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/DescuentoMonto',
+                '/EnvioDTE/SetDTE/DTE/*/Detalle/MontoItem',
+            ], 'http://www.sii.cl/SiiDte');
+            $detalle_items = ',
+                '.$item_codigo.' AS codigo,
+                '.$item_nombre.' AS nombre,
+                '.$item_cantidad.' AS cantidad,
+                '.$item_unidad.' AS unidad,
+                '.$item_es_exento.' AS precio_exento,
+                '.$item_precio.' AS precio_neto,
+                '.$item_descuento_p.' AS descuento_porcentaje,
+                '.$item_descuento_m.' AS descuento_monto,
+                '.$item_subtotal.' AS subtotal
+            ';
+        } else {
+            $detalle_items = '';
+        }
         // realizar consulta
         $datos = $this->db->getTable('
             SELECT
+                t.codigo AS id,
                 t.tipo,
                 e.folio,
                 e.fecha,
@@ -74,9 +102,12 @@ class Model_DteEmitidos extends \Model_Plural_App
                 '.$moneda.' AS moneda,
                 '.$moneda_total.' AS moneda_monto,
                 e.sucursal_sii AS sucursal,
-                i.glosa AS intercambio,
                 u.usuario,
-                '.$fecha_hora.' AS fecha_hora
+                '.$fecha_hora.' AS fecha_hora,
+                i.glosa AS intercambio,
+                e.receptor_evento,
+                e.cesion_track_id
+                '.$detalle_items.'
             FROM
                 dte_emitido AS e
                 LEFT JOIN dte_intercambio_resultado_dte AS i
@@ -89,10 +120,25 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND e.certificacion = :certificacion
                 AND e.fecha BETWEEN :desde AND :hasta
                 AND e.dte != 46
+            ORDER BY e.fecha, e.dte, e.folio
         ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        foreach ($datos as &$d) {
+            $d['id'] = 'T'.$d['id'].'F'.$d['folio'];
+        }
+        if ($detalle) {
+            $datos = \sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($datos, 19, 'items');
+        }
         foreach ($datos as &$d) {
             if ($d['nacionalidad']) {
                 $d['nacionalidad'] = \sasco\LibreDTE\Sii\Aduana::getNacionalidad($d['nacionalidad']);
+            }
+            if ($detalle) {
+                foreach ($d['items'] as &$item) {
+                    if ($item['precio_exento']) {
+                        $item['precio_exento'] = $item['precio_neto'];
+                        $item['precio_neto'] = null;
+                    }
+                }
             }
             $d['sucursal'] = $this->getContribuyente()->getSucursal($d['sucursal'])->sucursal;
         }

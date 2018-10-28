@@ -64,13 +64,69 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que entrega el informe de ventas en CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-24
+     * @version 2018-10-27
      */
     public function csv($desde, $hasta)
     {
+        extract($this->Api->getQuery([
+            'detalle' => false,
+        ]));
         $Emisor = $this->getContribuyente();
-        $emitidos = (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor)->getDetalle($desde, $hasta);
-        array_unshift($emitidos, ['Documento', 'Folio', 'Fecha', 'RUT', 'Razón social', 'Exento', 'Neto', 'IVA', 'Total CLP', 'Nacionalidad', 'Moneda', 'Total moneda', 'Sucursal', 'Intercambio', 'Usuario', 'Fecha y hora timbre']);
+        $cols = [
+            'ID',
+            'Documento',
+            'Folio',
+            'Fecha',
+            'RUT',
+            'Razón social',
+            'Exento',
+            'Neto',
+            'IVA',
+            'Total CLP',
+            'Nacionalidad',
+            'Moneda',
+            'Total moneda',
+            'Sucursal',
+            'Usuario',
+            'Fecha y hora timbre',
+            'Intercambio',
+            'Evento receptor',
+            'Cedido',
+        ];
+        if ($detalle) {
+            $cols[] = 'Código';
+            $cols[] = 'Item';
+            $cols[] = 'Cantidad';
+            $cols[] = 'Unidad';
+            $cols[] = 'Exento';
+            $cols[] = 'Neto';
+            $cols[] = 'Descuento %';
+            $cols[] = 'Descuento $';
+            $cols[] = 'Subtotal';
+        }
+        $aux = (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor)->getDetalle($desde, $hasta, $detalle);
+        if ($aux and $detalle) {
+            $emitidos = [];
+            foreach($aux as $e) {
+                $i = 1;
+                foreach ($e['items'] as $item) {
+                    if ($i==1) {
+                        $emitido = array_slice($e, 0, 19);
+                    } else {
+                        $emitido = array_fill(0, 19, '');
+                    }
+                    foreach  ($item as $key => $val) {
+                        $emitido[$key] = $val;
+                    }
+                    $emitidos[] = $emitido;
+                    $i++;
+                }
+            }
+            unset($aux);
+        } else {
+            $emitidos = $aux;
+        }
+        array_unshift($emitidos, $cols);
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($emitidos, 'emitidos_'.$Emisor->rut.'_'.$desde.'_'.$hasta);
     }
 
