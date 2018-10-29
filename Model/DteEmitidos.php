@@ -114,9 +114,9 @@ class Model_DteEmitidos extends \Model_Plural_App
                 $items = [];
                 foreach ($d['items'] as $isp) {
                     $item = str_getcsv(trim($isp['detalle'], '()'));
-                    if ($item[2]) {
-                        $item[2] = $item[6];
-                        $item[6] = null;
+                    if ($item[3]) {
+                        $item[3] = $item[7];
+                        $item[7] = null;
                     }
                     $items[] = $item;
                 }
