@@ -70,8 +70,8 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
-        <li class="nav-item"><a href="#resumen" aria-controls="resumen" role="tab" data-toggle="tab" id="resumen-tab" class="nav-link">Resumen</a></li>
 <?php if ($n_detalles) : ?>
+        <li class="nav-item"><a href="#resumen" aria-controls="resumen" role="tab" data-toggle="tab" id="resumen-tab" class="nav-link">Resumen</a></li>
 <?php if (isset($detalle)) : ?>
         <li class="nav-item"><a href="#detalle" aria-controls="detalle" role="tab" data-toggle="tab" id="detalle-tab" class="nav-link">Detalle</a></li>
 <?php endif; ?>
