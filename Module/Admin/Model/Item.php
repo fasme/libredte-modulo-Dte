@@ -319,7 +319,7 @@ class Model_Item extends \Model_App
      * @param moneda Tipo de moneda en la que se desea obtener el descuento del item
      * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el descuento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-26
+     * @version 2018-10-29
      */
     public function getDescuento($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = null)
     {
@@ -329,7 +329,7 @@ class Model_Item extends \Model_App
         }
         // si es descuento bruto se llama al métood getDescuentoBruto
         if ($bruto) {
-            return $this->getDescuentoBruto($moneda, $decimales);
+            return $this->getDescuentoBruto($fecha, $moneda, $decimales);
         }
         // si es descuento neto se revisa según moneda solicitada
         if ($moneda == 'CLP') {
