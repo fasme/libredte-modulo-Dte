@@ -103,6 +103,7 @@ class Controller_DteEmitidos extends \Controller_App
             $cols[] = 'Neto';
             $cols[] = 'Descuento %';
             $cols[] = 'Descuento $';
+            $cols[] = 'Imp. Adic.';
             $cols[] = 'Subtotal';
         }
         $aux = (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor)->getDetalle($desde, $hasta, $detalle);
