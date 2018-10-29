@@ -94,11 +94,12 @@ class Controller_DteEmitidos extends \Controller_App
             'Cedido',
         ];
         if ($detalle) {
+            $cols[] = 'Línea';
             $cols[] = 'Código';
+            $cols[] = 'Exento';
             $cols[] = 'Item';
             $cols[] = 'Cantidad';
             $cols[] = 'Unidad';
-            $cols[] = 'Exento';
             $cols[] = 'Neto';
             $cols[] = 'Descuento %';
             $cols[] = 'Descuento $';
@@ -108,18 +109,14 @@ class Controller_DteEmitidos extends \Controller_App
         if ($aux and $detalle) {
             $emitidos = [];
             foreach($aux as $e) {
-                $i = 1;
                 foreach ($e['items'] as $item) {
-                    if ($i==1) {
+                    if ($item[0]==1) {
                         $emitido = array_slice($e, 0, 19);
                     } else {
                         $emitido = array_fill(0, 19, '');
                     }
-                    foreach  ($item as $key => $val) {
-                        $emitido[$key] = $val;
-                    }
+                    $emitido = array_merge($emitido, $item);
                     $emitidos[] = $emitido;
-                    $i++;
                 }
             }
             unset($aux);

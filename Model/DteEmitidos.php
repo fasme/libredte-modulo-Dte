@@ -44,7 +44,6 @@ class Model_DteEmitidos extends \Model_Plural_App
 
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
-     * @warning Si no todos los campos del item tienen datos entonces los resultados son erróneos ya que la consulta al XML no entrega los datos asociados entre si :-(
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-10-28
      */
@@ -60,28 +59,7 @@ class Model_DteEmitidos extends \Model_Plural_App
         ], 'http://www.sii.cl/SiiDte');
         $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social.' END AS razon_social';
         if ($detalle) {
-            list($item_codigo, $item_nombre, $item_cantidad, $item_unidad, $item_es_exento, $item_precio, $item_descuento_p, $item_descuento_m, $item_subtotal) = $this->db->xml('e.xml', [
-                '/*/SetDTE/DTE/*/Detalle/CdgItem/VlrCodigo',
-                '/*/SetDTE/DTE/*/Detalle/NmbItem',
-                '/*/SetDTE/DTE/*/Detalle/QtyItem',
-                '/*/SetDTE/DTE/*/Detalle/UnmdItem',
-                '/*/SetDTE/DTE/*/Detalle/IndExe',
-                '/*/SetDTE/DTE/*/Detalle/PrcItem',
-                '/*/SetDTE/DTE/*/Detalle/DescuentoPct',
-                '/*/SetDTE/DTE/*/Detalle/DescuentoMonto',
-                '/*/SetDTE/DTE/*/Detalle/MontoItem',
-            ], 'http://www.sii.cl/SiiDte');
-            $detalle_items = ',
-                '.$item_codigo.' AS codigo,
-                '.$item_nombre.' AS nombre,
-                '.$item_cantidad.' AS cantidad,
-                '.$item_unidad.' AS unidad,
-                '.$item_es_exento.' AS precio_exento,
-                '.$item_precio.' AS precio_neto,
-                '.$item_descuento_p.' AS descuento_porcentaje,
-                '.$item_descuento_m.' AS descuento_monto,
-                '.$item_subtotal.' AS subtotal
-            ';
+            $detalle_items = ', dte_emitido_get_detalle(e.emisor, e.dte, e.folio, e.certificacion) AS detalle';
         } else {
             $detalle_items = '';
         }
@@ -133,32 +111,16 @@ class Model_DteEmitidos extends \Model_Plural_App
                 $d['nacionalidad'] = \sasco\LibreDTE\Sii\Aduana::getNacionalidad($d['nacionalidad']);
             }
             if ($detalle) {
-                if (strpos($d['items'][0]['cantidad'], ',')) {
-                    $d['items'][0]['nombre'] = str_replace('","', '|||', $d['items'][0]['nombre']);
-                    $d['items'][0]['nombre'] = str_replace(['",', ',"'], '|||', $d['items'][0]['nombre']);
-                    $d['items'][0]['nombre'] = str_replace('|||', '","', $d['items'][0]['nombre']);
-                    $items = [];
-                    $partes = [];
-                    foreach ($d['items'][0] as $key => $value) {
-                        $sep = $key == 'nombre' ? '","' : ',';
-                        $partes[$key] = explode($sep, $value);
+                $items = [];
+                foreach ($d['items'] as $isp) {
+                    $item = str_getcsv(trim($isp['detalle'], '()'));
+                    if ($item[2]) {
+                        $item[2] = $item[6];
+                        $item[6] = null;
                     }
-                    $n_partes = count($partes['nombre']);
-                    for ($i=0; $i<$n_partes; $i++) {
-                        $item_a = [];
-                        foreach ($partes as $key => $valores) {
-                            $item_a[$key] = isset($valores[$i]) ? $valores[$i] : null;
-                        }
-                        $items[] = $item_a;
-                    }
-                    $d['items'] = $items;
+                    $items[] = $item;
                 }
-                foreach ($d['items'] as &$item) {
-                    if ($item['precio_exento']) {
-                        $item['precio_exento'] = $item['precio_neto'];
-                        $item['precio_neto'] = null;
-                    }
-                }
+                $d['items'] = $items;
             }
             $d['sucursal'] = $this->getContribuyente()->getSucursal($d['sucursal'])->sucursal;
         }
