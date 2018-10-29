@@ -35,16 +35,17 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-14
+     * @version 2018-10-29
      */
     public function index()
     {
-        $periodo = date('Ym');
-        $periodo_anterior = \sowerphp\general\Utility_Date::previousPeriod($periodo);
         $Emisor = $this->getContribuyente();
         // contadores
-        $desde = date('Y-m-01');
-        $hasta = date('Y-m-d');
+        $periodo_actual = date('Ym');
+        $periodo = !empty($_GET['periodo']) ? (int)$_GET['periodo'] : $periodo_actual;
+        $periodo_anterior = \sowerphp\general\Utility_Date::previousPeriod($periodo);
+        $desde = \sowerphp\general\Utility_Date::normalize($periodo.'01');
+        $hasta = \sowerphp\general\Utility_Date::lastDayPeriod($periodo);
         $n_temporales = (new Model_DteTmps())->setContribuyente($Emisor)->getTotal();
         $n_emitidos = $Emisor->countVentas($periodo);
         $n_recibidos = $Emisor->countCompras($periodo);
@@ -90,6 +91,7 @@ class Controller_Dashboard extends \Controller_App
             'nav' => array_slice(\sowerphp\core\Configure::read('nav.module'), 1),
             'Emisor' => $Emisor,
             'Firma' => $Emisor->getFirma($this->Auth->User->id),
+            'periodo_actual' => $periodo_actual,
             'periodo' => $periodo,
             'periodo_anterior' => $periodo_anterior,
             'desde' => $desde,
@@ -100,7 +102,7 @@ class Controller_Dashboard extends \Controller_App
             'n_intercambios' => $n_intercambios,
             'libro_ventas_existe' => $libro_ventas_existe,
             'libro_compras_existe' => $libro_compras_existe,
-            'propuesta_f29' => ($libro_ventas_existe and $libro_compras_existe and date('d')<=20),
+            'propuesta_f29' => ($libro_ventas_existe and $libro_compras_existe and (date('d')<=20 or ($periodo < $periodo_actual))),
             'ventas_periodo' => $ventas_periodo,
             'compras_periodo' => $compras_periodo,
             'folios' => $folios,

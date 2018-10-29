@@ -1,3 +1,26 @@
+<div class="float-right">
+    <script>
+        function periodo_seleccionar(periodo) {
+            if (Form.check('periodo_form')) {
+                window.location = _url+'/dte/dashboard?periodo='+encodeURI(periodo);
+            }
+        }
+    </script>
+    <form name="periodo_form" id="periodo_form" onsubmit="periodo_seleccionar(this.periodo.value); return false">
+        <div class="form-group">
+            <label class="control-label sr-only" for="periodoField">Período del dashboard</label>
+            <div class="input-group input-group-sm">
+                <input type="text" name="periodo" value="<?=$periodo?>" class="form-control check integer" id="periodoField" placeholder="<?=$periodo_actual?>" size="7" onclick="this.select()" />
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" onclick="periodo_seleccionar(document.periodo_form.periodo.value); return false">
+                        <span class="fa fa-search"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 <div class="page-header"><h1>Facturación</h1></div>
 
 <?php
@@ -12,16 +35,16 @@ echo View_Helper_Dashboard::cards([
     [
         'icon' => 'fas fa-sign-out-alt',
         'quantity' => $n_emitidos,
-        'title' => 'Ventas '.$periodo,
+        'title' => 'Ventas',
         'link' => 'dte_ventas/ver/'.$periodo,
-        'link_title' => 'Detalle ventas '.$periodo,
+        'link_title' => 'Ver detalle de ventas',
     ],
     [
         'icon' => 'fas fa-sign-in-alt',
         'quantity' => $n_recibidos,
-        'title' => 'Compras '.$periodo,
+        'title' => 'Compras',
         'link' => 'dte_compras/ver/'.$periodo,
-        'link_title' => 'Detalle compras '.$periodo,
+        'link_title' => 'Ver detalle de compras',
     ],
     [
         'icon' => 'fas fa-exchange-alt',
@@ -93,7 +116,7 @@ echo View_Helper_Dashboard::cards([
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="far fa-chart-bar fa-fw"></i> Ventas período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Ventas
                     </div>
                     <div class="card-body">
                         <div id="grafico-ventas"></div>
@@ -104,7 +127,7 @@ echo View_Helper_Dashboard::cards([
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="far fa-chart-bar fa-fw"></i> Compras período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Compras
                     </div>
                     <div class="card-body">
                         <div id="grafico-compras"></div>
@@ -119,7 +142,7 @@ echo View_Helper_Dashboard::cards([
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="far fa-chart-bar fa-fw"></i> Estado envíos al SII de documentos emitidos período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Estado envíos al SII de documentos emitidos
                     </div>
                     <div class="card-body">
                         <div id="grafico-dte_emitidos_estados"></div>
@@ -134,7 +157,7 @@ echo View_Helper_Dashboard::cards([
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="far fa-chart-bar fa-fw"></i> Eventos asignados por receptores de documentos emitidos período <?=$periodo?>
+                        <i class="far fa-chart-bar fa-fw"></i> Eventos asignados por receptores de documentos emitidos
                     </div>
                     <div class="card-body">
                         <div id="grafico-dte_emitidos_eventos"></div>
