@@ -2,11 +2,11 @@
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir_masivo" title="Emitir DTE de manera masiva" class="nav-link">
             <i class="fa fa-upload"></i>
-            Emitir DTE masivo
+            Emitir documentos masivos
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Emitir DTE</h1></div>
+<div class="page-header"><h1>Emitir documento</h1></div>
 <?php if (isset($datos)) : ?>
 <script type="text/javascript">
     $(function() {

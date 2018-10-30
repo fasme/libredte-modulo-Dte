@@ -2,17 +2,17 @@
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/buscar_masivo" title="Buscar documentos masivamente" class="nav-link">
             <i class="fa fa-search"></i>
-            Buscar DTE masivo
+            Buscar documentos masivos
         </a>
     </li>
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir DTE de manera individual" class="nav-link">
-            <i class="fa fa-file-alt"></i>
-            Emitir DTE individual
+        <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documentos de manera individual" class="nav-link">
+            <i class="fa fa-file-invoice"></i>
+            Emitir documento individual
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Emitir DTE masivo</h1></div>
+<div class="page-header"><h1>Emitir documentos masivos</h1></div>
 <p>Aquí podrá solicitar la emisión masiva de DTE a partir de un archivo CSV (separado por punto y coma, codificado en UTF-8). El archivo debe tener el <a href="<?=$_base?>/dte/archivos/emision_masiva.csv" download="emision_masiva.csv">siguiente formato</a>:</p>
 <ul>
     <li>Tipo DTE: código del tipo de documento (ej: 33 para factura o 39 para boletas) (obligatorio)</li>

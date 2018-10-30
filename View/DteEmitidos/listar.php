@@ -1,7 +1,7 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal" class="nav-link">
-            <i class="fa fa-edit"></i> Emitir documento
+            <i class="fa fa-file-invoice"></i> Emitir documento
         </a>
     </li>
     <li class="nav-item">

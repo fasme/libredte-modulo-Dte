@@ -2,11 +2,11 @@
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir_masivo" title="Emitir DTE de manera masiva" class="nav-link">
             <i class="fa fa-upload"></i>
-            Emitir DTE masivo
+            Emitir documentos masivos
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Buscar DTE masivo</h1></div>
+<div class="page-header"><h1>Buscar documentos masivos</h1></div>
 <p>Aquí puede buscar documentos emitidos (temporales o reales) emitidos de manera masiva usando el mismo formato del archivo de emisión masiva.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
