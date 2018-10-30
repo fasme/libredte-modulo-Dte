@@ -46,14 +46,14 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que muestra los documentos temporales disponibles
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-13
+     * @version 2018-10-29
      */
     public function index()
     {
         $Emisor = $this->getContribuyente();
         $DteTmps = new Model_DteTmps();
         $DteTmps->setWhereStatement(['emisor = :rut'], [':rut'=>$Emisor->rut]);
-        $DteTmps->setOrderByStatement('fecha DESC', 'receptor');
+        $DteTmps->setOrderByStatement('fecha DESC', 'receptor', 'codigo');
         $this->set([
             'Emisor' => $Emisor,
             'dtes' => $DteTmps->getObjects(),
