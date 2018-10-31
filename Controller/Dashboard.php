@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-29
+     * @version 2018-10-30
      */
     public function index()
     {
@@ -44,6 +44,7 @@ class Controller_Dashboard extends \Controller_App
         $periodo_actual = date('Ym');
         $periodo = !empty($_GET['periodo']) ? (int)$_GET['periodo'] : $periodo_actual;
         $periodo_anterior = \sowerphp\general\Utility_Date::previousPeriod($periodo);
+        $periodo_siguiente = \sowerphp\general\Utility_Date::nextPeriod($periodo);
         $desde = \sowerphp\general\Utility_Date::normalize($periodo.'01');
         $hasta = \sowerphp\general\Utility_Date::lastDayPeriod($periodo);
         $n_temporales = (new Model_DteTmps())->setContribuyente($Emisor)->getTotal();
@@ -94,6 +95,7 @@ class Controller_Dashboard extends \Controller_App
             'periodo_actual' => $periodo_actual,
             'periodo' => $periodo,
             'periodo_anterior' => $periodo_anterior,
+            'periodo_siguiente' => $periodo_siguiente,
             'desde' => $desde,
             'hasta' => $hasta,
             'n_temporales' => $n_temporales,
