@@ -114,13 +114,10 @@ new \sowerphp\general\View_Helper_Table([
 <!-- INICIO DOCUMENTOS -->
 <div role="tabpanel" class="tab-pane" id="documentos" aria-labelledby="documentos-tab">
 <div class="row" style="margin-bottom:1em">
-    <div class="col-sm-7">
+    <div class="col-md-7">
         <p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
     </div>
-    <div class="col-sm-5 text-right">
-        <!--<a class="btn btn-primary btn-lg" href="#" onclick="intercambio_aceptar(); return false" role="button" title="Aceptar el contenido de los documentos (sin acuse de recibo)">
-            Aceptar
-        </a>-->
+    <div class="col-md-5 text-right">
         <a class="btn btn-success btn-lg" href="#" onclick="intercambio_recibir(); return false" role="button" title="Generar el acuse de recido para los documentos">
             Recibir
         </a>
