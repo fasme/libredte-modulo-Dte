@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Dte &raquo; Admin &raquo; Mantenedores &raquo; Importar contribuyentes</h1></div>
+<div class="page-header"><h1>Importar contribuyentes</h1></div>
 <p>Aquí se podrán importar datos de contribuyentes. El orden de las columnas es:</p>
 <ul>
     <li>RUT</li>

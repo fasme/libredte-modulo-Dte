@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Dte &raquo; Informes &raquo; Emitidos sin intercambio</h1></div>
+<div class="page-header"><h1>DTEs emitidos sin enviar al receptor</h1></div>
 <p>Aquí podrá revisar el listado de documentos emitidos que no han sido enviados al correo de intercambio registrado del receptor.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Dte &raquo; Informes &raquo; Eventos de DTEs emitidos</h1></div>
+<div class="page-header"><h1>Eventos de DTEs emitidos</h1></div>
 <p>Aquí podrá revisar los eventos asignados por los receptores de los documentos emitidos por el contribuyente <?=$Emisor->razon_social?>, como también acceder al detalle de los documentos por cada evento.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

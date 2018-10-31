@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Dte &raquo; Informes &raquo; Documentos emitidos</h1></div>
+<div class="page-header"><h1>Gráficos y detalle de documentos emitidos</h1></div>
 <p>Aquí podrá generar el informe de documentos emitidos de la empresa <?=$Emisor->razon_social?> para un rango determinado de tiempo.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

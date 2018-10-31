@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Dte &raquo; Informes &raquo; Estado proceso de intercambio</h1></div>
+<div class="page-header"><h1>Resultado intercambio DTEs emitidos</h1></div>
 <p>Aquí podrá revisar el estado del proceso de intercambio de documentos emitidos y envíados al SII por el contribuyente <?=$Emisor->razon_social?>, como también acceder al detalle de los documentos por cada estado.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();

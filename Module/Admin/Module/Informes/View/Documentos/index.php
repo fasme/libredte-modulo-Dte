@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Dte &raquo; Admin &raquo; Informes &raquo; Documentos emitidos y recibidos</h1></div>
+<div class="page-header"><h1>Documentos emitidos y recibidos</h1></div>
 <p>Este reporte permite conocer la cantidad de documentos emitidos y recibidos por contribuyente.</p>
 <?php
 // formulario
