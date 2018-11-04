@@ -394,6 +394,66 @@ class Controller_DteTmps extends \Controller_App
     }
 
     /**
+     * Acción que descarga el código binario ESCPOS del DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-04
+     */
+    public function escpos($receptor, $dte, $codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener datos JSON del DTE
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // datos por defecto
+        extract($this->Api->getQuery([
+            'cotizacion' => 0,
+            'compress' => false,
+        ]));
+        // armar xml a partir de datos del dte temporal
+        $xml = $DteTmp->getEnvioDte($cotizacion ? $DteTmp->getFolio() : 0)->generar();
+        if (!$xml) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible crear el código ESCPOS para previsualización:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
+            );
+            $this->redirect('/dte/dte_tmps/ver/'.$receptor.'/'.$dte.'/'.$codigo);
+        }
+        // armar datos con archivo XML y flag para indicar si es cedible o no
+        $data = [
+            'xml' => base64_encode($xml),
+            'cedible' => false,
+            'compress' => $compress,
+        ];
+        // consultar servicio web de LibreDTE
+        $ApiDteEscPosClient = $Emisor->getApiClient('dte_escpos');
+        if (!$ApiDteEscPosClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User->hash);
+            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_escpos', $data);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $data);
+        }
+        // procesar respuesta
+        if ($response['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            $this->redirect('/dte/dte_tmps/ver/'.$receptor.'/'.$dte.'/'.$codigo);
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+            if (isset($response['header'][$header]))
+                header($header.': '.$response['header'][$header]);
+        }
+        echo $response['body'];
+        exit;
+    }
+
+    /**
      * Método que elimina un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2015-09-23
