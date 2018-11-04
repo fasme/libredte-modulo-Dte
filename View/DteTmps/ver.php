@@ -129,7 +129,7 @@ echo $f->input([
     'type' => 'select',
     'name' => 'papelContinuo',
     'label' => 'Tipo papel',
-    'options' => \sasco\LibreDTE\Sii\PDF\Dte::$papel,
+    'options' => \sasco\LibreDTE\Sii\Dte\PDF\Dte::$papel,
     'value' => $Emisor->config_pdf_dte_papel,
     'check' => 'notempty',
 ]);

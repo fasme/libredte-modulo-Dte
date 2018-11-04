@@ -612,7 +612,7 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_pdf_dte_papel',
     'label' => 'Formato',
-    'options' => \sasco\LibreDTE\Sii\PDF\Dte::$papel,
+    'options' => \sasco\LibreDTE\Sii\Dte\PDF\Dte::$papel,
     'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_dte_papel : 0,
     'help' => 'Permite indicar si se usará hoja carta en las versiones en PDF del DTE o bien papel contínuo',
 ]);

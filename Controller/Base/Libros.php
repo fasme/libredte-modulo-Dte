@@ -134,7 +134,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         if (in_array($this->config['model']['singular'], ['Compra', 'Venta'])) {
             $LibroCompraVenta = new \sasco\LibreDTE\Sii\LibroCompraVenta();
             $LibroCompraVenta->loadXML($xml);
-            $pdf = new \sasco\LibreDTE\Sii\PDF\LibroCompraVenta();
+            $pdf = new \sasco\LibreDTE\Sii\Dte\PDF\LibroCompraVenta();
             $pdf->setFooterText(\sowerphp\core\Configure::read('dte.pdf.footer'));
             $pdf->agregar($LibroCompraVenta->toArray());
             $pdf->Output($file, 'D');
