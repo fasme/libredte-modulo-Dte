@@ -1,4 +1,12 @@
 <ul class="nav nav-pills float-right">
+<?php if ($Emisor->config_pdf_imprimir) : ?>
+    <li class="nav-item">
+        <a href="#" onclick="dte_imprimir('<?=$Emisor->config_pdf_imprimir?>', 'dte_emitido', {dte: <?=$DteEmitido->dte?>, folio: <?=$DteEmitido->folio?>}); return false" title="Imprimir el documento (<?=$Emisor->config_pdf_imprimir?>)" accesskey="P" class="nav-link">
+            <i class="fa fa-print"></i>
+            Imprimir
+        </a>
+    </li>
+<?php endif; ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>?copiar" title="Crear DTE con los mismos datos de este" class="nav-link">
             <i class="fa fa-copy"></i>

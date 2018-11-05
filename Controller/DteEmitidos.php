@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-22
+     * @version 2018-11-04
      */
     public function ver($dte, $folio)
     {
@@ -137,6 +137,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // asignar variables para la vista
         $this->set([
+            '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,
             'DteEmitido' => $DteEmitido,
             'Receptor' => $DteEmitido->getReceptor(),
@@ -246,7 +247,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-12
+     * @version 2018-11-04
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -265,6 +266,13 @@ class Controller_DteEmitidos extends \Controller_App
                 $this->redirect('/dte/dte_emitidos/consultar');
             }
         }
+        // datos por defecto y recibidos por GET
+        extract($this->Api->getQuery([
+            'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
+            'compress' => false,
+            'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : $Emisor->config_pdf_copias_tributarias,
+            'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : $Emisor->config_pdf_copias_cedibles,
+        ]));
         // obtener DTE emitido
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
@@ -292,12 +300,12 @@ class Controller_DteEmitidos extends \Controller_App
         }
         $data = [
             'xml' => $DteEmitido->xml,
-            'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
+            'cedible' => $cedible,
             'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $Emisor->config_pdf_dte_papel ),
-            'compress' => false,
+            'compress' => $compress,
             'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
-            'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : 1,
-            'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : $cedible,
+            'copias_tributarias' => $copias_tributarias,
+            'copias_cedibles' => $copias_cedibles,
         ];
         // consultar servicio web de LibreDTE
         $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
@@ -415,8 +423,8 @@ class Controller_DteEmitidos extends \Controller_App
         extract($this->Api->getQuery([
             'cedible' => false,
             'compress' => false,
-            'copias_tributarias' => 1,
-            'copias_cedibles' => 1,
+            'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
+            'copias_cedibles' => $Emisor->config_pdf_copias_cedibles,
         ]));
         // obtener DTE emitido
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);

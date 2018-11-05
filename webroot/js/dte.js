@@ -518,3 +518,56 @@ function dte_recibido_check() {
         });
     }
 }
+
+function dte_imprimir(formato, documento, id) {
+    // armar URL de donde obtener los datos que se desean imprimir según el formato
+    var config = {
+        websocket: 'ws://localhost:2186/print/'+formato,
+        compress: 1,
+        cedible: 1
+    };
+    var urls = {
+        pdf: {
+            cotizacion: _url+'/dte/dte_tmps/cotizacion/{receptor}/{dte}/{codigo}?compress='+config.compress,
+            previsualizacion: _url+'/dte/dte_tmps/pdf/{receptor}/{dte}/{codigo}?compress='+config.compress,
+            dte_emitido: _url+'/dte/dte_emitidos/pdf/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible
+        },
+        escpos: {
+            cotizacion: _url+'/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}?compress='+config.compress+'&cotizacion=1',
+            previsualizacion: _url+'/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}?compress='+config.compress+'&cotizacion=0',
+            dte_emitido: _url+'/dte/dte_emitidos/escpos/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible
+        }
+    }
+    var url = urls[formato][documento];
+    for (var key in id) {
+        url = url.replace('{'+key+'}', id[key]);
+    }
+    // obtener datos del archivo que se desea imprimir
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    xhr.onload = function(e) {
+        if (this.status == 200) {
+            var file_code = this.response;
+            // consumir el websocket y con esto imprimir
+            try {
+                var socket = new WebSocket(config.websocket);
+                socket.onopen = function (event) {
+                    socket.send(file_code);
+                };
+                socket.onmessage = function (event) {
+                    if (event.data !==undefined) {
+                        response = JSON.parse(event.data)
+                        alert(response.message);
+                    }
+                }
+                socket.onerror=function(event){
+                    alert("No fue posible conectar a LibreDTE websocketd");
+                }
+            } catch(e) {
+                console.log(e);
+            }
+        }
+    };
+    xhr.send();
+}

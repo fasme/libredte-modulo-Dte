@@ -63,7 +63,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Acción que muestra la página del documento temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-29
+     * @version 2018-11-04
      */
     public function ver($receptor, $dte, $codigo)
     {
@@ -77,6 +77,7 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         $this->set([
+            '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,
             'Receptor' => $DteTmp->getReceptor(),
             'DteTmp' => $DteTmp,
@@ -88,7 +89,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-06
+     * @version 2018-11-04
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
@@ -96,11 +97,12 @@ class Controller_DteTmps extends \Controller_App
         // datos por defecto
         extract($this->Api->getQuery([
             'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+            'compress' => false,
         ]));
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($Emisor->getUsuario()->hash);
-        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?cotizacion=1&papelContinuo='.$papelContinuo);
+        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?cotizacion=1&papelContinuo='.$papelContinuo.'&compress='.$compress);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_tmps');
@@ -122,7 +124,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-06
+     * @version 2018-11-04
      */
     public function pdf($receptor, $dte, $codigo, $disposition = 'attachment')
     {
@@ -130,11 +132,12 @@ class Controller_DteTmps extends \Controller_App
         // datos por defecto
         extract($this->Api->getQuery([
             'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+            'compress' => false,
         ]));
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
-        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?papelContinuo='.$papelContinuo);
+        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?papelContinuo='.$papelContinuo.'&compress='.$compress);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_tmps');
@@ -409,7 +412,7 @@ class Controller_DteTmps extends \Controller_App
             );
             $this->redirect('/dte/dte_tmps');
         }
-        // datos por defecto
+        // datos por defecto y recibidos por GET
         extract($this->Api->getQuery([
             'cotizacion' => 0,
             'compress' => false,

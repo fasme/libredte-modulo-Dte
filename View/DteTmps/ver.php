@@ -1,4 +1,14 @@
 <ul class="nav nav-pills float-right">
+<?php if ($Emisor->config_pdf_imprimir) : ?>
+<?php if ($DteTmp->getTipo()->permiteCotizacion()) : ?>
+    <li class="nav-item">
+        <a href="#" onclick="dte_imprimir('<?=$Emisor->config_pdf_imprimir?>', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" title="Imprimir el documento (<?=$Emisor->config_pdf_imprimir?>)" accesskey="P" class="nav-link">
+            <i class="fa fa-print"></i>
+            Imprimir
+        </a>
+    </li>
+<?php endif; ?>
+<?php endif; ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?copiar" title="Crear DTE con los mismos datos de este" class="nav-link">
             <i class="fa fa-copy"></i>
