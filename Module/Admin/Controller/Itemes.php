@@ -105,7 +105,7 @@ class Controller_Itemes extends \Controller_Maintainer
     {
         extract($this->Api->getQuery([
             'fecha' => date('Y-m-d'),
-            'tipo' => 'INT1',
+            'tipo' => null,
             'bruto' => false,
             'moneda' => 'CLP',
             'decimales' => null,
