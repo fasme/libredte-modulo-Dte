@@ -168,23 +168,30 @@ class Model_DteTmp extends \Model_App
      * Método que genera el XML de EnvioDTE a partir de los datos ya
      * normalizados de un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-13
+     * @version 2018-11-06
      */
-    public function getEnvioDte($folio = 0, \sasco\LibreDTE\Sii\Folios $Folios = null, \sasco\LibreDTE\FirmaElectronica $Firma = null, $RutReceptor = null)
+    public function getEnvioDte($folio = 0, \sasco\LibreDTE\Sii\Folios $Folios = null, \sasco\LibreDTE\FirmaElectronica $Firma = null, $RutReceptor = null, $fecha_emision = null)
     {
         $dte = json_decode($this->datos, true);
-        if (!$dte)
+        if (!$dte) {
             return false;
+        }
         $dte['Encabezado']['IdDoc']['Folio'] = $folio;
+        if ($fecha_emision) {
+            $dte['Encabezado']['IdDoc']['FchEmis'] = $fecha_emision;
+        }
         $Dte = new \sasco\LibreDTE\Sii\Dte($dte, false);
-        if ($Folios and !$Dte->timbrar($Folios))
+        if ($Folios and !$Dte->timbrar($Folios)) {
             return false;
-        if ($Firma and !$Dte->firmar($Firma))
+        }
+        if ($Firma and !$Dte->firmar($Firma)) {
             return false;
+        }
         $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
         $EnvioDte->agregar($Dte);
-        if ($Firma)
+        if ($Firma) {
             $EnvioDte->setFirma($Firma);
+        }
         $Emisor = $this->getEmisor();
         $EnvioDte->setCaratula([
             'RutEnvia' => $Firma ? $Firma->getID() : false,
@@ -257,13 +264,14 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-03-20
+     * @version 2018-11-06
      */
-    public function generar($user_id = null)
+    public function generar($user_id = null, $fecha_emision = null)
     {
         $Emisor = $this->getEmisor();
-        if (!$user_id)
+        if (!$user_id) {
             $user_id = $Emisor->usuario;
+        }
         // obtener firma electrónica
         $Firma = $Emisor->getFirma($user_id);
         if (!$Firma) {
@@ -308,7 +316,7 @@ class Model_DteTmp extends \Model_App
             }
         }
         // armar xml a partir del DTE temporal
-        $EnvioDte = $this->getEnvioDte($FolioInfo->folio, $FolioInfo->Caf, $Firma);
+        $EnvioDte = $this->getEnvioDte($FolioInfo->folio, $FolioInfo->Caf, $Firma, null, $fecha_emision);
         if (!$EnvioDte) {
             throw new \Exception('No fue posible generar el objeto del EnvioDTE. Folio '.$FolioInfo->folio.' quedará sin usar.<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 510);
         }
