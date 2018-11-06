@@ -34,7 +34,7 @@ new \sowerphp\general\View_Helper_Table($folios);
 <div class="card mt-4">
     <div class="card-header"><i class="fa fa-exclamation-circle text-warning"></i> ¿Para qué es la alerta de folios?</div>
     <div class="card-body">
-        <p>Se usa cuando la cantidad de folios llega al valor de la alerta, permitiendo realizar timbraje automático o bien informar al administrador por correo que se alcanzó la alerta y quedan pocos folios.</p>
+        <p>Se usa cuando la cantidad de folios disponibles llega al valor de la alerta, permitiendo realizar timbraje automático o bien informar al administrador por correo que se alcanzó la alerta y quedan pocos folios.</p>
         <p>Si se tiene configurado el timbraje automático, el sistema tratará de timbrar de manera automática según la siguiente fórmula:</p>
         <p class="text-monospace">folios a timbrar = alerta x multiplicador</p>
         <p>El multiplicador se define en la configuración de la empresa, en la pestaña <em>Facturación</em>.</p>
