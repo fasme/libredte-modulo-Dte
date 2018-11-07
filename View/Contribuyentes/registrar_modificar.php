@@ -601,7 +601,7 @@ echo $f->input([
     'name' => 'config_pdf_web_verificacion',
     'label' => 'Web verificación boletas electrónicas',
     'placeholder' => 'libredte.cl/boletas',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_web_verificacion : 0,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_web_verificacion : '',
     'help' => 'Enlace que se incluirá en las boletas para que el cliente pueda realizar la verificación',
 ]);
 ?>
