@@ -37,7 +37,7 @@
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-sync"></i> Actualizar
         </a>
-        <div class="dropdown-menu">
+        <div class="dropdown-menu dropdown-menu-right">
             <a href="<?=$_base?>/dte/dte_intercambios/actualizar/3" class="dropdown-item">Últimos 3 días</a>
             <a href="<?=$_base?>/dte/dte_intercambios/actualizar/7" class="dropdown-item">Última semana</a>
             <a href="<?=$_base?>/dte/dte_intercambios/actualizar/14" class="dropdown-item">Últimas 2 semanas</a>

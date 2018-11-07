@@ -3,7 +3,7 @@
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <span class="fa fa-search"></span> Filtrar
         </a>
-        <div class="dropdown-menu">
+        <div class="dropdown-menu dropdown-menu-right">
             <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencidos" class="dropdown-item">Vencidos <span class="badge badge-pill border"><?=num($cobranza_resumen['vencidos'])?></span></a>
             <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vencen_hoy" class="dropdown-item">Vencen hoy <span class="badge badge-pill border"><?=num($cobranza_resumen['vencen_hoy'])?></span></a>
             <a href="<?=$_base?>/dte/cobranzas/cobranzas/buscar?vigentes" class="dropdown-item">Vigentes <span class="badge badge-pill border"><?=num($cobranza_resumen['vigentes'])?></span></a>
