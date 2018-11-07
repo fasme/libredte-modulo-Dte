@@ -522,7 +522,7 @@ function dte_recibido_check() {
 function dte_imprimir(formato, documento, id) {
     // armar URL de donde obtener los datos que se desean imprimir según el formato
     var config = {
-        websocket: 'ws://localhost:2186/print/'+formato,
+        websocket: 'ws://127.0.0.1:2186/print/'+formato,
         compress: 1,
         cedible: 1
     };
