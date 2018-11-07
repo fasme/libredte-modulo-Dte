@@ -478,7 +478,7 @@ CREATE TABLE dte_intercambio_recepcion (
 	email VARCHAR(80),
 	fecha_hora TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	estado INTEGER NOT NULL,
-	glosa VARCHAR(256) NOT NULL,
+	glosa VARCHAR(256),
 	xml TEXT NOT NULL,
 	CONSTRAINT dte_intercambio_recepcion_pk PRIMARY KEY (responde, recibe, codigo),
 	CONSTRAINT dte_intercambio_recepcion_recibe_fk FOREIGN KEY (recibe)
