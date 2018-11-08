@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para las acciones asociadas al libro de boletas electrónicas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-02-14
+ * @version 2018-11-07
  */
 class Controller_DteBoletas extends \Controller_App
 {
@@ -35,12 +35,13 @@ class Controller_DteBoletas extends \Controller_App
     /**
      * Acción principal que lista los períodos con boletas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2018-11-07
      */
     public function index()
     {
         $Emisor = $this->getContribuyente();
         $this->set([
+            'Emisor' => $Emisor,
             'periodos' => $Emisor->getResumenBoletasPeriodos(),
         ]);
     }
@@ -87,6 +88,46 @@ class Controller_DteBoletas extends \Controller_App
         header('Content-Disposition: attachement; filename="'.$file.'"');
         print $xml;
         exit;
+    }
+
+    /**
+     * Acción para descargar libro de boletas en CSV
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-07
+     */
+    public function csv($periodo)
+    {
+        $Emisor = $this->getContribuyente();
+        $boletas = $Emisor->getBoletas($periodo);
+        $Libro = new \sasco\LibreDTE\Sii\LibroBoleta();
+        $Libro->setFirma($Emisor->getFirma());
+        foreach ($boletas as $boleta) {
+            $Libro->agregar([
+                'TpoDoc' => $boleta['dte'],
+                'FolioDoc' => $boleta['folio'],
+                //'Anulado' => $boleta['anulada'] ? 'A' : false,
+                'FchEmiDoc' => $boleta['fecha'],
+                'RUTCliente' => $boleta['rut'],
+                'MntExe' => $boleta['exento'] ? $boleta['exento'] : false,
+                'MntTotal' => $boleta['total'],
+                // oficialmente no son parte del libro estos campos, pero se entregan
+                // ya que permiten tener mayor información de la boleta. igualmente
+                // se podrían calcular a partir del monto exento y monto total pero se
+                // dejan porque son útiles en el archivo para ser usados en el reporte
+                // de consumo de folios
+                'MntNeto' =>$boleta['neto'],
+                'MntIVA' => $boleta['iva'],
+                'TasaImp' => $boleta['tasa'],
+            ]);
+        }
+        unset($boletas);
+        $detalle = $Libro->getDetalle();
+        // entregar XML
+        $file = 'boletas_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo;
+        if ($detalle) {
+            array_unshift($detalle, array_keys($detalle[0]));
+        }
+        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, $file);
     }
 
 }

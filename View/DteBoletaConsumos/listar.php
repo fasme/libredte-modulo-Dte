@@ -1,3 +1,10 @@
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_boletas" class="nav-link">
+            <i class="fa fa-book"></i> Libro de boletas
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1>Reporte consumo de folios boletas</h1></div>
 <?php
 // preparar títulos de columnas (con link para ordenar por dicho campo)

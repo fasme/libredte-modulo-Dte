@@ -1438,13 +1438,21 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las boletas por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-03
+     * @version 2018-11-07
      */
     public function getResumenBoletasPeriodos()
     {
         $periodo_col = $this->db->date('Ym', 'fecha');
         return $this->db->getTable('
-            SELECT '.$periodo_col.' AS periodo, COUNT(*) AS emitidas
+            SELECT
+                '.$periodo_col.' AS periodo,
+                COUNT(folio) AS emitidas,
+                MIN(fecha) AS desde,
+                MAX(fecha) AS hasta,
+                SUM(exento) AS exento,
+                SUM(neto) AS neto,
+                SUM(iva) AS iva,
+                SUM(total) AS total
             FROM dte_emitido
             WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39, 41)
             GROUP BY '.$periodo_col.'
@@ -1455,7 +1463,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega las boletas de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2018-11-07
      */
     public function getBoletas($periodo)
     {
@@ -1464,9 +1472,12 @@ class Model_Contribuyente extends \Model_App
             SELECT
                 e.dte,
                 e.folio,
+                e.tasa,
                 e.fecha,
                 '.$this->db->concat('r.rut', '-', 'r.dv').' AS rut,
                 e.exento,
+                e.neto,
+                e.iva,
                 e.total,
                 a.codigo AS anulada
             FROM
