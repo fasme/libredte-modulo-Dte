@@ -34,6 +34,7 @@ $(function() {
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item"><a href="#usuarios" aria-controls="usuarios" role="tab" data-toggle="tab" id="usuarios-tab" class="nav-link active" aria-selected="true">Usuarios autorizados</a></li>
         <li class="nav-item"><a href="#dtes" aria-controls="dtes" role="tab" data-toggle="tab" id="dtes-tab" class="nav-link">Documentos por usuario</a></li>
+        <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link">Datos usuarios</a></li>
         <li class="nav-item"><a href="#general" aria-controls="general" role="tab" data-toggle="tab" id="general-tab" class="nav-link">General</a></li>
     </ul>
     <div class="tab-content pt-4">
@@ -143,6 +144,26 @@ echo $f->end('Guardar documentos por usuarios');
 </div>
 </div>
 <!-- FIN DOCUMENTOS POR USUARIOS -->
+
+<!-- INICIO DATOS USUARIOS -->
+<div role="tabpanel" class="tab-pane" id="datos" aria-labelledby="datos-tab">
+<p>Estos son los usuarios autorizados y la configuración que tienen asignada en LibreDTE.</p>
+<?php
+$usuarios = [['Usuario', 'Nombre', 'Correo', 'Último ingreso', 'Estado']];
+foreach (array_merge([$Contribuyente->getUsuario()->usuario=>null], $Contribuyente->getUsuarios()) as $u => $p) {
+    $Usuario = new $_Auth->settings['model']($u);
+    $usuarios[] = [
+        $Usuario->usuario,
+        $Usuario->nombre,
+        $Usuario->email,
+        \sowerphp\general\Utility_Date::format($Usuario->ultimo_ingreso_fecha_hora, 'd/m/y H:i'),
+        !$Usuario->activo ? 'Inactivo' : (!$Usuario->contrasenia_intentos ? 'Bloqueado' : 'Activo'),
+    ];
+}
+new \sowerphp\general\View_Helper_Table($usuarios, 'usuarios_autorizados_'.$Contribuyente->rut, true);
+?>
+</div>
+<!-- FIN DATOS USUARIOS -->
 
 <!-- INICIO GENERAL -->
 <div role="tabpanel" class="tab-pane" id="general" aria-labelledby="general-tab">
