@@ -1035,7 +1035,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción que permite buscar un documento (ya sea temporal o real)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2018-11-09
      */
     public function buscar($q = null)
     {
@@ -1048,8 +1048,29 @@ class Controller_Documentos extends \Controller_App
             );
             $this->redirect('/dte');
         }
+        // si es sólo un número se busca si existe sólo un DTE que coincida con la búsqueda
+        // si hay más de uno se redirige a la página de documentos emitidos filtrado por folio
+        if (is_numeric($q)) {
+            $DteEmitidos = new Model_DteEmitidos();
+            $DteEmitidos->setWhereStatement(
+                ['emisor = :emisor', 'certificacion = :certificacion', 'folio = :folio'],
+                [':emisor'=>$Emisor->rut, ':certificacion'=>(int)$Emisor->config_ambiente_en_certificacion, ':folio'=>$q]
+            );
+            $documentos = $DteEmitidos->getObjects();
+            if (isset($documentos[0])) {
+                // se encontró más de un DTE -> se redirige a búsqueda
+                if (isset($documentos[1])) {
+                    $this->redirect('/dte/dte_emitidos/listar?search=folio:'.$q);
+                }
+                // se encontró sólo un DTE -> se redirige a la página del DTE
+                else {
+                    header('location: '.$documentos[0]->getLinks()['ver']);
+                    exit;
+                }
+            }
+        }
         // buscar si es documento real
-        if ($q[0]=='T') {
+        else if ($q[0]=='T') {
             $aux = explode('F', $q);
             if (count($aux)==2) {
                 $dte = (int)substr($aux[0], 1);
