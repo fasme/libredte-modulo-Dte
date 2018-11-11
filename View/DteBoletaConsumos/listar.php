@@ -1,5 +1,20 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_boleta_consumos/pendientes" class="nav-link">
+            <i class="fa fa-download"></i> Pendientes
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:ERRONEO" class="nav-link">
+            <i class="fa fa-search"></i> Rechazados
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:null" class="nav-link">
+            <i class="fa fa-search"></i> Sin estado
+        </a>
+    </li>
+    <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_boletas" class="nav-link">
             <i class="fa fa-book"></i> Libro de boletas
         </a>

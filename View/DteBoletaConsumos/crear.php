@@ -1,6 +1,6 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar" title="Ir al listado de RCOF" class="nav-link">
+        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D" title="Ir al listado de RCOF" class="nav-link">
             <i class="fa fa-archive"></i>
             Consumo de folios
         </a>

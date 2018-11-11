@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para las acciones asociadas al libro de boletas electrónicas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-02-14
+ * @version 2018-11-11
  */
 class Controller_DteBoletaConsumos extends \Controller_Maintainer
 {
@@ -239,6 +239,26 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         }
         // redireccionar
         $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
+    }
+
+    /**
+     * Acción que entrega un listado con todos los reportes de consumos de
+     * folios pendientes enviar al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    public function pendientes()
+    {
+        $Emisor = $this->getContribuyente();
+        $pendientes = (new Model_DteBoletaConsumos())->setContribuyente($Emisor)->getPendientes();
+        if (!$pendientes) {
+            \sowerphp\core\Model_Datasource_Session::message('No existen días pendientes por enviar entre el primer día enviado y ayer', 'ok');
+            $this->redirect('/dte/dte_boleta_consumos/listar/1/dia/D');
+        }
+        $this->set([
+            'Emisor' => $Emisor,
+            'pendientes' => $pendientes,
+        ]);
     }
 
 }

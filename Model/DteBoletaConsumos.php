@@ -38,4 +38,37 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'dte_boleta_consumo'; ///< Tabla del modelo
 
+    /**
+     * Método que entrega los días pendientes de enviar RCOF
+     * Se busca entre el primer día enviado y el día de ayer
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    public function getPendientes()
+    {
+        // determinar desde y hasta
+        $desde = $this->db->getValue(
+            'SELECT MIN(dia) FROM dte_boleta_consumo WHERE emisor = :emisor AND certificacion = :certificacion',
+            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]
+        );
+        if (!$desde) {
+            return false;
+        }
+        $hasta = \sowerphp\general\Utility_Date::getPrevious(date('Y-m-d'), 'D');
+        // crear listado de días que se buscarán
+        $dias = [];
+        $dia = $desde;
+        while ($dia<=$hasta) {
+            $dias[] = $dia;
+            $dia = \sowerphp\general\Utility_Date::getNext($dia, 'D');
+        }
+        // consultar los dias que si están en el RCOF
+        $dias_enviados = $this->db->getCol(
+            'SELECT dia FROM dte_boleta_consumo WHERE emisor = :emisor AND certificacion = :certificacion',
+            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]
+        );
+        // calcular la diferencia entre los enviados y los que se solicitaron
+        return array_diff($dias, $dias_enviados);
+    }
+
 }
