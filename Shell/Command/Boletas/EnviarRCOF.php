@@ -27,17 +27,19 @@ namespace website\Dte;
  * Comando para enviar el reporte de consumo de folios de las boletas
  * electrónicas
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-11-16
+ * @version 2018-11-11
  */
 class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
 {
 
-    public function main($grupo = 'dte_plus', $certificacion = 0)
+    public function main($grupo = 'dte_plus', $dia = null, $certificacion = 0)
     {
         \sasco\LibreDTE\Sii::setAmbiente((int)$certificacion);
-        $from_unix_time = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
-        $day_before = strtotime('yesterday', $from_unix_time);
-        $dia = date('Y-m-d', $day_before);
+        if (!$dia) {
+            $from_unix_time = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+            $day_before = strtotime('yesterday', $from_unix_time);
+            $dia = date('Y-m-d', $day_before);
+        }
         $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
         foreach ($contribuyentes as $rut) {
             $this->enviar($rut, $dia, $certificacion);
@@ -90,8 +92,9 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
 
     private function getContribuyentes($grupo, $certificacion)
     {
-        if (is_numeric($grupo))
+        if (is_numeric($grupo)) {
             return [$grupo];
+        }
         $db = \sowerphp\core\Model_Datasource_Database::get();
         return $db->getCol('
             SELECT DISTINCT c.rut
