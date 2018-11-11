@@ -43,7 +43,7 @@ class Controller_DteVentas extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de ventas al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-01
+     * @version 2018-11-11
      */
     public function enviar_sii($periodo)
     {
@@ -60,6 +60,20 @@ class Controller_DteVentas extends Controller_Base_Libros
         if ($periodo >= date('Ym')) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No puede enviar el libro de ventas del período '.$periodo.', debe esperar al mes siguiente del período', 'error'
+            );
+            $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+        }
+        // verificar que no existen documentos rechazados sin estado en el periodo
+        if ($DteVenta->countDteSinEstadoEnvioSII()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Existen documentos sin el estado de envío al SII en el libro de ventas del período '.$periodo.', debe actualizar los estados de todos los documentos antes de poder generar el libro', 'error'
+            );
+            $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
+        }
+        // verificar que no existan documentos rechazados en el período
+        if ($DteVenta->countDteRechazadosSII()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Existen documentos que han sido rechazados por el SII en el libro de ventas del período '.$periodo.', debe corregir los casos rechazados antes de poder generar el libro', 'error'
             );
             $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
         }

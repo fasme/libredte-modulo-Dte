@@ -357,4 +357,48 @@ class Model_DteVenta extends Model_Base_Libro
         return $totales['TotMntExe'] + $totales['TotMntNeto'];
     }
 
+    /**
+     * Método que entrega la cantidad de documentos que se envían al SII pero que no tienen
+     * estado asociado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    public function countDteSinEstadoEnvioSII()
+    {
+        $periodo_col = $this->db->date('Ym', 'fecha');
+        return $this->db->getValue('
+            SELECT COUNT(folio)
+            FROM dte_emitido
+            WHERE
+                emisor = :emisor
+                AND dte NOT IN (39, 41)
+                AND certificacion = :certificacion
+                AND '.$periodo_col.' = :periodo
+                AND track_id != -1
+                AND revision_estado IS NULL
+        ', [':emisor'=>$this->emisor, ':periodo'=>$this->periodo, ':certificacion'=>(int)$this->certificacion]);
+    }
+
+    /**
+     * Método que entrega la cantidad de documentos que están rechazados por el SII
+     * en el período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    public function countDteRechazadosSII()
+    {
+        $periodo_col = $this->db->date('Ym', 'fecha');
+        return $this->db->getValue('
+            SELECT COUNT(folio)
+            FROM dte_emitido
+            WHERE
+                emisor = :emisor
+                AND dte NOT IN (39, 41)
+                AND certificacion = :certificacion
+                AND '.$periodo_col.' = :periodo
+                AND track_id != -1
+                AND SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', Model_DteEmitidos::$revision_estados['rechazados']).'\')
+        ', [':emisor'=>$this->emisor, ':periodo'=>$this->periodo, ':certificacion'=>(int)$this->certificacion]);
+    }
+
 }
