@@ -168,7 +168,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
             );
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Estado del reporte de consumo de folios no pudo ser obtenido: '.$e-getMessage(), 'error'
+                'Estado del reporte de consumo de folios no pudo ser obtenido: '.$e->getMessage(), 'error'
             );
         }
         // redireccionar
