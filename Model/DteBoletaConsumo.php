@@ -238,4 +238,135 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
         return $ConsumoFolio;
     }
 
+    /**
+     * Método que actualiza el estado del RCOF enviado al SII, en realidad
+     * es un wrapper para las verdaderas llamadas
+     * @param usarWebservice =true se consultará vía servicio web = false vía email
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    public function actualizarEstado($user = null, $usarWebservice = true)
+    {
+        if (!$this->track_id) {
+            throw new \Exception('RCOF no tiene Track ID, primero debe enviarlo al SII');
+        }
+        return $usarWebservice ? $this->actualizarEstadoWebservice($user) : $this->actualizarEstadoEmail();
+    }
+
+    /**
+     * Método que actualiza el estado del RCOF enviado al SII a través del
+     * servicio web que dispone el SII para esta consulta
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    private function actualizarEstadoWebservice($user = null)
+    {
+        // obtener firma
+        $Firma = $this->getEmisor()->getFirma($user);
+        if (!$Firma) {
+            throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar)');
+        }
+        \sasco\LibreDTE\Sii::setAmbiente((int)$this->certificacion);
+        // solicitar token
+        $token = \sasco\LibreDTE\Sii\Autenticacion::getToken($Firma);
+        if (!$token) {
+            throw new \Exception('No fue posible obtener el token');
+        }
+        // consultar estado enviado
+        $estado_up = \sasco\LibreDTE\Sii::request('QueryEstUp', 'getEstUp', [$this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token]);
+        // si el estado no se pudo recuperar error
+        if ($estado_up===false) {
+            throw new \Exception('No fue posible obtener el estado del RCOF');
+        }
+        // armar estado del dte
+        $estado = (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/ESTADO')[0];
+        if (isset($estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/GLOSA')[0])) {
+            $glosa = (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/GLOSA')[0];
+        } else {
+            $glosa = null;
+        }
+        $this->revision_estado = $glosa ? ($estado.' - '.$glosa) : $estado;
+        $this->revision_detalle = trim(explode('( ', (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/NUM_ATENCION')[0])[1],')');
+        if ($estado=='EPR') {
+            $this->revision_estado = 'CORRECTO';
+        }
+        else if (in_array($estado, \website\Dte\Model_DteEmitidos::$revision_estados['rechazados'])) {
+            $this->revision_estado = 'ERRONEO';
+        }
+        // guardar estado del dte
+        try {
+            $this->save();
+            return [
+                'track_id' => $this->track_id,
+                'revision_estado' => $this->revision_estado,
+                'revision_detalle' => $this->revision_detalle,
+            ];
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            throw new \Exception('El estado se obtuvo pero no fue posible guardarlo en la base de datos<br/>'.$e->getMessage());
+        }
+    }
+
+    /**
+     * Método que actualiza el estado del RCOF enviado al SII a través del
+     * email que es recibido desde el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    private function actualizarEstadoEmail()
+    {
+        $Emisor = $this->getEmisor();
+        // buscar correo con respuesta
+        $Imap = $Emisor->getEmailImap('sii');
+        if (!$Imap) {
+            throw new \Exception(
+                'No fue posible conectar mediante IMAP a '.$Emisor->config_email_sii_imap.', verificar mailbox, usuario y/o contraseña de contacto SII:<br/>'.implode('<br/>', imap_errors())
+            );
+        }
+        $asunto = 'TipoEnvio=Automatico TrackID='.$this->track_id.' Rut='.$Emisor->rut.'-'.$Emisor->dv;
+        $uids = $Imap->search('FROM @sii.cl SUBJECT "'.$asunto.'" UNSEEN');
+        if (!$uids) {
+            throw new \Exception(
+                'No se encontró respuesta de envío del reporte de consumo de folios, espere unos segundos'
+            );
+        }
+        // procesar emails recibidos
+        foreach ($uids as $uid) {
+            $estado = $detalle = null;
+            $m = $Imap->getMessage($uid);
+            if (!$m)
+                continue;
+            foreach ($m['attachments'] as $file) {
+                if ($file['type']!='application/xml') {
+                    continue;
+                }
+                $xml = new \SimpleXMLElement($file['data'], LIBXML_COMPACT);
+                // obtener estado y detalle
+                if (isset($xml->DocumentoResultadoConsumoFolios)) {
+                    if ($xml->DocumentoResultadoConsumoFolios->Identificacion->Envio->TrackId==$this->track_id) {
+                        $estado = (string)$xml->DocumentoResultadoConsumoFolios->Resultado->Estado;
+                        $detalle = str_replace('T', ' ', (string)$xml->DocumentoResultadoConsumoFolios->Identificacion->Envio->TmstRecepcion);
+                    }
+                }
+            }
+            if (isset($estado)) {
+                $this->revision_estado = $estado;
+                $this->revision_detalle = $detalle;
+                try {
+                    $this->save();
+                    return [
+                        'track_id' => $this->track_id,
+                        'revision_estado' => $this->revision_estado,
+                        'revision_detalle' => $this->revision_detalle,
+                    ];
+                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                    throw new \Exception(
+                        'El estado se obtuvo pero no fue posible guardarlo en la base de datos<br/>'.$e->getMessage()
+                    );
+                }
+                // marcar email como leído
+                $Imap->setSeen($uid);
+            }
+        }
+    }
+
 }

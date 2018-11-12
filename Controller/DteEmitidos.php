@@ -227,8 +227,9 @@ class Controller_DteEmitidos extends \Controller_App
     public function actualizar_estado($dte, $folio, $usarWebservice = null)
     {
         $Emisor = $this->getContribuyente();
-        if ($usarWebservice===null)
+        if ($usarWebservice===null) {
             $usarWebservice = $Emisor->config_sii_estado_dte_webservice;
+        }
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
         $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/actualizar_estado/'.$dte.'/'.$folio.'/'.$Emisor->rut.'?usarWebservice='.(int)$usarWebservice);

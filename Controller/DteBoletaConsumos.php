@@ -136,12 +136,15 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
     /**
      * Acción que actualiza el estado del envío del reporte de consumo de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2018-11-11
      */
-    public function actualizar_estado($dia)
+    public function actualizar_estado($dia, $usarWebservice = null)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Emisor = $this->getContribuyente();
+        if ($usarWebservice===null) {
+            $usarWebservice = $Emisor->config_sii_estado_dte_webservice;
+        }
         // obtener reporte enviado
         $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteBoletaConsumo->exists()) {
@@ -157,56 +160,16 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
             );
             $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
         }
-        // buscar correo con respuesta
-        $Imap = $Emisor->getEmailImap('sii');
-        if (!$Imap) {
+        // actualizar estado
+        try {
+            $DteBoletaConsumo->actualizarEstado($dia, $usarWebservice);
             \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible conectar mediante IMAP a '.$Emisor->config_email_sii_imap.', verificar mailbox, usuario y/o contraseña de contacto SII:<br/>'.implode('<br/>', imap_errors()), 'error'
+                'Se actualizó el estado del reporte de consumo de folios', 'ok'
             );
-            $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
-        }
-        $asunto = 'TipoEnvio=Automatico TrackID='.$DteBoletaConsumo->track_id.' Rut='.$Emisor->rut.'-'.$Emisor->dv;
-        $uids = $Imap->search('FROM @sii.cl SUBJECT "'.$asunto.'" UNSEEN');
-        if (!$uids) {
+        } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No se encontró respuesta de envío del reporte de consumo de folios, espere unos segundos'
+                'Estado del reporte de consumo de folios no pudo ser obtenido: '.$e-getMessage(), 'error'
             );
-            $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
-        }
-        // procesar emails recibidos
-        foreach ($uids as $uid) {
-            $estado = $detalle = null;
-            $m = $Imap->getMessage($uid);
-            if (!$m)
-                continue;
-            foreach ($m['attachments'] as $file) {
-                if ($file['type']!='application/xml')
-                    continue;
-                $xml = new \SimpleXMLElement($file['data'], LIBXML_COMPACT);
-                // obtener estado y detalle
-                if (isset($xml->DocumentoResultadoConsumoFolios)) {
-                    if ($xml->DocumentoResultadoConsumoFolios->Identificacion->Envio->TrackId==$DteBoletaConsumo->track_id) {
-                        $estado = (string)$xml->DocumentoResultadoConsumoFolios->Resultado->Estado;
-                        $detalle = str_replace('T', ' ', (string)$xml->DocumentoResultadoConsumoFolios->Identificacion->Envio->TmstRecepcion);
-                    }
-                }
-            }
-            if (isset($estado)) {
-                $DteBoletaConsumo->revision_estado = $estado;
-                $DteBoletaConsumo->revision_detalle = $detalle;
-                try {
-                    $DteBoletaConsumo->save();
-                    \sowerphp\core\Model_Datasource_Session::message(
-                        'Se actualizó el estado del reporte de consumo de folios', 'ok'
-                    );
-                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-                    \sowerphp\core\Model_Datasource_Session::message(
-                        'El estado se obtuvo pero no fue posible guardarlo en la base de datos<br/>'.$e->getMessage(), 'error'
-                    );
-                }
-                // marcar email como leído
-                $Imap->setSeen($uid);
-            }
         }
         // redireccionar
         $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
