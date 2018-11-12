@@ -36,7 +36,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
         <div class="form-group col-md-3"><?=$f->input(['name'=>'TpoDoc', 'type'=>'select', 'options'=> $tipos_dte_autorizados, 'value'=>$dte_defecto, 'attr'=>'onblur="DTE.setTipo(this.value)"'])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'date', 'name' => 'FchEmis', 'placeholder'=>'Fecha emisión DTE', 'popover'=>'Día en que se emite el documento', 'value'=>$hoy, 'check' => 'notempty date'])?></div>
         <div class="form-group col-md-3"><?=$f->input(['name'=>'FmaPago', 'type'=>'select', 'options'=>[''=>'Sin forma de pago', 1=>'Contado', 2=>'Crédito', 3=>'Sin costo (entrega gratuita)'], 'value'=>!empty($datos['Encabezado']['IdDoc']['FmaPago'])?$datos['Encabezado']['IdDoc']['FmaPago']:$Emisor->config_emision_forma_pago, 'attr'=>'onblur="DTE.setFormaPago(this.value)"'])?></div>
-        <div class="form-group col-md-3"><?=$f->input(['type' => 'date', 'name' => 'FchVenc', 'placeholder'=>'Fecha de vencimiento', 'popover'=>'Día máximo a pagar o día en que se pagó el documento (si es pago anticipado)', 'value'=>$hoy, 'check' => 'notempty date'])?></div>
+        <div class="form-group col-md-3"><?=$f->input(['type' => 'date', 'name' => 'FchVenc', 'placeholder'=>'Vencimiento o pago anticipado', 'popover'=>'Día máximo a pagar (fecha mayor a emisión) o día en que se pagó el documento (fecha menor a emisión)', 'value'=>$hoy, 'check' => 'notempty date'])?></div>
     </div>
     <!-- INDICADOR DE SERVICIO -->
     <div class="row">
