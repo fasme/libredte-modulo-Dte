@@ -87,6 +87,7 @@ class Controller_Dashboard extends \Controller_App
         // estados de documentos emitidos del periodo
         $emitidos_estados = $Emisor->getDocumentosEmitidosResumenEstados($desde, $hasta);
         $emitidos_eventos = $Emisor->getDocumentosEmitidosResumenEventos($desde, $hasta);
+        $rcof_estados = (new Model_DteBoletaConsumos())->setContribuyente($Emisor)->getResumenEstados($desde, $hasta);
         // asignar variables a la vista
         $this->set([
             'nav' => array_slice(\sowerphp\core\Configure::read('nav.module'), 1),
@@ -113,6 +114,7 @@ class Controller_Dashboard extends \Controller_App
             'emitidos_estados' => $emitidos_estados,
             'emitidos_eventos' => $emitidos_eventos,
             'documentos_rechazados' => $documentos_rechazados,
+            'rcof_estados' => $rcof_estados,
         ]);
     }
 

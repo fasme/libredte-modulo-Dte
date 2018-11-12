@@ -71,4 +71,20 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
         return array_diff($dias, $dias_enviados);
     }
 
+    /**
+     * Método que entrega un resumen de los estados del envío del RCOF al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    public function getResumenEstados($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT revision_estado AS estado, COUNT(*) AS total
+            FROM dte_boleta_consumo
+            WHERE emisor = :emisor AND certificacion = :certificacion AND dia BETWEEN :desde AND :hasta AND track_id > 0
+            GROUP BY revision_estado
+            ORDER BY total DESC
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
 }

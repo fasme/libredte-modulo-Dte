@@ -177,7 +177,24 @@ echo View_Helper_Dashboard::cards([
                 </div>
             </div>
         </div>
-        <!-- fin estado de documentos emitidos SII -->
+        <!-- fin estado de documentos emitidos receptores -->
+<?php if ($rcof_estados) : ?>
+        <!-- estado de rcof enviados al SII -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="far fa-chart-bar fa-fw"></i> Estado envíos al SII de reportes de consumos de folios (RCOF)
+                    </div>
+                    <div class="card-body">
+                        <div id="grafico-rcof_estados"></div>
+                        <a href="dte_boleta_consumos/listar/1/dia/D" class="btn btn-primary btn-block">Ver listado de RCOFs</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin estado de rcof enviados al SII -->
+<?php endif; ?>
     </div>
     <!-- FIN PANEL CENTRO -->
     <!-- PANEL DERECHA -->
@@ -291,4 +308,14 @@ Morris.Bar({
     labels: ['DTEs'],
     resize: true
 });
+<?php if ($rcof_estados) : ?>
+Morris.Bar({
+    element: 'grafico-rcof_estados',
+    data: <?=json_encode($rcof_estados)?>,
+    xkey: 'estado',
+    ykeys: ['total'],
+    labels: ['RCOFs'],
+    resize: true
+});
+<?php endif; ?>
 </script>
