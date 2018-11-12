@@ -58,7 +58,9 @@ $(function() {
 <?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
         <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
 <?php endif; ?>
+<?php if ($DteEmitido->getTipo()->operacion=='S'): ?>
         <li class="nav-item"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab" id="cobranza-tab" class="nav-link">Cobranza</a></li>
+<?php endif; ?>
         <li class="nav-item"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab" id="referencias-tab" class="nav-link">Referencias</a></li>
 <?php if ($DteEmitido->getTipo()->cedible) : ?>
         <li class="nav-item"><a href="#cesion" aria-controls="cesion" role="tab" data-toggle="tab" id="cesion-tab" class="nav-link">Cesión</a></li>
@@ -377,6 +379,7 @@ if ($Cobro->datos) {
 <!-- FIN PAGAR -->
 <?php endif; ?>
 
+<?php if ($DteEmitido->getTipo()->operacion=='S'): ?>
 <!-- INICIO COBRANZA -->
 <div role="tabpanel" class="tab-pane" id="cobranza" aria-labelledby="cobranza-tab">
 <?php
@@ -402,6 +405,7 @@ if ($cobranza) {
 ?>
 </div>
 <!-- FIN COBRANZA -->
+<?php endif; ?>
 
 <!-- INICIO REFERENCIAS -->
 <div role="tabpanel" class="tab-pane" id="referencias" aria-labelledby="referencias-tab">
