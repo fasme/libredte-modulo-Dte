@@ -264,7 +264,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-06
+     * @version 2018-11-11
      */
     public function generar($user_id = null, $fecha_emision = null)
     {
@@ -332,8 +332,9 @@ class Model_DteTmp extends \Model_App
         }
         $cols = ['tasa'=>'TasaImp', 'fecha'=>'FchDoc', 'sucursal_sii'=>'CdgSIISucur', 'receptor'=>'RUTDoc', 'exento'=>'MntExe', 'neto'=>'MntNeto', 'iva'=>'MntIVA', 'total'=>'MntTotal'];
         foreach ($cols as $attr => $col) {
-            if ($r[$col]!==false)
+            if ($r[$col]!==false) {
                 $DteEmitido->$attr = $r[$col];
+            }
         }
         $DteEmitido->receptor = substr($DteEmitido->receptor, 0, -2);
         $DteEmitido->xml = base64_encode($xml);
@@ -346,11 +347,14 @@ class Model_DteTmp extends \Model_App
         $DteEmitido->save();
         // guardar referencias si existen
         $datos = json_decode($this->datos, true);
+        $nc_referencia_boleta = false;
         if (!empty($datos['Referencia'])) {
-            if (!isset($datos['Referencia'][0]))
+            if (!isset($datos['Referencia'][0])) {
                 $datos['Referencia'] = [$datos['Referencia']];
+            }
             foreach ($datos['Referencia'] as $referencia) {
                 if (!empty($referencia['TpoDocRef']) and is_numeric($referencia['TpoDocRef']) and $referencia['TpoDocRef']<200) {
+                    // guardar referencia
                     $DteReferencia = new Model_DteReferencia();
                     $DteReferencia->emisor = $DteEmitido->emisor;
                     $DteReferencia->dte = $DteEmitido->dte;
@@ -361,6 +365,10 @@ class Model_DteTmp extends \Model_App
                     $DteReferencia->codigo = !empty($referencia['CodRef']) ? $referencia['CodRef'] : null;
                     $DteReferencia->razon = !empty($referencia['RazonRef']) ? $referencia['RazonRef'] : null;
                     $DteReferencia->save();
+                    // si es nota de crédito asociada a boleta se recuerda por si se debe invalidar RCOF
+                    if ($DteEmitido->dte==61 and in_array($referencia['TpoDocRef'], [39, 41])) {
+                        $nc_referencia_boleta = true;
+                    }
                 }
             }
         }
@@ -377,6 +385,19 @@ class Model_DteTmp extends \Model_App
                 $Cobranza->monto = $pago['MntPago'];
                 $Cobranza->glosa = !empty($pago['GlosaPagos']) ? $pago['GlosaPagos'] : null;
                 $Cobranza->save();
+            }
+        }
+        // invalidar RCOF si es una boleta o referencia de boleta y la fecha de
+        // emisión es anterior al día actual
+        if ($DteEmitido->fecha < date('Y-m-d')) {
+            if (in_array($DteEmitido->dte, [39, 41]) or $nc_referencia_boleta) {
+                $DteBoletaConsumo = new Model_DteBoletaConsumo($DteEmitido->emisor, $DteEmitido->fecha, (int)$DteEmitido->certificacion);
+                if ($DteBoletaConsumo->track_id) {
+                    $DteBoletaConsumo->track_id = null;
+                    $DteBoletaConsumo->revision_estado = null;
+                    $DteBoletaConsumo->revision_detalle = null;
+                    $DteBoletaConsumo->save();
+                }
             }
         }
         // enviar al SII
