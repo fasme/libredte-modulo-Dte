@@ -87,4 +87,22 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
         ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
+    /**
+     * Método que entrega el total de RCOF rechazados y el rango de fechas
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-04-27
+     */
+    public function getTotalRechazados()
+    {
+        $aux = $this->db->getRow('
+            SELECT COUNT(dia) AS total, MIN(dia) AS desde, MAX(dia) AS hasta
+            FROM dte_boleta_consumo
+            WHERE
+                emisor = :emisor
+                AND certificacion = :certificacion
+                AND revision_estado = \'ERRONEO\'
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        return $aux['total'] ? $aux : null;
+    }
+
 }

@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-30
+     * @version 2018-11-18
      */
     public function index()
     {
@@ -52,6 +52,7 @@ class Controller_Dashboard extends \Controller_App
         $n_recibidos = $Emisor->countCompras($periodo);
         $n_intercambios = (new Model_DteIntercambios())->setContribuyente($Emisor)->getTotalPendientes();
         $documentos_rechazados = (new Model_DteEmitidos())->setContribuyente($Emisor)->getTotalRechazados();
+        $rcof_rechazados = (new Model_DteBoletaConsumos())->setContribuyente($Emisor)->getTotalRechazados();
         // valores para cuota
         $cuota = $Emisor->getCuota();
         $n_dtes = $cuota ? $Emisor->getTotalDocumentosUsadosPeriodo() : false;
@@ -114,6 +115,7 @@ class Controller_Dashboard extends \Controller_App
             'emitidos_estados' => $emitidos_estados,
             'emitidos_eventos' => $emitidos_eventos,
             'documentos_rechazados' => $documentos_rechazados,
+            'rcof_rechazados' => $rcof_rechazados,
             'rcof_estados' => $rcof_estados,
         ]);
     }

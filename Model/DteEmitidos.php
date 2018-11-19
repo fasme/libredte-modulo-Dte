@@ -325,14 +325,14 @@ class Model_DteEmitidos extends \Model_Plural_App
     }
 
     /**
-     * Método que entrega el total de documentos rechazados y desde cuando es el primero
+     * Método que entrega el total de documentos rechazados y el rango de fechas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-27
+     * @version 2018-11-18
      */
     public function getTotalRechazados()
     {
         $aux = $this->db->getRow('
-            SELECT COUNT(folio) AS total, MIN(fecha) AS desde
+            SELECT COUNT(folio) AS total, MIN(fecha) AS desde, MAX(fecha) AS hasta
             FROM dte_emitido
             WHERE
                 emisor = :emisor

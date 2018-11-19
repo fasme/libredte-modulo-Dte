@@ -109,13 +109,25 @@ echo View_Helper_Dashboard::cards([
         <!-- alertas documentos rechazados  -->
         <div class="row">
             <div class="col-sm-12">
-                <a class="btn btn-danger btn-lg btn-block" href="informes/dte_emitidos/estados/<?=$documentos_rechazados['desde']?>/<?=$hasta?>" role="button" title="Ir al informe de estados de envíos de DTE">
+                <a class="btn btn-danger btn-lg btn-block" href="informes/dte_emitidos/estados/<?=$documentos_rechazados['desde']?>/<?=$documentos_rechazados['hasta']?>" role="button" title="Ir al informe de estados de envíos de DTE">
                     <?=num($documentos_rechazados['total'])?> documento(s) rechazado(s) desde el <?=\sowerphp\general\Utility_Date::format($documentos_rechazados['desde'])?>
                 </a>
                 <br />
             </div>
         </div>
         <!-- fin alertas documentos rechazados -->
+<?php endif; ?>
+<?php if ($rcof_rechazados) : ?>
+        <!-- alertas rcof rechazados  -->
+        <div class="row">
+            <div class="col-sm-12">
+                <a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:ERRONEO" role="button" title="Ir al informe de estados de envíos de DTE">
+                    <?=num($rcof_rechazados['total'])?> RCOF(s) rechazado(s) desde el <?=\sowerphp\general\Utility_Date::format($rcof_rechazados['desde'])?>
+                </a>
+                <br />
+            </div>
+        </div>
+        <!-- fin alertas rcof rechazados -->
 <?php endif; ?>
         <!-- graficos ventas y compras -->
         <div class="row">
