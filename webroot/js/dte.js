@@ -318,7 +318,7 @@ DTE.calcular = function () {
             // agregar descuento si aplica
             if (!__.empty($('input[name="ValorDR[]"]').get(i).value) && $('input[name="ValorDR[]"]').get(i).value!=0) {
                 if ($('select[name="TpoValor[]"]').get(i).selectedOptions[0].value=="%")
-                    descuento = DTE.round($('input[name="subtotal[]"]').get(i).value * (DTE.parseInt($('input[name="ValorDR[]"]').get(i).value)/100.0));
+                    descuento = DTE.round($('input[name="subtotal[]"]').get(i).value * (parseFloat($('input[name="ValorDR[]"]').get(i).value)/100.0));
                 else
                     descuento = DTE.parseInt($('input[name="ValorDR[]"]').get(i).value);
                 $('input[name="subtotal[]"]').get(i).value -= descuento;
@@ -348,7 +348,7 @@ DTE.calcular = function () {
     if ($('select[name="TpoValor_global"]').length) {
         // calcular descuento global para neto
         if ($('select[name="TpoValor_global"]').get(0).selectedOptions[0].value=="%")
-            descuento = DTE.round(neto * (DTE.parseInt($('input[name="ValorDR_global"]').get(0).value)/100.0));
+            descuento = DTE.round(neto * (parseFloat($('input[name="ValorDR_global"]').get(0).value)/100.0));
         else
             descuento = DTE.parseInt($('input[name="ValorDR_global"]').get(0).value);
         neto -= descuento;
@@ -356,7 +356,7 @@ DTE.calcular = function () {
             neto = 0;
         // calcular descuento global para exento
         if ($('select[name="TpoValor_global"]').get(0).selectedOptions[0].value=="%")
-            descuento = DTE.round(exento * (DTE.parseInt($('input[name="ValorDR_global"]').get(0).value)/100.0));
+            descuento = DTE.round(exento * (parseFloat($('input[name="ValorDR_global"]').get(0).value)/100.0));
         else
             descuento = DTE.parseInt($('input[name="ValorDR_global"]').get(0).value);
         exento -= descuento;
