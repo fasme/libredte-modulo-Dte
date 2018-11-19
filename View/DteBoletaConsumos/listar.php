@@ -4,15 +4,18 @@
             <i class="fa fa-download"></i> Pendientes
         </a>
     </li>
-    <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:ERRONEO" class="nav-link">
-            <i class="fa fa-search"></i> Rechazados
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-search"></i> Filtrar
         </a>
-    </li>
-    <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:null" class="nav-link">
-            <i class="fa fa-search"></i> Sin estado
-        </a>
+        <div class="dropdown-menu">
+            <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:ERRONEO" class="dropdown-item">Rechazados</a>
+            <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:REPARO" class="dropdown-item">Con reparo</a>
+            <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:CORRECTO" class="dropdown-item">Correctos</a>
+            <div class="dropdown-divider"></div>
+            <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D?search=revision_estado:null" class="dropdown-item">Sin estado</a>
+            <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D" class="dropdown-item">Ver todo</a>
+        </div>
     </li>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_boletas" class="nav-link">
