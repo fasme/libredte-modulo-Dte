@@ -54,7 +54,9 @@ $(function() {
         <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
         <li class="nav-item"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab" id="pdf-tab" class="nav-link">PDF</a></li>
         <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link">Enviar por email</a></li>
+<?php if ($DteEmitido->getTipo()->permiteIntercambio()): ?>
         <li class="nav-item"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab" id="intercambio-tab" class="nav-link">Resultado intercambio</a></li>
+<?php endif; ?>
 <?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
         <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
 <?php endif; ?>
@@ -252,6 +254,7 @@ if ($email_enviados) {
 </div>
 <!-- FIN ENVIAR POR EMAIL -->
 
+<?php if ($DteEmitido->getTipo()->permiteIntercambio()): ?>
 <!-- INICIO INTERCAMBIO -->
 <div role="tabpanel" class="tab-pane" id="intercambio" aria-labelledby="intercambio-tab">
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
@@ -333,6 +336,7 @@ if ($Resultado) {
 ?>
 </div>
 <!-- FIN INTERCAMBIO -->
+<?php endif; ?>
 
 <?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
 <!-- INICIO PAGAR -->
