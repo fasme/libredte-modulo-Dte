@@ -405,6 +405,16 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que entrega el período contable al que correspondel el DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-22
+     */
+    public function getPeriodo()
+    {
+        return substr(str_replace('-', '', $this->fecha), 0, 6);
+    }
+
+    /**
      * Método que entrega el arreglo con los datos que se usaron para generar el
      * XML del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
