@@ -17,7 +17,7 @@
 <?php endif; ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/admin/itemes/listar" title="Ir al mantenedor de items" class="nav-link">
-            <i class="fa fa-cubes"></i> Listado de items
+            <i class="fa fa-cubes"></i> Items
         </a>
     </li>
 </ul>
