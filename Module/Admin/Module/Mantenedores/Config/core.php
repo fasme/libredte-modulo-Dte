@@ -21,6 +21,9 @@
  * En caso contrario, consulte <http://www.gnu.org/licenses/agpl.html>.
  */
 
+// título del módulo
+\sowerphp\core\Configure::write('module.title', 'Mantenedores módulo facturación');
+
 // Menú para el módulo
 Configure::write('nav.module', array(
     '/contribuyentes/importar' => [
