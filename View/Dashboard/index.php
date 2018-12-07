@@ -100,6 +100,14 @@ echo View_Helper_Dashboard::cards([
             </a>
             <br />
 <?php endif; ?>
+<?php if (!$Emisor->config_sii_pass) : ?>
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <p class="lead">¿Sabía que si asigna la contraseña del SII de la empresa podría desbloquear funcionalidades adicionales?</p>
+                    <p class="small">Por ejemplo la sincronización con el registro de compras y ventas del SII</p>
+                </div>
+            </div>
+<?php endif; ?>
         <!-- fin alertas envío libro o propuesta f29 -->
     </div>
     <!-- FIN PANEL IZQUIERDA -->
