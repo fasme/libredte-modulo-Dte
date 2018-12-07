@@ -137,32 +137,35 @@ echo View_Helper_Dashboard::cards([
         </div>
         <!-- fin alertas rcof rechazados -->
 <?php endif; ?>
+<?php if ($ventas_periodo or $compras_periodo) : ?>
         <!-- graficos ventas y compras -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="far fa-chart-bar fa-fw"></i> Ventas
-                    </div>
-                    <div class="card-body">
-                        <div id="grafico-ventas"></div>
-                        <a href="dte_ventas/ver/<?=$periodo?>" class="btn btn-primary btn-block">Ver libro del período</a>
-                    </div>
+        <div class="card-deck">
+<?php if ($ventas_periodo) : ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="far fa-chart-bar fa-fw"></i> Ventas
+                </div>
+                <div class="card-body">
+                    <div id="grafico-ventas"></div>
+                    <a href="dte_ventas/ver/<?=$periodo?>" class="btn btn-primary btn-block">Ver libro del período</a>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="far fa-chart-bar fa-fw"></i> Compras
-                    </div>
-                    <div class="card-body">
-                        <div id="grafico-compras"></div>
-                        <a href="dte_compras/ver/<?=$periodo?>" class="btn btn-primary btn-block">Ver libro del período</a>
-                    </div>
+<?php endif; ?>
+<?php if ($compras_periodo) : ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="far fa-chart-bar fa-fw"></i> Compras
+                </div>
+                <div class="card-body">
+                    <div id="grafico-compras"></div>
+                    <a href="dte_compras/ver/<?=$periodo?>" class="btn btn-primary btn-block">Ver libro del período</a>
                 </div>
             </div>
+<?php endif; ?>
         </div>
         <!-- fin graficos ventas y compras -->
+<?php endif; ?>
+<?php if ($emitidos_estados) : ?>
         <!-- estado de documentos emitidos SII -->
         <div class="row">
             <div class="col-md-12">
@@ -178,6 +181,8 @@ echo View_Helper_Dashboard::cards([
             </div>
         </div>
         <!-- fin estado de documentos emitidos SII -->
+<?php endif; ?>
+<?php if ($emitidos_eventos) : ?>
         <!-- estado de documentos emitidos receptores -->
         <div class="row">
             <div class="col-md-12">
@@ -198,6 +203,7 @@ echo View_Helper_Dashboard::cards([
             </div>
         </div>
         <!-- fin estado de documentos emitidos receptores -->
+<?php endif; ?>
 <?php if ($rcof_estados) : ?>
         <!-- estado de rcof enviados al SII -->
         <div class="row">
@@ -302,16 +308,21 @@ echo View_Helper_Dashboard::cards([
 </div>
 
 <script>
+<?php if ($ventas_periodo) : ?>
 Morris.Donut({
     element: 'grafico-ventas',
     data: <?=json_encode($ventas_periodo)?>,
     resize: true
 });
+<?php endif; ?>
+<?php if ($compras_periodo) : ?>
 Morris.Donut({
     element: 'grafico-compras',
     data: <?=json_encode($compras_periodo)?>,
     resize: true
 });
+<?php endif; ?>
+<?php if ($emitidos_estados) : ?>
 Morris.Bar({
     element: 'grafico-dte_emitidos_estados',
     data: <?=json_encode($emitidos_estados)?>,
@@ -320,6 +331,8 @@ Morris.Bar({
     labels: ['DTEs'],
     resize: true
 });
+<?php endif; ?>
+<?php if ($emitidos_eventos) : ?>
 Morris.Bar({
     element: 'grafico-dte_emitidos_eventos',
     data: <?=json_encode($emitidos_eventos)?>,
@@ -328,6 +341,7 @@ Morris.Bar({
     labels: ['DTEs'],
     resize: true
 });
+<?php endif; ?>
 <?php if ($rcof_estados) : ?>
 Morris.Bar({
     element: 'grafico-rcof_estados',
