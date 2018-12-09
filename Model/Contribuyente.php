@@ -609,9 +609,9 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega los correos electrónicos asociados a cierto permiso
      * Por defecto se entregan los correos de los usuarios administradores
-     * @return Tabla con los usuarios y sus permisos
+     * @return Arreglo con los correos electrónicos solicitados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-26
+     * @version 2018-12-09
      */
     public function getUsuariosEmail($permiso = 'admin')
     {
@@ -619,11 +619,11 @@ class Model_Contribuyente extends \Model_App
             (
                 SELECT u.email
                 FROM contribuyente AS c JOIN usuario AS u ON u.id = c.usuario
-                WHERE c.rut = :rut
+                WHERE c.rut = :rut AND u.activo = true
             ) UNION (
                 SELECT u.email
                 FROM contribuyente_usuario AS c JOIN usuario AS u ON u.id = c.usuario
-                WHERE c.contribuyente = :rut AND c.permiso = :permiso
+                WHERE c.contribuyente = :rut AND c.permiso = :permiso AND u.activo = true
             )
         ', [':rut'=>$this->rut, ':permiso'=>$permiso]);
         return $emails;
