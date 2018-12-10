@@ -72,6 +72,26 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
     }
 
     /**
+     * Método que entrega los RCOF rechazados (opcionalmente en un período de tiempo)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-12-10
+     */
+    public function getRechazados($desde = null, $hasta = null)
+    {
+        $where = ['emisor = :emisor', 'certificacion = :certificacion', 'revision_estado = \'ERRONEO\''];
+        $vars = [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
+        if ($desde) {
+            $where[] = 'dia >= :desde';
+            $vars[':desde'] = $desde;
+        }
+        if ($hasta) {
+            $where[] = 'dia <= :hasta';
+            $vars[':hasta'] = $hasta;
+        }
+        return $this->db->getCol('SELECT dia FROM dte_boleta_consumo WHERE '.implode(' AND ', $where).' ORDER BY dia', $vars);
+    }
+
+    /**
      * Método que entrega un resumen de los estados del envío del RCOF al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-11-11
