@@ -66,7 +66,7 @@ class Model_Contribuyentes extends \Model_Plural_App
      * @param omitir Se puede indicar el RUT de una empresa que no se quiere que aparezca en el listado
      * @return Tabla con las empresas que se están buscando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-17
+     * @version 2018-12-13
      */
     public function getByUsuario($usuario, $omitir = null)
     {
@@ -75,21 +75,22 @@ class Model_Contribuyentes extends \Model_Plural_App
                 SELECT c.rut, c.dv, c.razon_social, c.giro, a.valor AS certificacion, true AS administrador
                 FROM contribuyente AS c JOIN contribuyente_config AS a ON c.rut = a.contribuyente
                 WHERE
-                    usuario = :usuario
+                    c.usuario = :usuario
                     AND a.configuracion = \'ambiente\'
                     AND a.variable = \'en_certificacion\'
             ) UNION (
                 SELECT c.rut, c.dv, c.razon_social, c.giro, a.valor AS certificacion, true AS administrador
                 FROM contribuyente AS c JOIN contribuyente_config AS a ON c.rut = a.contribuyente
                 WHERE
-                    rut IN (SELECT contribuyente FROM contribuyente_usuario WHERE usuario = :usuario AND permiso = \'admin\')
+                    c.rut IN (SELECT contribuyente FROM contribuyente_usuario WHERE usuario = :usuario AND permiso = \'admin\')
                     AND a.configuracion = \'ambiente\'
                     AND a.variable = \'en_certificacion\'
             ) UNION (
                 SELECT c.rut, c.dv, c.razon_social, c.giro, a.valor AS certificacion, false AS administrador
                 FROM contribuyente AS c JOIN contribuyente_config AS a ON c.rut = a.contribuyente
                 WHERE
-                    rut IN (SELECT contribuyente FROM contribuyente_usuario WHERE usuario = :usuario AND permiso != \'admin\')
+                    c.rut IN (SELECT contribuyente FROM contribuyente_usuario WHERE usuario = :usuario AND permiso != \'admin\')
+                    AND c.rut NOT IN (SELECT contribuyente FROM contribuyente_usuario WHERE usuario = :usuario AND permiso = \'admin\')
                     AND a.configuracion = \'ambiente\'
                     AND a.variable = \'en_certificacion\'
             )
