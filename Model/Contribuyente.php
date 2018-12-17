@@ -431,11 +431,11 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que 'elimina' al contribuyente. En realidad los contribuyentes
      * nunca se eliminan. Lo que se hace es desasociar al contribuyente de su
-     * usuario administrador y se elimina la configuración.
+     * usuario administrador y se elimina la configuración del contribuyente.
      * Los datos del contribuyente de documentos emitidos, recibidos, etc no se
      * eliminan por defecto, se debe solicitar específicamente.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-20
+     * @version 2018-12-17
      */
     public function delete($all = false)
     {
@@ -453,28 +453,22 @@ class Model_Contribuyente extends \Model_App
         // eliminar todos los registros de la empresa de la base de datos
         if ($all) {
             // módulo Dte
-            $this->db->query('DELETE FROM cobranza WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM contribuyente_dte WHERE contribuyente = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM contribuyente_usuario WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM contribuyente_usuario_dte WHERE contribuyente = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_boleta_consumo WHERE emisor = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_caf WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_compra WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_emitido WHERE emisor = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_emitido_email WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_folio WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_guia WHERE emisor = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_recibido WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_recepcion WHERE recibe = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_intercambio_recepcion_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_recibo WHERE recibe = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_intercambio_recibo_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_intercambio_resultado WHERE recibe = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM dte_intercambio_resultado_dte WHERE emisor = :rut', [':rut'=>$this->rut]);
+            $this->db->query('DELETE FROM dte_recibido WHERE receptor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_referencia WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_tmp WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_venta WHERE emisor = :rut', [':rut'=>$this->rut]);
-            $this->db->query('DELETE FROM item WHERE contribuyente = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM item_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
         }
         // aplicar cambios
