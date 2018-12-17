@@ -128,7 +128,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
             'fk'        => null
         ),
         'revision_detalle' => array(
-            'name'      => 'Recepción SII',
+            'name'      => 'Detalle revisión',
             'comment'   => '',
             'type'      => 'text',
             'length'    => null,
@@ -310,7 +310,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
      * Método que actualiza el estado del RCOF enviado al SII a través del
      * email que es recibido desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-11
+     * @version 2018-12-17
      */
     private function actualizarEstadoEmail()
     {
@@ -345,6 +345,12 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
                     if ($xml->DocumentoResultadoConsumoFolios->Identificacion->Envio->TrackId==$this->track_id) {
                         $estado = (string)$xml->DocumentoResultadoConsumoFolios->Resultado->Estado;
                         $detalle = str_replace('T', ' ', (string)$xml->DocumentoResultadoConsumoFolios->Identificacion->Envio->TmstRecepcion);
+                        if (!empty($xml->DocumentoResultadoConsumoFolios->Resultado->Reparos->Reparo)) {
+                            $detalle = (string)$xml->DocumentoResultadoConsumoFolios->Resultado->Reparos->Reparo->Descripcion.': '.(string)$xml->DocumentoResultadoConsumoFolios->Resultado->Reparos->Reparo->Detalle.' ('.$detalle.')';
+                        }
+                        if (!empty($xml->DocumentoResultadoConsumoFolios->Resultado->Errores->Error)) {
+                            $detalle = (string)$xml->DocumentoResultadoConsumoFolios->Resultado->Errores->Error->Descripcion.': '.(string)$xml->DocumentoResultadoConsumoFolios->Resultado->Errores->Error->Detalle.' ('.$detalle.')';
+                        }
                     }
                 }
             }
