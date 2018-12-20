@@ -355,7 +355,7 @@ class Model_Contribuyente extends \Model_App
      * @param registrado Se usa para indicar que el contribuyente que se esta guardando es uno registrado por un usuario (se validan otros datos)
      * @param no_modificar =true Evita que se modifiquen ciertos contribuyentes reservados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2018-12-20
      */
     public function save($registrado = false, $no_modificar = true)
     {
@@ -386,7 +386,7 @@ class Model_Contribuyente extends \Model_App
                 $config = \sowerphp\core\Configure::read('dte.logos');
                 \sowerphp\general\Utility_Image::resizeOnFile($_FILES['logo']['tmp_name'], $config['width'], $config['height']);
                 if (!is_dir(DIR_STATIC.'/contribuyentes/'.$this->rut)) {
-                    mkdir(DIR_STATIC.'/contribuyentes/'.$this->rut);
+                    mkdir(DIR_STATIC.'/contribuyentes/'.$this->rut, 0777, true);
                 }
                 move_uploaded_file($_FILES['logo']['tmp_name'], DIR_STATIC.'/contribuyentes/'.$this->rut.'/logo.png');
             }

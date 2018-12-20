@@ -403,7 +403,7 @@ class Controller_Contribuyentes extends \Controller_App
         if (!empty($_FILES['template_email_dte']) and !$_FILES['template_email_dte']['error']) {
             $dir = DIR_PROJECT.'/data/static/contribuyentes/'.(int)$Contribuyente->rut.'/email';
             if (!is_dir($dir)) {
-                mkdir($dir);
+                mkdir($dir, 0777, true);
             }
             if ($_FILES['template_email_dte']['size']) {
                 move_uploaded_file($_FILES['template_email_dte']['tmp_name'], $dir.'/dte.html');
