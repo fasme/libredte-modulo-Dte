@@ -79,14 +79,14 @@ class Controller_FirmaElectronicas extends \Controller_App
                 return;
             }
             // validar que vengan los datos de la firma
-            if (!$Firma->getID()) {
+            if (!trim($Firma->getID())) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'No fue posible obtener el RUN de la firma electrónica', 'error'
                 );
                 return;
             }
             // si todo fue ok se crea el objeto firma para la bd y se guarda
-            $FirmaElectronica = new Model_FirmaElectronica($Firma->getID());
+            $FirmaElectronica = new Model_FirmaElectronica(trim($Firma->getID()));
             $FirmaElectronica->nombre = $Firma->getName();
             $FirmaElectronica->email = $Firma->getEmail();
             $FirmaElectronica->desde = $Firma->getFrom();
