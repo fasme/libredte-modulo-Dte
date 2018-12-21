@@ -43,7 +43,7 @@ class Controller_DteVentas extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de ventas al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-11
+     * @version 2018-12-21
      */
     public function enviar_sii($periodo)
     {
@@ -157,7 +157,31 @@ class Controller_DteVentas extends Controller_Base_Libros
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro de ventas período '.$periodo.' envíado', 'ok'
             );
-        } else {
+        }
+        // no se envía el libro al SII (se trata de enviar resumen boletas si existe)
+        else {
+            // se envía resumen de boletas si corresponde
+            $resumenes = $Libro->getResumenBoletas();
+            foreach ($resumenes as $resumen) {
+                try {
+                    $r = libredte_consume('/sii/rcv_set_resumen/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'/VENTA?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+                        'firma' => [
+                            'cert-data' => $Firma->getCertificate(),
+                            'key-data' => $Firma->getPrivateKey(),
+                        ],
+                        'resumen' => [
+                            'det_tipo_doc' => $resumen['TpoDoc'],
+                            'det_nro_doc' => $resumen['TotDoc'],
+                            'det_mnt_neto' => $resumen['TotMntNeto'],
+                            'det_mnt_iva' => $resumen['TotMntIVA'],
+                            'det_mnt_total' => $resumen['TotMntTotal'],
+                            'det_mnt_exe' => $resumen['TotMntExe'],
+                        ],
+                    ]);
+                } catch (\Exception $e) {
+                }
+            }
+            // libro generado
             $track_id = -1;
             $revision_estado = 'Libro generado';
             $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
