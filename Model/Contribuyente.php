@@ -1045,7 +1045,7 @@ class Model_Contribuyente extends \Model_App
      * los usuarios que están autorizados a trabajar con el contribuyente
      * @param dte Tipo de documento para el cual se quiere su folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-22
+     * @version 2018-12-21
      */
     public function getFirmas()
     {
@@ -1055,9 +1055,11 @@ class Model_Contribuyente extends \Model_App
                 FROM firma_electronica AS f, usuario AS u, contribuyente AS c
                 WHERE f.usuario = u.id AND f.usuario = c.usuario AND c.rut = :rut
             ) UNION (
-                SELECT f.run, f.nombre, f.email, f.desde, f.hasta, f.emisor, u.usuario, false AS administrador
+                SELECT DISTINCT f.run, f.nombre, f.email, f.desde, f.hasta, f.emisor, u.usuario, false AS administrador
                 FROM firma_electronica AS f, usuario AS u, contribuyente_usuario AS c
-                WHERE f.usuario = u.id AND f.usuario = c.usuario AND c.contribuyente = :rut
+                WHERE f.usuario = u.id AND f.usuario = c.usuario AND c.contribuyente = :rut AND u.id NOT IN (
+                    SELECT c.usuario FROM contribuyente AS c WHERE c.rut = :rut
+                )
             )
             ORDER BY administrador DESC, nombre ASC
         ', [':rut'=>$this->rut]);
