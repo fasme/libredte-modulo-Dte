@@ -23,7 +23,7 @@
     <li>Razón social receptor (opcional sólo en boletas)</li>
     <li>Giro del receptor (opcional sólo en boletas)</li>
     <li>Teléfono del receptor  (opcional)</li>
-    <li>Email del receptor (obligatorio si se desea enviar por correo el documento)</li>
+    <li>Email del receptor (obligatorio si se desea enviar a un correo específico y no usar los almacenados en la base de datos)</li>
     <li>Dirección del receptor (opcional sólo en boletas)</li>
     <li>Comuna del receptor (opcional sólo en boletas)</li>
     <li>Código del item (opcional)</li>

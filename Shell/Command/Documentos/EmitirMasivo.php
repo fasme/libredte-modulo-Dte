@@ -147,7 +147,14 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                         $response['body']['codigo']
                     );
                     try {
-                        $DteTmp->email();
+                        // enviar el correo indicado en el archivo
+                        if (!empty($dte['Encabezado']['Receptor']['CorreoRecep'])) {
+                            $DteTmp->email($dte['Encabezado']['Receptor']['CorreoRecep']);
+                        }
+                        // tratar de enviar a correos existentes en la base de datos
+                        else {
+                            $DteTmp->email();
+                        }
                     } catch (\Exception $e) {
                         $this->documentoAgregarResultado(
                             $datos,
@@ -178,7 +185,14 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 if ($email) {
                     $DteEmitido = new \website\Dte\Model_DteEmitido($response['body']['emisor'], $response['body']['dte'], $response['body']['folio'], $Emisor->config_ambiente_en_certificacion);
                     try {
-                        $DteEmitido->email($DteEmitido->getEmails(), null, null, true);
+                        // enviar el correo indicado en el archivo
+                        if (!empty($dte['Encabezado']['Receptor']['CorreoRecep'])) {
+                            $DteEmitido->email($dte['Encabezado']['Receptor']['CorreoRecep'], null, null, true);
+                        }
+                        // tratar de enviar a correos existentes en la base de datos
+                        else {
+                            $DteEmitido->email($DteEmitido->getEmails(), null, null, true);
+                        }
                     } catch (\Exception $e) {
                         $this->documentoAgregarResultado(
                             $datos,
