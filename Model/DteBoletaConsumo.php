@@ -220,7 +220,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
         if (!$Firma) {
             throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes generar el RCOF', 506);
         }
-        $ConsumoFolio->setFirma();
+        $ConsumoFolio->setFirma($Firma);
         $ConsumoFolio->setDocumentos($dtes);
         foreach ($documentos as $documento) {
             $ConsumoFolio->agregar([
