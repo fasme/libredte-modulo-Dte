@@ -157,11 +157,13 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
     {
         $ConsumoFolio = $this->generarConsumoFolio();
         $xml = $ConsumoFolio->generar();
-        if (!$ConsumoFolio->schemaValidate())
+        if (!$ConsumoFolio->schemaValidate()) {
             return false;
+        }
         $this->track_id = $ConsumoFolio->enviar();
-        if (!$this->track_id)
+        if (!$this->track_id) {
             return false;
+        }
         $this->secuencia = $ConsumoFolio->getSecuencia();
         $this->xml = base64_encode($xml);
         $this->revision_estado = null;
@@ -191,15 +193,16 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
     {
         $ConsumoFolio = $this->generarConsumoFolio();
         $xml = $ConsumoFolio->generar();
-        if (!$ConsumoFolio->schemaValidate())
+        if (!$ConsumoFolio->schemaValidate()) {
             return false;
+        }
         return $xml;
     }
 
     /**
      * Método que crea el objeto del consumo de folios de LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2018-12-26
      */
     private function generarConsumoFolio()
     {
@@ -213,7 +216,11 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
         sort($dtes);
         $documentos = $Emisor->getDocumentosConsumoFolios($this->dia);
         $ConsumoFolio = new \sasco\LibreDTE\Sii\ConsumoFolio();
-        $ConsumoFolio->setFirma($Emisor->getFirma());
+        $Firma = $Emisor->getFirma();
+        if (!$Firma) {
+            throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes generar el RCOF', 506);
+        }
+        $ConsumoFolio->setFirma();
         $ConsumoFolio->setDocumentos($dtes);
         foreach ($documentos as $documento) {
             $ConsumoFolio->agregar([

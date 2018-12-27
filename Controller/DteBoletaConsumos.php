@@ -107,7 +107,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
     /**
      * Acción que permite enviar el consumo de folios al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2018-12-26
      */
     public function enviar_sii($dia)
     {
@@ -120,14 +120,20 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         }
         $Emisor = $this->getContribuyente();
         $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
-        $track_id = $DteBoletaConsumo->enviar();
-        if (!$track_id) {
+        try {
+            $track_id = $DteBoletaConsumo->enviar();
+            if (!$track_id) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible enviar el reporte de consumo de folios al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
+                );
+            } else {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Reporte de consumo de folios del día '.$dia.' fue envíado al SII. Ahora debe consultar su estado con el Track ID '.$track_id, 'ok'
+                );
+        }
+        } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible enviar el reporte de consumo de folios al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
-            );
-        } else {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Reporte de consumo de folios del día '.$dia.' fue envíado al SII. Ahora debe consultar su estado con el Track ID '.$track_id, 'ok'
+                'No fue posible enviar el reporte de consumo de folios al SII: '.$e->getMessage(), 'error'
             );
         }
         $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
