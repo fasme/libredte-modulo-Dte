@@ -357,6 +357,7 @@ CREATE TABLE dte_intercambio (
 		ON UPDATE CASCADE ON DELETE RESTRICT
 );
 CREATE UNIQUE INDEX dte_intercambio_unique_idx ON dte_intercambio (receptor, certificacion, fecha_hora_firma, archivo_md5);
+CREATE INDEX dte_intercambio_receptor_certificacion_emisor_idx ON dte_intercambio (receptor, certificacion, emisor);
 
 -- tabla para dte recibido
 DROP TABLE IF EXISTS dte_recibido CASCADE;
