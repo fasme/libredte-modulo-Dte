@@ -1,9 +1,9 @@
 <ul class="nav nav-pills float-right">
-    <li class="nav-item">
+    <!--<li class="nav-item">
         <a href="<?=$_base?>/dte/admin/item_lista_precios/listar?search=activa:1" title="Mantenedor de listas de precios" class="nav-link">
             <i class="fa fa-dollar-sign"></i> Listas de precios
         </a>
-    </li>
+    </li>-->
     <li class="nav-item">
         <a href="<?=$_base?>/dte/admin/item_clasificaciones/listar?search=activa:1" title="Mantenedor de clasificaciones de items" class="nav-link">
             <i class="fa fa-list-alt"></i> Clasificaciones

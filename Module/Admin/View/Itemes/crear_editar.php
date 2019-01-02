@@ -34,7 +34,7 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
-        <li class="nav-item"><a href="#precios" aria-controls="precios" role="tab" data-toggle="tab" id="precios-tab" class="nav-link">Lista de precios</a></li>
+        <!--<li class="nav-item"><a href="#precios" aria-controls="precios" role="tab" data-toggle="tab" id="precios-tab" class="nav-link">Lista de precios</a></li>-->
     </ul>
     <div class="tab-content pt-4">
 
@@ -153,9 +153,9 @@ echo $f->input([
 <!-- FIN DATOS BASICOS -->
 
 <!-- INICIO LISTA DE PRECIOS -->
-<div role="tabpanel" class="tab-pane active" id="precios" aria-labelledby="precios-tab">
+<!--<div role="tabpanel" class="tab-pane active" id="precios" aria-labelledby="precios-tab">
 
-</div>
+</div>-->
 <!-- FIN LISTA DE PRECIOS -->
 
     </div>
