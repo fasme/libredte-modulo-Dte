@@ -1,7 +1,7 @@
 BEGIN;
 
 --
--- Actualización al día 18 de septiembre de 2018
+-- Actualización al día 01 de enero de 2019
 --
 
 -- agregar sucursal a dte_tmp
