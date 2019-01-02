@@ -26,44 +26,111 @@ namespace website\Dte;
 /**
  * Comando para enviar el reporte de consumo de folios de las boletas
  * electrónicas
+ * Permite enviar el RCOF directamente al SII o a un servidor remoto.
+ * Por el momento sólo se soporta servidor remoto SSH (SFTP/SCP).
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2018-11-11
+ * @version 2019-01-02
  */
 class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
 {
 
-    public function main($grupo = 'dte_plus', $dia = null, $certificacion = 0)
+    /**
+     * Método principal del comando
+     * @param uri Formato: sftp://usuario:clave@servidor:puerto/ubicacion/desde/raiz
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-01-02
+     */
+    public function main($grupo = 'dte_plus', $dia = null, $certificacion = 0, $uri = null, $filename = 'rcof_{rut}_{dia}.xml')
     {
-        \sasco\LibreDTE\Sii::setAmbiente((int)$certificacion);
+        // si no se especifico el día entonces se asigna automáticamente el día anterior
         if (!$dia) {
             $from_unix_time = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
             $day_before = strtotime('yesterday', $from_unix_time);
             $dia = date('Y-m-d', $day_before);
         }
+        // obtener listado de contribuyentes y procesar cada uno
         $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
         foreach ($contribuyentes as $rut) {
-            $this->enviar($rut, $dia, $certificacion);
+            // crear objeto del contribuyente
+            $Contribuyente = new Model_Contribuyente($rut);
+            if (!$Contribuyente->exists()) {
+                continue;
+            }
+            if ($this->verbose) {
+                $this->out('Enviando RCOF del contribuyente '.$Contribuyente->razon_social);
+            }
+            if ($Contribuyente->config_ambiente_en_certificacion != $certificacion) {
+                if ($this->verbose) {
+                    $this->out('  Contribuyente no está en el ambiente del envío');
+                }
+                continue;
+            }
+            // crear objeto con el consumo de folios del día y ambiente solicitados
+            $DteBoletaConsumo = new Model_DteBoletaConsumo($Contribuyente->rut, $dia, (int)$Contribuyente->config_ambiente_en_certificacion);
+            // si no se indicó URI entonces se debe enviar directamente al SII
+            if (!$uri) {
+                $this->enviar_sii($DteBoletaConsumo);
+            }
+            // si se indicó URI entonces se debe enviar a un servidor remoto
+            else {
+                // configuración del servidor
+                $server['scheme'] = parse_url($uri, PHP_URL_SCHEME);
+                $server['user'] = parse_url($uri, PHP_URL_USER);
+                $server['pass'] = parse_url($uri, PHP_URL_PASS);
+                $server['host'] = parse_url($uri, PHP_URL_HOST);
+                $server['port'] = parse_url($uri, PHP_URL_PORT);
+                $server['path'] = parse_url($uri, PHP_URL_PATH);
+                // verificar que existe el método para el esquema solicitado
+                if (!method_exists($this, 'enviar_'.$server['scheme'])) {
+                    if ($this->verbose) {
+                        $this->out('  Método de envío usando '.strtoupper($server['scheme']).' no está disponible');
+                    }
+                    continue;
+                }
+                // crear archivo que se enviará
+                $xml = $DteBoletaConsumo->getXML();
+                if (!$xml) {
+                    if ($this->verbose) {
+                        $this->out('  No fue posible generar el XML que se enviará');
+                    }
+                    continue;
+                }
+                $archivo = str_replace(['{rut}', '{dia}'], [$Contribuyente->rut.'-'.$Contribuyente->dv, $DteBoletaConsumo->dia], $filename);
+                $tmpfile = tempnam(TMP, 'rcof_');
+                file_put_contents($tmpfile, $xml);
+                // realizar envío al servidor remoto
+                try {
+                    $this->{'enviar_'.$server['scheme']}($tmpfile, $archivo, $server);
+                } catch (\Exception $e) {
+                    if ($this->verbose) {
+                        $this->out('  No fue posible enviar el reporte usando el método '.strtoupper($server['scheme']).': '.$e->getMessage());
+                    }
+                    $msg = $Contribuyente->getNombre().','."\n\n";
+                    $msg .= 'El envío automático del reporte de consumo de folios (RCOF) falló para el día '.$DteBoletaConsumo->dia.' usando el método de envío '.strtoupper($server['scheme']).':'."\n\n";
+                    $msg .= $e->getMessage()."\n\n";
+                    $Contribuyente->notificar('RCOF '.$DteBoletaConsumo->dia.' falló vía '.strtoupper($server['scheme']), $msg);
+                }
+                // eliminar archivo temporal con XML
+                unlink($tmpfile);
+            }
         }
+        // mostrar estadísticas y temrinar
         $this->showStats();
         return 0;
     }
 
-    private function enviar($rut, $dia, $certificacion, $retry = 10)
+    /**
+     * Método que envía el RCOF al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
+    private function enviar_sii($DteBoletaConsumo, $retry = 10)
     {
-        $Contribuyente = new Model_Contribuyente($rut);
-        if (!$Contribuyente->exists()) {
-            return false;
-        }
-        if ($this->verbose) {
-            $this->out('Enviando RCOF del contribuyente '.$Contribuyente->razon_social);
-        }
-        if ($Contribuyente->config_ambiente_en_certificacion != $certificacion) {
-            if ($this->verbose) {
-                $this->out('  Contribuyente no está en el ambiente del envío');
-            }
-            return;
-        }
-        $DteBoletaConsumo = new Model_DteBoletaConsumo($Contribuyente->rut, $dia, (int)$Contribuyente->config_ambiente_en_certificacion);
+        // obtener contribuyente
+        $Contribuyente = $DteBoletaConsumo->getContribuyente();
+        // definir ambiente en que se operará
+        \sasco\LibreDTE\Sii::setAmbiente((int)$DteBoletaConsumo->certificacion);
+        // realizar el envío al SII
         for ($i=0; $i<$retry; $i++) {
             $track_id = false;
             try {
@@ -77,19 +144,82 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
                 break;
             }
         }
+        // si no se pudo enviar entonces se genera error y se envía email avisando al usuario
         if (!$track_id) {
             if ($this->verbose) {
-                $this->out('  No fue posible enviar el reporte');
+                $this->out('  No fue posible enviar el reporte al SII');
             }
             $msg = $Contribuyente->getNombre().','."\n\n";
-            $msg .= 'El envío automático del reporte de consumo de folios (RCOF) falló para el día '.$dia.'.'."\n\n";
+            $msg .= 'El envío automático del reporte de consumo de folios (RCOF) falló para el día '.$DteBoletaConsumo->dia.'.'."\n\n";
             $msg .= 'Ingrese a Facturación -> Consumo de folios y envíelo manualmente.'."\n\n";
             $url = '/dte/dte_boleta_consumos/crear?listar=LzEvZGlhL0Q/c2VhcmNoPWVtaXNvcjo3NjE5MjA4MyxjZXJ0aWZpY2FjaW9uOjE=';
             $msg .= 'Enlace envío manual: '.(new \sowerphp\core\Network_Request())->url.'/dte/contribuyentes/seleccionar/'.$Contribuyente->rut.'/'.base64_encode($url);
-            $Contribuyente->notificar('RCOF '.$dia.' falló', $msg);
+            $Contribuyente->notificar('RCOF '.$DteBoletaConsumo->dia.' falló', $msg);
         }
     }
 
+    /**
+     * Método que envía el RCOF al SII
+     * Requiere tener instalado en el sistema operativo: php-ssh2
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-01-02
+     */
+    private function enviar_sftp($local_file, $remote_file, array $config = [])
+    {
+        // configuración por defecto mínima
+        $config = array_merge([
+            'port' => 22,
+        ], $config);
+        if (empty($config['host'])) {
+            throw new \Exception('No se especificó el host del servidor SFTP');
+        }
+        if (empty($config['user'])) {
+            throw new \Exception('No se especificó el usuario del servidor SFTP');
+        }
+        if (empty($config['path'])) {
+            throw new \Exception('No se especificó la ruta en el servidor SFTP');
+        }
+        // conectar al servidor SSH
+        $connection = ssh2_connect($config['host'], $config['port']);
+        if (!$connection) {
+            throw new \Exception('No fue posible conectar al servidor SFTP en '.$config['host'].':'.$config['port']);
+        }
+        // autenticar con usuario/contraseña
+        if (!empty($config['pass'])) {
+            if (!@ssh2_auth_password($connection, $config['user'], $config['pass'])) {
+                throw new \Exception('No fue posible autenticar con usuario y contraseña');
+            }
+        }
+        // autenticar con clave pública
+        else {
+            $pubkey = '/home/'.get_current_user().'/.ssh/id_rsa.pub';
+            $prikey = '/home/'.get_current_user().'/.ssh/id_rsa';
+            if (!is_readable($pubkey) or !is_readable($prikey)) {
+                throw new \Exception('No se especificó contraseña para el usuario '.$config['user'].' y no se encontró clave pública para autenticar (o no se puede leer)');
+            }
+            if (!@ssh2_auth_pubkey_file($connection, $config['user'], $pubkey, $prikey)) {
+                throw new \Exception('No fue posible autenticar con clave pública');
+            }
+        }
+        // crear conexión SFTP
+        $sftp = ssh2_sftp($connection);
+        // crear ruta en caso que no exista (se crea recursivamente)
+        if (!@ssh2_sftp_stat($sftp, $config['path'])) {
+            if (!ssh2_sftp_mkdir($sftp, $config['path'], 0700, true)) {
+                throw new \Exception('No fue posible crear el directorio para guardar el RCOF');
+            }
+        }
+        // copiar archivo al servidor remoto
+        if (!ssh2_scp_send($connection, $local_file, $config['path'].'/'.$remote_file)) {
+            throw new \Exception('No fue posible copiar el XML al servidor remoto en '.$config['path'].'/'.$remote_file);
+        }
+    }
+
+    /**
+     * Método que obtiene el listado de contribuyentes a los cuales se debe enviar el RCOF
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2018-11-11
+     */
     private function getContribuyentes($grupo, $certificacion)
     {
         if (is_numeric($grupo)) {
