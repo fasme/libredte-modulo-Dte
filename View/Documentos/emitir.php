@@ -426,7 +426,7 @@ foreach($clientes as &$c) {
         }
         $c['direccion'] .= '<span>'.implode(' / ', $contacto).'</span>';
     }
-    unset($c['dv'], $c['telefono'], $c['email'], $c['comuna'], $c['codigo_interno']);
+    unset($c['dv'], $c['telefono'], $c['email'], $c['comuna'], $c['codigo_interno'], $c['giro']);
 }
 array_unshift($clientes, ['RUT', 'Razón social', 'Contacto']);
 $t = new \sowerphp\general\View_Helper_Table();
