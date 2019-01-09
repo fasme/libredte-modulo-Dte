@@ -71,6 +71,7 @@ class Controller_Documentos extends \Controller_App
     private $monedas = [
         'DOLAR USA' => 'DOLAR USA',
         'EURO' => 'EURO',
+        'PESO CL' => 'PESO CL',
     ]; // Tipo moneda para documentos de exportación
 
     private $MedioPago = [
@@ -272,7 +273,11 @@ class Controller_Documentos extends \Controller_App
                 }
                 $fecha = $dte['Encabezado']['IdDoc']['FchEmis'];
                 $moneda = $dte['Encabezado']['Totales']['TpoMoneda'];
-                $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($moneda, 'CLP', $fecha))->valor;
+                if ($moneda == 'PESO CL') {
+                    $cambio = 1;
+                } else {
+                    $cambio = (new \sowerphp\app\Sistema\General\Model_MonedaCambio($moneda, 'CLP', $fecha))->valor;
+                }
                 if ($cambio) {
                     $dte['Encabezado']['OtraMoneda'][] = [
                         'TpoMoneda' => 'PESO CL',
