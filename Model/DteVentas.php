@@ -78,7 +78,7 @@ class Model_DteVentas extends \Model_Plural_App
     /**
      * Método que entrega el resumen anual de ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2019-01-16
      */
     public function getResumenAnual($anio)
     {
@@ -93,18 +93,20 @@ class Model_DteVentas extends \Model_Plural_App
         }
         // ir sumando en el resumen anual
         $resumen = [];
-        foreach($libros[$anio] as $mes => $resumen_mensual) {
-            foreach ($resumen_mensual as $r) {
-                $cols = array_keys($r);
-                unset($cols[array_search('TpoDoc',$cols)]);
-                if (!isset($resumen[$r['TpoDoc']])) {
-                    $resumen[$r['TpoDoc']] = ['TpoDoc' => $r['TpoDoc']];
-                    foreach ($cols as $col) {
-                        $resumen[$r['TpoDoc']][$col] = 0;
+        if (!empty($libros[$anio])) {
+            foreach($libros[$anio] as $mes => $resumen_mensual) {
+                foreach ($resumen_mensual as $r) {
+                    $cols = array_keys($r);
+                    unset($cols[array_search('TpoDoc',$cols)]);
+                    if (!isset($resumen[$r['TpoDoc']])) {
+                        $resumen[$r['TpoDoc']] = ['TpoDoc' => $r['TpoDoc']];
+                        foreach ($cols as $col) {
+                            $resumen[$r['TpoDoc']][$col] = 0;
+                        }
                     }
-                }
-                foreach ($cols as $col) {
-                    $resumen[$r['TpoDoc']][$col] += $r[$col];
+                    foreach ($cols as $col) {
+                        $resumen[$r['TpoDoc']][$col] += $r[$col];
+                    }
                 }
             }
         }
