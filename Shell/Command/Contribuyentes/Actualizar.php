@@ -119,7 +119,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             $dia = date('Y-m-d');
         }
         // obtener contribuyentes desde el servicio web de LibreDTE
-        $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=csv');
+        $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=csv_sii');
         if ($response['status']['code']!=200 or empty($response['body'])) {
             $msg = 'No fue posible obtener los contribuyentes desde el SII';
             if ($response['body']) {
