@@ -60,6 +60,24 @@ class Model_Contribuyentes extends \Model_Plural_App
     }
 
     /**
+     * Método que busca el objeto de un contribuyente (o varios) a partir
+     * del correo electrónico registrado del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-01-30
+     */
+    public function getByEmail($email, $onlyOne = false)
+    {
+        $contribuyentes = (new Model_Contribuyentes())->setWhereStatement(['email = :email'], [':email'=>$email])->getObjects();
+        if (!$contribuyentes) {
+            return false;
+        }
+        if ($onlyOne and isset($contribuyentes[1])) {
+            throw new \Exception('Se encontraron '.num(count($contribuyentes)).' contribuyentes que tienen asociado el email '.$email);
+        }
+        return !isset($contribuyentes[1]) ? $contribuyentes[0] : $contribuyentes;
+    }
+
+    /**
      * Método que entrega una tabla con los contribuyentes que cierto usuario
      * está autorizado a operar
      * @param usuario ID del usuario que se quiere obtener el listado de contribuyentes con los que está autorizado a operar
