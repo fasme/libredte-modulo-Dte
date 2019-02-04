@@ -3095,7 +3095,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la plantilla de un correo ya armada con los datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-29
+     * @version 2019-02-04
      */
     public function getEmailFromTemplate($template, $params = null)
     {
@@ -3132,6 +3132,18 @@ class Model_Contribuyente extends \Model_App
                     }
                 }
             }
+            if ($class == 'website\Dte\Model_DteTmp') {
+                if (in_array($Documento->dte, [33, 34, 39, 41])) {
+                    $dte_cotizacion = 'cotización';
+                    $dte_tipo = 'cotización';
+                } else {
+                    $dte_cotizacion = 'documento';
+                    $dte_tipo = 'borrador de '.$Documento->getTipo()->tipo;
+                }
+            } else {
+                $dte_cotizacion = 'documento tributario electrónico';
+                $dte_tipo = $Documento->getTipo()->tipo;
+            }
             return str_replace(
                 [
                     '{dte_cotizacion}',
@@ -3149,10 +3161,10 @@ class Model_Contribuyente extends \Model_App
                     '{mostrar_pagar}',
                 ],
                 [
-                    $class == 'website\Dte\Model_DteTmp' ? 'documento' : 'documento tributario electrónico',
+                    $dte_cotizacion,
                     num($Documento->total),
                     $Documento->getReceptor()->razon_social,
-                    $Documento->getTipo()->tipo,
+                    $dte_tipo,
                     $Documento->getFolio(),
                     \sowerphp\general\Utility_Date::format($Documento->fecha),
                     $mostrar_pagar ? $links['pagar'] : '',
