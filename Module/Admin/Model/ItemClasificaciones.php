@@ -66,7 +66,7 @@ class Model_ItemClasificaciones extends \Model_Plural_App
     /**
      * Método que entrega el listado de clasificaciones con sus items y valores brutos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-14
+     * @version 2019-02-03
      */
     public function getListItems()
     {
@@ -86,7 +86,7 @@ class Model_ItemClasificaciones extends \Model_Plural_App
                 item AS i
                 JOIN item_clasificacion AS c ON i.contribuyente = c.contribuyente AND i.clasificacion = c.codigo
             WHERE c.contribuyente = :rut AND c.activa = true AND i.activo = true
-            ORDER BY c.clasificacion
+            ORDER BY c.clasificacion, i.item
         ', [':rut'=>$this->getContribuyente()->rut]), 2, 'items'));
     }
 
