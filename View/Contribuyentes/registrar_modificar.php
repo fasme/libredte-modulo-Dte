@@ -448,7 +448,7 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_emision_forma_pago',
     'label' => 'Forma de pago',
-    'options' => [''=>'Sin forma de pago', 1=>'Contado'],
+    'options' => [''=>'Sin forma de pago', 1=>'Contado', 2=>'Crédito'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_emision_forma_pago : 0,
     'help' => '¿Forma de pago por defecto?',
 ]);

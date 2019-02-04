@@ -7,17 +7,19 @@
     </li>
 </ul>
 <div class="page-header"><h1>Emitir documento</h1></div>
+<script>
+$(function() {
 <?php if (isset($datos)) : ?>
-<script type="text/javascript">
-    $(function() {
         DTE.calcular();
 <?php if (!empty($datos['Encabezado']['IdDoc']['FmaPago'])) : ?>
         DTE.setFormaPago(<?=$datos['Encabezado']['IdDoc']['FmaPago']?>);
 <?php endif; ?>
-    });
+<?php else : if ($Emisor->config_emision_forma_pago) : ?>
+        DTE.setFormaPago(<?=$Emisor->config_emision_forma_pago?>);
+<?php endif; endif; ?>
+});
 </script>
 <?php
-endif;
 $f = new \sowerphp\general\View_Helper_Form(false);
 echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check()']);
 ?>
@@ -346,7 +348,7 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     </div>
 </form>
 
-<script type="text/javascript">
+<script>
 var emision_observaciones = <?=json_encode($Emisor->config_emision_observaciones)?>;
 var codigos = <?=json_encode($codigos)?>;
 var codigo_typeahead = [
@@ -440,7 +442,7 @@ echo $t->generate($clientes);
         </div>
     </div>
 </div>
-<script type="text/javascript"> $(document).ready(function(){ dataTable("#clientes", [{"sWidth":120}, null, null]); }); </script>
+<script> $(document).ready(function(){ dataTable("#clientes", [{"sWidth":120}, null, null]); }); </script>
 <script>
 <?php if ($Emisor->config_pagos_cuenta_rut == $Emisor->getRUT()) : ?>
     var BcoPago = "<?=mb_substr((new \website\Sistema\General\Model_Bancos())->get($Emisor->config_pagos_cuenta_banco)->banco,0,40)?>";
