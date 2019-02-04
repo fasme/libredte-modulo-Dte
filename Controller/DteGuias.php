@@ -124,7 +124,7 @@ class Controller_DteGuias extends Controller_Base_Libros
     /**
      * Método que permite buscar las guías que se desean facturar masivamente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-26
+     * @version 2018-02-03
      */
     public function facturar()
     {
@@ -133,7 +133,7 @@ class Controller_DteGuias extends Controller_Base_Libros
         if (!empty($_POST['desde']) and !empty($_POST['hasta'])) {
             $this->set([
                 'Emisor' => $Emisor,
-                'guias' => (new Model_DteGuias())->setContribuyente($Emisor)->getSinFacturar($_POST['desde'], $_POST['hasta'], $_POST['receptor']),
+                'guias' => (new Model_DteGuias())->setContribuyente($Emisor)->getSinFacturar($_POST['desde'], $_POST['hasta'], $_POST['receptor'], $_POST['con_referencia']),
             ]);
         }
         // facturar las guías seleccionadas

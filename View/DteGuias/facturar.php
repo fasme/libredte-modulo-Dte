@@ -28,7 +28,12 @@ echo $f->input([
     'name' => 'receptor',
     'label' => 'Receptor',
     'check' => 'rut',
-    'help' => 'RUT del receptor de la guía para facturar por cada cliente',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'con_referencia',
+    'label' => '¿Con referencia?',
+    'options' => ['Sólo guías sin referencia (sin facturar)', 'Incluir guías que tengan una referencia (podrían estar facturadas)'],
 ]);
 echo $f->end('Buscar guías a facturar');
 // mostrar guías

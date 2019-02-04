@@ -116,9 +116,9 @@ class Model_DteGuias extends \Model_Plural_App
      * es aquellas que tienen indicador de traslado "operación constituye venta"
      * y no poseen una referencia desde una factura electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-30
+     * @version 2019-02-03
      */
-    public function getSinFacturar($desde, $hasta, $receptor = null)
+    public function getSinFacturar($desde, $hasta, $receptor = null, $con_referencia = false)
     {
         $where = ['e.fecha BETWEEN :desde AND :hasta AND anulado = :anulado'];
         $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta, ':anulado'=>0];
@@ -127,6 +127,17 @@ class Model_DteGuias extends \Model_Plural_App
             $where[] = 'e.receptor = :receptor';
         }
         $where[] = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/IdDoc/IndTraslado', 'http://www.sii.cl/SiiDte').' = \'1\'';
+        if (!$con_referencia) {
+            $where[] = '
+                (e.emisor, e.dte, e.folio, e.certificacion) NOT IN (
+                    SELECT r.emisor, r.referencia_dte, r.referencia_folio, r.certificacion
+                    FROM
+                        dte_referencia AS r
+                        JOIN dte_emitido AS e ON e.emisor = r.emisor AND e.dte = r.dte AND e.folio = r.folio AND r.certificacion = e.certificacion
+                    WHERE e.fecha >= :desde
+                )'
+            ;
+        }
         return $this->db->getTable('
             SELECT e.folio, r.razon_social, e.fecha, e.total
             FROM
@@ -134,13 +145,6 @@ class Model_DteGuias extends \Model_Plural_App
                 JOIN contribuyente AS r ON r.rut = e.receptor
             WHERE
                 e.emisor = :rut AND e.dte = 52 AND e.certificacion = :certificacion AND '.implode(' AND ', $where).'
-                AND (e.emisor, e.dte, e.folio, e.certificacion) NOT IN (
-                    SELECT r.emisor, r.referencia_dte, r.referencia_folio, r.certificacion
-                    FROM
-                        dte_referencia AS r
-                        JOIN dte_emitido AS e ON e.emisor = r.emisor AND e.dte = r.dte AND e.folio = r.folio AND r.certificacion = e.certificacion
-                    WHERE e.fecha >= :desde
-                )
             ORDER BY r.razon_social, e.fecha, e.folio
         ', $vars);
     }
