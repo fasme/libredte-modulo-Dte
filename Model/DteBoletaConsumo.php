@@ -317,7 +317,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
      * Método que actualiza el estado del RCOF enviado al SII a través del
      * email que es recibido desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-17
+     * @version 2019-02-03
      */
     private function actualizarEstadoEmail()
     {
@@ -366,6 +366,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
                 $this->revision_detalle = $detalle;
                 try {
                     $this->save();
+                    $Imap->setSeen($uid);
                     return [
                         'track_id' => $this->track_id,
                         'revision_estado' => $this->revision_estado,
@@ -376,8 +377,6 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
                         'El estado se obtuvo pero no fue posible guardarlo en la base de datos<br/>'.$e->getMessage()
                     );
                 }
-                // marcar email como leído
-                $Imap->setSeen($uid);
             }
         }
     }
