@@ -223,22 +223,24 @@ class Model_DteTmp extends \Model_App
 
     /**
      * Método que entrega el objeto del tipo de dte
+     * @deprecated Ya que en DteEmitido este método retorna \sasco\LibreDTE\Sii\Dte
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-01
+     * @version 2019-02-04
      */
     public function getDte()
     {
-        return (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($this->dte);
+        return $this->getTipo();
     }
 
     /**
      * Método que entrega el objeto del tipo de dte
+     * @return \website\Dte\Admin\Mantenedores\Model_DteTipo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-07
+     * @version 2019-02-04
      */
     public function getTipo()
     {
-        return $this->getDte();
+        return (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($this->dte);
     }
 
     /**
