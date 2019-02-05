@@ -36,7 +36,7 @@ class Controller_Documentos extends \Controller_App
         1 => 'Operación constituye venta',
         2 => 'Ventas por efectuar',
         3 => 'Consignaciones',
-        4 => ' Entrega gratuita',
+        4 => 'Entrega gratuita',
         5 => 'Traslados internos',
         6 => 'Otros traslados no venta',
         7 => 'Guía de devolución',
