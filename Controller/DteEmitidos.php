@@ -1538,7 +1538,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite buscar y consultar un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-16
+     * @version 2019-02-07
      */
     public function consultar($dte = null)
     {
@@ -1546,11 +1546,32 @@ class Controller_DteEmitidos extends \Controller_App
         $this->set([
             'dtes' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
             'dte' => isset($_POST['dte']) ? $_POST['dte'] : $dte,
+            'language' => \sowerphp\core\Configure::read('language'),
+            'public_key' => \sowerphp\core\Configure::read('recaptcha.public_key'),
         ]);
         $this->layout .= '.min';
         // si se solicitó un documento se busca
         if (isset($_POST['emisor'])) {
-            $r = $this->consume('/api/dte/dte_emitidos/consultar?getXML=0', $_POST);
+            // verificar captcha
+            $private_key = \sowerphp\core\Configure::read('recaptcha.private_key');
+            if ($private_key) {
+                if (empty($_POST['g-recaptcha-response'])) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Se requiere captcha para consultar un DTE', 'warning'
+                    );
+                    return;
+                }
+                $recaptcha = new \ReCaptcha\ReCaptcha($private_key);
+                $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
+                if (!$resp->isSuccess()) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Se requiere captcha válido para consultar un DTE', 'error'
+                    );
+                    return;
+                }
+            }
+            // buscar datos del DTE
+            $r = $this->consume('/api/dte/dte_emitidos/consultar?getXML=1', $_POST);
             if ($r['status']['code']!=200) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     str_replace("\n", '<br/>', $r['body']), 'error'
@@ -1597,8 +1618,9 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('DTE existe, pero fecha y/o monto no coinciden con los registrados', 409);
         }
         // quitar XML si no se pidió explícitamente
-        if (!$getXML)
+        if (!$getXML) {
             $DteEmitido->xml = false;
+        }
         // enviar DteEmitido
         return $DteEmitido;
     }

@@ -55,6 +55,10 @@ if ($message) {
                             <label for="total" class="sr-only">Monto total</label>
                             <input type="number" name="total" id="total" class="form-control form-control-lg" required="required" placeholder="Monto total">
                         </div>
+<?php if (!empty($public_key)) : ?>
+                        <div class="g-recaptcha mb-3" data-sitekey="<?=$public_key?>" style="width:304px;margin:0 auto"></div>
+                        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?hl=<?=$language?>"></script>
+<?php endif; ?>
                         <button type="submit" class="btn btn-primary btn-block btn-lg">Buscar documento</button>
                     </form>
                     <script> $(function() { $("#emisor").focus(); }); </script>
