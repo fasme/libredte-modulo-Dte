@@ -208,29 +208,32 @@ class Controller_DteIntercambios extends \Controller_App
     }
 
     /**
-     * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
+     * Recurso para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-06
+     * @version 2019-02-07
      */
-    public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
+    public function _api_pdf_GET($codigo, $contribuyente, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
-        $Receptor = $this->getContribuyente();
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear contribuyente
+        $Receptor = new Model_Contribuyente($contribuyente);
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_intercambios/pdf')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
         // obtener DTE intercambiado
         $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, (int)$Receptor->config_ambiente_en_certificacion);
         if (!$DteIntercambio->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el intercambio solicitado', 'error'
-            );
-            $this->redirect('/dte/dte_intercambios/listar');
+            $this->Api->send('No existe el intercambio solicitado', 404);
         }
         // obtener XML que se debe usar
         if ($DteIntercambio->documentos>1 and $emisor and $dte and $folio) {
             $Documento = $DteIntercambio->getDocumento($emisor, $dte, $folio);
             if (!$Documento) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'No existe el DTE T'.$dte.'F'.$folio.' del RUT '.$emisor.' en el intercambio N° '.$codigo, 'error'
-                );
-                $this->redirect('/dte/dte_intercambios/ver/'.$codigo);
+                $this->Api->send('No existe el DTE T'.$dte.'F'.$folio.' del RUT '.$emisor.' en el intercambio N° '.$codigo, 404);
             }
             $xml = base64_encode($Documento->saveXML());
         } else {
@@ -254,8 +257,7 @@ class Controller_DteIntercambios extends \Controller_App
         }
         // procesar respuesta
         if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            return;
+            return $this->Api->send($response['body'], $response['status']['code']);
         }
         // si dió código 200 se entrega la respuesta del servicio web
         foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
@@ -267,20 +269,51 @@ class Controller_DteIntercambios extends \Controller_App
     }
 
     /**
-     * Acción que descarga el XML del documento intercambiado
+     * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-27
+     * @version 2019-02-07
      */
-    public function xml($codigo)
+    public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
-        $Emisor = $this->getContribuyente();
-        // obtener DTE emitido
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteIntercambio->exists()) {
+        $Receptor = $this->getContribuyente();
+        $response = $this->consume('/api/dte/dte_intercambios/pdf/'.$codigo.'/'.$Receptor->rut.'/'.(int)$cedible.'/'.(int)$emisor.'/'.(int)$dte.'/'.(int)$folio);
+        if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el intercambio solicitado', 'error'
+                $response['body'], 'error'
             );
             $this->redirect('/dte/dte_intercambios/listar');
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+            if (isset($response['header'][$header])) {
+                header($header.': '.$response['header'][$header]);
+            }
+        }
+        echo $response['body'];
+        exit;
+    }
+
+    /**
+     * Recurso que descarga el XML del documento intercambiado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-02-07
+     */
+    public function _api_xml_GET($codigo, $contribuyente)
+    {
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear contribuyente
+        $Receptor = new Model_Contribuyente($contribuyente);
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_intercambios/xml')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // obtener DTE intercambio
+        $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteIntercambio->exists()) {
+            $this->Api->send('No existe el intercambio solicitado', 404);
         }
         // entregar XML
         $xml = base64_decode($DteIntercambio->archivo_xml);
@@ -292,27 +325,55 @@ class Controller_DteIntercambios extends \Controller_App
     }
 
     /**
-     * Acción que entrega los XML del resultado de la revisión del intercambio
+     * Acción que descarga el XML del documento intercambiado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-28
+     * @version 2019-02-07
      */
-    public function resultados_xml($codigo)
+    public function xml($codigo)
     {
-        $Emisor = $this->getContribuyente();
-        // obtener DTE emitido
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteIntercambio->exists()) {
+        $Receptor = $this->getContribuyente();
+        $response = $this->consume('/api/dte/dte_intercambios/xml/'.$codigo.'/'.$Receptor->rut);
+        if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el intercambio solicitado', 'error'
+                $response['body'], 'error'
             );
             $this->redirect('/dte/dte_intercambios/listar');
         }
+        // si dió código 200 se entrega la respuesta del servicio web
+        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+            if (isset($response['header'][$header])) {
+                header($header.': '.$response['header'][$header]);
+            }
+        }
+        echo $response['body'];
+        exit;
+    }
+
+    /**
+     * Recurso que entrega los XML del resultado de la revisión del intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-02-07
+     */
+    public function _api_resultados_xml_GET($codigo, $contribuyente)
+    {
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear contribuyente
+        $Emisor = new Model_Contribuyente($contribuyente);
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_intercambios/resultados_xml')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // obtener DTE intercambio
+        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteIntercambio->exists()) {
+            $this->Api->send('No existe el intercambio solicitado', 404);
+        }
         // si no hay XML error
         if (!$DteIntercambio->recepcion_xml and !$DteIntercambio->recibos_xml and !$DteIntercambio->resultado_xml) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existen archivos de resultado generados, no se ha procesado aun el intercambio', 'error'
-            );
-            $this->redirect(str_replace('resultados_xml', 'ver', $this->request->request));
+            $this->Api->send('No existen archivos de resultado generados, no se ha procesado aun el intercambio', 400);
         }
         // agregar a archivo comprimido y entregar
         $dir = TMP.'/resultado_intercambio_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$DteIntercambio->codigo;
@@ -320,10 +381,7 @@ class Controller_DteIntercambios extends \Controller_App
             \sowerphp\general\Utility_File::rmdir($dir);
         }
         if (!mkdir($dir)) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible crear el directorio temporal para los XML', 'error'
-            );
-            $this->redirect(str_replace('resultados_xml', 'ver', $this->request->request));
+            $this->Api->send('No fue posible crear el directorio temporal para los XML', 507);
         }
         if ($DteIntercambio->recepcion_xml) {
             file_put_contents($dir.'/RecepcionDTE.xml', base64_decode($DteIntercambio->recepcion_xml));
@@ -335,6 +393,35 @@ class Controller_DteIntercambios extends \Controller_App
             file_put_contents($dir.'/ResultadoDTE.xml', base64_decode($DteIntercambio->resultado_xml));
         }
         \sowerphp\general\Utility_File::compress($dir, ['format'=>'zip', 'delete'=>true]);
+        exit;
+    }
+
+    /**
+     * Acción que entrega los XML del resultado de la revisión del intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-02-07
+     */
+    public function resultados_xml($codigo)
+    {
+        $Emisor = $this->getContribuyente();
+        $response = $this->consume('/api/dte/dte_intercambios/resultados_xml/'.$codigo.'/'.$Emisor->rut);
+        if ($response['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                $response['body'], 'error'
+            );
+            if (in_array($response['status']['code'], [401, 403, 404])) {
+                $this->redirect('/dte/dte_intercambios/listar');
+            } else {
+                $this->redirect(str_replace('resultados_xml', 'ver', $this->request->request));
+            }
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+            if (isset($response['header'][$header])) {
+                header($header.': '.$response['header'][$header]);
+            }
+        }
+        echo $response['body'];
         exit;
     }
 
