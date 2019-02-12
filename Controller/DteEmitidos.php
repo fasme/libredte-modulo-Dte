@@ -1010,17 +1010,13 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-04
+     * @version 2019-02-12
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
@@ -1038,8 +1034,8 @@ class Controller_DteEmitidos extends \Controller_App
             'cedible' => $Emisor->config_pdf_dte_cedible,
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
-            'copias_tributarias' => 1,
-            'copias_cedibles' => $Emisor->config_pdf_dte_cedible,
+            'copias_tributarias' => $Emisor->config_pdf_copias_tributarias ? $Emisor->config_pdf_copias_tributarias : 1,
+            'copias_cedibles' => $Emisor->config_pdf_copias_cedibles ? $Emisor->config_pdf_copias_cedibles : $Emisor->config_pdf_dte_cedible,
         ]));
         // armar datos con archivo XML y flag para indicar si es cedible o no
         $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
