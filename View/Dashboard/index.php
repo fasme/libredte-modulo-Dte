@@ -137,7 +137,7 @@ echo View_Helper_Dashboard::cards([
         </div>
         <!-- fin alertas rcof rechazados -->
 <?php endif; ?>
-<?php if ($Firma->getExpirationDays()<=20) : ?>
+<?php if ($Firma and $Firma->getExpirationDays()<=20) : ?>
         <!-- alerta vencimiento firma electrónica -->
         <div class="row">
             <div class="col-sm-12">
