@@ -137,6 +137,18 @@ echo View_Helper_Dashboard::cards([
         </div>
         <!-- fin alertas rcof rechazados -->
 <?php endif; ?>
+<?php if ($Firma->getExpirationDays()<=20) : ?>
+        <!-- alerta vencimiento firma electrónica -->
+        <div class="row">
+            <div class="col-sm-12">
+                <a class="btn btn-warning btn-lg btn-block" href="<?=$_base?>/dte/admin/firma_electronicas" role="button" title="Ir al mantenedor de firmas electrónicas">
+                    La firma electrónica vence en <?=num($Firma->getExpirationDays())?> día(s)
+                </a>
+                <br />
+            </div>
+        </div>
+        <!-- fin alerta vencimiento firma electrónica -->
+<?php endif; ?>
 <?php if ($ventas_periodo or $compras_periodo) : ?>
         <!-- graficos ventas y compras -->
         <div class="card-deck">
