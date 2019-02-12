@@ -457,14 +457,33 @@ class Model_DteTmp extends \Model_App
      * Método que entrega el listado de correos a los que se podría enviar el documento
      * temporal (correo receptor, correo del dte y contacto comercial)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-04
+     * @version 2019-02-12
      */
     public function getEmails()
     {
         $origen = (int)$this->getEmisor()->config_emision_origen_email;
         $emails = [];
-        if (in_array($origen, [0, 1, 2]) and !empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep'])) {
-            $emails['Documento'] = strtolower($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']);
+        $datos = $this->getDatos();
+        if (!in_array($this->dte, [39, 41])) {
+            if (in_array($origen, [0, 1, 2]) and !empty($datos['Encabezado']['Receptor']['CorreoRecep'])) {
+                $emails['Documento'] = strtolower($datos['Encabezado']['Receptor']['CorreoRecep']);
+            }
+        } else if (!empty($datos['Referencia'])) {
+            if (!isset($datos['Referencia'][0])) {
+                $datos['Referencia'] = [$datos['Referencia']];
+            }
+            foreach ($datos['Referencia'] as $r) {
+                if (strpos($r['RazonRef'], 'Email receptor:')===0) {
+                    $aux = explode('Email receptor:', $r['RazonRef']);
+                    if (!empty($aux[1])) {
+                        $email_dte = strtolower(trim($aux[1]));
+                        if (in_array($origen, [0, 1, 2]) and $email_dte) {
+                            $emails['Documento'] = $email_dte;
+                        }
+                    }
+                    break;
+                }
+            }
         }
         if (in_array($origen, [0]) and $this->getReceptor()->email and !in_array($this->getReceptor()->email, $emails)) {
             $emails['Compartido LibreDTE'] = strtolower($this->getReceptor()->email);

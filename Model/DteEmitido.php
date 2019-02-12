@@ -432,17 +432,36 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el listado de correos a los que se debería enviar el
      * DTE (correo receptor, correo intercambio y correo del dte)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-04
+     * @version 2019-02-12
      */
     public function getEmails()
     {
         $origen = (int)$this->getEmisor()->config_emision_origen_email;
         $emails = [];
-        if ($this->getReceptor()->config_email_intercambio_user) {
-            $emails['Intercambio DTE'] = strtolower($this->getReceptor()->config_email_intercambio_user);
-        }
-        if (in_array($origen, [0, 1, 2]) and !empty($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']) and !in_array(strtolower($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']), $emails)) {
-            $emails['Documento'] = strtolower($this->getDatos()['Encabezado']['Receptor']['CorreoRecep']);
+        $datos = $this->getDatos();
+        if (!in_array($this->dte, [39, 41])) {
+            if ($this->getReceptor()->config_email_intercambio_user) {
+                $emails['Intercambio DTE'] = strtolower($this->getReceptor()->config_email_intercambio_user);
+            }
+            if (in_array($origen, [0, 1, 2]) and !empty($datos['Encabezado']['Receptor']['CorreoRecep']) and !in_array(strtolower($datos['Encabezado']['Receptor']['CorreoRecep']), $emails)) {
+                $emails['Documento'] = strtolower($datos['Encabezado']['Receptor']['CorreoRecep']);
+            }
+        } else if (!empty($datos['Referencia'])) {
+            if (!isset($datos['Referencia'][0])) {
+                $datos['Referencia'] = [$datos['Referencia']];
+            }
+            foreach ($datos['Referencia'] as $r) {
+                if (strpos($r['RazonRef'], 'Email receptor:')===0) {
+                    $aux = explode('Email receptor:', $r['RazonRef']);
+                    if (!empty($aux[1])) {
+                        $email_dte = strtolower(trim($aux[1]));
+                        if (in_array($origen, [0, 1, 2]) and $email_dte and !in_array($email_dte, $emails)) {
+                            $emails['Documento'] = $email_dte;
+                        }
+                    }
+                    break;
+                }
+            }
         }
         if (in_array($origen, [0]) and $this->getReceptor()->email and !in_array(strtolower($this->getReceptor()->email), $emails)) {
             $emails['Compartido LibreDTE'] = strtolower($this->getReceptor()->email);
