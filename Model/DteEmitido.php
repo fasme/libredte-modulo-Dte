@@ -388,13 +388,27 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el objeto del receptor del DTE
      * @return \website\Dte\Model_Contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-20
+     * @version 2019-02-12
      */
     public function getReceptor()
     {
         if ($this->Receptor === null) {
             $this->Receptor = (new Model_Contribuyentes())->get($this->receptor);
-            if (in_array($this->dte, [110, 111, 112])) {
+            if (in_array($this->dte, [39, 41])) {
+                if ($this->receptor==66666666) {
+                    $datos = $this->getDte()->getDatos()['Encabezado']['Receptor'];
+                    if (!empty($datos['RznSocRecep'])) {
+                        $this->Receptor->razon_social = $datos['RznSocRecep'];
+                    }
+                    if (!empty($datos['DirRecep'])) {
+                        $this->Receptor->direccion = $datos['DirRecep'];
+                    }
+                    if (!empty($datos['CmnaRecep'])) {
+                        $this->Receptor->comuna = $datos['CmnaRecep'];
+                    }
+                }
+            }
+            else if (in_array($this->dte, [110, 111, 112])) {
                 $datos = $this->getDte()->getDatos()['Encabezado']['Receptor'];
                 $this->Receptor->razon_social = $datos['RznSocRecep'];
                 $this->Receptor->direccion = !empty($datos['DirRecep']) ? $datos['DirRecep'] : null;

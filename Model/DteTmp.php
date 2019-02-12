@@ -205,12 +205,27 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que entrega el objeto de receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-05
+     * @version 2019-02-12
      */
     public function getReceptor()
     {
         if ($this->Receptor === null) {
             $this->Receptor = (new Model_Contribuyentes())->get($this->receptor);
+            if (in_array($this->dte, [39, 41])) {
+                if ($this->receptor==66666666) {
+                    $datos = json_decode($this->datos, true)['Encabezado']['Receptor'];
+                    if (!empty($datos['RznSocRecep'])) {
+                        $this->Receptor->razon_social = $datos['RznSocRecep'];
+                    }
+                    if (!empty($datos['DirRecep'])) {
+                        $this->Receptor->direccion = $datos['DirRecep'];
+                    }
+                    if (!empty($datos['CmnaRecep'])) {
+                        $this->Receptor->comuna = $datos['CmnaRecep'];
+                    }
+                }
+            }
+            else
             if (in_array($this->dte, [110, 111, 112])) {
                 $datos = json_decode($this->datos, true)['Encabezado']['Receptor'];
                 $this->Receptor->razon_social = $datos['RznSocRecep'];
