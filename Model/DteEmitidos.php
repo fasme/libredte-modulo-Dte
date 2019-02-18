@@ -327,7 +327,7 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega el total de documentos rechazados y el rango de fechas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-18
+     * @version 2019-02-18
      */
     public function getTotalRechazados()
     {
@@ -340,7 +340,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND certificacion = :certificacion
                 AND SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', self::$revision_estados['rechazados']).'\')
         ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
-        return $aux['total'] ? $aux : null;
+        return !empty($aux['total']) ? $aux : null;
     }
 
     /**
