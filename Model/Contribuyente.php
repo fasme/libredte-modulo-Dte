@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para mapear la tabla contribuyente de la base de datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2018-05-19
+ * @version 2019-02-18
  */
 class Model_Contribuyente extends \Model_App
 {
@@ -3180,6 +3180,22 @@ class Model_Contribuyente extends \Model_App
         }
         // no se encontró plantilla
         return false;
+    }
+
+    /**
+     * Método que entrega la URL del sitio web
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-02-18
+     */
+    public function getURL()
+    {
+        if ($this->config_extra_web) {
+            if (strpos($this->config_extra_web, 'http://')===0 or strpos($this->config_extra_web, 'https://')) {
+                return $this->config_extra_web;
+            } else {
+                return 'http://'.$this->config_extra_web;
+            }
+        }
     }
 
 }
