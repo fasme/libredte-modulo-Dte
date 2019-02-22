@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Controlador de dte emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-02-23
+ * @version 2019-02-22
  */
 class Controller_DteEmitidos extends \Controller_App
 {
@@ -416,11 +416,62 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el código binario ESCPOS del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-02-22
      */
     public function escpos($dte, $folio)
     {
+        // crear emisor
         $Emisor = $this->getContribuyente();
+        // armar datos por defecto para parámetros por GET
+        $params_default = [
+            'cedible' => false,
+            'compress' => false,
+            'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
+            'copias_cedibles' => $Emisor->config_pdf_copias_cedibles,
+        ];
+        extract($this->Api->getQuery($params_default));
+        // realizar consulta al servicio web de la API
+        $response = $this->consume('/api/dte/dte_emitidos/escpos/'.(int)$dte.'/'.(int)$folio.'/'.(int)$Emisor->rut.'?'.http_build_query(compact(array_keys($params_default))));
+        // procesar respuesta
+        if ($response===false) {
+            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
+        }
+        if ($response['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+            if (isset($response['header'][$header])) {
+                header($header.': '.$response['header'][$header]);
+            }
+        }
+        echo $response['body'];
+        exit;
+    }
+
+    /**
+     * Recurso de la API que descarga el código
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-02-22
+     */
+    public function _api_escpos_GET($dte, $folio, $contribuyente)
+    {
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear emisor y verificar permisos
+        $Emisor = new Model_Contribuyente($contribuyente);
+        if (!$Emisor->usuario) {
+            $this->Api->send('Contribuyente no está registrado en la aplicación', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/escpos')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // parámetros pasados por GET
         extract($this->Api->getQuery([
             'cedible' => false,
             'compress' => false,
@@ -430,10 +481,7 @@ class Controller_DteEmitidos extends \Controller_App
         // obtener DTE emitido
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el DTE solicitado', 'error'
-            );
-            $this->redirect('/dte/dte_emitidos/listar');
+            $this->Api->send('No existe el DTE solicitado', 400);
         }
         // armar datos con archivo XML y flag para indicar si es cedible o no
         if ($Emisor->config_pdf_web_verificacion) {
@@ -456,7 +504,7 @@ class Controller_DteEmitidos extends \Controller_App
         $ApiDteEscPosClient = $Emisor->getApiClient('dte_escpos');
         if (!$ApiDteEscPosClient) {
             $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($this->Auth->User->hash);
+            $rest->setAuth($User->hash);
             $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_escpos', $data);
         }
         // consultar servicio web del contribuyente
@@ -465,12 +513,10 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // procesar respuesta
         if ($response===false) {
-            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
-            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
+            $this->Api->send(implode('<br/>', $rest->getErrors()), 500);
         }
         if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
+            $this->Api->send($response['body'], 500);
         }
         // si dió código 200 se entrega la respuesta del servicio web
         foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
