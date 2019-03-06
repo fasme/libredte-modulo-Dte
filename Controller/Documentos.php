@@ -1014,6 +1014,7 @@ class Controller_Documentos extends \Controller_App
         $Emisor = $this->getContribuyente();
         $this->set([
             'Emisor' => $Emisor,
+            'codigos_referencias' => array_map(function($r){return $r['id'].' para '.strtolower($r['glosa']);}, (new \website\Dte\Admin\Mantenedores\Model_DteReferenciaTipos())->getList()),
         ]);
         if (isset($_POST['submit'])) {
             if (empty($_FILES['archivo']) or $_FILES['archivo']['error']) {

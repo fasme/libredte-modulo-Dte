@@ -46,8 +46,8 @@
     <li>Tipo documento referencia (opcional)</li>
     <li>Folio documento referencia (obligatorio si hay referencia)</li>
     <li>Fecha referencia (obligatoria si hay referencia)</li>
-    <li>Código de referencia (opcional)</li>
-    <li>Razón de referencia (opcional)</li>
+    <li>Código de referencia (obligatorio en nota de crédito y nota de débito. Códigos: <?=implode(', ', $codigos_referencias)?></li>
+    <li>Razón de referencia (obligatorio en nota de crédito y nota de débito, ej: motivo del DTE)</li>
 </ul>
 <p>Si el documento tiene más de un item, se agrega una nueva fila donde sólo van las columnas correspondientes al item y las demás vacías.</p>
 <p>El archivo subido se procesará de manera asíncrona y se notificará vía correo electrónico a <?=$_Auth->User->email?> cuando el proceso esté completo. El correo incluirá el mismo archivo CSV que se subió a la plataforma con 2 columnas nuevas que incluirán el código del resultado de la operación para ese documento y la glosa asociada a dicho estado. El significado macro de cada código de estado es:</p>
