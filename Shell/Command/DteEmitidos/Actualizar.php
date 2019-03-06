@@ -134,7 +134,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                         OR (
                             (
                                 e.revision_estado IS NULL
-                                OR e.revision_estado = \'-11\'
+                                OR e.revision_estado LIKE \'-%\'
                                 OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\'SOK\', \'CRT\')
                             )
                             AND e.track_id > 0
@@ -156,7 +156,11 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                         e.track_id IS NULL
                         -- enviados al SII (con track ID válido != -1)
                         OR (
-                            (e.revision_estado IS NULL OR e.revision_estado LIKE \'-%\')
+                            (
+                                e.revision_estado IS NULL
+                                OR e.revision_estado LIKE \'-%\'
+                                OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\'SOK\', \'CRT\')
+                            )
                             AND e.track_id > 0
                         )
                     )
