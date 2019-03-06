@@ -3125,10 +3125,12 @@ class Model_Contribuyente extends \Model_App
                     $mostrar_pagar = true;
                 } else {
                     $Cobro = $Documento->getCobro(false);
-                    if (!$Cobro->pagado) {
-                        $mostrar_pagar = true;
-                    } else {
-                        $mostrar_pagado = true;
+                    if ($Cobro->total) {
+                        if (!$Cobro->pagado) {
+                            $mostrar_pagar = true;
+                        } else {
+                            $mostrar_pagado = true;
+                        }
                     }
                 }
             }
