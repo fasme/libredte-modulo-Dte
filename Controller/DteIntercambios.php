@@ -208,6 +208,41 @@ class Controller_DteIntercambios extends \Controller_App
     }
 
     /**
+     * Acción de la API que permite buscar dentro de la bandeja de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-03-07
+     */
+    public function _api_buscar_GET($receptor)
+    {
+        // crear receptor y verificar autorización
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_intercambios/listar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // buscar documentos
+        $filtros = $this->Api->getQuery([
+            'soloPendientes' => true,
+            'emisor' => null,
+            'folio' => null,
+            'recibido_desde' => date('Y-m-01'),
+            'recibido_hasta' => date('Y-m-d'),
+            'usuario' => null,
+        ]);
+        $documentos = (new Model_DteIntercambios())->setContribuyente($Receptor)->buscar($filtros);
+        if (!$documentos) {
+            $this->Api->send('No se encontraron documentos de intercambio', 404);
+        }
+        $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
      * Recurso para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-02-07

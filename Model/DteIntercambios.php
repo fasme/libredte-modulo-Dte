@@ -55,15 +55,14 @@ class Model_DteIntercambios extends \Model_Plural_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-19
+     * @version 2019-03-07
      */
     public function buscar(array $filter = [])
     {
         $filter = array_merge([
             'soloPendientes' => true,
-            'p' => 0,
+            'p' => 0, // página de intercambios
         ], $filter);
-        //$soloPendientes = true, $page = 0
         $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
         $select = $filter['soloPendientes'] ? '' : ', i.estado, u.usuario';
         $where = [];
@@ -87,6 +86,22 @@ class Model_DteIntercambios extends \Model_Plural_App
             $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
             $where[] = $folio_where.' LIKE :folio';
             $vars['folio'] = $filter['folio'];
+        }
+        if (!empty($filter['recibido_desde'])) {
+            $where[] = 'fecha_hora_email >= :recibido_desde';
+            $vars[':recibido_desde'] = $filter['recibido_desde'];
+        }
+        if (!empty($filter['recibido_hasta'])) {
+            $where[] = 'fecha_hora_email <= :recibido_hasta';
+            $vars[':recibido_hasta'] = $filter['recibido_hasta'].' 23:59:59';
+        }
+        if (!empty($filter['usuario'])) {
+            if ($filter['usuario']=='!null') {
+                $where[] = 'i.usuario IS NOT NULL';
+            } else {
+                $where[] = 'u.usuario = :usuario';
+                $vars[':usuario'] = $filter['usuario'];
+            }
         }
         if ($filter['p']) {
             $limit = \sowerphp\core\Configure::read('app.registers_per_page');
