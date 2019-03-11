@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-03-11
      */
     public function ver($dte, $folio)
     {
@@ -149,6 +149,7 @@ class Controller_DteEmitidos extends \Controller_App
             'Cobro' => (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S') ? $DteEmitido->getCobro(false) : false,
             'email_html' => $Emisor->getEmailFromTemplate('dte'),
             'sucursales' => $Emisor->getSucursales(),
+            'servidor_sii' => \sasco\LibreDTE\Sii::getServidor(),
         ]);
     }
 
@@ -602,7 +603,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite ceder el documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-10
+     * @version 2019-03-11
      */
     public function ceder($dte, $folio)
     {
@@ -632,6 +633,13 @@ class Controller_DteEmitidos extends \Controller_App
         if ($DteEmitido->cesion_track_id) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Documento ya fue enviado al SII para cesión', 'error'
+            );
+            $this->redirect(str_replace('ceder', 'ver', $this->request->request).'#cesion');
+        }
+        // verificar que no se esté cediendo al mismo rut del emisor del DTE
+        if ($DteEmitido->getEmisor()->getRUT() == $_POST['cesionario_rut']) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No puede ceder el DTE a la empresa emisora', 'error'
             );
             $this->redirect(str_replace('ceder', 'ver', $this->request->request).'#cesion');
         }
@@ -706,6 +714,45 @@ class Controller_DteEmitidos extends \Controller_App
         header('Content-Disposition: attachement; filename="'.$file.'"');
         print $xml;
         exit;
+    }
+
+    /**
+     * Acción que permite eliminar la cesión de un DTE desde LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-03-11
+     */
+    public function cesion_eliminar($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // verificar que exista track ID asociado al envio
+        if (!$DteEmitido->cesion_track_id) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'DTE no tiene Track ID de AEC asociado', 'error'
+            );
+            $this->redirect(str_replace('cesion_eliminar', 'ver', $this->request->request).'#cesion');
+        }
+        // verificar que el usuario puede eliminar la cesión
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No está autorizado a eliminar el archivo de cesión', 'error'
+            );
+            $this->redirect(str_replace('cesion_eliminar', 'ver', $this->request->request).'#cesion');
+        }
+        // eliminar cesión
+        $servidor_sii = \sasco\LibreDTE\Sii::getServidor();
+        $DteEmitido->cesion_xml = null;
+        $DteEmitido->cesion_track_id = null;
+        $DteEmitido->save();
+        \sowerphp\core\Model_Datasource_Session::message('Archivo de cesión eliminado de LibreDTE. Recuerde anular la cesión del DTE en la oficina del SII usando el formulario 2117', 'ok');
+        $this->redirect(str_replace('cesion_eliminar', 'ver', $this->request->request).'#cesion');
     }
 
     /**

@@ -320,6 +320,7 @@ class Model_DteEmitido extends Model_Base_Envio
 
     private $Dte; ///< Objeto con el DTE
     private $datos; ///< Arreglo con los datos del XML del DTE
+    private $datos_cesion; ///< Arreglo con los datos del XML de cesión del DTE
     private $Receptor = null; /// caché para el receptor
 
     /**
@@ -440,6 +441,24 @@ class Model_DteEmitido extends Model_Base_Envio
             $this->datos = $this->getDte()->getDatos();
         }
         return $this->datos;
+    }
+
+    /**
+     * Método que entrega el arreglo con los datos del XML de cesión del DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-03-11
+     */
+    public function getDatosCesion()
+    {
+        if (!$this->datos_cesion) {
+            if (!$this->cesion_xml) {
+                return false;
+            }
+            $xml = new \sasco\LibreDTE\XML();
+            $xml->loadXML(base64_decode($this->cesion_xml));
+            $this->datos_cesion = $xml->toArray()['AEC']['DocumentoAEC']['Cesiones']['Cesion']['DocumentoCesion'];
+        }
+        return $this->datos_cesion;
     }
 
     /**

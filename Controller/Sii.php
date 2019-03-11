@@ -35,7 +35,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los datos de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-03-11
      */
     public function contribuyente_datos($rut)
     {
@@ -63,11 +63,7 @@ class Controller_Sii extends \Controller_App
         }
         // se redirecciona al SII
         catch (\Exception $e) {
-            if (\sasco\LibreDTE\Sii::getAmbiente()) {
-                header('location: https://maullin.sii.cl/cvc_cgi/dte/ad_empresa1');
-            } else {
-                header('location: https://palena.sii.cl/cvc_cgi/dte/ad_empresa1');
-            }
+            header('location: https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/cvc_cgi/dte/ad_empresa1');
             exit;
         }
     }
@@ -289,6 +285,76 @@ class Controller_Sii extends \Controller_App
             $this->set('error', $e->getMessage());
             $this->autoRender = false;
             $this->render('Sii/dte_rcv_error');
+        }
+    }
+
+    /**
+     * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del AEC
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-03-11
+     */
+    public function cesion_estado_envio($track_id)
+    {
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        try {
+            $Emisor = $this->getContribuyente();
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            if (!$Firma) {
+                die('No hay firma electrónica asociada al usuario');
+            }
+            $data = [
+                'firma' => [
+                    'cert-data' => $Firma->getCertificate(),
+                    'key-data' => $Firma->getPrivateKey(),
+                ],
+            ];
+            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $response = libredte_consume(
+                '/sii/cesion_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
+                $data
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se crea enlace directo al SII
+        catch (\Exception $e) {
+            header('location: https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/rtc/RTC/RTCAnotConsulta.html');
+            exit;
+        }
+    }
+
+    /**
+     * Acción que permite consultar el certificado de cesión de un DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-03-11
+     */
+    public function cesion_certificado($dte, $folio, $fecha)
+    {
+        // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
+        try {
+            $Emisor = $this->getContribuyente();
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            if (!$Firma) {
+                die('No hay firma electrónica asociada al usuario');
+            }
+            $data = [
+                'auth' => [
+                    'rut' => $Emisor->getRUT(),
+                    'clave' => $Emisor->config_sii_pass,
+                ],
+            ];
+            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $response = libredte_consume(
+                '/sii/cesion_certificado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'/'.$fecha.'&certificacion='.$certificacion,
+                $data
+            );
+            echo $response['body'];
+            exit;
+        }
+        // se crea enlace directo al SII
+        catch (\Exception $e) {
+            header('location: https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/rtc/RTC/RTCObtCertif.html');
+            exit;
         }
     }
 

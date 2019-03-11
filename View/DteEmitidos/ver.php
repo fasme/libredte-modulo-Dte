@@ -474,10 +474,49 @@ if ($referencias) {
 <!-- INICIO CESIÓN -->
 <div role="tabpanel" class="tab-pane" id="cesion" aria-labelledby="cesion-tab">
 <?php if ($DteEmitido->cesion_track_id) : ?>
-<div class="bg-info lead center" style="padding:0.5em">
-    Documento tiene track id de cesión: <?=$DteEmitido->cesion_track_id?>
-    <br/>
-    <small><a href="<?=$_base?>/dte/dte_emitidos/cesion_xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>">Descargar AEC</a></small>
+<div class="row">
+    <div class="col-md-9">
+        <p class="lead">Documento tributario electrónico se encuentra cedido según la siguiente información:</p>
+<?php
+new \sowerphp\general\View_Helper_Table([
+    ['RUT', 'Cesionario', 'Dirección', 'Email', 'Fecha cesión'],
+    [
+        $DteEmitido->getDatosCesion()['Cesionario']['RUT'],
+        $DteEmitido->getDatosCesion()['Cesionario']['RazonSocial'],
+        $DteEmitido->getDatosCesion()['Cesionario']['Direccion'],
+        $DteEmitido->getDatosCesion()['Cesionario']['eMail'],
+        \sowerphp\general\Utility_Date::format($DteEmitido->getDatosCesion()['TmstCesion']),
+    ],
+]);
+?>
+        <div class="card mb-4">
+            <div class="card-body"><?=$DteEmitido->getDatosCesion()['Cedente']['DeclaracionJurada']?></div>
+        </div>
+        <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+            <span class="far fa-file-code"></span>
+            Descargar Archivo Electrónico de Cesión (AEC)
+        </a>
+    </div>
+    <div class="col-md-3">
+        <div class="card mb-4 bg-light">
+            <div class="card-header lead text-center">Track ID SII: <?=$DteEmitido->cesion_track_id?></div>
+            <div class="card-body small text-center">
+                <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/cesion_estado_envio/<?=$DteEmitido->cesion_track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
+                <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/cesion_certificado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=\sowerphp\general\Utility_Date::format($DteEmitido->getDatosCesion()['TmstCesion'],'Y-m-d')?>', 750, 550)" title="Obtener el certificado de la cesión del DTE">obtener certificado de cesión</a><br/>
+                <a href="https://<?=$servidor_sii?>.sii.cl/rtc/RTC/RTCMenu.html" target="_blank">ir al Registro de Cesión en SII</a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body lead text-center">
+                <a href="http://www.sii.cl/preguntas_frecuentes/catastro/001_012_6407.htm" target="_blank">¿Cómo puedo anular una cesión?</a>
+            </div>
+        </div>
+<?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')) : ?>
+        <a class="btn btn-danger btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.checkSend('¿Está seguro de eliminar la cesión de LibreDTE?\nSi continúa ¡perderá el archivo AEC!')">
+            Eliminar cesión
+        </a>
+<?php endif; ?>
+    </div>
 </div>
 <?php
 else :
@@ -486,32 +525,53 @@ echo $f->begin([
     'id' => 'cesionForm',
     'onsubmit' => 'Form.check(\'cesionForm\') && Form.checkSend(\'¿Está seguro de querer ceder el DTE?\')'
 ]);
+?>
+<div class="card mb-4">
+    <div class="card-header">Datos del cedente (<?=$Emisor->getNombre()?>)</div>
+    <div class="card-body">
+<?php
 echo $f->input([
     'name' => 'cedente_email',
-    'label' => 'Email cedente',
+    'label' => 'Correo contacto',
     'check' => 'notempty email',
     'value' => $_Auth->User->email,
+    'help' => 'Correo electrónico del usuario responsable en '.$Emisor->getNombre().' de la cesión que se está realizando',
 ]);
+?>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header">Datos del cesionario (ej: la empresa de factoring a quien se cede el DTE)</div>
+    <div class="card-body">
+<?php
 echo $f->input([
     'name' => 'cesionario_rut',
-    'label' => 'RUT cesionario',
+    'label' => 'RUT',
     'check' => 'notempty rut',
+    'help' => 'RUT de la empresa a la que se está cediendo el DTE',
 ]);
 echo $f->input([
     'name' => 'cesionario_razon_social',
-    'label' => 'Razón social cesionario',
+    'label' => 'Razón social',
     'check' => 'notempty',
+    'help' => 'Razón social de la empresa a la que se está cediendo el DTE',
 ]);
 echo $f->input([
     'name' => 'cesionario_direccion',
-    'label' => 'Dirección cesionario',
+    'label' => 'Dirección',
     'check' => 'notempty',
+    'help' => 'Dirección completa de la empresa a la que se está cediendo el DTE',
 ]);
 echo $f->input([
     'name' => 'cesionario_email',
-    'label' => 'Email cesionario',
+    'label' => 'Correo contacto',
     'check' => 'notempty email',
+    'help' => 'Correo electrónico del contacto en la empresa a la que se está cediendo el DTE',
 ]);
+?>
+    </div>
+</div>
+<?php
 echo $f->end('Generar archivo cesión y enviar al SII');
 endif;
 ?>
