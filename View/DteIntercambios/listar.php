@@ -82,3 +82,12 @@ $paginator = new \sowerphp\app\View_Helper_Paginator([
 ]);
 $paginator->setColsWidth([null, null, null, null, null, null, null, 110]);
 echo $paginator->generate($intercambios, $pages, $p);
+?>
+
+<div class="card mt-4">
+    <div class="card-header"><i class="fa fa-exclamation-circle text-warning"></i> ¿Por qué no están todos los documentos de mis proveedores en esta bandeja?</div>
+    <div class="card-body">
+        <p>Los documentos que aquí aparecen son todos los XML del tipo <span class="text-monospace">EnvioDTE</span> que han sido enviados a su correo de intercambio. Si un proveedor no ha enviado el XML no tendrá el documento en la bandeja y por lo tanto no lo tendrá enlazado al documento recibido, ni tampoco su PDF.</p>
+        <p>Si falta algún documento debe pedir a su proveedor que envíe el XML a su correo de intercambio: <span class="lead text-center text-monospace"><?=$Emisor->config_email_intercambio_user?></span></p>
+    </div>
+</div>
