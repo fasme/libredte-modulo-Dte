@@ -747,7 +747,7 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario al que se asignarán permisos
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-07
+     * @version 2019-03-27
      */
     public function setPermisos(&$Usuario)
     {
@@ -759,6 +759,7 @@ class Model_Contribuyente extends \Model_App
         // si es un usuario autorizado, entonces se copian los permisos asignados de los disponibles en el
         // administrador
         else {
+            // asignar permisos copiados del administrador
             $permisos = \sowerphp\core\Configure::read('empresa.permisos');
             $usuario_permisos = $this->db->getCol('
                 SELECT permiso
@@ -773,6 +774,12 @@ class Model_Contribuyente extends \Model_App
                     }
                 }
             }
+            // parche para asignar grupo 'distribuidor' a usuarios autorizados de un contribuyente
+            // que es distribuidor
+            if (in_array('distribuidor', $this->getUsuario()->getGroups())) {
+                $grupos[] = 'distribuidor';
+            }
+            // asignar permisos
             $Usuario->setAuths($this->getUsuario()->getAuths($grupos));
             $Usuario->setGroups($this->getUsuario()->getGroups($grupos));
         }
