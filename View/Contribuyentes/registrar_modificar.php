@@ -973,7 +973,7 @@ if ($Contribuyente->getCuota()) {
 echo $f->input([
     'type' => 'div',
     'label' => 'Modificado',
-    'value' => $Contribuyente->modificado,
+    'value' => \sowerphp\general\Utility_Date::format($Contribuyente->modificado, 'd/m/Y H:m'),
 ]);
 ?>
         </div>
