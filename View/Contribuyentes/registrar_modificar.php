@@ -201,9 +201,9 @@ echo $f->input([
     'attr' => 'maxlength="80"',
 ]);
 echo $f->input([
-    'name' => 'config_extra_representante_rut',
-    'label' => 'RUT representante',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_representante_rut : null,
+    'name' => 'config_extra_representante_run',
+    'label' => 'RUN representante',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_representante_run : null,
     'check' => 'rut',
 ]);
 echo $f->input([

@@ -768,9 +768,9 @@ class Controller_Contribuyentes extends \Controller_App
         $Contribuyente->config_ambiente_produccion_fecha;
         $Contribuyente->config_ambiente_produccion_numero;
         $Contribuyente->config_email_intercambio_user;
-        $Contribuyente->config_extra_representante_rut;
-        $Contribuyente->config_extra_contador_rut;
         $Contribuyente->config_extra_web;
+        $Contribuyente->config_extra_representante_run;
+        $Contribuyente->config_contabilidad_contador_run;
         unset($Contribuyente->usuario);
         $datos = array_merge(get_object_vars($Contribuyente), [
             'comuna_glosa' => $Contribuyente->getComuna()->comuna,
