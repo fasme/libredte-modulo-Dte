@@ -1204,7 +1204,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-07-04
+     * @version 2019-04-05
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1248,6 +1248,10 @@ class Model_Contribuyente extends \Model_App
                 $where[] = 'd.receptor = :receptor';
                 $vars[':receptor'] = $filtros['receptor'];
             }
+        }
+        if (!empty($filtros['razon_social'])) {
+            $where[] = 'r.razon_social ILIKE :razon_social';
+            $vars[':razon_social'] = '%'.$filtros['razon_social'].'%';
         }
         // otros filtros
         if (!empty($filtros['fecha_desde'])) {

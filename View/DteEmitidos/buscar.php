@@ -13,8 +13,9 @@ $f = new \sowerphp\general\View_Helper_Form(false);
 echo $f->begin(['onsubmit'=>'Form.check()']);
 ?>
 <div class="row">
-    <div class="form-group col-md-8"><?=$f->input(['type'=>'select', 'name'=>'dte', 'options'=>[''=>'Buscar en todos los tipos de documentos'] + $tipos_dte])?></div>
-    <div class="form-group col-md-4"><?=$f->input(['name'=>'receptor', 'placeholder'=>'RUT receptor sin puntos ni DV', 'check'=>'integer'])?></div>
+    <div class="form-group col-md-3"><?=$f->input(['type'=>'select', 'name'=>'dte', 'options'=>[''=>'Todos los tipos de documentos'] + $tipos_dte])?></div>
+    <div class="form-group col-md-3"><?=$f->input(['name'=>'receptor', 'placeholder'=>'RUT receptor sin puntos ni DV', 'check'=>'integer'])?></div>
+    <div class="form-group col-md-6"><?=$f->input(['name'=>'razon_social', 'placeholder'=>'Razón social del receptor'])?></div>
 </div>
 <div class="row">
     <div class="form-group col-md-3"><?=$f->input(['type'=>'date', 'name'=>'fecha_desde', 'placeholder'=>'Fecha desde', 'check'=>'date'])?></div>

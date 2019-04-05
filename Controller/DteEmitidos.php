@@ -1016,7 +1016,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción que permite realizar una búsqueda avanzada dentro de los DTE
      * emitidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2019-04-05
      */
     public function buscar()
     {
@@ -1039,6 +1039,7 @@ class Controller_DteEmitidos extends \Controller_App
             $response = $rest->post($this->request->url.'/api/dte/dte_emitidos/buscar/'.$Emisor->rut, [
                 'dte' => $_POST['dte'],
                 'receptor' => $_POST['receptor'],
+                'razon_social' => $_POST['razon_social'],
                 'fecha_desde' => $_POST['fecha_desde'],
                 'fecha_hasta' => $_POST['fecha_hasta'],
                 'total_desde' => $_POST['total_desde'],
