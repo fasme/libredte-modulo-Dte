@@ -91,6 +91,10 @@ class Model_Respaldo
         'dte_intercambio_resultado_dte' => [
             'rut' => 'emisor',
         ],
+        'dte_tmp' => [
+            'rut' => 'emisor',
+            'archivos' => ['datos'=>['ext'=>'json','base64'=>false]],
+        ],
         'dte_recibido' => [
             'rut' => 'receptor',
         ],
@@ -143,7 +147,7 @@ class Model_Respaldo
      * @param tablas Arreglo con las tablas a respaldar
      * @return Ruta del directorio donde se dejó el respaldo recién creado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-09
+     * @version 2019-04-10
      */
     public function generar($rut, $tablas = [])
     {
@@ -204,13 +208,16 @@ class Model_Respaldo
             if (isset($info['archivos'])) {
                 $pks = $this->db->getPksFromTable($tabla);
                 foreach ($datos as &$row) {
-                    foreach ($info['archivos'] as $col => $ext) {
+                    foreach ($info['archivos'] as $col => $file_meta) {
                         if (is_numeric($col)) {
-                            $col = $ext;
-                            $ext = 'xml';
+                            $col = $file_meta;
+                            $file_meta = ['ext'=>'xml', 'base64'=>true];
+                        }
+                        if (!is_array($file_meta)) {
+                            $file_meta = ['ext'=>$file_meta, 'base64'=>true];
                         }
                         // recuperar el archivo si está en base64 (o sea no está encriptado)
-                        if (!isset($info['encriptar']) or !in_array($col, $info['encriptar'])) {
+                        if ($file_meta['base64'] and (!isset($info['encriptar']) or !in_array($col, $info['encriptar']))) {
                             $row[$col] = base64_decode($row[$col]);
                         }
                         if (!empty($row[$col])) {
@@ -219,7 +226,7 @@ class Model_Respaldo
                             foreach ($pks as $pk) {
                                 $archivo[] = $row[$pk];
                             }
-                            $archivo = implode('_', $archivo).'-'.$tabla.'-'.$col.'.'.$ext;
+                            $archivo = implode('_', $archivo).'-'.$tabla.'-'.$col.'.'.$file_meta['ext'];
                             // guardar archivo
                             if (!file_exists($dir.'/'.$tabla)) {
                                 mkdir($dir.'/'.$tabla);
