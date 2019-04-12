@@ -113,6 +113,8 @@ class Model_Respaldo
         ],
     ]; ///< Información de las tabla que se exportarán
 
+    private $_pks = []; ///< Caché para las PKs
+
     /**
      * Constructor del modelo de respaldos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -152,8 +154,9 @@ class Model_Respaldo
     public function generar($rut, $tablas = [])
     {
         // si no se especificaron tablas se respaldarán todas
-        if (!$tablas)
+        if (!$tablas) {
             $tablas = array_keys($this->tablas);
+        }
         // crear directorio temporal para respaldos
         $dir = TMP.'/libredte_contribuyente_'.$rut;
         if (file_exists($dir)) {
@@ -167,16 +170,18 @@ class Model_Respaldo
         // procesar cada tabla
         foreach ($tablas as $tabla) {
             // si la tabla no se puede exportar se omite
-            if (!isset($this->tablas[$tabla]))
+            if (!isset($this->tablas[$tabla])) {
                 continue;
+            }
             // obtener datos de la tabla
             $info = $this->tablas[$tabla];
             $datos = $this->db->getTable(
                 'SELECT * FROM '.$tabla.' WHERE '.$info['rut'].' = :rut',
                 [':rut' => $rut]
             );
-            if (empty($datos))
+            if (empty($datos)) {
                 continue;
+            }
             $registros[$tabla] = count($datos);
             // si la tabla es la de configuraciones extras del contribuyente se
             // desencriptan las columnas que corresponden
@@ -206,7 +211,7 @@ class Model_Respaldo
             }
             // procesar archivos
             if (isset($info['archivos'])) {
-                $pks = $this->db->getPksFromTable($tabla);
+                $pks = $this->getPKs($tabla);
                 foreach ($datos as &$row) {
                     foreach ($info['archivos'] as $col => $file_meta) {
                         if (is_numeric($col)) {
@@ -264,6 +269,22 @@ class Model_Respaldo
         file_put_contents($dir.'/README.md', $msg);
         // entregar directorio
         return $dir;
+    }
+
+    /**
+     * Método que entrega las PKs de una tabla
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-04-10
+     */
+    private function getPKs($tabla)
+    {
+        if (!isset($this->_pks[$tabla])) {
+            $this->_pks[$tabla] = $pks = $this->db->getPksFromTable($tabla);
+            if (empty($pks)) {
+                $this->_pks[$tabla] = $this->db->getPksFromTable($tabla, 'libredte');
+            }
+        }
+        return $this->_pks[$tabla];
     }
 
 }
