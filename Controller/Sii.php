@@ -114,12 +114,12 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener si la empresa está o no autorizada para usar facturación electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-04-15
      */
     public function contribuyente_autorizado($rut)
     {
         extract($this->Api->getQuery([
-            'certificacion'=>\sasco\LibreDTE\Sii\Navegador::PRODUCCION,
+            'certificacion'=>\sasco\LibreDTE\Sii::PRODUCCION,
         ]));
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
         try {
@@ -131,7 +131,7 @@ class Controller_Sii extends \Controller_App
         }
         // se redirecciona al SII
         catch (\Exception $e) {
-            if (\sasco\LibreDTE\Sii::getAmbiente()) {
+            if ($certificacion) {
                 header('location: https://maullin.sii.cl/cvc/dte/ee_empresas_dte.html');
             } else {
                 header('location: https://palena.sii.cl/cvc/dte/ee_empresas_dte.html');
