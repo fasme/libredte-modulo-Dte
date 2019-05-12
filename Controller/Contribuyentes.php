@@ -745,14 +745,24 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método de la API que permite obtener los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-01-30
+     * @version 2019-05-10
      */
-    public function _api_info_GET($rut)
+    public function _api_info_GET($rut, $emisor = null)
     {
+        // verificar autenticación
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
+        // datos pasados por GET al servicio web
+        extract($this->Api->getQuery([
+            'tipo' => 'contribuyente',
+        ]));
+        if (!in_array($tipo, ['contribuyente', 'emisor', 'receptor'])) {
+            $this->Api->send('Búsqueda de tipo "'.$tipo.'" no es válida. Posibles tipos: contribuyente, emisor o receptor.', 400);
+        }
+        // obtener objeto del contribuyente
+        // se puede obtener por RUT o por correo electrónico asociado al contribuyente
         if (strpos($rut, '@')) {
             try {
                 $Contribuyente = (new Model_Contribuyentes())->getByEmail($rut, true);
@@ -760,21 +770,56 @@ class Controller_Contribuyentes extends \Controller_App
                 $this->Api->send('Error al obtener el contribuyente: '.$e->getMessage(), 500);
             }
         } else {
-            $Contribuyente = new Model_Contribuyente($rut);
+            $Contribuyente = (new Model_Contribuyentes())->get($rut);
         }
+        // si el contribuyente no existe error
         if (!$Contribuyente or !$Contribuyente->exists()) {
             $this->Api->send('Contribuyente solicitado no existe', 404);
         }
+        // asignar ciertos valores de la configuración al objeto del contribuyente
+        // se hace un "touch" para que el atributo sea cargado desde la configuración
         $Contribuyente->config_ambiente_produccion_fecha;
         $Contribuyente->config_ambiente_produccion_numero;
         $Contribuyente->config_email_intercambio_user;
         $Contribuyente->config_extra_web;
         $Contribuyente->config_extra_representante_run;
         $Contribuyente->config_contabilidad_contador_run;
-        unset($Contribuyente->usuario);
+        // se crea el arreglo con datos básicos del contribuyente
         $datos = array_merge(get_object_vars($Contribuyente), [
             'comuna_glosa' => $Contribuyente->getComuna()->comuna,
         ]);
+        // acciones si no hay emisor indicado (si fuesen necesarias)
+        if (!$emisor) {
+            // si no hay emisor y es búsqueda emisor se copia el rut como emisor
+            if ($tipo == 'emisor') {
+                $emisor = $rut;
+            }
+            // si no hay emisor con búsqueda de receptor error
+            else if ($tipo == 'receptor') {
+                $this->Api->send('Debe indicar emisor para hacer una búsqueda de tipo receptor', 400);
+            }
+        } else {
+            if ($tipo == 'emisor' and $emisor != $rut) {
+                $this->Api->send('Debe indicar el mismo emisor y rut para una búsqueda de tipo emisor (o dejar el emisor en blanco)', 400);
+            }
+        }
+        // se agregan datos vía trigger del contribuyente sólo si existe un emisor
+        // esto indica que se está buscando uno receptor (cliente) o emisor (proveedor)
+        if ($emisor) {
+            $Emisor = (new Model_Contribuyentes())->get($emisor);
+            if (!$Emisor->usuarioAutorizado($User)) {
+                $this->Api->send('No está autorizado a operar con el emisor seleccionado para el tipo de búsqueda '.$tipo, 404);
+            }
+            $datos = array_merge(
+                $datos,
+                (array)\sowerphp\core\Trigger::run(
+                    'contribuyente_info', $Contribuyente, $tipo, $Emisor, $User
+                )
+            );
+        }
+        // se quita el usuario de los atributos (por seguridad)
+        unset($datos['usuario']);
+        // se entregan los datos del contribuyente
         $this->Api->send($datos, 200, JSON_PRETTY_PRINT);
     }
 

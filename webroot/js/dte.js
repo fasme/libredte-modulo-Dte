@@ -116,11 +116,16 @@ Receptor.setDatos = function (form) {
     f.CmnaRecep.value = "";
     f.Contacto.value = "";
     f.CorreoRecep.value = "";
-    if (f.RUTSolicita !== undefined)
+    if (f.CdgIntRecep !== undefined) {
+        f.CdgIntRecep.value = "";
+    }
+    if (f.RUTSolicita !== undefined) {
         f.RUTSolicita.value = "";
+    }
     // si no se indicó el rut no se hace nada más
-    if (__.empty(f.RUTRecep.value))
+    if (__.empty(f.RUTRecep.value)) {
         return;
+    }
     // verificar validez del rut
     if (Form.check_rut(f.RUTRecep) !== true) {
         alert('RUT receptor es incorrecto');
@@ -132,7 +137,7 @@ Receptor.setDatos = function (form) {
     rut = rut.substr(0, rut.length - 1);
     $.ajax({
         type: "GET",
-        url: _url+'/api/dte/contribuyentes/info/'+rut,
+        url: _url+'/api/dte/contribuyentes/info/'+rut+'/'+f.RUTEmisor.value+'?tipo=receptor',
         dataType: "json",
         success: function (c) {
             f.RznSocRecep.value = c.razon_social;
@@ -141,6 +146,7 @@ Receptor.setDatos = function (form) {
             f.CmnaRecep.value = (c.comuna!==undefined && c.comuna) ? c.comuna : '';
             f.Contacto.value = (c.telefono!==undefined && c.telefono) ? c.telefono : '';
             f.CorreoRecep.value = (c.email!==undefined && c.email) ? c.email : '';
+            f.CdgIntRecep.value = (c.codigo!==undefined && c.codigo) ? c.codigo : '';
         },
         error: function (jqXHR) {
             console.log(jqXHR.responseJSON);
