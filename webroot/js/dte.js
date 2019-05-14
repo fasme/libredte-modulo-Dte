@@ -107,7 +107,7 @@ function Receptor() {
     return;
 }
 
-Receptor.setDatos = function (form) {
+Receptor.setDatos = function (form, tipo) {
     var f = document.getElementById(form);
     // resetear campos
     f.RznSocRecep.value = "";
@@ -131,13 +131,21 @@ Receptor.setDatos = function (form) {
         alert('RUT receptor es incorrecto');
         return;
     }
+    // si no se indicó tipo se usa el de receptor
+    if (tipo === undefined) {
+        tipo = 'receptor';
+    }
     // buscar datos del rut en el servicio web y asignarlos si existen
     var dv = f.RUTRecep.value.charAt(f.RUTRecep.value.length - 1),
         rut = f.RUTRecep.value.replace(/\./g, "").replace("-", "");
     rut = rut.substr(0, rut.length - 1);
+    url = _url+'/api/dte/contribuyentes/info/'+rut;
+    if (tipo == 'receptor') {
+        url += '/'+f.RUTEmisor.value+'?tipo=receptor';
+    }
     $.ajax({
         type: "GET",
-        url: _url+'/api/dte/contribuyentes/info/'+rut+'/'+f.RUTEmisor.value+'?tipo=receptor',
+        url: url,
         dataType: "json",
         success: function (c) {
             f.RznSocRecep.value = c.razon_social;
@@ -146,7 +154,9 @@ Receptor.setDatos = function (form) {
             f.CmnaRecep.value = (c.comuna!==undefined && c.comuna) ? c.comuna : '';
             f.Contacto.value = (c.telefono!==undefined && c.telefono) ? c.telefono : '';
             f.CorreoRecep.value = (c.email!==undefined && c.email) ? c.email : '';
-            f.CdgIntRecep.value = (c.codigo!==undefined && c.codigo) ? c.codigo : '';
+            if (f.CdgIntRecep !== undefined) {
+                f.CdgIntRecep.value = (c.codigo!==undefined && c.codigo) ? c.codigo : '';
+            }
         },
         error: function (jqXHR) {
             console.log(jqXHR.responseJSON);
