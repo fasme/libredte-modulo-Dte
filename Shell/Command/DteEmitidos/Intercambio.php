@@ -67,29 +67,41 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
             $desde = date('Y-m-d', strtotime('-'.$desde.' days'));
         }
         $estados = Model_DteEmitidos::$revision_estados['rechazados'];
+        $where = [];
+        $vars = [':desde' => $desde, ':certificacion' => (int)$certificacion];
+        if (is_numeric($grupo)) {
+            $where[] = 'e.emisor = :emisor';
+            $vars[':emisor'] = $grupo;
+        } else {
+            $where[] = 'g.grupo = :grupo';
+            $vars[':grupo'] = $grupo;
+        }
         return $this->db->getTable('
-            SELECT e.emisor, e.dte, e.folio
-            FROM
-                dte_emitido AS e
-                JOIN dte_tipo AS t ON e.dte = t.codigo
-                JOIN contribuyente AS c ON e.emisor = c.rut
-                JOIN contribuyente_config AS rc ON e.receptor = rc.contribuyente AND rc.configuracion = \'email\' AND rc.variable = \'intercambio_user\'
-                JOIN usuario_grupo AS ug ON c.usuario = ug.usuario
-                JOIN grupo AS g ON ug.grupo = g.id
-                JOIN contribuyente_config AS cc ON e.emisor = cc.contribuyente AND cc.configuracion = \'emision\' AND cc.variable = \'intercambio_automatico\' AND cc.valor = \'1\'
-                LEFT JOIN dte_intercambio_recepcion_dte AS ir ON ir.emisor = e.emisor AND ir.dte = e.dte AND ir.folio = e.folio AND ir.certificacion = e.certificacion
-            WHERE
-                g.grupo = :grupo
-                AND t.enviar = true
-                AND e.fecha >= :desde
-                AND e.certificacion = :certificacion
-                AND e.emisor != e.receptor
-                AND e.track_id IS NOT NULL
-                AND e.revision_estado IS NOT NULL
-                AND SUBSTR(e.revision_estado,1,3) NOT IN (\''.implode('\', \'', $estados).'\')
-                AND ir.responde IS NULL
-            ORDER BY e.emisor, e.fecha, e.dte, e.folio
-        ', [':desde' => $desde, ':grupo' => $grupo, ':certificacion' => (int)$certificacion]);
+            SELECT DISTINCT *
+            FROM (
+                SELECT e.emisor, e.dte, e.folio
+                FROM
+                    dte_emitido AS e
+                    JOIN dte_tipo AS t ON e.dte = t.codigo
+                    JOIN contribuyente AS c ON e.emisor = c.rut
+                    JOIN contribuyente_config AS rc ON e.receptor = rc.contribuyente AND rc.configuracion = \'email\' AND rc.variable = \'intercambio_user\'
+                    JOIN usuario_grupo AS ug ON c.usuario = ug.usuario
+                    JOIN grupo AS g ON ug.grupo = g.id
+                    JOIN contribuyente_config AS cc ON e.emisor = cc.contribuyente AND cc.configuracion = \'emision\' AND cc.variable = \'intercambio_automatico\' AND cc.valor = \'1\'
+                    LEFT JOIN dte_intercambio_recepcion_dte AS ir ON ir.emisor = e.emisor AND ir.dte = e.dte AND ir.folio = e.folio AND ir.certificacion = e.certificacion
+                WHERE
+                    t.enviar = true
+                    AND '.implode(' AND ', $where).'
+                    AND e.fecha >= :desde
+                    AND e.certificacion = :certificacion
+                    AND e.emisor != e.receptor
+                    AND e.track_id IS NOT NULL
+                    AND e.revision_estado IS NOT NULL
+                    AND SUBSTR(e.revision_estado,1,3) NOT IN (\''.implode('\', \'', $estados).'\')
+                    AND ir.responde IS NULL
+                ORDER BY e.emisor, e.fecha, e.dte, e.folio
+            ) AS t
+        ', $vars);
     }
 
 }
