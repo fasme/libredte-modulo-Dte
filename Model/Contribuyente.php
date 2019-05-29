@@ -1417,7 +1417,7 @@ class Model_Contribuyente extends \Model_App
     public function getEmailSmtp($email = 'intercambio')
     {
         return new \sowerphp\core\Network_Email([
-            'type' => 'smtp',
+            'type' => 'smtp-phpmailer',
             'host' => $this->{'config_email_'.$email.'_smtp'},
             'user' => $this->{'config_email_'.$email.'_user'},
             'pass' => $this->{'config_email_'.$email.'_pass'},
