@@ -100,7 +100,10 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             // si la fila no es documento nuevo, se agrega el detalle al documento que ya existe
             else {
                 try {
-                    $this->agregarItem($documento, array_slice($datos[$i], 11, 9));
+                    if (!empty($datos[$i][13])) {
+                        $this->agregarItem($documento, array_slice($datos[$i], 11, 8));
+                    }
+                    $this->agregarReferencia($documento, array_slice($datos[$i], 28, 5));
                 } catch (\Exception $e) {
                     $error_formato = true;
                     $datos[$i][] = 1;
