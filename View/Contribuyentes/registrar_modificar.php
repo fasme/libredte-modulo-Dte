@@ -316,7 +316,7 @@ echo $f->input([
     'name' => 'config_email_sii_smtp',
     'label' => 'Servidor SMTP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_smtp : null,
-    'help' => 'Ejemplo: ssl://smtp.gmail.com:465',
+    'help' => 'Ejemplo: ssl://smtp.gmail.com:465<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/sii/smtp\', 750, 550); return false" class="small">[probar correo]</a>',
     'attr' => 'maxlength="50"',
     'check' => 'notempty',
 ]);
@@ -324,7 +324,7 @@ echo $f->input([
     'name' => 'config_email_sii_imap',
     'label' => 'Mailbox IMAP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_imap : null,
-    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX',
+    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/sii/imap\', 750, 550); return false" class="small">[probar correo]</a>',
     'attr' => 'maxlength="100"',
     'check' => 'notempty',
 ]);
@@ -358,7 +358,7 @@ echo $f->input([
     'name' => 'config_email_intercambio_smtp',
     'label' => 'Servidor SMTP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_smtp : null,
-    'help' => 'Ejemplo: ssl://smtp.gmail.com:465',
+    'help' => 'Ejemplo: ssl://smtp.gmail.com:465<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/intercambio/smtp\', 750, 550); return false" class="small">[probar correo]</a>',
     'attr' => 'maxlength="50"',
     'check' => 'notempty',
 ]);
@@ -366,7 +366,7 @@ echo $f->input([
     'name' => 'config_email_intercambio_imap',
     'label' => 'Mailbox IMAP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_imap : null,
-    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX',
+    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/intercambio/imap\', 750, 550); return false" class="small">[probar correo]</a>',
     'attr' => 'maxlength="100"',
     'check' => 'notempty',
 ]);

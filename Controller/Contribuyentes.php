@@ -743,6 +743,60 @@ class Controller_Contribuyentes extends \Controller_App
     }
 
     /**
+     * Acción que permite probar la configuración de los correos electrónicos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-05-31
+     */
+    public function config_email_test($rut, $email, $protocol = 'smtp')
+    {
+        // crear objeto del contribuyente
+        try {
+            $class = $this->Contribuyente_class;
+            $Contribuyente = new $class($rut);
+        } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+            die('No se encontró la empresa solicitada');
+        }
+        // verificar que el usuario sea el administrador o de soporte autorizado
+        if (!$Contribuyente->usuarioAutorizado($this->Auth->User, 'admin')) {
+            die('Usted no es el administrador de la empresa solicitada');
+        }
+        // verificar protocolo
+        if (!in_array($protocol, ['smtp', 'imap'])) {
+            die('El protocolo debe ser "smtp" o "imap"');
+        }
+        // datos pasados por GET al servicio web
+        extract($this->Api->getQuery([
+            'debug' => 3,
+        ]));
+        // hacer test SMTP
+        if ($protocol == 'smtp') {
+            $Email = $Contribuyente->getEmailSmtp($email);
+            $Email->setDebug($debug);
+            if ($Contribuyente->{'config_email_'.$email.'_replyto'}) {
+                $Email->replyTo($Contribuyente->{'config_email_'.$email.'_replyto'});
+            }
+            $Email->to($this->Auth->User->email);
+            $Email->subject('[LibreDTE] Mensaje de prueba '.date('YmdHis'));
+            $status = $Email->send('Esto es un mensaje de prueba desde LibreDTE');
+            if ($status === true) {
+                die('Mensaje enviado mediante SMTP.');
+            } else {
+                die($status['message']);
+            }
+        }
+        // hacer test IMAP
+        else if ($protocol == 'imap') {
+            $Email = $Contribuyente->getEmailImap($email);
+            if (!$Email) {
+                die('No se logró la conexión mediante IMAP.');
+            }
+            die('La casilla IMAP tiene en total '.num($Email->countMessages()).' mensajes.');
+        }
+        // terminar script
+        exit;
+    }
+
+    /**
      * Método de la API que permite obtener los datos de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-05-10
