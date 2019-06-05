@@ -128,13 +128,14 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-07-05
+     * @version 2019-06-04
      */
     public function _api_emitir_POST()
     {
         extract($this->Api->getQuery([
             'normalizar' => true,
             'email' => false,
+            'links' => false,
         ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
@@ -348,13 +349,19 @@ class Controller_Documentos extends \Controller_App
             } catch (\Exception $e) {
             }
         }
-        // entregar los datos del DTE temporal creado
-        return [
+        // obtener datos del dte temporal
+        $datos_dte_temporal = [
             'emisor' => $DteTmp->emisor,
             'receptor' => $DteTmp->receptor,
             'dte' => $DteTmp->dte,
             'codigo' => $DteTmp->codigo,
         ];
+        // agregar enlaces del documento si se solicitaron
+        if ($links) {
+            $datos_dte_temporal['links'] = $DteTmp->getLinks();
+        }
+        // entregar los datos del DTE temporal creado
+        return $datos_dte_temporal;
     }
 
     /**
@@ -815,13 +822,14 @@ class Controller_Documentos extends \Controller_App
      * Función de la API que permite emitir un DTE a partir de un documento
      * temporal, asignando folio, firmando y enviando al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-03-02
+     * @version 2019-06-04
      */
     public function _api_generar_POST()
     {
         extract($this->Api->getQuery([
             'getXML' => false,
             'email' => false,
+            'links' => false,
         ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
@@ -872,11 +880,18 @@ class Controller_Documentos extends \Controller_App
             } catch (\Exception $e) {
             }
         }
-        // entregar DTE emitido al cliente de la API
-        if (!$getXML) {
-            $DteEmitido->xml = false;
+        // obtener datos del dte emitido
+        $datos_dte_emitido = get_object_vars($DteEmitido);
+        // agregar enlaces del documento si se solicitaron
+        if ($links) {
+            $datos_dte_emitido['links'] = $DteEmitido->getLinks();
         }
-        return $DteEmitido;
+        // quitar XML si no se pidió
+        if (!$getXML) {
+            $datos_dte_emitido['xml'] = false;
+        }
+        // entregar DTE emitido al cliente de la API
+        return $datos_dte_emitido;
     }
 
     /**
