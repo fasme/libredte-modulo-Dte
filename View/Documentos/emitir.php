@@ -350,8 +350,6 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     </div>
 </form>
 
-<?php debug($items); ?>
-
 <script>
 var emision_observaciones = <?=json_encode($Emisor->config_emision_observaciones)?>;
 var codigo_typeahead = [
