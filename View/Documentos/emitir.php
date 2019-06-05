@@ -371,7 +371,12 @@ var codigo_typeahead = [
         templates: {
             //empty: '<div class="text-danger pl-2">Item solicitado no existe <i class="far fa-frown fa-fx"></i></div>',
             suggestion: function(data) {
-                return '<p><strong>' + data.codigo + '</strong>: '+ data.item +'<br/><span class="small">' + data.descripcion + '</span></p>';
+                var item = '<p><strong>' + data.codigo + '</strong>: '+ data.item;
+                if (data.descripcion) {
+                    item += '<br/><span class="small">' + data.descripcion + '</span>';
+                }
+                item += '</p>';
+                return item;
             }
         },
         limit: 20
