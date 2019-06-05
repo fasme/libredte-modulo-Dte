@@ -350,9 +350,10 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     </div>
 </form>
 
+<?php debug($items); ?>
+
 <script>
 var emision_observaciones = <?=json_encode($Emisor->config_emision_observaciones)?>;
-var codigos = <?=json_encode($codigos)?>;
 var codigo_typeahead = [
     {
         hint: false,
@@ -361,7 +362,18 @@ var codigo_typeahead = [
     },
     {
         name: 'codigos',
-        source: substring_matcher(codigos),
+        display: 'codigo',
+        source: new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('item'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            local: <?=json_encode($items)?>
+        }),
+        templates: {
+            //empty: '<div class="text-danger pl-2">Item solicitado no existe <i class="far fa-frown fa-fx"></i></div>',
+            suggestion: function(data) {
+                return '<p><strong>' + data.codigo + '</strong>: '+ data.item +'<br/><span class="small">' + data.descripcion + '</span></p>';
+            }
+        },
         limit: 20
     }
 ];

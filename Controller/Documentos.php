@@ -360,7 +360,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-15
+     * @version 2019-06-04
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -441,7 +441,7 @@ class Controller_Documentos extends \Controller_App
             'TpoTranCompra' => $this->TpoTranCompra,
             'TpoTranVenta' => $this->TpoTranVenta,
             'nacionalidades' => \sasco\LibreDTE\Sii\Aduana::getNacionalidades(),
-            'codigos' => (new \website\Dte\Admin\Model_Itemes())->getCodigos($Emisor->rut),
+            'items' => (new \website\Dte\Admin\Model_Itemes())->setContribuyente($Emisor)->getItems(),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getListContribuyente($Emisor->config_extra_impuestos_adicionales),
             'ImpuestoAdicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getObjectsContribuyente($Emisor->config_extra_impuestos_adicionales),
             'dte_defecto' => $dte_defecto ? $dte_defecto : $Emisor->config_emision_dte_defecto,

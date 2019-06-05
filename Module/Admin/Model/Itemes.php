@@ -59,25 +59,24 @@ class Model_Itemes extends \Model_Plural_App
     }
 
     /**
-     * Método que busca los códigos para autocompletar
+     * Método que busca los items del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-25
+     * @version 2019-06-04
      */
-    public function getCodigos($contribuyente, $tipo = null)
+    public function getItems($filtros = [])
     {
-        if ($tipo) {
-            return $this->db->getCol('
-                SELECT codigo
-                FROM item
-                WHERE contribuyente = :contribuyente AND codigo_tipo = :tipo
-            ', [':contribuyente'=>$contribuyente, ':tipo'=>$tipo]);
-        } else {
-            return $this->db->getCol('
-                SELECT codigo
-                FROM item
-                WHERE contribuyente = :contribuyente
-            ', [':contribuyente'=>$contribuyente]);
+        $where = ['contribuyente = :contribuyente', 'activo = true'];
+        $vars = [':contribuyente'=>$this->getContribuyente()->rut];
+        if (!empty($filtros['tipo'])) {
+            $where[] = 'codigo_tipo = :tipo';
+            $vars[':tipo'] = $filtros['tipo'];
         }
+        return $this->db->getTable('
+            SELECT codigo, item, descripcion
+            FROM item
+            WHERE '.implode(' AND ', $where).'
+            ORDER BY item
+        ', $vars);
     }
 
     /**
