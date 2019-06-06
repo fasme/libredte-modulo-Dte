@@ -362,12 +362,12 @@ var codigo_typeahead = [
         name: 'codigos',
         display: 'codigo',
         source: new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('item'),
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('codigo', 'item', 'descripcion'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             local: <?=json_encode($items)?>
         }),
         templates: {
-            //empty: '<div class="text-danger pl-2">Item solicitado no existe <i class="far fa-frown fa-fx"></i></div>',
+            empty: '<div class="text-danger pl-2">No se encuentra el item solicitado <i class="far fa-frown fa-fx"></i></div>',
             suggestion: function(data) {
                 var item = '<p><strong>' + data.codigo + '</strong>: '+ data.item;
                 if (data.descripcion) {
