@@ -277,9 +277,10 @@ $color = [
 </a>
 <hr/>
 <?php endif; ?>
+   <div class="card mb-4">
+        <div class="card-header">Recibo</div>
+        <div class="card-body">
 <?php
-// recibo
-echo '<h2>Recibo</h2>',"\n";
 $Recibo = $DteEmitido->getIntercambioRecibo();
 if ($Recibo) {
     $Sobre = $Recibo->getSobre();
@@ -298,8 +299,13 @@ if ($Recibo) {
 } else {
     echo '<p>No existe recibo para el documento.</p>';
 }
-// recepcion
-echo '<h2>Recepción</h2>',"\n";
+?>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">Recepción</div>
+        <div class="card-body">
+<?php
 $Recepcion = $DteEmitido->getIntercambioRecepcion();
 if ($Recepcion) {
     $Sobre = $Recepcion->getSobre();
@@ -318,8 +324,13 @@ if ($Recepcion) {
 } else {
     echo '<p>No existe recepción para el documento.</p>';
 }
-// resultado
-echo '<h2>Resultado</h2>',"\n";
+?>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">Resultado</div>
+        <div class="card-body">
+<?php
 $Resultado = $DteEmitido->getIntercambioResultado();
 if ($Resultado) {
     $Sobre = $Resultado->getSobre();
@@ -338,6 +349,8 @@ if ($Resultado) {
     echo '<p>No existe resultado para el documento.</p>';
 }
 ?>
+        </div>
+    </div>
 </div>
 <!-- FIN INTERCAMBIO -->
 <?php endif; ?>
