@@ -375,9 +375,6 @@ class Model_Contribuyente extends \Model_App
             if (!$this->config_ambiente_en_certificacion and (empty($this->config_ambiente_produccion_fecha) or empty($this->config_ambiente_produccion_numero))) {
                 throw new \Exception('Para usar la empresa en producción debe indicar la fecha y número de resolución que la autoriza');
             }
-            if ($this->config_ambiente_en_certificacion and empty($this->config_ambiente_certificacion_fecha)) {
-                throw new \Exception('Para usar la empresa en certificación debe indicar la fecha que la autoriza');
-            }
             // si se pasó un logo se guarda
             if (isset($_FILES['logo']) and !$_FILES['logo']['error']) {
                 if (\sowerphp\general\Utility_File::mimetype($_FILES['logo']['tmp_name'])!='image/png') {
