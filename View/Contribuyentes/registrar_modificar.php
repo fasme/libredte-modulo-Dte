@@ -48,6 +48,12 @@ $(function() {
 
 <!-- INICIO DATOS EMPRESA -->
 <div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info"></i>
+            Datos básicos
+        </div>
+        <div class="card-body">
 <?php
 if ($form_id=='registrarContribuyente') {
     echo $f->input([
@@ -62,12 +68,6 @@ echo $f->input([
     'label' => 'Razón social',
     'value' => isset($Contribuyente) ? $Contribuyente->razon_social : null,
     'check' => 'notempty',
-    'attr' => 'maxlength="100"',
-]);
-echo $f->input([
-    'name' => 'config_extra_nombre_fantasia',
-    'label' => 'Nombre fantasía',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_nombre_fantasia : null,
     'attr' => 'maxlength="100"',
 ]);
 echo $f->input([
@@ -87,6 +87,39 @@ echo $f->input([
     'check' => 'notempty',
     'attr' => 'maxlength="80"',
     'help' => 'Indique el giro comercial principal de la empresa (sin utilizar abreviaciones)',
+]);
+echo $f->input([
+    'name' => 'direccion',
+    'label' => 'Dirección',
+    'value' => isset($Contribuyente) ? $Contribuyente->direccion : null,
+    'help' => 'Dirección casa matriz',
+    'check' => 'notempty',
+    'attr' => 'maxlength="70"',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'comuna',
+    'label' => 'Comuna',
+    'value' => isset($Contribuyente) ? $Contribuyente->comuna : null,
+    'help' => 'Comuna casa matriz',
+    'options' => [''=>'Seleccionar una comuna'] + $comunas,
+    'check' => 'notempty',
+]);
+?>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info"></i>
+            Datos extras
+        </div>
+        <div class="card-body">
+<?php
+echo $f->input([
+    'name' => 'config_extra_nombre_fantasia',
+    'label' => 'Nombre fantasía',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_nombre_fantasia : null,
+    'attr' => 'maxlength="100"',
 ]);
 $config_extra_otras_actividades = [];
 if (isset($Contribuyente) and $Contribuyente->config_extra_otras_actividades) {
@@ -117,23 +150,6 @@ echo $f->input([
     ],
     'values' => $config_extra_otras_actividades,
     'help' => 'Indique las actividades económicas secundarias de la empresa y los giros (si son diferentes al principal)',
-]);
-echo $f->input([
-    'name' => 'direccion',
-    'label' => 'Dirección',
-    'value' => isset($Contribuyente) ? $Contribuyente->direccion : null,
-    'help' => 'Dirección casa matriz',
-    'check' => 'notempty',
-    'attr' => 'maxlength="70"',
-]);
-echo $f->input([
-    'type' => 'select',
-    'name' => 'comuna',
-    'label' => 'Comuna',
-    'value' => isset($Contribuyente) ? $Contribuyente->comuna : null,
-    'help' => 'Comuna casa matriz',
-    'options' => [''=>'Seleccionar una comuna'] + $comunas,
-    'check' => 'notempty',
 ]);
 $config_extra_sucursales = [];
 if (isset($Contribuyente) and $Contribuyente->config_extra_sucursales) {
@@ -201,12 +217,6 @@ echo $f->input([
     'attr' => 'maxlength="80"',
 ]);
 echo $f->input([
-    'name' => 'config_extra_representante_run',
-    'label' => 'RUN representante',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_representante_run : null,
-    'check' => 'rut',
-]);
-echo $f->input([
     'name' => 'config_extra_web',
     'label' => 'Web',
     'value' => isset($Contribuyente) ? $Contribuyente->config_extra_web : null,
@@ -226,6 +236,35 @@ echo $f->input([
     <br/><br/>
 </div>
 <?php endif; ?>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info"></i>
+            Datos representante legal
+        </div>
+        <div class="card-body">
+<?php
+echo $f->input([
+    'name' => 'config_extra_representante_run',
+    'label' => 'RUN',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_representante_run : null,
+    'check' => 'rut',
+]);
+echo $f->input([
+    'name' => 'config_extra_representante_nombre',
+    'label' => 'Nombre',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_representante_nombre : null,
+]);
+?>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info"></i>
+            Datos SII
+        </div>
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'text',
@@ -236,11 +275,19 @@ echo $f->input([
     'help' => 'Permite acceder a ciertas funcionalidades que se conectan al SII',
 ]);
 ?>
+        </div>
+    </div>
 </div>
 <!-- FIN DATOS EMPRESA -->
 
 <!-- INICIO AMBIENTES -->
 <div role="tabpanel" class="tab-pane" id="ambientes" aria-labelledby="ambientes-tab">
+<div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-university"></i>
+            Ambiente de facturación en SII
+        </div>
+        <div class="card-body">
 <?php
 echo $f->input([
     'type' => 'select',
@@ -279,6 +326,8 @@ echo $f->input([
     'attr' => isset($Contribuyente) ? ($Contribuyente->config_ambiente_en_certificacion?'':'disabled="disabled"') : '',
 ]);
 ?>
+        </div>
+    </div>
 </div>
 <!-- FIN AMBIENTES -->
 
@@ -316,7 +365,7 @@ echo $f->input([
     'name' => 'config_email_sii_smtp',
     'label' => 'Servidor SMTP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_smtp : null,
-    'help' => 'Ejemplo: ssl://smtp.gmail.com:465<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/sii/smtp\', 750, 550); return false" class="small">[probar correo]</a>',
+    'help' => 'Ejemplo: ssl://smtp.gmail.com:465'.(isset($Contribuyente)?('<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/sii/smtp\', 750, 550); return false" class="small">[probar correo]</a>'):''),
     'attr' => 'maxlength="50"',
     'check' => 'notempty',
 ]);
@@ -324,7 +373,7 @@ echo $f->input([
     'name' => 'config_email_sii_imap',
     'label' => 'Mailbox IMAP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_imap : null,
-    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/sii/imap\', 750, 550); return false" class="small">[probar correo]</a>',
+    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX'.(isset($Contribuyente)?('<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/sii/imap\', 750, 550); return false" class="small">[probar correo]</a>'):''),
     'attr' => 'maxlength="100"',
     'check' => 'notempty',
 ]);
@@ -358,7 +407,7 @@ echo $f->input([
     'name' => 'config_email_intercambio_smtp',
     'label' => 'Servidor SMTP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_smtp : null,
-    'help' => 'Ejemplo: ssl://smtp.gmail.com:465<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/intercambio/smtp\', 750, 550); return false" class="small">[probar correo]</a>',
+    'help' => 'Ejemplo: ssl://smtp.gmail.com:465'.(isset($Contribuyente)?('<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/intercambio/smtp\', 750, 550); return false" class="small">[probar correo]</a>'):''),
     'attr' => 'maxlength="50"',
     'check' => 'notempty',
 ]);
@@ -366,7 +415,7 @@ echo $f->input([
     'name' => 'config_email_intercambio_imap',
     'label' => 'Mailbox IMAP',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_imap : null,
-    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/intercambio/imap\', 750, 550); return false" class="small">[probar correo]</a>',
+    'help' => 'Ejemplo: {imap.gmail.com:993/imap/ssl}INBOX'.(isset($Contribuyente)?('<br/><a href="#" onclick="__.popup(\''.$_base.'/dte/contribuyentes/config_email_test/'.$Contribuyente->rut.'/intercambio/imap\', 750, 550); return false" class="small">[probar correo]</a>'):''),
     'attr' => 'maxlength="100"',
     'check' => 'notempty',
 ]);
