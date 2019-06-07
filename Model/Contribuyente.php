@@ -1412,16 +1412,30 @@ class Model_Contribuyente extends \Model_App
      * @param email Email que se quiere obteber: intercambio o sii
      * @return \sowerphp\core\Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-22
+     * @version 2019-06-07
      */
     public function getEmailSmtp($email = 'intercambio')
     {
+        $user = $this->{'config_email_'.$email.'_user'};
+        $pass = $this->{'config_email_'.$email.'_pass'};
+        $host = $this->{'config_email_'.$email.'_smtp'};
+        // validar campos mínimos
+        if (empty($user)) {
+            throw new \Exception('El usuario del correo "'.$email.'" no está definido. Por favor, verificar configuración de la empresa.');
+        }
+        if (empty($pass)) {
+            throw new \Exception('La contraseña del correo "'.$email.'" no está definida. Por favor, verificar configuración de la empresa.');
+        }
+        if (empty($host)) {
+            throw new \Exception('El servidor SMTP del correo "'.$email.'" no está definido. Por favor, verificar configuración de la empresa.');
+        }
+        // crear objeto con configuración del correo
         return new \sowerphp\core\Network_Email([
             'type' => 'smtp-phpmailer',
-            'host' => $this->{'config_email_'.$email.'_smtp'},
-            'user' => $this->{'config_email_'.$email.'_user'},
-            'pass' => $this->{'config_email_'.$email.'_pass'},
-            'from' => ['email'=>$this->{'config_email_'.$email.'_user'}, 'name'=>str_replace(',', '', $this->getNombre())],
+            'host' => $host,
+            'user' => $user,
+            'pass' => $pass,
+            'from' => ['email'=>$user, 'name'=>str_replace(',', '', $this->getNombre())],
         ]);
     }
 
@@ -1430,14 +1444,28 @@ class Model_Contribuyente extends \Model_App
      * @param email Email que se quiere obteber: intercambio o sii
      * @return \sowerphp\core\Network_Email_Imap
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-27
+     * @version 2019-06-07
      */
     public function getEmailImap($email = 'intercambio')
     {
+        $user = $this->{'config_email_'.$email.'_user'};
+        $pass = $this->{'config_email_'.$email.'_pass'};
+        $host = $this->{'config_email_'.$email.'_imap'};
+        // validar campos mínimos
+        if (empty($user)) {
+            throw new \Exception('El usuario del correo "'.$email.'" no está definido. Por favor, verificar configuración de la empresa.');
+        }
+        if (empty($pass)) {
+            throw new \Exception('La contraseña del correo "'.$email.'" no está definida. Por favor, verificar configuración de la empresa.');
+        }
+        if (empty($host)) {
+            throw new \Exception('El servidor IMAP del correo "'.$email.'" no está definido. Por favor, verificar configuración de la empresa.');
+        }
+        // crear objeto con configuración del correo
         $Imap = new \sowerphp\core\Network_Email_Imap([
-            'mailbox' => $this->{'config_email_'.$email.'_imap'},
-            'user' => $this->{'config_email_'.$email.'_user'},
-            'pass' => $this->{'config_email_'.$email.'_pass'},
+            'mailbox' => $host,
+            'user' => $user,
+            'pass' => $pass,
         ]);
         return $Imap->isConnected() ? $Imap : false;
     }

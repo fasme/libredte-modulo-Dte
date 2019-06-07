@@ -155,7 +155,7 @@ class Model_DteIntercambios extends \Model_Plural_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2019-06-07
      */
     public function actualizar($dias = 7)
     {
@@ -170,7 +170,11 @@ class Model_DteIntercambios extends \Model_Plural_App
             return $trigger_actualizar;
         }
         // obtener correo
-        $Imap = is_object($trigger_actualizar) ? $trigger_actualizar : $this->getContribuyente()->getEmailImap();
+        try {
+            $Imap = is_object($trigger_actualizar) ? $trigger_actualizar : $this->getContribuyente()->getEmailImap();
+        } catch (\Exception $e) {
+            throw new \sowerphp\core\Exception($e->getMessage(), 500);
+        }
         if (!$Imap) {
             throw new \sowerphp\core\Exception(
                 'No fue posible conectar mediante IMAP a '.$this->getContribuyente()->config_email_intercambio_imap.', verificar mailbox, usuario y/o contraseña de correo de intercambio:<br/>'.implode('<br/>', imap_errors()), 500
