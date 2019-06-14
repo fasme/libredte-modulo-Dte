@@ -3236,4 +3236,15 @@ class Model_Contribuyente extends \Model_App
         }
     }
 
+    /**
+     * Método que entrega la aplicación de tercero del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-06-13
+     */
+    public function getApp($codigo, $namespace = 'apps')
+    {
+        $App = $this->{'config_'.$namespace.'_'.$codigo};
+        return !empty($App->disponible) ? $App : false;
+    }
+
 }
