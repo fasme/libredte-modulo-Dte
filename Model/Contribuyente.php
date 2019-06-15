@@ -3239,12 +3239,30 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la aplicación de tercero del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-13
+     * @version 2019-06-14
      */
-    public function getApp($codigo, $namespace = 'apps')
+    public function getApp($app)
     {
-        $App = $this->{'config_'.$namespace.'_'.$codigo};
-        return !empty($App->disponible) ? $App : false;
+        // obtener namespace y código
+        if (strpos($app, '.')) {
+            list($namespace, $codigo) = explode('.', $app);
+        } else {
+            $namespace = 'apps';
+            $codigo = $app;
+        }
+        // cargar app si existe
+        $apps_config = \sowerphp\core\Configure::read('apps_3rd_party.'.$namespace);
+        $App = (new \sowerphp\app\Utility_Apps($apps_config))->getApp($codigo);
+        if (!$App) {
+            throw new \Exception('Aplicación solicitada "'.$app.'" no existe', 404);
+        }
+        // cargar configuración de la app
+        $App->setConfig($this->{'config_'.$namespace.'_'.$codigo});
+        $App->setVars([
+            'Contribuyente' => $this,
+        ]);
+        // entrgar App con su configuración (si existe) y enlazada al contribuyente
+        return $App;
     }
 
 }
