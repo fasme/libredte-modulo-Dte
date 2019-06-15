@@ -219,7 +219,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite modificar contribuyente previamente registrado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-19
+     * @version 2019-06-14
      */
     public function modificar($rut)
     {
@@ -267,8 +267,7 @@ class Controller_Contribuyentes extends \Controller_App
             $Contribuyente->modificado = date('Y-m-d H:i:s');
             try {
                 $Contribuyente->save(true);
-                $link = '<a href="'.$this->request->base.str_replace('modificar', 'seleccionar', $this->request->request).'">[seleccionar]</a>';
-                \sowerphp\core\Model_Datasource_Session::message('Empresa '.$Contribuyente->razon_social.' ha sido modificada '.$link, 'ok');
+                \sowerphp\core\Model_Datasource_Session::message('Empresa '.$Contribuyente->razon_social.' ha sido modificada', 'ok');
                 $ContribuyenteSeleccionado = $this->getContribuyente(false);
                 if ($ContribuyenteSeleccionado and $ContribuyenteSeleccionado->rut == $Contribuyente->rut) {
                     $this->redirect('/dte/contribuyentes/seleccionar/'.$Contribuyente->rut);
