@@ -3265,4 +3265,58 @@ class Model_Contribuyente extends \Model_App
         return $App;
     }
 
+    /**
+     * Método que entrega todas los aplicaciones disponibles para el contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-06-15
+     */
+    public function getApps($filtros = [])
+    {
+        // ver si viene el namespace como filtro y extraer
+        if (is_string($filtros)) {
+            $filtros = ['namespace' => $filtros];
+        }
+        $default = [
+            'namespace' => 'apps',
+            'loadConfig' => true,
+        ];
+        $filtros = array_merge($default, $filtros);
+        foreach ($default as $key => $value) {
+            $$key = $filtros[$key];
+            unset($filtros[$key]);
+        }
+        // obtener aplicaciones según namespace y filtros
+        $apps_config = \sowerphp\core\Configure::read('apps_3rd_party.'.$namespace);
+        $apps = (new \sowerphp\app\Utility_Apps($apps_config))->getApps($filtros);
+        // cargar variables por defecto (asociar contribuyente)
+        foreach ($apps as $App) {
+            $App->setVars([
+                'Contribuyente' => $this,
+            ]);
+        }
+        if ($loadConfig) {
+            // cargar configuración de la app de un objeto que no es el Contribuyente
+            if (is_array($loadConfig)) {
+                list($config_obj, $config_prefix) = $loadConfig;
+            }
+            // cargar configuración de la app desde el objeto contribuyente y prefijo estándar
+            else {
+                $config_obj = $this;
+                $config_prefix = 'config_'.$namespace.'_';
+            }
+            // cargar la configuración de cada tienda
+            foreach ($apps as $App) {
+                $App->setConfig($config_obj->{$config_prefix.$App->getCodigo()});
+                // si se solicitó sólo disponibles o sólo no disponibles verificar
+                if (isset($filtros['disponible'])) {
+                    if ($App->getConfig()->disponible != $filtros['disponible']) {
+                        unset($apps[$App->getCodigo()]);
+                    }
+                }
+            }
+        }
+        // entregar aplicaciones
+        return $apps;
+    }
+
 }
