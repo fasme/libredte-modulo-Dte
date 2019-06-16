@@ -518,7 +518,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Acción de la API que entrega el cobro asociado al documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-05
+     * @version 2019-06-16
      */
     public function _api_cobro_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -542,7 +542,8 @@ class Controller_DteTmps extends \Controller_App
         }
         // entregar cobro (se agrega URL)
         $Cobro = $DteTmp->getCobro();
-        $Cobro->url = $this->request->url.'/pagos/cotizaciones/pagar/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo.'/'.$DteTmp->emisor;
+        $links = $DteTmp->getLinks();
+        $Cobro->url = !empty($links['pagar']) ? $links['pagar'] : null;
         return $this->Api->send($Cobro, 200, JSON_PRETTY_PRINT);
     }
 
