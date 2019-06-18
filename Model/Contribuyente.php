@@ -3131,7 +3131,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la plantilla de un correo ya armada con los datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-04
+     * @version 2019-06-17
      */
     public function getEmailFromTemplate($template, $params = null)
     {
@@ -3210,7 +3210,7 @@ class Model_Contribuyente extends \Model_App
                     $msg_text ? str_replace("\n", '</p><p>', $msg_text) : null,
                     !$mostrar_pagado ? 'none' : '',
                     $mostrar_pagado ? \sowerphp\general\Utility_Date::format($Cobro->pagado) : '00/00/0000',
-                    $mostrar_pagado ? $Cobro->getMedioPago()->medio_pago : '"sin pago"',
+                    $mostrar_pagado ? $Cobro->getMedioPago()->getNombre() : '"sin pago"',
                     !$mostrar_pagar ? 'none' : '',
                 ],
                 $html

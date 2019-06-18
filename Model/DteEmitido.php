@@ -994,7 +994,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-06
+     * @version 2018-06-17
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -1022,7 +1022,7 @@ class Model_DteEmitido extends Model_Base_Envio
                 if (!$Cobro->pagado) {
                     $msg .= 'Enlace pago en línea: '.$links['pagar']."\n\n";
                 } else {
-                    $msg .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->medio_pago."\n\n";
+                    $msg .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->getNombre()."\n\n";
                 }
             }
         }
