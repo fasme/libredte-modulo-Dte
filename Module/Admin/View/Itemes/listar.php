@@ -1,9 +1,9 @@
 <ul class="nav nav-pills float-right">
-    <!--<li class="nav-item">
-        <a href="<?=$_base?>/dte/admin/item_lista_precios/listar?search=activa:1" title="Mantenedor de listas de precios" class="nav-link">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/item_lista_precios/listar?search=activa:1" title="Mantenedor de listas de precios" class="nav-link" onclick="alert('¡Próximamente disponible!'); return false">
             <i class="fa fa-dollar-sign"></i> Listas de precios
         </a>
-    </li>-->
+    </li>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/admin/item_clasificaciones/listar?search=activa:1" title="Mantenedor de clasificaciones de items" class="nav-link">
             <i class="fa fa-list-alt"></i> Clasificaciones
@@ -120,7 +120,7 @@ foreach ($Objs as &$obj) {
     }
     $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$obj->codigo.'/'.$obj->codigo_tipo.$listarFilterUrl.'" title="Editar" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
     if ($deleteRecord) {
-        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.'/'.$obj->codigo_tipo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(\''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-primary"><i class="fas fa-times fa-fw"></i></a>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.'/'.$obj->codigo_tipo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(this, \''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-primary"><i class="fas fa-times fa-fw"></i></a>';
     }
     $row[] = $actions;
     $data[] = $row;

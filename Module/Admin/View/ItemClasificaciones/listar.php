@@ -115,7 +115,7 @@ foreach ($Objs as &$obj) {
     }
     $actions .= '<a href="'.$_base.$module_url.$controller.'/editar/'.$obj->codigo.$listarFilterUrl.'" title="Editar" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
     if ($deleteRecord) {
-        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(\''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-primary"><i class="fas fa-times fa-fw"></i></a>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->codigo.$listarFilterUrl.'" title="Eliminar" onclick="return eliminar(this, \''.$model.'\', \''.implode(', ', $pkValues).'\')" class="btn btn-primary"><i class="fas fa-times fa-fw"></i></a>';
     }
     $row[] = $actions;
     $data[] = $row;
