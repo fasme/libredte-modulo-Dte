@@ -109,9 +109,9 @@ new \sowerphp\general\View_Helper_Table([
                     </p>
 <?php else: ?>
 <?php if ($Libro->periodo<201708) : ?>
-                    <p><a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">Enviar libro al SII</a></p>
+                    <p><a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.confirm(this, '¿Confirmar el envio del libro al SII?')">Enviar libro al SII</a></p>
 <?php else : ?>
-                    <p><a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">Generar libro local</a></p>
+                    <p><a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.confirm(this, '¿Confirmar el envio del libro al SII?')">Generar libro local</a></p>
 <?php endif; ?>
 <?php endif; ?>
                 </div>
@@ -184,7 +184,7 @@ $f = new \sowerphp\general\View_Helper_Form(false);
 echo $f->begin([
     'id'=>'enviar_sii',
     'action'=>$_base.'/dte/dte_ventas/enviar_sii/'.$Libro->periodo,
-    'onsubmit'=>'Form.check(\'enviar_sii\') && Form.checkSend()'
+    'onsubmit'=>'Form.check(\'enviar_sii\') && Form.confirm(this)'
 ]);
 echo $f->input([
     'type' => 'js',

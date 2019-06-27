@@ -134,7 +134,7 @@ new \sowerphp\general\View_Helper_Table([
                     </p>
 <?php else: ?>
                     <p>
-                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.checkSend('¿Confirmar el envio del libro al SII?')">
+                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_compras/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.confirm(this, '¿Confirmar el envio del libro al SII?')">
                             <?=$Libro->periodo<201708?'Enviar libro al SII':'Generar libro local'?>
                         </a>
                     </p>

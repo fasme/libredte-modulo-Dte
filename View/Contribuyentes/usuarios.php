@@ -65,7 +65,7 @@ foreach ($Contribuyente->getUsuarios() as $u => $p) {
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([
     'id' => 'usuarios',
-    'onsubmit' => 'Form.check(\'usuarios\') && Form.checkSend()',
+    'onsubmit' => 'Form.check(\'usuarios\') && Form.confirm(this)',
 ]);
 $f->setStyle(false);
 echo $f->input([
@@ -203,7 +203,7 @@ $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin([
     'action' => '../transferir/'.$Contribuyente->rut,
     'id' => 'transferir',
-    'onsubmit' => 'Form.check(\'transferir\') && Form.checkSend(\'¿Está seguro de querer transferir la empresa al nuevo usuario?\')',
+    'onsubmit' => 'Form.check(\'transferir\') && Form.confirm(this, \'¿Está seguro de querer transferir la empresa al nuevo usuario?\')',
 ]);
 echo $f->input([
     'name' => 'usuario',

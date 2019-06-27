@@ -276,7 +276,7 @@ echo '</div>',"\n";
 
 if (isset($DteRecibido)) : ?>
 <div class="col-md-4">
-    <a class="btn btn-danger btn-block" href="<?=$_base?>/dte/dte_recibidos/eliminar/<?=$DteRecibido->emisor?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" role="button" onclick="return Form.checkSend('¿Confirmar la eliminación del documento?')">Eliminar documento</a>
+    <a class="btn btn-danger btn-block" href="<?=$_base?>/dte/dte_recibidos/eliminar/<?=$DteRecibido->emisor?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" role="button" onclick="return Form.confirm(this, '¿Confirmar la eliminación del documento?')">Eliminar documento</a>
 </div>
 <?php endif;
 echo '</div>',"\n";

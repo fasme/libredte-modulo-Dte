@@ -113,7 +113,6 @@ foreach ($Objs as &$obj) {
     $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII" class="btn btn-primary"><i class="fas fa-sync fa-fw"></i></a>';
     $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII" class="btn btn-primary"><i class="fab fa-rev fa-fw"></i></a>';
     $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
-    //$actions .= ' <a href="'.$_base.$module_url.$controller.'/enviar_sii/'.$obj->dia.$listarFilterUrl.'" title="Reenviar al SII" onclick="return Form.checkSend(\'¿Confirmar el reenvío del reporte de consumo de folios al SII?\')"><i class="far fa-paper-plane fa-fw"></i></a>';
     $row[] = $actions;
     $data[] = $row;
 }

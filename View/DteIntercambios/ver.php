@@ -128,7 +128,7 @@ new \sowerphp\general\View_Helper_Table([
 </div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['action'=>$_base.'/dte/dte_intercambios/responder/'.$DteIntercambio->codigo, 'onsubmit'=>'Form.check() && Form.checkSend()']);
+echo $f->begin(['action'=>$_base.'/dte/dte_intercambios/responder/'.$DteIntercambio->codigo, 'onsubmit'=>'Form.check() && Form.confirm(this)']);
 $f->setColsLabel(3);
 echo '<div class="row">',"\n";
 echo '<div class="col-md-6">',"\n";
@@ -274,7 +274,7 @@ if ($_Auth->User->inGroup('soporte')) {
     echo '<hr/>';
 }
 ?>
-<a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/eliminar/<?=$DteIntercambio->codigo?>" role="button" title="Eliminar intercambio" onclick="return Form.checkSend('¿Confirmar la eliminación del intercambio?')">
+<a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/eliminar/<?=$DteIntercambio->codigo?>" role="button" title="Eliminar intercambio" onclick="return Form.confirm(this, '¿Confirmar la eliminación del intercambio?')">
     Eliminar archivo EnvioDTE de intercambio
 </a>
 </div>

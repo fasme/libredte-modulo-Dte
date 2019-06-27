@@ -123,11 +123,11 @@ new \sowerphp\general\View_Helper_Table([
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
 <?php if (substr($DteEmitido->revision_estado,0,3)=='RFR') : ?>
                             <br/>
-                            <a href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" onclick="return Form.checkSend('¿Confirmar el reenvío del DTE al SII?')">reenviar DTE al SII</a>
+                            <a href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" onclick="return Form.confirm(this, '¿Confirmar el reenvío del DTE al SII?')">reenviar DTE al SII</a>
 <?php endif; ?>
 <?php if ($DteEmitido->getEstado()=='R' or $DteEmitido->track_id==-1) : ?>
                             <br/>
-                            <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
+                            <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">eliminar documento</a>
 <?php endif; ?>
                         </span>
                     </p>
@@ -137,7 +137,7 @@ new \sowerphp\general\View_Helper_Table([
                         <br/>
                         <span style="font-size:0.8em">
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
-                            <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.checkSend('¿Confirmar la eliminación del DTE?')">eliminar documento</a>
+                            <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">eliminar documento</a>
                         </span>
                     </p>
 <?php endif; ?>
@@ -525,7 +525,7 @@ new \sowerphp\general\View_Helper_Table([
             </div>
         </div>
 <?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')) : ?>
-        <a class="btn btn-danger btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.checkSend('¿Está seguro de eliminar la cesión de LibreDTE?\nSi continúa ¡perderá el archivo AEC!')">
+        <a class="btn btn-danger btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.confirm(this, '¿Está seguro de eliminar la cesión de LibreDTE?\nSi continúa ¡perderá el archivo AEC!')">
             Eliminar cesión
         </a>
 <?php endif; ?>
@@ -536,7 +536,7 @@ else :
 echo $f->begin([
     'action' => $_base.'/dte/dte_emitidos/ceder/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
     'id' => 'cesionForm',
-    'onsubmit' => 'Form.check(\'cesionForm\') && Form.checkSend(\'¿Está seguro de querer ceder el DTE?\')'
+    'onsubmit' => 'Form.check(\'cesionForm\') && Form.confirm(this, \'¿Está seguro de querer ceder el DTE?\')'
 ]);
 ?>
 <div class="card mb-4">
@@ -666,7 +666,7 @@ if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()-
     echo $f->begin([
         'action' => $_base.'/dte/dte_emitidos/avanzado_tipo_cambio/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
         'id' => 'avanzadoTipoCambioForm',
-        'onsubmit' => 'Form.check(\'avanzadoTipoCambioForm\') && Form.checkSend(\'¿Está seguro de querer modificar el tipo de cambio del documento?\')'
+        'onsubmit' => 'Form.check(\'avanzadoTipoCambioForm\') && Form.confirm(this, \'¿Está seguro de querer modificar el tipo de cambio del documento?\')'
     ]);
     echo $f->input([
         'name' => 'tipo_cambio',
@@ -691,7 +691,7 @@ if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()-
 echo $f->begin([
     'action' => $_base.'/dte/dte_emitidos/avanzado_track_id/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
     'id' => 'avanzadoTrackIdForm',
-    'onsubmit' => 'Form.check(\'avanzadoTrackIdForm\') && Form.checkSend(\'¿Está seguro de querer cambiar el Track ID?\n\n¡Perderá el valor actual!\')'
+    'onsubmit' => 'Form.check(\'avanzadoTrackIdForm\') && Form.confirm(this, \'¿Está seguro de querer cambiar el Track ID?\n\n¡Perderá el valor actual!\')'
 ]);
 echo $f->input([
     'name' => 'track_id',
