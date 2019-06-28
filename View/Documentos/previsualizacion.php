@@ -49,6 +49,7 @@ new \sowerphp\general\View_Helper_Table([
     <a href="javascript:__.popup('<?=$_base?>/dte/dte_tmps/vale/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>', 280, 180)">Ver vale</a>
 </div>
 <?php if ($DteTmp->getEmisor()->config_emision_previsualizacion_automatica) : ?>
+<div class="clearfix"></div>
 <div class="row" style="margin-top:2em">
     <div class="col-sm-12">
         <iframe src="../dte_tmps/pdf/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>/inline" style="border:0;width:100%;height:500px"></iframe>
