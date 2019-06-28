@@ -1,6 +1,6 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/admin/item_lista_precios/listar?search=activa:1" title="Mantenedor de listas de precios" class="nav-link" onclick="alert('¡Próximamente disponible!'); return false">
+        <a href="<?=$_base?>/dte/admin/item_lista_precios/listar?search=activa:1" title="Mantenedor de listas de precios" class="nav-link" onclick="Form.alert('¡Próximamente disponible!'); return false">
             <i class="fa fa-dollar-sign"></i> Listas de precios
         </a>
     </li>

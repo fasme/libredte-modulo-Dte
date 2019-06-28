@@ -38,7 +38,7 @@ $(function() {
 function get_codigo_reemplazo() {
     $.get(_base+'/api/dte/dte_ventas/codigo_reemplazo/<?=$Libro->periodo?>/<?=$Emisor->rut?>', function(codigo) {
         document.getElementById('CodAutRecField').value = codigo;
-    }).fail(function(error){alert(error.responseJSON)});
+    }).fail(function(error){Form.alert(error.responseJSON, document.getElementById('CodAutRecField'))});
 }
 </script>
 

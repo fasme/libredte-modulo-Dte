@@ -395,13 +395,13 @@ function item_nuevo(tr) {
     n_items = $('input[name="QtyItem[]"]').length;
     if (TpoDoc == 39 || TpoDoc == 41) {
         if (n_items > 1000) {
-            alert('Boletas no pueden tener más de 1000 items en su detalle');
+            Form.alert('Boletas no pueden tener más de 1000 items en su detalle');
             Form.delJS(tr.childNodes[0].childNodes[0]);
             return false;
         }
     } else {
         if (n_items > 60) {
-            alert('Documentos no pueden tener más de 60 items en su detalle');
+            Form.alert('Documentos no pueden tener más de 60 items en su detalle');
             Form.delJS(tr.childNodes[0].childNodes[0]);
             return false;
         }

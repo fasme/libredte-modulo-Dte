@@ -9,8 +9,9 @@ function config_email_set(email, uso) {
     var dominio, status;
     status = Form.check_email(email);
     if (status !== true) {
-        if (!__.empty(email.value))
-            alert(status.replace('%s', 'Email'));
+        if (!__.empty(email.value)) {
+            Form.alert(status.replace('%s', 'Email'), email);
+        }
         return false;
     }
     dominio = email.value.substr(email.value.indexOf('@')+1);

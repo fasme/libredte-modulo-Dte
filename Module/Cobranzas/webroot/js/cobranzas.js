@@ -13,11 +13,12 @@ function pago_actualizar() {
 
 function pago_check(formulario) {
     var pendiente = document.getElementById("pendienteField");
-    if (!Form.check())
+    if (!Form.check()) {
         return false;
+    }
     pago_actualizar();
     if (parseInt(pendiente.value) < 0) {
-        alert('No puede pagar más del monto del pago programado');
+        Form.alert('No puede pagar más del monto del pago programado');
         return false;
     }
     return Form.confirm(formulario, '¿Desea registrar el pago?');

@@ -3,7 +3,7 @@ function buscar(q) {
     var dte_tmp = $('#dte_'+q.value.toUpperCase());
     q.value = '';
     if (dte_tmp.length==0) {
-        alert('No se encontró el DTE temporal');
+        Form.alert('No se encontró el DTE temporal', q);
         q.focus();
     } else {
         dte_tmp.get(0).click();

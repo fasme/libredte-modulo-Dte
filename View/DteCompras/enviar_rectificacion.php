@@ -10,7 +10,7 @@
 function get_codigo_reemplazo() {
     $.get(_base+'/api/dte/dte_compras/codigo_reemplazo/<?=$periodo?>/<?=$Emisor->rut?>', function(codigo) {
         document.getElementById('CodAutRecField').value = codigo;
-    }).fail(function(error){alert(error.responseJSON)});
+    }).fail(function(error){Form.alert(error.responseJSON, document.getElementById('CodAutRecField'))});
 }
 </script>
 <div class="page-header"><h1>Rectificación IEC para el período <?=$periodo?></h1></div>
