@@ -22,7 +22,7 @@ Contribuyente.setDatos = function (form) {
         return;
     // verificar validez del rut
     if (Form.check_rut(f.rut) !== true) {
-        alert('RUT contribuyente es incorrecto');
+        Form.alert('RUT contribuyente es incorrecto', f.rut);
         return;
     }
     // buscar datos del rut en el servicio web y asignarlos si existen
@@ -74,7 +74,7 @@ Emisor.setDatos = function (form) {
         return;
     // verificar validez del rut
     if (Form.check_rut(f.RUTEmisor) !== true) {
-        alert('RUT emisor es incorrecto');
+        Form.alert('RUT emisor es incorrecto', f.RUTEmisor);
         return;
     }
     // buscar datos del rut en el servicio web y asignarlos si existen
@@ -128,7 +128,7 @@ Receptor.setDatos = function (form, tipo) {
     }
     // verificar validez del rut
     if (Form.check_rut(f.RUTRecep) !== true) {
-        alert('RUT receptor es incorrecto');
+        Form.alert('RUT receptor es incorrecto', f.RUTRecep);
         return;
     }
     // si no se indicó tipo se usa el de receptor
@@ -387,7 +387,7 @@ DTE.calcular = function () {
     $('input[name="total"]').val(neto + exento + DTE.parseInt($('input[name="iva"]').val()) + adicional - retencion);
 }
 
-DTE.check = function () {
+DTE.check = function (formulario) {
     var status = true, TpoDoc = parseInt(document.getElementById("TpoDocField").value);
     var dte_check_detalle = [33, 34, 39, 41];
     var n_itemAfecto = 0, n_itemExento = 0;
@@ -398,38 +398,38 @@ DTE.check = function () {
     // revisión detalle del dte
     $('input[name="QtyItem[]"]').each(function (i, e) {
         if (__.empty($('input[name="NmbItem[]"]').get(i).value)) {
-            alert ('En la línea '+(i+1)+', item no puede estar en blanco');
+            Form.alert('En la línea '+(i+1)+', item no puede estar en blanco', $('input[name="NmbItem[]"]').get(i));
             $('input[name="NmbItem[]"]').get(i).focus();
             status = false;
             return false;
         }
         if (dte_check_detalle.indexOf(TpoDoc)!=-1) {
             if (__.empty($(e).val())) {
-                alert ('En la línea '+(i+1)+', cantidad no puede estar en blanco');
+                Form.alert('En la línea '+(i+1)+', cantidad no puede estar en blanco', $(e));
                 $(e).focus();
                 status = false;
                 return false;
             }
             if (Form.check_real($('input[name="QtyItem[]"]').get(i))!==true) {
-                alert ('En la línea '+(i+1)+', cantidad debe ser un número (entero o decimal)');
+                Form.alert('En la línea '+(i+1)+', cantidad debe ser un número (entero o decimal)', $(e));
                 $(e).focus();
                 status = false;
                 return false;
             }
             if (__.empty($('input[name="PrcItem[]"]').get(i).value)) {
-                alert ('En la línea '+(i+1)+', precio no puede estar en blanco');
+                Form.alert('En la línea '+(i+1)+', precio no puede estar en blanco', $('input[name="PrcItem[]"]').get(i));
                 $('input[name="PrcItem[]"]').get(i).focus();
                 status = false;
                 return false;
             }
             if (Form.check_real($('input[name="PrcItem[]"]').get(i))!==true) {
-                alert ('En la línea '+(i+1)+', cantidad debe ser un número (entero o decimal)');
+                Form.alert('En la línea '+(i+1)+', cantidad debe ser un número (entero o decimal)', $('input[name="PrcItem[]"]').get(i));
                 $('input[name="PrcItem[]"]').get(i).focus();
                 status = false;
                 return false;
             }
             if (__.empty($('input[name="ValorDR[]"]').get(i).value)) {
-                alert ('En la línea '+(i+1)+', descuento no puede estar en blanco');
+                Form.alert('En la línea '+(i+1)+', descuento no puede estar en blanco', $('input[name="ValorDR[]"]').get(i));
                 $('input[name="ValorDR[]"]').get(i).focus();
                 status = false;
                 return false;
@@ -460,19 +460,19 @@ DTE.check = function () {
     // revisión referencia del dte
     $('select[name="CodRef[]"]').each(function (i, e) {
         if (__.empty($('select[name="TpoDocRef[]"]').get(i).value)) {
-            alert ('En la línea '+(i+1)+' de referencia:'+"\n"+'Tipo de documento referenciado no puede estar en blanco');
+            Form.alert('En la línea '+(i+1)+' de referencia:'+"\n"+'Tipo de documento referenciado no puede estar en blanco', $('select[name="TpoDocRef[]"]').get(i));
             $('select[name="TpoDocRef[]"]').get(i).focus();
             status = false;
             return false;
         }
         if (__.empty($('input[name="FolioRef[]"]').get(i).value)) {
-            alert ('En la línea '+(i+1)+' de referencia:'+"\n"+'Folio no puede estar en blanco');
+            Form.alert('En la línea '+(i+1)+' de referencia:'+"\n"+'Folio no puede estar en blanco', $('input[name="FolioRef[]"]').get(i));
             $('input[name="FolioRef[]"]').get(i).focus();
             status = false;
             return false;
         }
         if (__.empty($('input[name="FchRef[]"]').get(i).value)) {
-            alert ('En la línea '+(i+1)+' de referencia:'+"\n"+'Fecha no puede estar en blanco');
+            Form.alert('En la línea '+(i+1)+' de referencia:'+"\n"+'Fecha no puede estar en blanco', $('input[name="FchRef[]"]').get(i));
             $('input[name="FchRef[]"]').get(i).focus();
             status = false;
             return false;
@@ -487,13 +487,13 @@ DTE.check = function () {
             monto_pago += DTE.parseInt(m.value);
         });
         if (monto_pago != $('input[name="total"]').val()) {
-            alert('Monto de pago programado $' + __.num(monto_pago) + '.- no cuadra con el total del documento');
+            Form.alert('Monto de pago programado $' + __.num(monto_pago) + '.- no cuadra con el total del documento', $('input[name="total"]'));
             return false;
         }
     }
     // pedir confirmación de generación de factura
     DTE.calcular();
-    return Form.checkSend('Confirmar '+document.getElementById("TpoDocField").selectedOptions[0].textContent+' por $'+__.num($('input[name="total"]').val())+' a '+$('input[name="RUTRecep"]').val());
+    return Form.confirm(formulario, 'Confirmar '+document.getElementById("TpoDocField").selectedOptions[0].textContent+' por $'+__.num($('input[name="total"]').val())+' a '+$('input[name="RUTRecep"]').val());
 }
 
 function dte_recibido_check() {
@@ -504,7 +504,7 @@ function dte_recibido_check() {
     if (emisor.value && dte.value && folio.value) {
         estado = Form.check_rut(emisor);
         if (estado !== true) {
-            alert(estado);
+            Form.alert(estado.replace("%s", "RUT emisor"), emisor);
             return;
         }
         $.ajax({
@@ -520,7 +520,6 @@ function dte_recibido_check() {
                 document.getElementById("ivaField").value = documento.iva;
                 document.getElementById("periodoField").value = documento.periodo;
                 document.getElementById("iva_uso_comunField").value = documento.iva_uso_comun;
-                document.getElementById("iva_no_recuperableField").value = documento.iva_no_recuperable ? documento.iva_no_recuperable : '';
                 document.getElementById("impuesto_adicionalField").value = documento.impuesto_adicional ? documento.impuesto_adicional  : '';
                 document.getElementById("impuesto_sin_creditoField").value = documento.impuesto_sin_credito;
                 document.getElementById("monto_activo_fijoField").value = documento.monto_activo_fijo;
@@ -574,11 +573,11 @@ function dte_imprimir(formato, documento, id) {
                 socket.onmessage = function (event) {
                     if (event.data !==undefined) {
                         response = JSON.parse(event.data)
-                        alert(response.message);
+                        Form.alert(response.message);
                     }
                 }
                 socket.onerror=function(event){
-                    alert("No fue posible conectar a LibreDTE websocketd");
+                    Form.alert('<p>No fue posible conectar a LibreDTE websocketd</p><p>¿Está en ejecución el cliente de LibreDTE para escritorio?</p><p>Más información en el <a href="https://blog.libredte.cl/index.php/2018/11/06/enviar-dte-directo-a-impresora-sin-abrir-pdf" target="_blank">siguiente enlace</a></p>');
                 }
             } catch(e) {
                 console.log(e);

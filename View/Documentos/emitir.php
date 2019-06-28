@@ -21,7 +21,7 @@ $(function() {
 </script>
 <?php
 $f = new \sowerphp\general\View_Helper_Form(false);
-echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check()']);
+echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check(this)']);
 ?>
     <!-- DATOS DEL DOCUMENTO -->
 <?php if ($Emisor->puedeAsignarFolio($_Auth->User)) : ?>

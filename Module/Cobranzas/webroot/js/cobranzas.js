@@ -11,7 +11,7 @@ function pago_actualizar() {
     }
 }
 
-function pago_check() {
+function pago_check(formulario) {
     var pendiente = document.getElementById("pendienteField");
     if (!Form.check())
         return false;
@@ -20,5 +20,5 @@ function pago_check() {
         alert('No puede pagar más del monto del pago programado');
         return false;
     }
-    return Form.checkSend('¿Desea registrar el pago?');
+    return Form.confirm(formulario, '¿Desea registrar el pago?');
 }
