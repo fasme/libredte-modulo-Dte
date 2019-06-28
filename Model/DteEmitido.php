@@ -465,7 +465,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el listado de correos a los que se debería enviar el
      * DTE (correo receptor, correo intercambio y correo del dte)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-12
+     * @version 2019-06-28
      */
     public function getEmails()
     {
@@ -484,7 +484,7 @@ class Model_DteEmitido extends Model_Base_Envio
                 $datos['Referencia'] = [$datos['Referencia']];
             }
             foreach ($datos['Referencia'] as $r) {
-                if (strpos($r['RazonRef'], 'Email receptor:')===0) {
+                if (!empty($r['RazonRef']) and strpos($r['RazonRef'], 'Email receptor:')===0) {
                     $aux = explode('Email receptor:', $r['RazonRef']);
                     if (!empty($aux[1])) {
                         $email_dte = strtolower(trim($aux[1]));
