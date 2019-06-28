@@ -937,7 +937,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-09-26
+     * @version 2019-06-28
      */
     private function guardarReceptor($datos)
     {
@@ -982,7 +982,7 @@ class Controller_Documentos extends \Controller_App
         }
         $Receptor->modificado = date('Y-m-d H:i:s');
         if (!$Receptor->save()) {
-            throw new \Exception('No fue posible guardar los datos del receptor');
+            throw new \Exception('Error al guardar receptor en la base de datos');
         }
         return $Receptor;
     }
