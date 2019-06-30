@@ -165,4 +165,156 @@ class Model_DteRecibidos extends \Model_Plural_App
         ', $vars);
     }
 
+    /**
+     * Método que entrega el detalle de las compras en un rango de tiempo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-06-30
+     */
+    public function getDetalle($desde, $hasta, $detalle)
+    {
+        if ($detalle) {
+            $detalle_items = ', dte_recibido_get_detalle(r.emisor, r.dte, r.folio, r.certificacion) AS detalle';
+        } else {
+            $detalle_items = '';
+        }
+        // realizar consulta
+        $datos = $this->db->getTable('
+            SELECT
+                t.codigo AS id,
+                t.tipo,
+                r.folio,
+                r.fecha,
+                '.$this->db->concat('e.rut', '-', 'e.dv').' AS rut,
+                e.razon_social,
+                r.exento,
+                r.neto,
+                r.iva,
+                r.total,
+                r.periodo,
+                r.sucursal_sii_receptor AS sucursal,
+                u.usuario,
+                r.rcv_accion,
+                r.tipo_transaccion
+                '.$detalle_items.'
+            FROM
+                dte_recibido AS r
+                JOIN dte_tipo AS t ON r.dte = t.codigo
+                JOIN contribuyente AS e ON r.emisor = e.rut
+                JOIN usuario AS u ON r.usuario = u.id
+            WHERE
+                r.receptor = :receptor
+                AND r.certificacion = :certificacion
+                AND r.fecha BETWEEN :desde AND :hasta
+            ORDER BY r.fecha, r.dte, r.folio
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        foreach ($datos as &$dato) {
+            $dato['id'] = 'T'.$dato['id'].'F'.$dato['folio'];
+        }
+        if ($detalle) {
+            $datos = \sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($datos, 15, 'items');
+        }
+        foreach ($datos as &$d) {
+            if ($detalle) {
+                $items = [];
+                foreach ($d['items'] as $isp) {
+                    $item = str_getcsv(trim($isp['detalle'], '()'));
+                    if ($item[3]) {
+                        $item[3] = $item[7];
+                        $item[7] = null;
+                    }
+                    $items[] = $item;
+                }
+                $d['items'] = $items;
+            }
+            $d['sucursal'] = $this->getContribuyente()->getSucursal($d['sucursal'])->sucursal;
+            if ($d['rcv_accion'] and !empty(\sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$d['rcv_accion']])) {
+                $d['rcv_accion'] = \sasco\LibreDTE\Sii\RegistroCompraVenta::$acciones[$d['rcv_accion']];
+            }
+            if ($d['tipo_transaccion'] and !empty(\sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones[$d['tipo_transaccion']])) {
+                $d['tipo_transaccion'] = \sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones[$d['tipo_transaccion']];
+            }
+        }
+        return $datos;
+    }
+
+    /**
+     * Método que entrega los totales de documentos emitidos por tipo de DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-09-24
+     */
+    public function getPorTipo($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT t.tipo, COUNT(*) AS total
+            FROM dte_recibido AS r JOIN dte_tipo AS t ON r.dte = t.codigo
+            WHERE
+                r.receptor = :receptor
+                AND r.certificacion = :certificacion
+                AND r.fecha BETWEEN :desde AND :hasta
+            GROUP BY t.tipo
+            ORDER BY total DESC
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    /**
+     * Método que entrega los totales de documentos emitidos por día
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-06-30
+     */
+    public function getPorDia($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT fecha AS dia, COUNT(*) AS total
+            FROM dte_recibido
+            WHERE
+                receptor = :receptor
+                AND certificacion = :certificacion
+                AND fecha BETWEEN :desde AND :hasta
+            GROUP BY fecha
+            ORDER BY fecha
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
+    /**
+     * Método que entrega los totales de documentos emitidos por sucursal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-06-30
+     */
+    public function getPorSucursal($desde, $hasta)
+    {
+        $datos = $this->db->getTable('
+            SELECT COALESCE(sucursal_sii_receptor, 0) AS sucursal, COUNT(*) AS total
+            FROM dte_recibido
+            WHERE
+                receptor = :receptor
+                AND certificacion = :certificacion
+                AND fecha BETWEEN :desde AND :hasta
+            GROUP BY sucursal
+            ORDER BY total DESC
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        foreach($datos as &$d) {
+            $d['sucursal'] = $this->getContribuyente()->getSucursal($d['sucursal'])->sucursal;
+        }
+        return $datos;
+    }
+
+    /**
+     * Método que entrega los totales de documentos emitidos por usuario
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-06-30
+     */
+    public function getPorUsuario($desde, $hasta)
+    {
+        return $this->db->getTable('
+            SELECT u.usuario, COUNT(*) AS total
+            FROM dte_recibido AS r JOIN usuario AS u ON r.usuario = u.id
+            WHERE
+                r.receptor = :receptor
+                AND r.certificacion = :certificacion
+                AND r.fecha BETWEEN :desde AND :hasta
+            GROUP BY u.usuario
+            ORDER BY total DESC
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+    }
+
 }

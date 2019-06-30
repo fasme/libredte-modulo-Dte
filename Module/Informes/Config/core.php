@@ -31,6 +31,11 @@ Configure::write('nav.module', array(
         'desc' => 'Informe de documentos emitidos',
         'icon' => 'fas fa-sign-out-alt',
     ],
+    '/dte_recibidos' => [
+        'name' => 'Gráficos y detalle documentos recibidos',
+        'desc' => 'Informe de documentos recibidos',
+        'icon' => 'fas fa-sign-in-alt',
+    ],
     '/despachos' => [
         'name' => 'Despachos diarios y mapa guías',
         'desc' => 'Informe diario de guías de despachos a realizar (incluye mapa)',
