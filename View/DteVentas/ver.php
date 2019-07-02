@@ -146,24 +146,43 @@ $total = [
 ];
 foreach ($resumen as &$r) {
     // sumar campos que se suman directamente
-    foreach (['TotDoc', 'TotAnulado', 'TotOpExe'] as $c)
+    foreach (['TotDoc', 'TotAnulado', 'TotOpExe'] as $c) {
         $total[$c] += $r[$c];
+    }
     // sumar o restar campos segun operación
     foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntTotal', 'TotMntNoFact', 'TotMntPeriodo'] as $c) {
-        if ($operaciones[$r['TpoDoc']]=='S')
+        if ($operaciones[$r['TpoDoc']]=='S') {
             $total[$c] += $r[$c];
-        else if ($operaciones[$r['TpoDoc']]=='R')
+        } else if ($operaciones[$r['TpoDoc']]=='R') {
             $total[$c] -= $r[$c];
+        }
+    }
+    // verificar si IVA boleta cuadra para mostrar alerta con explicación si no lo hace
+    if ($r['TpoDoc']==39) {
+        $iva_boleta = $r['TotMntIVA'];
+        $iva_boleta_segun_neto = round($r['TotMntNeto'] * 0.19);
+        $iva_boleta_segun_total = round(round($r['TotMntTotal'] / 1.19) * 0.19);
+        if ($iva_boleta != $iva_boleta_segun_neto or $iva_boleta != $iva_boleta_segun_total) {
+            $alerta_iva_boleta = '<sup><i class="fa fa-exclamation-triangle fa-fw text-warning"></i></sup>';
+        } else {
+            $alerta_iva_boleta = '';
+        }
     }
     // dar formato de número
     foreach ($r as &$v) {
-        if ($v)
+        if ($v) {
             $v = num($v);
+        }
+    }
+    // agregar alerta IVA boleta
+    if ($r['TpoDoc']==39 and $alerta_iva_boleta) {
+        $r['TotMntIVA'] .= ' '.$alerta_iva_boleta;
     }
 }
 foreach ($total as &$tot) {
-    if (is_numeric($tot))
+    if (is_numeric($tot)) {
         $tot = $tot>0 ? num($tot) : null;
+    }
 }
 $titulos = ['Tipo Doc.', '# docs', 'Anulados', 'Op. exen.', 'Exento', 'Neto', 'IVA', 'IVA propio', 'IVA terc.', 'Ley 18211', 'Monto total', 'No fact.', 'Total periodo'];
 array_unshift($resumen, $titulos);
@@ -171,7 +190,17 @@ $resumen[] = $total;
 $t = new \sowerphp\general\View_Helper_Table();
 $t->setShowEmptyCols(false);
 echo $t->generate($resumen);
+if (!empty($alerta_iva_boleta)) :
 ?>
+            <p class="small text-muted">
+                <i class="fa fa-exclamation-triangle fa-fw text-warning"></i>
+                El IVA de boletas no cuadra, esto podría ser "normal" dependiendo de los valores.
+                El IVA calculado a partir del neto es <?=num($iva_boleta_segun_neto)?> (<?=num($iva_boleta-$iva_boleta_segun_neto)?>) y el IVA calculado a partir del total es <?=num($iva_boleta_segun_total)?> (<?=num($iva_boleta-$iva_boleta_segun_total)?>).
+            </p>
+            <p class="small text-muted">
+                Para el cálculo del IVA total de las boletas se obtiene el IVA de cada boleta por separado y se aproxima a su valor entero. Luego se suman todos los IVAs obteniendo el valor final. Al haber una aproximación en el cálculo individual de cada IVA es que se produce la diferencia aquí indicada en el total.
+            </p>
+<?php endif; ?>
         </div>
     </div>
     <div class="card mb-4">
