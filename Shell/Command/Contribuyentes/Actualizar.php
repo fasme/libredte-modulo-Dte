@@ -148,9 +148,6 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             // agregar y/o actualizar datos del contribuyente si no tiene usuario administrador
             $modificado = false;
             list($rut, $dv) = explode('-', $c[0]);
-            if ($rut != 76013949) {
-                continue;
-            }
             $Contribuyente = new Model_Contribuyente($rut);
             $Contribuyente->dv = $dv;
             if (!$Contribuyente->usuario) {
