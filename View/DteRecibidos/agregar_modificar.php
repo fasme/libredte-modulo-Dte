@@ -8,7 +8,7 @@
     </li>
     <li class="nav-item">
         <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>', 750, 550)" title="Ver datos del registro de compra/venta en el SII" class="nav-link">
-            <i class="fa fa-eye"></i>
+            <i class="fa fa-book"></i>
             Ver RCV
         </a>
     </li>

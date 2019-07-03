@@ -16,7 +16,7 @@
 <?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
     <li class="nav-item">
         <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="nav-link">
-            <i class="fa fa-eye"></i>
+            <i class="fa fa-book"></i>
             Ver RCV
         </a>
     </li>
