@@ -25,8 +25,10 @@ namespace website\Dte;
 
 /**
  * Comando para actualizar los contribuyentes desde el SII
+ * Usa por defecto los servicios web de la versión oficial de LibreDTE o bien
+ * se puede usar el archivo CSV descargado directamente desde el SII
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-08-04
+ * @version 2019-07-02
  */
 class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
 {
@@ -34,7 +36,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-07-02
      */
     public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
     {
@@ -53,35 +55,13 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 $this->libredte($ambiente, $dia);
                 $this->corregir();
             } catch (\Exception $e) {
-                $this->sii($ambiente, $dia);
+                $this->out(
+                    '<error>'.$e->getMessage().'</error>'
+                );
             }
         }
         $this->showStats();
         return 0;
-    }
-
-    /**
-     * Método que descarga el listado de contribuyentes desde el SII y luego los pasa
-     * el método que los procesa y actualiza en la BD
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-26
-     */
-    private function sii($ambiente, $dia)
-    {
-        // obtener firma electrónica
-        try {
-            $Firma = new \sasco\LibreDTE\FirmaElectronica();
-        } catch (\sowerphp\core\Exception $e) {
-            $this->out('<error>No fue posible obtener la firma electrónica: '.$e->getMessage().'</error>');
-            return 1;
-        }
-        // obtener contribuyentes desde el SII
-        $contribuyentes = \sasco\LibreDTE\Sii::getContribuyentes($Firma, $ambiente, $dia);
-        if (!$contribuyentes) {
-            $this->out('<error>No fue posible obtener los contribuyentes desde el SII</error>');
-            return 2;
-        }
-        $this->procesarContribuyentes($contribuyentes);
     }
 
     /**
@@ -166,14 +146,20 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 $this->out('Procesando '.num($procesados).'/'.$registros.': contribuyente '.$c[1]);
             }
             // agregar y/o actualizar datos del contribuyente si no tiene usuario administrador
+            $modificado = false;
             list($rut, $dv) = explode('-', $c[0]);
+            if ($rut != 76013949) {
+                continue;
+            }
             $Contribuyente = new Model_Contribuyente($rut);
             $Contribuyente->dv = $dv;
             if (!$Contribuyente->usuario) {
-                $Contribuyente->razon_social = mb_substr(utf8_encode($c[1]), 0, 100);
+                $Contribuyente->razon_social = mb_substr($c[1], 0, 100);
+                $modificado = true;
             }
             if (is_numeric($c[2]) and $c[2]) {
                 $Contribuyente->config_ambiente_produccion_numero = (int)$c[2];
+                $modificado = true;
             }
             if (isset($c[3][9])) {
                 $aux = explode('-', $c[3]);
@@ -184,17 +170,21 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                     } else {
                         $Contribuyente->config_ambiente_certificacion_fecha = $Y.'-'.$m.'-'.$d;
                     }
+                    $modificado = true;
                 }
             }
             if (strpos($c[4], '@')) {
                 $Contribuyente->config_email_intercambio_user = $c[4];
+                $modificado = true;
             }
-            $Contribuyente->modificado = date('Y-m-d H:i:s');
-            try {
-                $Contribuyente->save();
-            } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-                if ($this->verbose) {
-                    $this->out('<error>Contribuyente '.$c[1].' no pudo ser guardado en la base de datos</error>');
+            if ($modificado) {
+                $Contribuyente->modificado = date('Y-m-d H:i:s');
+                try {
+                    $Contribuyente->save();
+                } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                    if ($this->verbose) {
+                        $this->out('<error>Contribuyente '.$c[1].' no pudo ser guardado en la base de datos</error>');
+                    }
                 }
             }
             unset($Contribuyente);
