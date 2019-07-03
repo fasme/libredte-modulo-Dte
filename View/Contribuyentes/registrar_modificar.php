@@ -262,7 +262,7 @@ echo $f->input([
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-info"></i>
-            Datos SII
+            Datos SII empresa
         </div>
         <div class="card-body">
 <?php
