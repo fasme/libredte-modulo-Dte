@@ -118,11 +118,11 @@ new \sowerphp\general\View_Helper_Table([
         <p>Aquí podrá generar y enviar la respuesta para los documentos que <?=$DteIntercambio->getEmisor()->razon_social?> envió a <?=$Emisor->razon_social?>.</p>
     </div>
     <div class="col-md-5 text-right">
-        <a class="btn btn-success btn-lg" href="#" onclick="intercambio_recibir(); return false" role="button" title="Generar el acuse de recido para los documentos">
-            Recibir
-        </a>
         <a class="btn btn-danger btn-lg" href="#" onclick="intercambio_reclamar(); return false" role="button" title="Rechazar los documentos">
             Reclamar
+        </a>
+        <a class="btn btn-success btn-lg" href="#" onclick="intercambio_recibir(); return false" role="button" title="Generar el acuse de recido para los documentos">
+            Recibir
         </a>
     </div>
 </div>
@@ -253,14 +253,27 @@ echo $f->end(false);
 
 <!-- INICIO AVANZADO -->
 <div role="tabpanel" class="tab-pane" id="avanzado" aria-labelledby="avanzado-tab">
-
+<?php if ($estado_enviodte==1) : ?>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-code"></i> Error validación de esquema del XML de EnvioDTE</div>
+    <div class="card-body">
+<?php debug(implode("\n\n", \sasco\LibreDTE\Log::readAll())); ?>
+    </div>
+</div>
+<?php endif; ?>
+<?php if ($estado_enviodte==2) : ?>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-certificate"></i> Error validación firma del XML de EnvioDTE</div>
+    <div class="card-body">
+        <p>Se encontró un error al validar la firma del XML de EnvioDTE.</p>
+    </div>
+</div>
+<?php endif; ?>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-file"></i> Documentos incluídos en el XML de EnvioDTE</div>
+    <div class="card-body">
 <?php
-if ($estado_enviodte==1) {
-    debug(implode("\n\n", \sasco\LibreDTE\Log::readAll()));
-    echo '<hr/>';
-}
-if ($_Auth->User->inGroup('soporte')) {
-    $tabla = [['DTE', 'Folio', 'Tasa', 'Fecha', 'Sucursal', 'Receptor', 'Razón social receptor', 'Exento', 'Neto', 'IVA', 'Total']];
+    $tabla = [['DTE', 'Folio', 'Tasa', 'Fecha', 'Sucursal', 'Receptor', 'Razón social receptor', 'Exento', 'Neto', 'IVA', 'Total', 'Firma']];
     foreach ($Documentos as $Dte) {
         $resumen = $Dte->getResumen();
         foreach (['MntExe', 'MntIVA', 'MntNeto', 'MntTotal'] as $monto) {
@@ -268,13 +281,14 @@ if ($_Auth->User->inGroup('soporte')) {
                 $resumen[$monto] = num($resumen[$monto]);
             }
         }
+        $resumen[] = '<div class="text-center"><i class="fa fa-'.($Dte->checkFirma() ? 'check text-success' : 'times text-danger').' fa-fw"></i></div>';
         $tabla[] = $resumen;
     }
     new \sowerphp\general\View_Helper_Table($tabla);
-    echo '<hr/>';
-}
 ?>
-<a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/eliminar/<?=$DteIntercambio->codigo?>" role="button" title="Eliminar intercambio" onclick="return Form.confirm(this, '¿Confirmar la eliminación del intercambio?')">
+    </div>
+</div>
+<a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_intercambios/eliminar/<?=$DteIntercambio->codigo?>" role="button" title="Eliminar intercambio" onclick="return Form.confirm(this, '¿Confirmar la eliminación del intercambio?<br/><br/><span class=\'small\'>Podrá recuperar el XML desde su correo de intercambio si existe ahí.</span>')">
     Eliminar archivo EnvioDTE de intercambio
 </a>
 </div>
