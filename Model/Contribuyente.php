@@ -1983,7 +1983,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos recibidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-12
+     * @version 2019-07-03
      */
     public function getDocumentosRecibidos($filtros = [])
     {
@@ -2020,9 +2020,31 @@ class Model_Contribuyente extends \Model_App
             $where[] = 'd.emisor = :emisor';
             $vars[':emisor'] = $filtros['emisor'];
         }
+        if (!empty($filtros['razon_social'])) {
+            $where[] = 'e.razon_social ILIKE :razon_social';
+            $vars[':razon_social'] = '%'.$filtros['razon_social'].'%';
+        }
+        // filtrar por fechas
         if (!empty($filtros['periodo'])) {
             $where[] = $this->db->date('Ym', 'd.fecha').' = :periodo';
             $vars[':periodo'] = $filtros['periodo'];
+        }
+        if (!empty($filtros['fecha_desde'])) {
+            $where[] = 'd.fecha >= :fecha_desde';
+            $vars[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+        if (!empty($filtros['fecha_hasta'])) {
+            $where[] = 'd.fecha <= :fecha_hasta';
+            $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+        // filtrar por montos
+        if (!empty($filtros['total_desde'])) {
+            $where[] = 'd.total >= :total_desde';
+            $vars[':total_desde'] = $filtros['total_desde'];
+        }
+        if (!empty($filtros['total_hasta'])) {
+            $where[] = 'd.total <= :total_hasta';
+            $vars[':total_hasta'] = $filtros['total_hasta'];
         }
         // armar consulta
         $query = '

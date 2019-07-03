@@ -511,7 +511,72 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
+     * Acción que permite realizar una búsqueda avanzada dentro de los DTE
+     * recibidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-02
+     */
+    public function buscar()
+    {
+        $Receptor = $this->getContribuyente();
+        $this->set([
+            'tipos_dte' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
+        ]);
+        if (isset($_POST['submit'])) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User->hash);
+            $response = $rest->post($this->request->url.'/api/dte/dte_recibidos/buscar/'.$Receptor->rut, [
+                'dte' => $_POST['dte'],
+                'emisor' => $_POST['emisor'],
+                'razon_social' => $_POST['razon_social'],
+                'fecha_desde' => $_POST['fecha_desde'],
+                'fecha_hasta' => $_POST['fecha_hasta'],
+                'total_desde' => $_POST['total_desde'],
+                'total_hasta' => $_POST['total_hasta'],
+            ]);
+            if ($response===false) {
+                \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+            }
+            else if ($response['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            }
+            else {
+                $this->set([
+                    'Receptor' => $Receptor,
+                    'documentos' => $response['body'],
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Acción de la API que permite realizar una búsqueda avanzada dentro de los
+     * DTEs recibidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-02
+     */
+    public function _api_buscar_POST($receptor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // verificar permisos del usuario autenticado sobre el receptor del DTE
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/buscar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // buscar documentos
+        $this->Api->send($Receptor->getDocumentosRecibidos($this->Api->data, true), 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
      * Acción de la API que permite buscar dentro de los documentos recibidos
+     * @deprecated Este método se debe dejar de usar y será reemplazado con la versión por POST
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-01-11
      */

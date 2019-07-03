@@ -25,6 +25,11 @@
             <i class="fa fa-plus"></i> Agregar documento
         </a>
     </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_recibidos/buscar" title="Búsqueda avanzada de documentos recibidos" class="nav-link">
+            <i class="fa fa-search"></i> Buscar
+        </a>
+    </li>
 </ul>
 
 <div class="page-header"><h1>Documentos recibidos</h1></div>
