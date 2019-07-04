@@ -51,7 +51,7 @@ if (isset($documentos)) {
         $d[] = $acciones;
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d['total'] = num($d['total']);
-        unset($d['dte'], $d['intercambio']);
+        unset($d['receptor'], $d['dte'], $d['intercambio']);
     }
     // agregar resumen
     echo '<div class="card mt-4 mb-4"><div class="card-body lead text-center">Se encontraron '.num(count($documentos)).' documentos por un total de $'.num($total).'.-</div></div>';

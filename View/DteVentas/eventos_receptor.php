@@ -15,7 +15,7 @@ foreach ($documentos as &$d) {
     $d[] = $acciones;
     $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
     $d['total'] = num($d['total']);
-    unset($d['dte'], $d['intercambio']);
+    unset($d['receptor'], $d['dte'], $d['intercambio']);
 }
 array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Sucursal', 'Usuario', 'Acciones']);
 $t = new \sowerphp\general\View_Helper_Table();

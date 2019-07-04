@@ -6,7 +6,7 @@
     </li>
 </ul>
 <div class="page-header"><h1>Asignación tipo de transacciones del período <?=$periodo?></h1></div>
-<p>Aquí puede hacer una búsqueda de los documentos emitidos y realizar la asignación del tipo de transacción.</p>
+<p>Aquí puede hacer una búsqueda de los documentos recibidos en el período <?=$periodo?> y realizar la asignación del tipo de transacción.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Form.check()']);

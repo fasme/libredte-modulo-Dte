@@ -1204,7 +1204,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-04-05
+     * @version 2019-07-04
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1331,6 +1331,7 @@ class Model_Contribuyente extends \Model_App
                 e.dte,
                 e.tipo,
                 e.folio,
+                d.receptor,
                 CASE WHEN e.dte NOT IN (110, 111, 112) THEN e.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
                 d.fecha,
                 d.total,
@@ -1983,7 +1984,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos recibidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-03
+     * @version 2019-07-04
      */
     public function getDocumentosRecibidos($filtros = [])
     {
@@ -2048,7 +2049,7 @@ class Model_Contribuyente extends \Model_App
         }
         // armar consulta
         $query = '
-            SELECT d.dte, t.tipo, d.folio, e.razon_social, d.fecha, d.total, d.intercambio, u.usuario, d.emisor
+            SELECT d.dte, t.tipo, d.folio, d.emisor, e.razon_social, d.fecha, d.total, d.intercambio, u.usuario, d.emisor
             FROM dte_recibido AS d, dte_tipo AS t, contribuyente AS e, usuario AS u
             WHERE d.dte = t.codigo AND d.emisor = e.rut AND d.usuario = u.id AND '.implode(' AND ', $where).'
             ORDER BY d.fecha DESC, t.tipo, e.razon_social
