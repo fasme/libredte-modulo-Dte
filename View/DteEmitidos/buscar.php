@@ -41,15 +41,21 @@ echo $f->input([
 echo $f->end(false);
 // mostrar documentos
 if (isset($documentos)) {
-    echo '<hr/>';
+    // procesar documentos
+    $total = 0;
     foreach ($documentos as &$d) {
+        $filename = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.pdf';
+        $total += $d['total'];
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary" download="'.$filename.'" data-click="pdf"><i class="far fa-file-pdf fa-fw"></i></a>';
         $d[] = $acciones;
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d['total'] = num($d['total']);
         unset($d['dte'], $d['intercambio']);
     }
+    // agregar resumen
+    echo '<div class="card mt-4 mb-4"><div class="card-body lead text-center">Se encontraron '.num(count($documentos)).' documentos por un total de $'.num($total).'.-</div></div>';
+    // agregar tabla
     array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Sucursal', 'Usuario', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setColsWidth([null, null, null, null, null, null, null, null, 110]);
