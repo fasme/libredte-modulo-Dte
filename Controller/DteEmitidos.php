@@ -986,6 +986,35 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite usar la verificación avanzada de datos del DTE
+     * Permite validar firma con la enviada al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-04
+     */
+    public function verificar_datos_avanzado($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            die('No existe el DTE solicitado');
+        }
+        $DTE = $DteEmitido->getDte();
+        $r = $this->consume('/api/dte/dte_emitidos/estado/'.$dte.'/'.$folio.'/'.$Emisor->rut.'?avanzado=1');
+        if ($r['status']['code']!=200) {
+            die('Error al obtener el estado: '.$r['body']);
+        }
+        $this->layout .= '.min';
+        $this->set([
+            'Emisor' => $Emisor,
+            'Receptor' => $DteEmitido->getReceptor(),
+            'DteTipo' => $DteEmitido->getTipo(),
+            'Documento' => $DteEmitido,
+            'estado' => $r['body'],
+        ]);
+    }
+
+    /**
      * Acción que permite cargar un archivo XML como DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-07-01

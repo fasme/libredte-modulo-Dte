@@ -120,7 +120,8 @@ new \sowerphp\general\View_Helper_Table([
 <?php if ($DteEmitido->track_id!=-1) : ?>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$DteEmitido->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
 <?php endif; ?>
-                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/verificar_datos_avanzado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 750)" title="Verificar datos avanzados del documento con el servicio web del SII">verificación avanzada en SII</a>
 <?php if (substr($DteEmitido->revision_estado,0,3)=='RFR') : ?>
                             <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" onclick="return Form.confirm(this, '¿Confirmar el reenvío del DTE al SII?')">reenviar DTE al SII</a>
