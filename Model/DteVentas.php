@@ -41,11 +41,11 @@ class Model_DteVentas extends \Model_Plural_App
     /**
      * Método que indica si el libro para cierto periodo está o no generado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-14
+     * @version 2019-07-05
      */
     public function libroGenerado($periodo)
     {
-        return $this->getValue('
+        return $this->db->getValue('
             SELECT COUNT(*)
             FROM dte_venta
             WHERE emisor = :emisor AND periodo = :periodo AND certificacion = :certificacion AND track_id IS NOT NULL
