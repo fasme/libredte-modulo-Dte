@@ -57,11 +57,8 @@ $(function() {
 <?php if ($DteEmitido->getTipo()->permiteIntercambio()): ?>
         <li class="nav-item"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab" id="intercambio-tab" class="nav-link">Resultado intercambio</a></li>
 <?php endif; ?>
-<?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
-        <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
-<?php endif; ?>
 <?php if ($DteEmitido->getTipo()->operacion=='S'): ?>
-        <li class="nav-item"><a href="#cobranza" aria-controls="cobranza" role="tab" data-toggle="tab" id="cobranza-tab" class="nav-link">Cobranza</a></li>
+        <li class="nav-item"><a href="#pagos" aria-controls="pagos" role="tab" data-toggle="tab" id="pagos-tab" class="nav-link">Pagos</a></li>
 <?php endif; ?>
         <li class="nav-item"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab" id="referencias-tab" class="nav-link">Referencias</a></li>
 <?php if ($DteEmitido->getTipo()->cedible) : ?>
@@ -356,25 +353,32 @@ if ($Resultado) {
 <!-- FIN INTERCAMBIO -->
 <?php endif; ?>
 
+<?php if ($DteEmitido->getTipo()->operacion=='S'): ?>
+<!-- INICIO PAGOS -->
+<div role="tabpanel" class="tab-pane" id="pagos" aria-labelledby="pagos-tab">
 <?php if ($DteEmitido->getTipo()->permiteCobro()): ?>
-<!-- INICIO PAGAR -->
-<div role="tabpanel" class="tab-pane" id="pagar" aria-labelledby="pagar-tab">
+<!-- módulo Pagos -->
+<div class="card mb-4">
+    <div class="card-header">
+        Pagos y cobros de LibreDTE
+    </div>
+    <div class="card-body">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
 <?php if (!$Cobro->pagado) : ?>
-<div class="row">
-    <div class="col-sm-6 mb-2">
-        <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
-            Registrar pago
-        </a>
-    </div>
-    <div class="col-sm-6 mb-2">
-        <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
-            Enlace público para pagar
-        </a>
-    </div>
-</div>
+        <div class="row">
+            <div class="col-sm-6 mb-2">
+                <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+                    Registrar pago
+                </a>
+            </div>
+            <div class="col-sm-6 mb-2">
+                <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
+                    Enlace público para pagar
+                </a>
+            </div>
+        </div>
 <?php else: ?>
-<p>El documento se encuentra pagado con fecha <strong><?=\sowerphp\general\Utility_Date::format($Cobro->pagado)?></strong> usando el medio de pago <strong><?=$Cobro->getMedioPago()->getNombre()?></strong>.</p>
+        <p>El documento se encuentra pagado con fecha <strong><?=\sowerphp\general\Utility_Date::format($Cobro->pagado)?></strong> usando el medio de pago <strong><?=$Cobro->getMedioPago()->getNombre()?></strong>.</p>
 <?php
 if ($Cobro->datos) {
     $datos = $Cobro->getDatosNormalizados();
@@ -387,23 +391,25 @@ if ($Cobro->datos) {
     }
 }
 ?>
-<?php if (!empty($Emisor->config_api_servicios->pagos_notificar->url)) : ?>
-<hr/>
-<a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/pagos/cobros/notificar_pago/<?=$Cobro->codigo?>" role="button" title="Notificar pago a <?=$Emisor->config_api_servicios->pagos_notificar->url?>">
-    Notificar pago a servicio web del emisor
-</a>
+        <?php if (!empty($Emisor->config_api_servicios->pagos_notificar->url)) : ?>
+        <hr/>
+        <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/pagos/cobros/notificar_pago/<?=$Cobro->codigo?>" role="button" title="Notificar pago a <?=$Emisor->config_api_servicios->pagos_notificar->url?>">
+            Notificar pago a servicio web del emisor
+        </a>
 <?php endif; ?>
 <?php endif; ?>
 <?php else : ?>
-<p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
+        <p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
 <?php endif; ?>
+    </div>
 </div>
-<!-- FIN PAGAR -->
 <?php endif; ?>
-
-<?php if ($DteEmitido->getTipo()->operacion=='S'): ?>
-<!-- INICIO COBRANZA -->
-<div role="tabpanel" class="tab-pane" id="cobranza" aria-labelledby="cobranza-tab">
+<!-- módulo Cobranza -->
+<div class="card mb-4">
+    <div class="card-header">
+        Cobranza de ventas a crédito
+    </div>
+    <div class="card-body">
 <?php
 $cobranza = $DteEmitido->getCobranza();
 if ($cobranza) {
@@ -425,8 +431,10 @@ if ($cobranza) {
     echo '<p>No hay pagos programados por ventas a crédito para este documento.</p>',"\n";
 }
 ?>
+    </div>
 </div>
-<!-- FIN COBRANZA -->
+</div>
+<!-- FIN PAGOS -->
 <?php endif; ?>
 
 <!-- INICIO REFERENCIAS -->
