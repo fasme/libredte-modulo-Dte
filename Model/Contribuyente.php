@@ -1204,7 +1204,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-04
+     * @version 2019-07-06
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1290,6 +1290,9 @@ class Model_Contribuyente extends \Model_App
                 $where[] = 'd.receptor_evento IS NULL';
             }
         }
+        if (!empty($filtros['cedido'])) {
+            $where[] = 'd.cesion_track_id IS NOT NULL';
+        }
         // si se debe hacer búsqueda dentro de los XML
         if (!empty($filtros['xml'])) {
             $i = 1;
@@ -1349,7 +1352,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el total de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-07-04
+     * @version 2019-07-06
      */
     public function countDocumentosEmitidos($filtros = [])
     {
@@ -1393,7 +1396,7 @@ class Model_Contribuyente extends \Model_App
                 $vars[':receptor'] = $filtros['receptor'];
             }
         }
-        // otros filtros
+        // filtros fecha
         if (!empty($filtros['fecha_desde'])) {
             $where[] = 'd.fecha >= :fecha_desde';
             $vars[':fecha_desde'] = $filtros['fecha_desde'];
@@ -1402,6 +1405,11 @@ class Model_Contribuyente extends \Model_App
             $where[] = 'd.fecha <= :fecha_hasta';
             $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
+        // documento cedido
+        if (!empty($filtros['cedido'])) {
+            $where[] = 'd.cesion_track_id IS NOT NULL';
+        }
+        // contar documentos emitidos
         return $this->db->getValue(
             'SELECT COUNT(*) FROM dte_emitido AS d WHERE '.implode(' AND ', $where),
             $vars

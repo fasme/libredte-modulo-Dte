@@ -76,6 +76,11 @@
         'desc' => 'Reporte de consumo de folios de boletas',
         'icon' => 'fa fa-archive',
     ],
+    '/cesiones/listar' => [
+        'name' => 'Cesiones',
+        'desc' => 'Cesiones de documentos tributarios electrónicos',
+        'icon' => 'fas fa-external-link-square-alt',
+    ],
     '/cobranzas/cobranzas/buscar' => [
         'name' => 'Pagos programados',
         'desc' => 'Buscar pagos programados ventas a crédito',
