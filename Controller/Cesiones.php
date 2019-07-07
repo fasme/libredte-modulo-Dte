@@ -118,10 +118,15 @@ class Controller_Cesiones extends \Controller_App
                 ],
             ];
             $certificacion = (int)$Contribuyente->config_ambiente_en_certificacion;
-            $response = libredte_consume(
-                '/sii/rtc_cesiones_periodo/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$consulta_codigo.'/json?certificacion='.$certificacion,
-                $data
-            );
+            try {
+                $response = libredte_consume(
+                    '/sii/rtc_cesiones_periodo/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$consulta_codigo.'/json?certificacion='.$certificacion,
+                    $data
+                );
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                return;
+            }
             if ($response['status']['code']!=200) {
                 \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
                 return;
