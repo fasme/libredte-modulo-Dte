@@ -27,12 +27,15 @@ echo $f->begin(['onsubmit'=>'Form.check()']);
 echo $f->end(false);
 // mostrar documentos
 if (isset($documentos)) {
-    echo '<hr/>';
+    // procesar documentos
+    $total = 0;
     $aux = $documentos;
     $documentos = [['Receptor', 'RUT', 'Documento', 'Folio', 'Fecha', 'Total', 'Acciones']];
     foreach ($aux as &$d) {
-        $acciones = '<a href="'.$_base.'/dte/dte_tmps/ver/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'" title="Ver documento"><span class="fa fa-search fa-fw"></span></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/pdf/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento"><span class="far fa-file-pdf fa-fw"></span></a>';
+        $filename = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_'.$d['codigo'].'.pdf';
+        $total += $d['total'];
+        $acciones = '<a href="'.$_base.'/dte/dte_tmps/ver/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'" title="Ver documento" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_tmps/pdf/'.$d['receptor'].'/'.$d['dte'].'/'.$d['codigo'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary" download="'.$filename.'" data-click="pdf"><i class="far fa-file-pdf fa-fw"></i></a>';
         $documentos[] = [
             $d['razon_social'],
             $d['receptor'].'-'.\sowerphp\app\Utility_Rut::dv($d['receptor']),
@@ -43,8 +46,11 @@ if (isset($documentos)) {
             $acciones
         ];
     }
+    // agregar resumen
+    echo '<div class="card mt-4 mb-4"><div class="card-body lead text-center">Se encontraron '.num(count($aux)).' documentos por un total de $'.num($total).'.-</div></div>';
+    // agregar tabla
     $t = new \sowerphp\general\View_Helper_Table();
-    $t->setColsWidth([null, null, null, null, null, null, 100]);
+    $t->setColsWidth([null, null, null, null, null, null, 110]);
     $t->setId('dte_tmps_'.$Emisor->rut);
     $t->setExport(true);
     echo $t->generate($documentos);
