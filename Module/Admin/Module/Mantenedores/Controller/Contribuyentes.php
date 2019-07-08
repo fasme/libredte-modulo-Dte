@@ -59,15 +59,15 @@ class Controller_Contribuyentes extends \Controller_Maintainer
                 }
                 $actualizado = false;
                 if ((empty($Contribuyente->razon_social) or in_array($Contribuyente->razon_social, [$Contribuyente->getRUT(), $Contribuyente->rut.'-'.$Contribuyente->dv])) and !empty($c[1])) {
-                    $Contribuyente->razon_social = substr(trim($c[1]), 0, 100);
+                    $Contribuyente->razon_social = mb_substr(trim($c[1]), 0, 100);
                     $actualizado = true;
                 }
                 if (empty($Contribuyente->giro) and !empty($c[2])) {
-                    $Contribuyente->giro = substr(trim($c[2]), 0, 80);
+                    $Contribuyente->giro = mb_substr(trim($c[2]), 0, 80);
                     $actualizado = true;
                 }
                 if (empty($Contribuyente->direccion) and !empty($c[3])) {
-                    $Contribuyente->direccion = substr(trim($c[3]), 0, 70);
+                    $Contribuyente->direccion = mb_substr(trim($c[3]), 0, 70);
                     $actualizado = true;
                 }
                 if (empty($Contribuyente->comuna) and !empty($c[4])) {
@@ -83,11 +83,11 @@ class Controller_Contribuyentes extends \Controller_Maintainer
                     }
                 }
                 if (empty($Contribuyente->email) and !empty($c[5])) {
-                    $Contribuyente->email = substr(trim($c[5]), 0, 80);
+                    $Contribuyente->email = mb_substr(trim($c[5]), 0, 80);
                     $actualizado = true;
                 }
                 if (empty($Contribuyente->telefono) and !empty($c[6])) {
-                    $Contribuyente->telefono = substr(trim($c[6]), 0, 20);
+                    $Contribuyente->telefono = mb_substr(trim($c[6]), 0, 20);
                     $actualizado = true;
                 }
                 if (empty($Contribuyente->actividad_economica) and !empty($c[7])) {
