@@ -221,6 +221,17 @@ echo $f->input([
 ]);
 echo $f->input(['type'=>'select', 'name'=>'cotizacion', 'label'=>'Enviar', 'options'=>['Previsualización', 'Cotización'], 'value'=>1]);
 echo $f->end('Enviar PDF por email');
+$email_enviados = $DteTmp->getEmailEnviadosResumen();
+if ($email_enviados) {
+    echo '<hr/>';
+    foreach ($email_enviados as &$e) {
+        $e['enviados'] = num($e['enviados']);
+        $e['primer_envio'] = \sowerphp\general\Utility_Date::format($e['primer_envio'], 'H:i \e\l d/m/Y');
+        $e['ultimo_envio'] = \sowerphp\general\Utility_Date::format($e['ultimo_envio'], 'H:i \e\l d/m/Y');
+    }
+    array_unshift($email_enviados, ['Email', 'Cantidad de envíos', 'Primer envío', 'Último envío']);
+    new \sowerphp\general\View_Helper_Table($email_enviados);
+}
 ?>
 </div>
 <!-- FIN ENVIAR POR EMAIL -->

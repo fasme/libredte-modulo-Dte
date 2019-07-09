@@ -222,6 +222,21 @@ CREATE TABLE dte_tmp (
 CREATE INDEX dte_tmp_sucursal_sii_idx ON dte_tmp (sucursal_sii);
 CREATE INDEX dte_tmp_usuario_idx ON dte_tmp (usuario);
 
+-- tabla para los correos de los DTE temporales
+DROP TABLE IF EXISTS dte_tmp_email CASCADE;
+CREATE TABLE dte_tmp_email (
+    emisor INTEGER NOT NULL,
+    receptor INTEGER NOT NULL,
+    dte SMALLINT NOT NULL,
+    codigo CHAR(32) NOT NULL,
+    email VARCHAR(80) NOT NULL,
+    fecha_hora TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT dte_tmp_email_pk PRIMARY KEY (emisor, receptor, dte, codigo, email, fecha_hora),
+    CONSTRAINT dte_tmp_email_dte_tmp_fk FOREIGN KEY (emisor, receptor, dte, codigo)
+        REFERENCES dte_tmp (emisor, receptor, dte, codigo) MATCH FULL
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 -- tabla para dte emitido
 DROP TABLE IF EXISTS dte_emitido CASCADE;
 CREATE TABLE dte_emitido (
