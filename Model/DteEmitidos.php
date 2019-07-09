@@ -170,13 +170,13 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega los totales de documentos emitidos por hora
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2019-07-09
      */
     public function getPorHora($desde, $hasta)
     {
         $hora = $this->db->xml('xml', '/*/SetDTE/Caratula/TmstFirmaEnv', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
-            SELECT SUBSTR('.$hora.', 12, 2) AS hora, COUNT(*) AS total
+            SELECT ('.$this->db->concat('SUBSTR('.$hora.', 12, 2)', '\':00\'').') AS hora, COUNT(*) AS total
             FROM dte_emitido
             WHERE
                 emisor = :emisor

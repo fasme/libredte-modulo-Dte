@@ -35,7 +35,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción principal del informe de ventas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-24
+     * @version 2019-07-09
      */
     public function index()
     {
@@ -49,10 +49,14 @@ class Controller_DteEmitidos extends \Controller_App
         ]);
         if (isset($_POST['submit'])) {
             $DteEmitidos = (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor);
+            $emitidos_por_hora = $DteEmitidos->getPorHora($desde, $hasta);
+            foreach ($emitidos_por_hora as &$e) {
+                $e['hora'] = '0000-00-00 '.$e['hora'];
+            }
             $this->set([
                 'por_tipo' => $DteEmitidos->getPorTipo($desde, $hasta),
                 'por_dia' => $DteEmitidos->getPorDia($desde, $hasta),
-                'por_hora' => $DteEmitidos->getPorHora($desde, $hasta),
+                'por_hora' => $emitidos_por_hora,
                 'por_sucursal' => $DteEmitidos->getPorSucursal($desde, $hasta),
                 'por_usuario' => $DteEmitidos->getPorUsuario($desde, $hasta),
                 'por_nacionalidad' => $DteEmitidos->getPorNacionalidad($desde, $hasta),

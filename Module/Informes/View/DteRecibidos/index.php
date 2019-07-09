@@ -69,16 +69,17 @@ Morris.Line({
     data: <?=json_encode($por_dia)?>,
     xkey: 'dia',
     ykeys: ['total'],
-    labels: ['DTEs'],
+    labels: ['Documentos'],
+    xLabels: 'day',
     resize: true,
-    parseTime: false
+    xLabelAngle: 45
 });
 Morris.Bar({
     element: 'grafico-por_sucursal',
     data: <?=json_encode($por_sucursal)?>,
     xkey: 'sucursal',
     ykeys: ['total'],
-    labels: ['DTEs'],
+    labels: ['Documentos'],
     resize: true
 });
 Morris.Bar({
@@ -86,7 +87,7 @@ Morris.Bar({
     data: <?=json_encode($por_usuario)?>,
     xkey: 'usuario',
     ykeys: ['total'],
-    labels: ['DTEs'],
+    labels: ['Documentos'],
     resize: true
 });
 Morris.Bar({
@@ -94,7 +95,7 @@ Morris.Bar({
     data: <?=json_encode($por_tipo)?>,
     xkey: 'tipo',
     ykeys: ['total'],
-    labels: ['DTEs'],
+    labels: ['Documentos'],
     resize: true
 });
 </script>
