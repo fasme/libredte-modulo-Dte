@@ -32,7 +32,7 @@
     <li>Descripción del item (opcional)</li>
     <li>Cantidad del item (obligatorio)</li>
     <li>Unidad del item (opcional)</li>
-    <li>Precio del item: monto neto si es factura (sin IVA), monto bruto si es boleta (con IVA) (obligatorio)</li>
+    <li>Precio del item: monto bruto si es boleta (con IVA), cualquier otro documento monto neto (sin IVA) (obligatorio)</li>
     <li>Descuento del item: puede ser 0.5 para indicar 50% de descuento un un monto mayor o igual a 1 para indicar descuento en cantidad (opcional)</li>
     <li>Observación del documento (opcional)</li>
     <li>Fecha período desde: en formato AAAA-MM-DD (opcional)</li>
