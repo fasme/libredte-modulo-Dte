@@ -63,7 +63,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Acción que muestra la página del documento temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-07-09
      */
     public function ver($receptor, $dte, $codigo)
     {
@@ -81,6 +81,7 @@ class Controller_DteTmps extends \Controller_App
             'Emisor' => $Emisor,
             'Receptor' => $DteTmp->getReceptor(),
             'DteTmp' => $DteTmp,
+            'datos' => $DteTmp->getDatos(),
             'emails' => $DteTmp->getEmails(),
             'email_html' => $Emisor->getEmailFromTemplate('dte'),
         ]);

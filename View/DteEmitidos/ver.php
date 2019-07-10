@@ -74,8 +74,18 @@ $(function() {
         <div class="col-md-<?=$enviar_sii?9:12?>">
 <?php
 new \sowerphp\general\View_Helper_Table([
-    ['Documento', 'Folio', 'Fecha', 'Receptor', 'Exento', 'Neto', 'IVA', 'Total'],
-    [$DteEmitido->getTipo()->tipo, $DteEmitido->folio, \sowerphp\general\Utility_Date::format($DteEmitido->fecha), $Receptor->razon_social, num($DteEmitido->exento), num($DteEmitido->neto), num($DteEmitido->iva), num($DteEmitido->total)],
+    ['Documento', 'Folio', 'Fecha', 'Vencimiento', 'Receptor', 'Exento', 'Neto', 'IVA', 'Total'],
+    [
+        $DteEmitido->getTipo()->tipo,
+        $DteEmitido->folio,
+        \sowerphp\general\Utility_Date::format($DteEmitido->fecha),
+        !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? \sowerphp\general\Utility_Date::format($datos['Encabezado']['IdDoc']['FchVenc']) : 'Sin vencimiento',
+        $Receptor->razon_social,
+        num($DteEmitido->exento),
+        num($DteEmitido->neto),
+        num($DteEmitido->iva),
+        num($DteEmitido->total)
+    ],
 ]);
 ?>
             <div class="row mt-2">
@@ -381,10 +391,10 @@ if ($Resultado) {
         <p>El documento se encuentra pagado con fecha <strong><?=\sowerphp\general\Utility_Date::format($Cobro->pagado)?></strong> usando el medio de pago <strong><?=$Cobro->getMedioPago()->getNombre()?></strong>.</p>
 <?php
 if ($Cobro->datos) {
-    $datos = $Cobro->getDatosNormalizados();
-    if ($datos) {
+    $datos_cobro = $Cobro->getDatosNormalizados();
+    if ($datos_cobro) {
         echo '<hr/><table class="table table-striped"><tbody>';
-        foreach($datos as $dato => $valor) {
+        foreach($datos_cobro as $dato => $valor) {
             echo '<tr><th>',$dato,'</th><td>',$valor,'</td></tr>';
         }
         echo '</tbody></table>',"\n";
