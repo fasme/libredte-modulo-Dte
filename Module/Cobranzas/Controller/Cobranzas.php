@@ -78,7 +78,7 @@ class Controller_Cobranzas extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message(
                 'Pago programado solicitado no existe', 'error'
             );
-            $this->redirect('/dte/cobranzas/buscar');
+            $this->redirect('/dte/cobranzas/cobranzas/buscar');
         }
         $this->set([
             '_header_extra' => ['js'=>['/dte/cobranzas/js/cobranzas.js']],
@@ -94,7 +94,7 @@ class Controller_Cobranzas extends \Controller_App
                 \sowerphp\core\Model_Datasource_Session::message(
                     'Pago registrado exitosamente', 'ok'
                 );
-                $this->redirect('/dte/dte_emitidos/ver/'.$Pago->dte.'/'.$Pago->folio.'#cobranza');
+                $this->redirect('/dte/dte_emitidos/ver/'.$Pago->dte.'/'.$Pago->folio.'#pagos');
             } else {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'No fue posible guardar el pago', 'error'
@@ -102,4 +102,46 @@ class Controller_Cobranzas extends \Controller_App
             }
         }
     }
+
+    /**
+     * Acción que permite eliminar un cobro programado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-10
+     */
+    public function eliminar($dte, $folio, $fecha)
+    {
+        $Emisor = $this->getContribuyente();
+        $Pago = new Model_Cobranza($Emisor->rut, $dte, $folio, $Emisor->config_ambiente_en_certificacion, $fecha);
+        if (!$Pago->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Pago programado solicitado no existe', 'error'
+            );
+            $this->redirect('/dte/cobranzas/cobranzas/buscar');
+        }
+        if ($Pago->pagado == $Pago->monto) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El pago programado se encuentra pagado totalmente, no se puede eliminar', 'error'
+            );
+            $this->redirect(str_replace('/eliminar/', '/ver/', $this->request->request));
+        }
+        if ($Pago->pagado) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El pago programado tiene un abono, no se puede eliminar', 'error'
+            );
+            $this->redirect(str_replace('/eliminar/', '/ver/', $this->request->request));
+        }
+        try {
+            $Pago->delete();
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Cobro programado eliminado', 'ok'
+            );
+            $this->redirect('/dte/dte_emitidos/ver/'.$Pago->dte.'/'.$Pago->folio.'#pagos');
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible eliminar el cobro programado: '.$e->getMessage(), 'error'
+            );
+            $this->redirect(str_replace('/eliminar/', '/ver/', $this->request->request));
+        }
+    }
+
 }
