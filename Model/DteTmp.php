@@ -281,7 +281,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-26
+     * @version 2019-07-11
      */
     public function generar($user_id = null, $fecha_emision = null)
     {
@@ -385,6 +385,28 @@ class Model_DteTmp extends \Model_App
                     // si es nota de crédito asociada a boleta se recuerda por si se debe invalidar RCOF
                     if ($DteEmitido->dte==61 and in_array($referencia['TpoDocRef'], [39, 41])) {
                         $nc_referencia_boleta = true;
+                    }
+                    // si es nota de crédito que anula un DTE con cobro programado se borra el cobro programado
+                    if (in_array($DteEmitido->dte, [61,112]) and $DteReferencia->codigo==1) {
+                        $DteEmitidoReferencia = $DteReferencia->getDocumento();
+                        if ($DteEmitidoReferencia->exists()) {
+                            $pagos = $DteEmitidoReferencia->getPagosProgramados();
+                            if ($pagos) {
+                                try {
+                                    $this->db->query(
+                                        'DELETE FROM cobranza WHERE emisor = :emisor AND dte = :dte AND folio = :folio AND certificacion = :certificacion',
+                                        [
+                                            ':emisor' => $DteEmitidoReferencia->emisor,
+                                            ':dte' => $DteEmitidoReferencia->dte,
+                                            ':folio' => $DteEmitidoReferencia->folio,
+                                            ':certificacion' => $DteEmitidoReferencia->certificacion,
+                                        ]
+                                    );
+                                } catch (\Exception $e) {
+                                    // fallo silencioso (se tendría que borrar a mano en el módulo de cobranza)
+                                }
+                            }
+                        }
                     }
                 }
             }

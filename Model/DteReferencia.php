@@ -150,4 +150,14 @@ class Model_DteReferencia extends \Model_App
         'Model_DteReferenciaTipo' => 'website\Dte'
     ); ///< Namespaces que utiliza esta clase
 
+    /**
+     * Método que entrega el documento asociado a la referencia
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-11
+     */
+    public function getDocumento()
+    {
+        return (new Model_DteEmitidos())->get($this->emisor, $this->referencia_dte, $this->referencia_folio, (int)$this->certificacion);
+    }
+
 }
