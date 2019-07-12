@@ -27,8 +27,6 @@ namespace website\Dte;
  * Clase que permite encriptar/desencriptar datos que son almacenados en la base
  * de datos
  *
- * Requiere php5-mcrypt
- *
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
  * @version 2016-01-26
  */
