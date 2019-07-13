@@ -21,4 +21,6 @@ CREATE TABLE dte_tmp_email (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+UPDATE contribuyente_config SET configuracion = 'apps' WHERE configuracion = 'respaldos' AND variable = 'dropbox';
+
 COMMIT;

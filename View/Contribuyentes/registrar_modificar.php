@@ -40,7 +40,7 @@ $(function() {
         <li class="nav-item"><a href="#correos" aria-controls="correos" role="tab" data-toggle="tab" id="correos-tab" class="nav-link">Correos</a></li>
         <li class="nav-item"><a href="#facturacion" aria-controls="facturacion" role="tab" data-toggle="tab" id="facturacion-tab" class="nav-link">Facturación</a></li>
 <?php if (isset($Contribuyente)) : ?>
-        <li class="nav-item"><a href="#api" aria-controls="api" role="tab" data-toggle="tab" id="api-tab" class="nav-link">API</a></li>
+        <li class="nav-item"><a href="#apps" aria-controls="apps" role="tab" data-toggle="tab" id="apps-tab" class="nav-link">Apps</a></li>
         <li class="nav-item"><a href="#general" aria-controls="general" role="tab" data-toggle="tab" id="general-tab" class="nav-link">General</a></li>
 <?php endif; ?>
     </ul>
@@ -951,8 +951,8 @@ echo $f->input([
 
 <?php if (isset($Contribuyente)) : ?>
 
-<!-- INICIO API -->
-<div role="tabpanel" class="tab-pane" id="api" aria-labelledby="api-tab">
+<!-- INICIO APPS -->
+<div role="tabpanel" class="tab-pane" id="apps" aria-labelledby="apps-tab">
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-exchange-alt"></i>
@@ -995,8 +995,28 @@ $f->setStyle('horizontal');
 ?>
         </div>
     </div>
+    <!-- INICIO APPS -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-exchange-alt"></i>
+            Aplicaciones de terceros
+        </div>
+        <div class="card-body">
+            <p>LibreDTE puede utilizar aplicaciones de terceros para entregar mayores funcionalidades y características.</p>
+<?php
+$AppsConfigHelper = new \sowerphp\app\View_Helper_AppsConfig('apps', $f);
+foreach($apps as $App) {
+    $App->setVars([
+        'url' => $_url,
+    ]);
+    echo $AppsConfigHelper->generate($App);
+}
+?>
+        </div>
+    </div>
+    <!-- FIN APPS -->
 </div>
-<!-- FIN API -->
+<!-- FIN APPS -->
 
 <!-- INICIO CONFIGURACIÓN GENERAL -->
 <div role="tabpanel" class="tab-pane" id="general" aria-labelledby="general-tab">

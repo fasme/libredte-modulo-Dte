@@ -27,36 +27,42 @@ namespace website\Dte;
  * Comando para respaldar los datos de los contribuyentes la cuenta asociada en
  * Dropbox
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2017-03-15
+ * @version 2019-07-13
  */
 class Shell_Command_Respaldos_Dropbox extends \Shell_App
 {
 
-    public function main($grupo = null)
+    public function main($grupo = null, $compress = 'tgz')
     {
-        // verificar que exista soporta para usar Dropbox
-        $this->config = \sowerphp\core\Configure::read('backup.dropbox');
-        if (!$this->config or !class_exists('\Kunnu\Dropbox\DropboxApp')) {
-            $this->out('<error>Respaldos en Dropbox no están disponibles</error>');
-            return 1;
-        }
-        // procesar contribuyentes
         $contribuyentes = $this->getContribuyentes($grupo);
         foreach ($contribuyentes as $rut) {
-            $this->crearRespaldo($rut);
+            $this->crearRespaldo($rut, $compress);
         }
         $this->showStats();
         return 0;
     }
 
-    private function crearRespaldo($rut, $compress = 'tgz')
+    private function crearRespaldo($rut, $compress)
     {
-        // crear respaldo para el contribuyente
         $Contribuyente = new Model_Contribuyente($rut);
-        if (!$Contribuyente->exists() or !$Contribuyente->config_respaldos_dropbox)
+        // cargar dropbox
+        $DropboxApp = $Contribuyente->getApp('apps.dropbox');
+        if (!$DropboxApp) {
+            $this->out('<error>No existe la aplicación Dropbox</error>');
             return false;
+        }
+        if (!$DropboxApp->isConnected()) {
+            $this->out('<error>La empresa '.$Contribuyente->getNombre().' no está conectada a Dropbox</error>');
+            return false;
+        }
+        $Dropbox = $DropboxApp->getDropboxClient();
+        if (!$Dropbox) {
+            $this->out('<error>Dropbox no está habilitado en esta versión de LibreDTE</error>');
+            return false;
+        }
+        // crear respaldo para el contribuyente
         if ($this->verbose) {
-            $this->out('Respaldando el contribuyente '.$Contribuyente->razon_social.' en el Dropbox de '.$Contribuyente->config_respaldos_dropbox->display_name);
+            $this->out('Respaldando el contribuyente '.$Contribuyente->razon_social.' en el Dropbox de '.$DropboxApp->getConfig()->display_name);
         }
         $dir = (new \website\Dte\Admin\Model_Respaldo())->generar($Contribuyente->rut);
         \sowerphp\general\Utility_File::compress(
@@ -65,10 +71,8 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
         $output = $dir.'.'.$compress;
         // enviar respaldo a Dropbox
         try {
-            $app = new \Kunnu\Dropbox\DropboxApp($this->config['key'], $this->config['secret'], $Contribuyente->config_respaldos_dropbox->token);
-            $dropbox = new \Kunnu\Dropbox\Dropbox($app);
             $archivo = date('N').'_'.\sowerphp\general\Utility_Date::$dias[date('w')];
-            $file = $dropbox->upload(
+            $file = $Dropbox->upload(
                 $output,
                 '/'.$Contribuyente->razon_social.'/respaldos/'.$archivo.'.'.$compress,
                 ['mode' => ['.tag' => 'overwrite']]
@@ -77,6 +81,7 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
               $this->out('  Se subió el archivo: '.$file->getName());
             }
             unlink($output);
+            return true;
         } catch (\Exception $e) {
             if ($this->verbose) {
                 $this->out('  No se pudo subir el archivo: '.str_replace("\n", ' => ', $e->getMessage()));
@@ -88,8 +93,9 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
 
     private function getContribuyentes($grupo = null)
     {
-        if (is_numeric($grupo))
+        if (is_numeric($grupo)) {
             return [$grupo];
+        }
         $db = \sowerphp\core\Model_Datasource_Database::get();
         if ($grupo) {
             return $db->getCol('
@@ -102,7 +108,7 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
                     JOIN grupo AS g ON ug.grupo = g.id
                 WHERE
                     g.grupo = :grupo
-                    AND cc.configuracion = \'respaldos\'
+                    AND cc.configuracion = \'apps\'
                     AND cc.variable = \'dropbox\'
             ', [':grupo' => $grupo]);
         } else {
@@ -113,7 +119,7 @@ class Shell_Command_Respaldos_Dropbox extends \Shell_App
                     JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
                 WHERE
                     c.usuario IS NOT NULL
-                    AND cc.configuracion = \'respaldos\'
+                    AND cc.configuracion = \'apps\'
                     AND cc.variable = \'dropbox\'
             ');
         }
