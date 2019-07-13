@@ -52,35 +52,38 @@
 
 <?php
 foreach ($intercambios as &$i) {
-    $i['documentos'] = is_array($i['documentos']) ? implode('<br/>', $i['documentos']) : num($i['documentos']);
-    if ($soloPendientes) {
-        $i[] = '';
-        $i[] = '';
-    }
-    $i['fecha_hora_firma'] = \sowerphp\general\Utility_Date::format($i['fecha_hora_firma']);
-    $i['fecha_hora_email'] = \sowerphp\general\Utility_Date::format($i['fecha_hora_email']);
     $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$i['codigo'].'" title="Ver detalles del intercambio" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
     $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$i['codigo'].'" title="Descargar PDF del intercambio" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
     $i[] = $acciones;
     if (is_numeric($i['emisor'])) {
         $i['emisor'] = \sowerphp\app\Utility_Rut::addDV($i['emisor']);
     }
+    $i['fecha_hora_email'] = \sowerphp\general\Utility_Date::format($i['fecha_hora_email']);
+    $i['documentos'] = is_array($i['documentos']) ? implode('<br/>', $i['documentos']) : num($i['documentos']);
+    $i['totales'] = implode('<br/>', array_map('num', $i['totales']));
+    if ($i['estado'] === null) {
+        $i['estado'] = '<i class="fas fa-question-circle fa-fw text-warning"></i>';
+    } else if ($i['estado'] === true) {
+        $i['estado'] = '<i class="fas fa-check-circle fa-fw text-success"></i>';
+    } else {
+        $i['estado'] = '<i class="fas fa-times-circle fa-fw text-danger"></i>';
+    }
+    unset($i['usuario']);
 }
 array_unshift($intercambios, [
     '',
     '<input type="text" name="emisor" class="check integer form-control" placeholder="RUT o razón social emisor" autofocus="autofocus" />',
-    '',
     '',
     '<input type="text" name="folio" class="check integer form-control" placeholder="Folio del DTE" />',
     '',
     '',
     '<button type="submit" class="btn btn-primary"><i class="fa fa-search fa-fw" aria-hidden="true"></i></button>',
 ]);
-array_unshift($intercambios, ['Código', 'Emisor', 'Firmado', 'Recibido', 'Documentos', 'Estado', 'Procesado', 'Acciones']);
+array_unshift($intercambios, ['Código', 'Emisor', 'Recibido', 'Documento', 'Total', 'Estado', 'Acciones']);
 $paginator = new \sowerphp\app\View_Helper_Paginator([
     'link' => $_base.'/dte/dte_intercambios/listar',
 ]);
-$paginator->setColsWidth([null, null, null, null, null, null, null, 110]);
+$paginator->setColsWidth([null, null, null, null, null, null, 110]);
 echo $paginator->generate($intercambios, $pages, $p);
 ?>
 

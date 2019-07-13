@@ -55,7 +55,7 @@ class Model_DteIntercambios extends \Model_Plural_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-07
+     * @version 2019-07-12
      */
     public function buscar(array $filter = [])
     {
@@ -64,7 +64,7 @@ class Model_DteIntercambios extends \Model_Plural_App
             'p' => 0, // página de intercambios
         ], $filter);
         $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
-        $select = $filter['soloPendientes'] ? '' : ', i.estado, u.usuario';
+        $totales = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/Totales/MntTotal', 'http://www.sii.cl/SiiDte');
         $where = [];
         $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
         if ($filter['soloPendientes']) {
@@ -111,17 +111,31 @@ class Model_DteIntercambios extends \Model_Plural_App
             $limit = '';
         }
         $intercambios = $this->db->getTable('
-            SELECT i.codigo, i.emisor, e.razon_social, i.fecha_hora_firma, i.fecha_hora_email, '.$documentos.' AS documentos, i.documentos AS n_documentos'.$select.'
-            FROM dte_intercambio AS i LEFT JOIN contribuyente AS e ON i.emisor = e.rut LEFT JOIN usuario AS u ON i.usuario = u.id
+            SELECT
+                i.codigo,
+                i.emisor,
+                e.razon_social,
+                i.fecha_hora_email,
+                '.$documentos.' AS documentos,
+                '.$totales.' AS totales,
+                i.documentos AS n_documentos,
+                i.estado,
+                u.usuario
+            FROM
+                dte_intercambio AS i
+                LEFT JOIN contribuyente AS e ON i.emisor = e.rut
+                LEFT JOIN usuario AS u ON i.usuario = u.id
             WHERE i.receptor = :receptor AND i.certificacion = :certificacion '.($where?(' AND '.implode(' AND ',$where)):'').'
             ORDER BY i.fecha_hora_firma DESC
             '.$limit.'
         ', $vars);
         foreach ($intercambios as &$i) {
-            if (!empty($i['razon_social']))
+            if (!empty($i['razon_social'])) {
                 $i['emisor'] = $i['razon_social'];
-            if (isset($i['estado']))
-                $i['estado'] = \sasco\LibreDTE\Sii\RespuestaEnvio::$estados['envio'][$i['estado']];
+            }
+            if (isset($i['estado']) and is_numeric($i['estado'])) {
+                $i['estado'] = (bool)!$i['estado'];
+            }
             if (!empty($i['documentos'])) {
                 $nuevo_dte = true;
                 $n_letras = strlen($i['documentos']);
@@ -145,6 +159,7 @@ class Model_DteIntercambios extends \Model_Plural_App
             } else {
                 $i['documentos'] = $i['n_documentos'];
             }
+            $i['totales'] = !empty($i['totales']) ? explode(',', $i['totales']) : [];
             unset($i['razon_social'], $i['n_documentos']);
         }
         return $intercambios;
