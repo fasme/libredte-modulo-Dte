@@ -69,7 +69,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para descargar los intercambios pendientes de procesar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-19
+     * @version 2019-07-15
      */
     public function pendientes()
     {
@@ -84,6 +84,9 @@ class Controller_DteIntercambios extends \Controller_App
         foreach ($pendientes as &$i) {
             if (is_array($i['documentos'])) {
                 $i['documentos'] = implode("\n", $i['documentos']);
+            }
+            if (is_array($i['totales'])) {
+                $i['totales'] = implode("\n", $i['totales']);
             }
         }
         array_unshift($pendientes, array_keys($pendientes[0]));
