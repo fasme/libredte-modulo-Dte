@@ -310,11 +310,13 @@ abstract class Controller_Base_Libros extends \Controller_App
         // procesar emails recibidos
         foreach ($uids as $uid) {
             $m = $Imap->getMessage($uid);
-            if (!$m)
+            if (!$m) {
                 continue;
+            }
             foreach ($m['attachments'] as $file) {
-                if ($file['type']!='application/xml')
+                if (!in_array($file['type'], ['application/xml', 'text/xml'])) {
                     continue;
+                }
                 $status = $Libro->saveRevision($file['data']);
                 if ($status===true) {
                     \sowerphp\core\Model_Datasource_Session::message(
