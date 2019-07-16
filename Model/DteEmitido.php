@@ -858,7 +858,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que actualiza el estado de un DTE enviado al SII a través del
      * email que es recibido desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-11
+     * @version 2019-07-15
      */
     private function actualizarEstadoEmail()
     {
@@ -868,24 +868,18 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('No fue posible conectar mediante IMAP a '.$this->getEmisor()->config_email_sii_imap.', verificar mailbox, usuario y/o contraseña de contacto SII:<br/>'.implode('<br/>', imap_errors()));
         }
         $asunto = 'Resultado de Revision Envio '.$this->track_id.' - '.$this->getEmisor()->rut.'-'.$this->getEmisor()->dv;
-        $uids = $Imap->search('FROM @sii.cl SUBJECT "'.$asunto.'" UNSEEN');
-        if (!$uids) {
-            if (str_replace('-', '', $this->fecha)<date('Ymd')) {
-                $this->solicitarRevision();
-                throw new \Exception('No se encontró respuesta de envío del DTE, se solicitó nueva revisión.');
-            } else {
-                throw new \Exception('No se encontró respuesta de envío del DTE, espere unos segundos o solicite nueva revisión.');
-            }
-        }
+        $uids = (array)$Imap->search('FROM @sii.cl SUBJECT "'.$asunto.'" UNSEEN');
         // procesar emails recibidos
         foreach ($uids as $uid) {
             $estado = $detalle = null;
             $m = $Imap->getMessage($uid);
-            if (!$m)
+            if (!$m) {
                 continue;
+            }
             foreach ($m['attachments'] as $file) {
-                if ($file['type']!='application/xml')
+                if (!in_array($file['type'], ['application/xml', 'text/xml'])) {
                     continue;
+                }
                 $xml = new \SimpleXMLElement($file['data'], LIBXML_COMPACT);
                 // obtener estado y detalle
                 if (isset($xml->REVISIONENVIO)) {
@@ -913,6 +907,13 @@ class Model_DteEmitido extends Model_Base_Envio
                     throw new \Exception('El estado se obtuvo pero no fue posible guardarlo en la base de datos<br/>'.$e->getMessage());
                 }
             }
+        }
+        // no se encontró email o bien los que se encontraron no se procesaron (porque no se retornó)
+        if (str_replace('-', '', $this->fecha)<date('Ymd')) {
+            $this->solicitarRevision();
+            throw new \Exception('No se encontró respuesta de envío del DTE, se solicitó nueva revisión.');
+        } else {
+            throw new \Exception('No se encontró respuesta de envío del DTE, espere unos segundos o solicite nueva revisión.');
         }
     }
 
