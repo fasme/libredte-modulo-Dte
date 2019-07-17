@@ -420,7 +420,7 @@ class Controller_DteFolios extends \Controller_App
         if (!$DteFolio->exists()) {
             $this->Api->send('No existe el mantenedor de folios para el tipo de DTE '.$dte, 404);
         }
-        extract($this->Api->getQuery(['sinUso'=>false]));
+        extract($this->getQuery(['sinUso'=>false]));
         if ($sinUso) {
             $DteFolio->sin_uso = $DteFolio->getSinUso();
         }

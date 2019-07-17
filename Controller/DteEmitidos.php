@@ -270,7 +270,7 @@ class Controller_DteEmitidos extends \Controller_App
             }
         }
         // datos por defecto y recibidos por GET
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
             'compress' => false,
             'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : $Emisor->config_pdf_copias_tributarias,
@@ -431,7 +431,7 @@ class Controller_DteEmitidos extends \Controller_App
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
             'copias_cedibles' => $Emisor->config_pdf_copias_cedibles,
         ];
-        extract($this->Api->getQuery($params_default));
+        extract($this->getQuery($params_default));
         // realizar consulta al servicio web de la API
         $response = $this->consume('/api/dte/dte_emitidos/escpos/'.(int)$dte.'/'.(int)$folio.'/'.(int)$Emisor->rut.'?'.http_build_query(compact(array_keys($params_default))));
         // procesar respuesta
@@ -474,7 +474,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // parámetros pasados por GET
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'cedible' => false,
             'compress' => false,
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
@@ -1113,7 +1113,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'getXML' => false,
             'getDetalle' => false,
             'getDatosDte' => false,
@@ -1154,7 +1154,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         // datos por defecto
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'cedible' => $Emisor->config_pdf_dte_cedible,
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
@@ -1238,7 +1238,7 @@ class Controller_DteEmitidos extends \Controller_App
      */
     public function _api_ted_GET($dte, $folio, $emisor)
     {
-        extract($this->Api->getQuery(['formato'=>'png', 'ecl'=>5]));
+        extract($this->getQuery(['formato'=>'png', 'ecl'=>5]));
         if ($this->Auth->User) {
             $User = $this->Auth->User;
         } else {
@@ -1294,7 +1294,7 @@ class Controller_DteEmitidos extends \Controller_App
      */
     public function _api_estado_GET($dte, $folio, $emisor)
     {
-        extract($this->Api->getQuery(['avanzado'=>false]));
+        extract($this->getQuery(['avanzado'=>false]));
         if ($this->Auth->User) {
             $User = $this->Auth->User;
         } else {
@@ -1329,7 +1329,7 @@ class Controller_DteEmitidos extends \Controller_App
      */
     public function _api_actualizar_estado_GET($dte, $folio, $emisor)
     {
-        extract($this->Api->getQuery(['usarWebservice'=>true]));
+        extract($this->getQuery(['usarWebservice'=>true]));
         // verificar permisos y crear DteEmitido
         if ($this->Auth->User) {
             $User = $this->Auth->User;
@@ -1715,7 +1715,7 @@ class Controller_DteEmitidos extends \Controller_App
      */
     public function _api_consultar_POST()
     {
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'getXML' => false,
         ]));
         // verificar si se pasaron credenciales de un usuario

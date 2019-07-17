@@ -497,7 +497,7 @@ class Controller_DteRecibidos extends \Controller_App
         if ($DteRecibido->receptor!=$Receptor->rut) {
             $this->Api->send('RUT del receptor no corresponde al DTE T'.$dte.'F'.$folio, 400);
         }
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'getXML' => false,
             'getDetalle' => false,
         ]));
@@ -595,7 +595,7 @@ class Controller_DteRecibidos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // buscar documentos
-        $filtros = $this->Api->getQuery([
+        $filtros = $this->getQuery([
             'fecha_desde' => date('Y-m-01'),
             'fecha_hasta' => date('Y-m-d'),
             'fecha' => null,
@@ -640,7 +640,7 @@ class Controller_DteRecibidos extends \Controller_App
             ],
         ];
         // buscar documentos
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'formato' => 'csv',
         ]));
         $certificacion = (int)$Receptor->config_ambiente_en_certificacion;

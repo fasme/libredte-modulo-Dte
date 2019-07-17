@@ -118,7 +118,7 @@ class Controller_Sii extends \Controller_App
      */
     public function contribuyente_autorizado($rut)
     {
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'certificacion'=>\sasco\LibreDTE\Sii::PRODUCCION,
         ]));
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial

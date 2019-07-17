@@ -230,7 +230,7 @@ class Controller_DteIntercambios extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // buscar documentos
-        $filtros = $this->Api->getQuery([
+        $filtros = $this->getQuery([
             'soloPendientes' => true,
             'emisor' => null,
             'folio' => null,

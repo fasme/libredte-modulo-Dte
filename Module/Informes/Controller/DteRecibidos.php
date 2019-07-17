@@ -65,7 +65,7 @@ class Controller_DteRecibidos extends \Controller_App
      */
     public function csv($desde, $hasta)
     {
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'detalle' => false,
         ]));
         $Emisor = $this->getContribuyente();

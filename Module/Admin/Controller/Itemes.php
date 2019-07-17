@@ -103,7 +103,7 @@ class Controller_Itemes extends \Controller_Maintainer
      */
     public function _api_info_GET($empresa, $codigo)
     {
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'fecha' => date('Y-m-d'),
             'tipo' => null,
             'bruto' => false,

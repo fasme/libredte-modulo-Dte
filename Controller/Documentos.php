@@ -132,7 +132,7 @@ class Controller_Documentos extends \Controller_App
      */
     public function _api_emitir_POST()
     {
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'normalizar' => true,
             'email' => false,
             'links' => false,
@@ -826,7 +826,7 @@ class Controller_Documentos extends \Controller_App
      */
     public function _api_generar_POST()
     {
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'getXML' => false,
             'email' => false,
             'links' => false,

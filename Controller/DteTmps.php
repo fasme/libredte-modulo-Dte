@@ -96,7 +96,7 @@ class Controller_DteTmps extends \Controller_App
     {
         $Emisor = $emisor===null ? $this->getContribuyente() : new Model_Contribuyente($emisor);
         // datos por defecto
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
             'compress' => false,
         ]));
@@ -131,7 +131,7 @@ class Controller_DteTmps extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // datos por defecto
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
             'compress' => false,
         ]));
@@ -297,7 +297,7 @@ class Controller_DteTmps extends \Controller_App
             $this->Api->send('No existe el DTE temporal solicitado', 404);
         }
         // datos por defecto
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'cotizacion' => 0,
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
@@ -414,7 +414,7 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         // datos por defecto y recibidos por GET
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'cotizacion' => 0,
             'compress' => false,
         ]));

@@ -764,7 +764,7 @@ class Controller_Contribuyentes extends \Controller_App
             die('El protocolo debe ser "smtp" o "imap"');
         }
         // datos pasados por GET al servicio web
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'debug' => 3,
         ]));
         // hacer test SMTP
@@ -808,7 +808,7 @@ class Controller_Contribuyentes extends \Controller_App
             $this->Api->send($User, 401);
         }
         // datos pasados por GET al servicio web
-        extract($this->Api->getQuery([
+        extract($this->getQuery([
             'tipo' => 'contribuyente',
         ]));
         if (!in_array($tipo, ['contribuyente', 'emisor', 'receptor'])) {
