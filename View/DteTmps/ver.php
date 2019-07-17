@@ -73,13 +73,15 @@ $(function() {
 <!-- INICIO DATOS BÁSICOS -->
 <div role="tabpanel" class="tab-pane active" id="datos" aria-labelledby="datos-tab">
 <?php
-new \sowerphp\general\View_Helper_Table([
+$t = new \sowerphp\general\View_Helper_Table();
+$t->setShowEmptyCols(false);
+echo $t->generate([
     ['Documento', 'Folio', 'Fecha', 'Vencimiento', 'Receptor', 'Total'],
     [
         $DteTmp->getTipo()->tipo,
         $DteTmp->getFolio(),
         \sowerphp\general\Utility_Date::format($DteTmp->fecha),
-        !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? \sowerphp\general\Utility_Date::format($datos['Encabezado']['IdDoc']['FchVenc']) : 'Sin vencimiento',
+        !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? \sowerphp\general\Utility_Date::format($datos['Encabezado']['IdDoc']['FchVenc']) : null,
         $Receptor->razon_social,
         num($DteTmp->total)
     ],

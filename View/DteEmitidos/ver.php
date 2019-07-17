@@ -73,13 +73,15 @@ $(function() {
     <div class="row">
         <div class="col-md-<?=$enviar_sii?9:12?>">
 <?php
-new \sowerphp\general\View_Helper_Table([
+$t = new \sowerphp\general\View_Helper_Table();
+$t->setShowEmptyCols(false);
+echo $t->generate([
     ['Documento', 'Folio', 'Fecha', 'Vencimiento', 'Receptor', 'Exento', 'Neto', 'IVA', 'Total'],
     [
         $DteEmitido->getTipo()->tipo,
         $DteEmitido->folio,
         \sowerphp\general\Utility_Date::format($DteEmitido->fecha),
-        !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? \sowerphp\general\Utility_Date::format($datos['Encabezado']['IdDoc']['FchVenc']) : 'Sin vencimiento',
+        !empty($datos['Encabezado']['IdDoc']['FchVenc']) ? \sowerphp\general\Utility_Date::format($datos['Encabezado']['IdDoc']['FchVenc']) : null,
         $Receptor->razon_social,
         num($DteEmitido->exento),
         num($DteEmitido->neto),
@@ -292,7 +294,10 @@ $color = [
 $Recibo = $DteEmitido->getIntercambioRecibo();
 if ($Recibo) {
     $Sobre = $Recibo->getSobre();
-    new \sowerphp\general\View_Helper_Table([
+    $t = new \sowerphp\general\View_Helper_Table();
+    $t->setColsWidth([null, null, null, null, null, null, 60]);
+    $t->setShowEmptyCols(false);
+    echo $t->generate([
         ['Contacto', 'Teléfono', 'Email', 'Recinto', 'Firma', 'Fecha y hora', 'XML'],
         [
             $Sobre->contacto,
@@ -300,7 +305,7 @@ if ($Recibo) {
             $Sobre->email,
             $Recibo->recinto,
             $Recibo->firma,
-            $Recibo->fecha_hora,
+            \sowerphp\general\Utility_Date::format($Recibo->fecha_hora, 'd/m/Y H:i'),
             '<a href="'.$_base.'/dte/dte_intercambio_recibos/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>',
         ],
     ]);
@@ -317,7 +322,10 @@ if ($Recibo) {
 $Recepcion = $DteEmitido->getIntercambioRecepcion();
 if ($Recepcion) {
     $Sobre = $Recepcion->getSobre();
-    new \sowerphp\general\View_Helper_Table([
+    $t = new \sowerphp\general\View_Helper_Table();
+    $t->setColsWidth([null, null, null, null, null, null, 60]);
+    $t->setShowEmptyCols(false);
+    echo $t->generate([
         ['Contacto', 'Teléfono', 'Email', 'Estado general', 'Estado documento', 'Fecha y hora', 'XML'],
         [
             $Sobre->contacto,
@@ -325,7 +333,7 @@ if ($Recepcion) {
             $Sobre->email,
             $Sobre->estado.': '.$Sobre->glosa,
             $Recepcion->estado.': '.$Recepcion->glosa,
-            $Sobre->fecha_hora,
+            \sowerphp\general\Utility_Date::format($Sobre->fecha_hora, 'd/m/Y H:i'),
             '<a href="'.$_base.'/dte/dte_intercambio_recepciones/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>',
         ],
     ]);
@@ -342,14 +350,17 @@ if ($Recepcion) {
 $Resultado = $DteEmitido->getIntercambioResultado();
 if ($Resultado) {
     $Sobre = $Resultado->getSobre();
-    new \sowerphp\general\View_Helper_Table([
+    $t = new \sowerphp\general\View_Helper_Table();
+    $t->setColsWidth([null, null, null, null, null, 60]);
+    $t->setShowEmptyCols(false);
+    echo $t->generate([
         ['Contacto', 'Teléfono', 'Email', 'Estado', 'Fecha y hora', 'XML'],
         [
             $Sobre->contacto,
             $Sobre->telefono,
             $Sobre->email,
             $Resultado->estado.': '.$Resultado->glosa,
-            $Sobre->fecha_hora,
+            \sowerphp\general\Utility_Date::format($Sobre->fecha_hora, 'd/m/Y H:i'),
             '<a href="'.$_base.'/dte/dte_intercambio_resultados/xml/'.$Sobre->responde.'/'.$Sobre->codigo.'" role="button" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>',
         ],
     ]);
