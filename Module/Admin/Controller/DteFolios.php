@@ -222,7 +222,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite descargar el XML del archivo CAF
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2019-07-17
      */
     public function xml($dte, $desde)
     {
@@ -243,11 +243,10 @@ class Controller_DteFolios extends \Controller_App
         // entregar XML
         $file = 'caf_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$dte.'_'.$desde.'.xml';
         $xml = $DteCaf->getXML();
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
     }
 
     /**
@@ -313,17 +312,16 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite anular un folio directamente en el sitio del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-17
+     * @version 2019-07-17
      */
     public function anular($dte, $folio)
     {
         $Emisor = $this->getContribuyente();
         $r = $this->consume('/api/dte/admin/dte_folios/anular/'.$dte.'/'.$folio.'/'.$Emisor->rut);
         if ($r['status']['code']!=200) {
-            die($r['body']);
+            $this->response->send($r['body']);
         }
-        echo utf8_encode($r['body']);
-        exit;
+        $this->response->send(utf8_encode($r['body']));
     }
 
     /**
@@ -516,7 +514,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite consultar el estado de un folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-17
+     * @version 2019-07-17
      */
     public function _api_estado_GET($dte, $folio, $emisor)
     {
@@ -548,14 +546,14 @@ class Controller_DteFolios extends \Controller_App
         if ($r['status']['code']!=200) {
             $this->Api->send('No fue posible consultar el estado del folio: '.$r['body'], 500);
         }
-        echo $r['body'];
-        exit;
+        $this->Api->response()->type('text/html');
+        $this->Api->send($r['body']);
     }
 
     /**
      * Recurso que permite anular un folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-17
+     * @version 2019-07-17
      */
     public function _api_anular_GET($dte, $folio, $emisor)
     {
@@ -587,8 +585,8 @@ class Controller_DteFolios extends \Controller_App
         if ($r['status']['code']!=200) {
             $this->Api->send('No fue posible anular el folio: '.$r['body'], 500);
         }
-        echo $r['body'];
-        exit;
+        $this->Api->response()->type('text/html');
+        $this->Api->send($r['body']);
     }
 
 }

@@ -39,7 +39,7 @@ class Controller_DteIntercambioRecepciones extends \Controller_App
     /**
      * Acción que descarga el XML de la recepción
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-23
+     * @version 2019-07-17
      */
     public function xml($responde, $codigo)
     {
@@ -54,11 +54,10 @@ class Controller_DteIntercambioRecepciones extends \Controller_App
         }
         // entregar XML
         $xml = base64_decode($DteIntercambioRecepcion->xml);
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$DteIntercambioRecepcion->responde.'_'.$DteIntercambioRecepcion->codigo.'.xml"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$DteIntercambioRecepcion->responde.'_'.$DteIntercambioRecepcion->codigo.'.xml"');
+        $this->response->send($xml);
     }
 
 }

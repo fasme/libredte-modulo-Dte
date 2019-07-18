@@ -473,7 +473,7 @@ class Controller_DteCompras extends Controller_Base_Libros
         }
         array_unshift($detalle, array_keys($detalle[0]));
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, 'rc_'.$Emisor->rut.'_'.$periodo.'_'.$estado.'_'.$tipo);
-        exit;
+        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
     }
 
 }

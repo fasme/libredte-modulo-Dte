@@ -183,7 +183,7 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
         }
         array_unshift($clasificaciones, array_keys($clasificaciones[0]));
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($clasificaciones, 'item_clasificaciones_'.$Contribuyente->rut);
-        exit;
+        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
     }
 
 }

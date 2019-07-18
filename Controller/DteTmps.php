@@ -90,7 +90,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-07-17
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
@@ -113,19 +113,19 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Length', 'Content-Type', 'Content-Disposition'] as $header) {
+        $this->response->type('application/pdf');
+        foreach (['Content-Length', 'Content-Disposition'] as $header) {
             if (!empty($response['header'][$header])) {
-                header($header.': '.$response['header'][$header]);
+                $this->response->header($header, $response['header'][$header]);
             }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**
      * Método que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-07-17
      */
     public function pdf($receptor, $dte, $codigo, $disposition = 'attachment')
     {
@@ -148,19 +148,20 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->response->type('application/pdf');
+        foreach (['Content-Length'] as $header) {
+            if (!empty($response['header'][$header])) {
+                $this->response->header($header, $response['header'][$header]);
+            }
         }
-        header('Content-Disposition: '.($disposition=='inline'?'inline':(!empty($response['header']['Content-Disposition'])?$response['header']['Content-Disposition']:'inline')));
-        echo $response['body'];
-        exit;
+        $this->response->header('Content-Disposition', ($disposition=='inline'?'inline':(!empty($response['header']['Content-Disposition'])?$response['header']['Content-Disposition']:'inline')));
+        $this->response->send($response['body']);
     }
 
     /**
      * Acción que permite ver una vista previa del correo en HTML
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-29
+     * @version 2019-07-17
      */
     public function email_html($receptor, $dte, $codigo)
     {
@@ -179,8 +180,7 @@ class Controller_DteTmps extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message('No existe correo en HTML para el envío del documento', 'error');
             $this->redirect(str_replace('email_html', 'ver', $this->request->request));
         }
-        echo $email_html;
-        exit;
+        $this->response->send($email_html);
     }
 
     /**
@@ -272,17 +272,13 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Recurso de la API que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-13
+     * @version 2019-07-17
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
     {
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
@@ -332,18 +328,19 @@ class Controller_DteTmps extends \Controller_App
             $this->Api->send($response['body'], $response['status']['code']);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->Api->response()->type('application/pdf');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->Api->response()->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->Api->send($response['body']);
     }
 
     /**
      * Método que genera la previsualización del XML del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-30
+     * @version 2019-07-17
      */
     public function xml($receptor, $dte, $codigo)
     {
@@ -365,17 +362,16 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps');
         }
         // entregar xml
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$receptor.'_'.$dte.'_'.$codigo.'.xml"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$receptor.'_'.$dte.'_'.$codigo.'.xml"');
+        $this->response->send($xml);
     }
 
     /**
      * Método que entrega el JSON del DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-07
+     * @version 2019-07-17
      */
     public function json($receptor, $dte, $codigo)
     {
@@ -390,17 +386,16 @@ class Controller_DteTmps extends \Controller_App
         }
         // entregar xml
         $json = json_encode(json_decode($DteTmp->datos), JSON_PRETTY_PRINT);
-        header('Content-Type: application/json; charset=UTF-8');
-        header('Content-Length: '.strlen($json));
-        header('Content-Disposition: attachement; filename="'.$receptor.'_'.$dte.'_'.$codigo.'.json"');
-        print $json;
-        exit;
+        $this->response->type('application/json', 'UTF-8');
+        $this->response->header('Content-Length', strlen($json));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$receptor.'_'.$dte.'_'.$codigo.'.json"');
+        $this->response->send($json);
     }
 
     /**
      * Acción que descarga el código binario ESCPOS del DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-07-17
      */
     public function escpos($receptor, $dte, $codigo)
     {
@@ -449,12 +444,13 @@ class Controller_DteTmps extends \Controller_App
             $this->redirect('/dte/dte_tmps/ver/'.$receptor.'/'.$dte.'/'.$codigo);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->response->type('application/octet-stream');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->response->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**

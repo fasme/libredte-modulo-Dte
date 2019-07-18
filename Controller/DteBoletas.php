@@ -49,7 +49,7 @@ class Controller_DteBoletas extends \Controller_App
     /**
      * Acción para descargar libro de boletas en XML
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-28
+     * @version 2019-07-17
      */
     public function xml($periodo, $FolioNotificacion = 1)
     {
@@ -83,11 +83,10 @@ class Controller_DteBoletas extends \Controller_App
         }
         // entregar XML
         $file = 'boletas_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo.'.xml';
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
     }
 
     /**
@@ -128,6 +127,7 @@ class Controller_DteBoletas extends \Controller_App
             array_unshift($detalle, array_keys($detalle[0]));
         }
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, $file);
+        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
     }
 
 }

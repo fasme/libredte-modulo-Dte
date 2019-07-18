@@ -82,7 +82,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
     /**
      * Acción para descargar reporte de consumo de folios en XML
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2019-07-17
      */
     public function xml($dia)
     {
@@ -97,11 +97,10 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         }
         // entregar XML
         $file = 'consumo_folios_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$dia.'.xml';
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
     }
 
     /**

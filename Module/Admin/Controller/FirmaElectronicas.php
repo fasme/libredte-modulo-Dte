@@ -85,6 +85,15 @@ class Controller_FirmaElectronicas extends \Controller_App
                 );
                 return;
             }
+            // si el usuario tiene una firma asociada se borra antes de agregar la nueva
+            // esto es necesario porque la PK de la firma es el RUN de la misma y no el ID
+            // del usuario, además un usuario puede tener sólo una firma. Entonces si un
+            // usuario ya tiene firma y trata de subir una nueva con un RUN diferente el
+            // guardado de la firma falla. Para evitar este problema, se borra si existe una
+            $FirmaElectronicaAntigua = (new Model_FirmaElectronicas())->getByUser($this->Auth->User->id);
+            if ($FirmaElectronicaAntigua) {
+                $FirmaElectronicaAntigua->delete();
+            }
             // si todo fue ok se crea el objeto firma para la bd y se guarda
             $FirmaElectronica = new Model_FirmaElectronica(trim($Firma->getID()));
             $FirmaElectronica->nombre = $Firma->getName();
@@ -143,26 +152,25 @@ class Controller_FirmaElectronicas extends \Controller_App
     /**
      * Acción que descarga la firma electrónica de un usuario
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-10-05
+     * @version 2019-07-17
      */
     public function descargar()
     {
         $FirmaElectronica = (new Model_FirmaElectronicas())->getByUser($this->Auth->User->id);
-        // si el usuario no tiene firma electrónica no se elimina :-)
+        // si el usuario no tiene firma electrónica no hay algo que descargar
         if (!$FirmaElectronica) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'Usted no tiene una firma electrónica registrada en el sistema, no hay nada que descargar'
+                'Usted no tiene una firma electrónica registrada en el sistema, no es posible descargar'
             );
             $this->redirect('/dte/admin/firma_electronicas');
         }
         // descargar la firma
         $file = $FirmaElectronica->run.'.p12';
         $firma = base64_decode($FirmaElectronica->archivo);
-        header('Content-Type: application/x-pkcs12');
-        header('Content-Length: '.strlen($firma));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $firma;
-        exit;
+        $this->response->type('application/x-pkcs12');
+        $this->response->header('Content-Length', strlen($firma));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($firma);
     }
 
 }

@@ -35,7 +35,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los datos de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-11
+     * @version 2019-07-17
      */
     public function contribuyente_datos($rut)
     {
@@ -58,20 +58,18 @@ class Controller_Sii extends \Controller_App
                 '/sii/dte_contribuyente_datos/'.$Emisor->getRUT().'?certificacion='.$certificacion,
                 $data
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se redirecciona al SII
         catch (\Exception $e) {
-            header('location: https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/cvc_cgi/dte/ad_empresa1');
-            exit;
+            $this->redirect('https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/cvc_cgi/dte/ad_empresa1');
         }
     }
 
     /**
      * Acción que permite obtener los usuarios de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-07-17
      */
     public function contribuyente_usuarios($rut)
     {
@@ -97,24 +95,18 @@ class Controller_Sii extends \Controller_App
                 '/sii/dte_contribuyente_usuarios/'.$Emisor->getRUT().'?certificacion='.$certificacion,
                 $data
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se redirecciona al SII
         catch (\Exception $e) {
-            if (\sasco\LibreDTE\Sii::getAmbiente()) {
-                header('location: https://maullin.sii.cl/cvc_cgi/dte/eu_enrola_usuarios');
-            } else {
-                header('location: https://palena.sii.cl/cvc_cgi/dte/eu_enrola_usuarios');
-            }
-            exit;
+            $this->redirect('https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/cvc_cgi/dte/eu_enrola_usuarios');
         }
     }
 
     /**
      * Acción que permite obtener si la empresa está o no autorizada para usar facturación electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-04-15
+     * @version 2019-07-17
      */
     public function contribuyente_autorizado($rut)
     {
@@ -126,24 +118,18 @@ class Controller_Sii extends \Controller_App
             $response = libredte_consume(
                 '/sii/dte_contribuyente_autorizado/'.$rut.'?certificacion='.$certificacion
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se redirecciona al SII
         catch (\Exception $e) {
-            if ($certificacion) {
-                header('location: https://maullin.sii.cl/cvc/dte/ee_empresas_dte.html');
-            } else {
-                header('location: https://palena.sii.cl/cvc/dte/ee_empresas_dte.html');
-            }
-            exit;
+            $this->redirect('https://'.\sasco\LibreDTE\Sii::getServidor($certificacion).'.sii.cl/cvc/dte/ee_empresas_dte.html');
         }
     }
 
     /**
      * Acción que permite obtener la situación tributaria de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-07-17
      */
     public function contribuyente_situacion_tributaria($rut)
     {
@@ -152,20 +138,18 @@ class Controller_Sii extends \Controller_App
             $response = libredte_consume(
                 '/sii/contribuyente_situacion_tributaria/'.$rut.'?formato=web'
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se redirecciona al SII
         catch (\Exception $e) {
-            header('location: https://zeus.sii.cl/cvc/stc/stc.html');
-            exit;
+            $this->redirect('https://zeus.sii.cl/cvc/stc/stc.html');
         }
     }
 
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-07-10
+     * @version 2019-07-17
      */
     public function estado_envio($track_id)
     {
@@ -187,8 +171,7 @@ class Controller_Sii extends \Controller_App
                 '/sii/dte_emitido_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
                 $data
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se crea enlace directo al SII
         catch (\Exception $e) {
@@ -291,7 +274,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del AEC
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-11
+     * @version 2019-07-17
      */
     public function cesion_estado_envio($track_id)
     {
@@ -313,20 +296,18 @@ class Controller_Sii extends \Controller_App
                 '/sii/cesion_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
                 $data
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se crea enlace directo al SII
         catch (\Exception $e) {
-            header('location: https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/rtc/RTC/RTCAnotConsulta.html');
-            exit;
+            $this->redirect('https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/rtc/RTC/RTCAnotConsulta.html');
         }
     }
 
     /**
      * Acción que permite consultar el certificado de cesión de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-11
+     * @version 2019-07-17
      */
     public function cesion_certificado($dte, $folio, $fecha)
     {
@@ -348,13 +329,11 @@ class Controller_Sii extends \Controller_App
                 '/sii/cesion_certificado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'/'.$fecha.'&certificacion='.$certificacion,
                 $data
             );
-            echo $response['body'];
-            exit;
+            $this->response->send($response['body']);
         }
         // se crea enlace directo al SII
         catch (\Exception $e) {
-            header('location: https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/rtc/RTC/RTCObtCertif.html');
-            exit;
+            $this->redirect('https://'.\sasco\LibreDTE\Sii::getServidor().'.sii.cl/rtc/RTC/RTCObtCertif.html');
         }
     }
 

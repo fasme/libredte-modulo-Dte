@@ -719,7 +719,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Acción que entrega el logo del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-09
+     * @version 2019-07-17
      */
     public function logo($rut)
     {
@@ -734,17 +734,16 @@ class Controller_Contribuyentes extends \Controller_App
         if (!is_readable($logo)) {
             $logo = DIR_STATIC.'/contribuyentes/default/logo.png';
         }
-        header('Content-Type: image/png');
-        header('Content-Length: '.filesize($logo));
-        header('Content-Disposition: inline; filename="'.$Contribuyente->rut.'.png"');
-        print file_get_contents($logo);
-        exit;
+        $this->response->type('image/png');
+        $this->response->header('Content-Length', filesize($logo));
+        $this->response->header('Content-Disposition', 'inline; filename="'.$Contribuyente->rut.'.png"');
+        $this->response->send(file_get_contents($logo));
     }
 
     /**
      * Acción que permite probar la configuración de los correos electrónicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-05-31
+     * @version 2019-07-17
      */
     public function config_email_test($rut, $email, $protocol = 'smtp')
     {
@@ -753,15 +752,15 @@ class Controller_Contribuyentes extends \Controller_App
             $class = $this->Contribuyente_class;
             $Contribuyente = new $class($rut);
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            die('No se encontró la empresa solicitada');
+            $this->response->send('No se encontró la empresa solicitada');
         }
         // verificar que el usuario sea el administrador o de soporte autorizado
         if (!$Contribuyente->usuarioAutorizado($this->Auth->User, 'admin')) {
-            die('Usted no es el administrador de la empresa solicitada');
+            $this->response->send('Usted no es el administrador de la empresa solicitada');
         }
         // verificar protocolo
         if (!in_array($protocol, ['smtp', 'imap'])) {
-            die('El protocolo debe ser "smtp" o "imap"');
+            $this->response->send('El protocolo debe ser "smtp" o "imap"');
         }
         // datos pasados por GET al servicio web
         extract($this->getQuery([
@@ -778,21 +777,19 @@ class Controller_Contribuyentes extends \Controller_App
             $Email->subject('[LibreDTE] Mensaje de prueba '.date('YmdHis'));
             $status = $Email->send('Esto es un mensaje de prueba desde LibreDTE');
             if ($status === true) {
-                die('Mensaje enviado mediante SMTP.');
+                $this->response->send('Mensaje enviado mediante SMTP.');
             } else {
-                die($status['message']);
+                $this->response->send($status['message']);
             }
         }
         // hacer test IMAP
         else if ($protocol == 'imap') {
             $Email = $Contribuyente->getEmailImap($email);
             if (!$Email) {
-                die('No se logró la conexión mediante IMAP.');
+                $this->response->send('No se logró la conexión mediante IMAP.');
             }
-            die('La casilla IMAP tiene en total '.num($Email->countMessages()).' mensajes.');
+            $this->response->send('La casilla IMAP tiene en total '.num($Email->countMessages()).' mensajes.');
         }
-        // terminar script
-        exit;
     }
 
     /**

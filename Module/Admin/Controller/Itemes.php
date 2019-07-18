@@ -231,7 +231,7 @@ class Controller_Itemes extends \Controller_Maintainer
         }
         array_unshift($items, array_keys($items[0]));
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($items, 'items_'.$Contribuyente->rut);
-        exit;
+        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
     }
 
 }

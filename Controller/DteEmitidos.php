@@ -250,7 +250,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-04
+     * @version 2019-07-17
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -331,18 +331,19 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/listar');
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->response->type('application/pdf');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->response->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**
      * Acción que descarga el XML del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-23
+     * @version 2019-07-17
      */
     public function xml($dte, $folio, $emisor = null, $fecha = null, $total = null)
     {
@@ -380,17 +381,16 @@ class Controller_DteEmitidos extends \Controller_App
         // entregar XML
         $file = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml';
         $xml = base64_decode($DteEmitido->xml);
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
     }
 
     /**
      * Acción que descarga el JSON del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-19
+     * @version 2019-07-17
      */
     public function json($dte, $folio)
     {
@@ -408,17 +408,16 @@ class Controller_DteEmitidos extends \Controller_App
         $datos = $DteEmitido->getDatos();
         unset($datos['@attributes'], $datos['TED'], $datos['TmstFirma']);
         $json = json_encode($datos, JSON_PRETTY_PRINT);
-        header('Content-Type: application/json; charset=UTF-8');
-        header('Content-Length: '.strlen($json));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        echo $json;
-        exit;
+        $this->response->type('application/json', 'UTF-8');
+        $this->response->header('Content-Length', strlen($json));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($json);
     }
 
     /**
      * Acción que descarga el código binario ESCPOS del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-22
+     * @version 2019-07-17
      */
     public function escpos($dte, $folio)
     {
@@ -444,19 +443,19 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+        $this->response->type('application/octet-stream');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
             if (isset($response['header'][$header])) {
-                header($header.': '.$response['header'][$header]);
+                $this->response->header($header, $response['header'][$header]);
             }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**
      * Recurso de la API que descarga el código
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-22
+     * @version 2019-07-17
      */
     public function _api_escpos_GET($dte, $folio, $contribuyente)
     {
@@ -521,18 +520,19 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send($response['body'], 500);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->Api->response()->type('application/octet-stream');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->Api->response()->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->Api->send($response['body']);
     }
 
     /**
      * Acción que permite ver una vista previa del correo en HTML
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-29
+     * @version 2019-07-17
      */
     public function email_html($dte, $folio)
     {
@@ -551,8 +551,7 @@ class Controller_DteEmitidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message('No existe correo en HTML para el envío del documento', 'error');
             $this->redirect(str_replace('email_html', 'ver', $this->request->request));
         }
-        echo $email_html;
-        exit;
+        $this->response->send($email_html);
     }
 
     /**
@@ -687,7 +686,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el XML de la cesión del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-10
+     * @version 2019-07-17
      */
     public function cesion_xml($dte, $folio)
     {
@@ -710,11 +709,10 @@ class Controller_DteEmitidos extends \Controller_App
         // entregar XML
         $file = 'cesion_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml';
         $xml = base64_decode($DteEmitido->cesion_xml);
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
     }
 
     /**
@@ -1134,7 +1132,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-12
+     * @version 2019-07-17
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
@@ -1194,12 +1192,13 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send($response['body'], $response['status']['code']);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->Api->response()->type('application/pdf');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->Api->response()->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->Api->send($response['body']);
     }
 
     /**
@@ -1267,7 +1266,7 @@ class Controller_DteEmitidos extends \Controller_App
         else if ($formato == 'png') {
             $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
             $pdf417->getBarcodePNG(4, 4, [0,0,0]);
-            exit;
+            exit; // TODO: enviar usando $this->Api->send() / TCPDF2DBarcode::getBarcodePNG()
         }
         else if ($formato == 'bmp') {
             $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
@@ -1275,12 +1274,12 @@ class Controller_DteEmitidos extends \Controller_App
             $im = imagecreatefromstring($png);
             header('Content-Typ: image/x-ms-bmp');
             \imagebmp($im);
-            exit;
+            exit; // TODO: enviar usando $this->Api->send() / TCPDF2DBarcode::getBarcodePngData()
         }
         else if ($formato == 'svg') {
             $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
             $pdf417->getBarcodeSVG(1, 1, 'black');
-            exit;
+            exit; // TODO: enviar usando $this->Api->send() / TCPDF2DBarcode::getBarcodeSVG()
         }
         else {
             $this->Api->send('Formato '.$formato.' no soportado', 400);

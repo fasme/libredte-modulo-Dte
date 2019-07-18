@@ -433,18 +433,17 @@ class Controller_DteRecibidos extends \Controller_App
         if ($r['status']['code']!=200 or empty($r['body'])) {
             $this->Api->send('No fue posible descargar el PDF de la boleta de honorarios desde el SII', 500);
         }
-        header('Content-type: application/pdf');
-        header('Content-Disposition: attachment; filename=bhe_'.$codigo.'.pdf');
-        header('Pragma: no-cache');
-        header('Expires: 0');
-        echo $r['body'];
-        exit;
+        $this->Api->response()->type('application/pdf');
+        $this->Api->response()->header('Content-Disposition', 'attachment; filename=bhe_'.$codigo.'.pdf');
+        $this->Api->response()->header('Pragma', 'no-cache');
+        $this->Api->response()->header('Expires', 0);
+        $this->Api->send($r['body']);
     }
 
     /**
      * Acción que permite descargar el PDF de una boleta de honorarios electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-28
+     * @version 2019-07-17
      */
     public function bhe_pdf($codigo)
     {
@@ -457,12 +456,11 @@ class Controller_DteRecibidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
             $this->redirect('/dte/dte_recibidos/bhe');
         }
-        header('Content-type: application/pdf');
-        header('Content-Disposition: attachment; filename=bhe_'.$codigo.'.pdf');
-        header('Pragma: no-cache');
-        header('Expires: 0');
-        echo $r['body'];
-        exit;
+        $this->Api->response()->type('application/pdf');
+        $this->Api->response()->header('Content-Disposition', 'attachment; filename=bhe_'.$codigo.'.pdf');
+        $this->Api->response()->header('Pragma', 'no-cache');
+        $this->Api->response()->header('Expires', 0);
+        $this->Api->send($r['body']);
     }
 
     /**
@@ -615,7 +613,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción de la API que permite buscar en el SII los documentos recibidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2019-07-17
      */
     public function _api_sii_GET($desde, $hasta, $receptor)
     {
@@ -654,12 +652,11 @@ class Controller_DteRecibidos extends \Controller_App
         if ($formato=='json') {
             $this->Api->send($response['body'], 200, JSON_PRETTY_PRINT);
         } else {
-            header('Content-type: text/csv');
-            header('Content-Disposition: attachment; filename=dte_recibidos_'.($certificacion?'certificacion':'produccion').'_'.$receptor.'_'.$desde.'_'.$hasta.'.csv');
-            header('Pragma: no-cache');
-            header('Expires: 0');
-            echo $response['body'];
-            exit;
+            $this->Api->response()->type('text/csv');
+            $this->Api->response()->header('Content-Disposition', 'attachment; filename=dte_recibidos_'.($certificacion?'certificacion':'produccion').'_'.$receptor.'_'.$desde.'_'.$hasta.'.csv');
+            $this->Api->response()->header('Pragma', 'no-cache');
+            $this->Api->response()->header('Expires', 0);
+            $this->Api->send($response['body']);
         }
     }
 

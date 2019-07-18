@@ -1011,12 +1011,15 @@ class Controller_Documentos extends \Controller_App
             $this->Api->send($response['body'], 500);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->Api->response()->type('application/pdf');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->Api->response()->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->Api->response()->header('X-API-Deprecation-Date', '2017-05-01');
+        $this->Api->response()->header('X-API-Deprecation-Info', 'https://blog.libredte.cl/index.php/2017/04/03/servicio-web-pdf-dte-emitido-apps-conectadas');
+        $this->Api->send($response['body']);
     }
 
     /**
@@ -1057,7 +1060,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción que permite buscar un documento (ya sea temporal o real)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-09
+     * @version 2019-07-17
      */
     public function buscar($q = null)
     {
@@ -1086,8 +1089,7 @@ class Controller_Documentos extends \Controller_App
                 }
                 // se encontró sólo un DTE -> se redirige a la página del DTE
                 else {
-                    header('location: '.$documentos[0]->getLinks()['ver']);
-                    exit;
+                    $this->redirect($documentos[0]->getLinks()['ver']);
                 }
             }
         }
@@ -1099,8 +1101,7 @@ class Controller_Documentos extends \Controller_App
                 $folio = (int)$aux[1];
                 $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
                 if ($DteEmitido->exists()) {
-                    header('location: '.$DteEmitido->getLinks()['ver']);
-                    exit;
+                    $this->redirect($DteEmitido->getLinks()['ver']);
                 }
             }
         }
@@ -1128,8 +1129,7 @@ class Controller_Documentos extends \Controller_App
                         );
                         $this->redirect('/dte');
                     }
-                    header('location: '.$documentos[0]->getLinks()['ver']);
-                    exit;
+                    $this->redirect($documentos[0]->getLinks()['ver']);
                 }
             }
         }

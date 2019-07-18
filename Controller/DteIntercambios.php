@@ -91,7 +91,7 @@ class Controller_DteIntercambios extends \Controller_App
         }
         array_unshift($pendientes, array_keys($pendientes[0]));
         \sowerphp\general\Utility_Spreadsheet_CSV::generate($pendientes, $Emisor->rut.'_intercambios_pendientes_'.date('Ymd'));
-        exit;
+        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
     }
 
     /**
@@ -248,7 +248,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Recurso para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-07
+     * @version 2019-07-17
      */
     public function _api_pdf_GET($codigo, $contribuyente, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
@@ -298,18 +298,19 @@ class Controller_DteIntercambios extends \Controller_App
             return $this->Api->send($response['body'], $response['status']['code']);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
-            if (isset($response['header'][$header]))
-                header($header.': '.$response['header'][$header]);
+        $this->Api->response()->type('application/pdf');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+            if (isset($response['header'][$header])) {
+                $this->Api->response()->header($header, $response['header'][$header]);
+            }
         }
-        echo $response['body'];
-        exit;
+        $this->Api->send($response['body']);
     }
 
     /**
      * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-07
+     * @version 2019-07-17
      */
     public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
@@ -322,19 +323,19 @@ class Controller_DteIntercambios extends \Controller_App
             $this->redirect('/dte/dte_intercambios/listar');
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+        $this->response->type('application/pdf');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
             if (isset($response['header'][$header])) {
-                header($header.': '.$response['header'][$header]);
+                $this->response->header($header, $response['header'][$header]);
             }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**
      * Recurso que descarga el XML del documento intercambiado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-07
+     * @version 2019-07-17
      */
     public function _api_xml_GET($codigo, $contribuyente)
     {
@@ -355,17 +356,16 @@ class Controller_DteIntercambios extends \Controller_App
         }
         // entregar XML
         $xml = base64_decode($DteIntercambio->archivo_xml);
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$DteIntercambio->archivo.'"');
-        print $xml;
-        exit;
+        $this->Api->response()->type('application/xml', 'ISO-8859-1');
+        $this->Api->response()->header('Content-Length', strlen($xml));
+        $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$DteIntercambio->archivo.'"');
+        $this->Api->send($xml);
     }
 
     /**
      * Acción que descarga el XML del documento intercambiado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-07
+     * @version 2019-07-17
      */
     public function xml($codigo)
     {
@@ -378,13 +378,13 @@ class Controller_DteIntercambios extends \Controller_App
             $this->redirect('/dte/dte_intercambios/listar');
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+        $this->response->type('application/xml', 'ISO-8859-1');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
             if (isset($response['header'][$header])) {
-                header($header.': '.$response['header'][$header]);
+                $this->response->header($header, $response['header'][$header]);
             }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**
@@ -431,13 +431,13 @@ class Controller_DteIntercambios extends \Controller_App
             file_put_contents($dir.'/ResultadoDTE.xml', base64_decode($DteIntercambio->resultado_xml));
         }
         \sowerphp\general\Utility_File::compress($dir, ['format'=>'zip', 'delete'=>true]);
-        exit;
+        exit; // TODO: enviar usando $this->Api->send() / File::compress()
     }
 
     /**
      * Acción que entrega los XML del resultado de la revisión del intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-07
+     * @version 2019-07-17
      */
     public function resultados_xml($codigo)
     {
@@ -454,13 +454,13 @@ class Controller_DteIntercambios extends \Controller_App
             }
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Disposition', 'Content-Length', 'Content-Type'] as $header) {
+        $this->response->type('application/zip');
+        foreach (['Content-Disposition', 'Content-Length'] as $header) {
             if (isset($response['header'][$header])) {
-                header($header.': '.$response['header'][$header]);
+                $this->response->header($header, $response['header'][$header]);
             }
         }
-        echo $response['body'];
-        exit;
+        $this->response->send($response['body']);
     }
 
     /**

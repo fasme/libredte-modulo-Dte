@@ -113,7 +113,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que descarga el archivo PDF del libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-08
+     * @version 2019-07-17
      */
     public function pdf($periodo)
     {
@@ -138,6 +138,7 @@ abstract class Controller_Base_Libros extends \Controller_App
             $pdf->setFooterText(\sowerphp\core\Configure::read('dte.pdf.footer'));
             $pdf->agregar($LibroCompraVenta->toArray());
             $pdf->Output($file, 'D');
+            exit; // TODO: enviar usando $this->response->send() / LibroCompraVenta::Output() / PDF
         }
         // entregar libro de guías
         else {
@@ -146,13 +147,12 @@ abstract class Controller_Base_Libros extends \Controller_App
             );
             $this->redirect(str_replace('pdf', 'ver', $this->request->request));
         }
-        exit;
     }
 
     /**
      * Acción que descarga el archivo XML del libro
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-12-25
+     * @version 2019-07-17
      */
     public function xml($periodo)
     {
@@ -169,11 +169,10 @@ abstract class Controller_Base_Libros extends \Controller_App
         // entregar XML
         $file = strtolower($this->config['model']['plural']).'_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo.'.xml';
         $xml = base64_decode($Libro->xml);
-        header('Content-Type: application/xml; charset=ISO-8859-1');
-        header('Content-Length: '.strlen($xml));
-        header('Content-Disposition: attachement; filename="'.$file.'"');
-        print $xml;
-        exit;
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
     }
 
     /**
