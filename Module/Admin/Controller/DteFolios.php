@@ -97,7 +97,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite subir un caf para un tipo de folio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-20
+     * @version 2019-07-19
      */
     public function subir_caf()
     {
@@ -115,9 +115,10 @@ class Controller_DteFolios extends \Controller_App
                 );
                 return;
             }
-            if (\sowerphp\general\Utility_File::mimetype($_FILES['caf']['tmp_name'])!='application/xml') {
+            $mimetype = \sowerphp\general\Utility_File::mimetype($_FILES['caf']['tmp_name']);
+            if (!in_array($mimetype, ['application/xml', 'text/xml'])) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'Formato del archivo '.$_FILES['caf']['name'].' es incorrecto', 'error'
+                    'Formato '.$mimetype.' del archivo '.$_FILES['caf']['name'].' es incorrecto', 'error'
                 );
                 return;
             }

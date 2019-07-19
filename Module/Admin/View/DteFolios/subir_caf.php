@@ -28,7 +28,7 @@ echo $f->input([
     'label' => 'Archivo CAF',
     'check' => 'notempty',
     'help' => 'Archivo CAF en formato XML descargado desde SII',
-    'attr' => 'accept="application/xml"',
+    'attr' => 'accept="application/xml,text/xml,.xml"',
 ]);
 echo $f->end('Subir archivo CAF');
 ?>
