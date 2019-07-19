@@ -157,7 +157,7 @@ class Model_FirmaElectronica extends \Model_App
     public static $tableComment = '';
 
     public static $fkNamespace = array(
-        'Model_Usuario' => 'website\Dte\Admin'
+        'Model_Usuario' => '\sowerphp\app\Sistema\Usuarios'
     ); ///< Namespaces que utiliza esta clase
 
     /**

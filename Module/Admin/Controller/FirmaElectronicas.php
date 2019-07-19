@@ -53,7 +53,7 @@ class Controller_FirmaElectronicas extends \Controller_App
     /**
      * Acción que permite al usuario agregar una nueva firma electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-21
+     * @version 2019-07-19
      */
     public function agregar()
     {
@@ -85,6 +85,14 @@ class Controller_FirmaElectronicas extends \Controller_App
                 );
                 return;
             }
+            // verificar que la firma no esté cargada en otro usuario
+            $FirmaElectronica = new Model_FirmaElectronica(trim($Firma->getID()));
+            if ($FirmaElectronica->usuario and $FirmaElectronica->usuario != $this->Auth->User->id) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'La firma de '.$Firma->getID().' ya está cargada en el usuario '.$FirmaElectronica->getUsuario()->usuario.', no es posible asignar a '.$this->Auth->User->usuario, 'error'
+                );
+                return;
+            }
             // si el usuario tiene una firma asociada se borra antes de agregar la nueva
             // esto es necesario porque la PK de la firma es el RUN de la misma y no el ID
             // del usuario, además un usuario puede tener sólo una firma. Entonces si un
@@ -95,7 +103,6 @@ class Controller_FirmaElectronicas extends \Controller_App
                 $FirmaElectronicaAntigua->delete();
             }
             // si todo fue ok se crea el objeto firma para la bd y se guarda
-            $FirmaElectronica = new Model_FirmaElectronica(trim($Firma->getID()));
             $FirmaElectronica->nombre = $Firma->getName();
             $FirmaElectronica->email = $Firma->getEmail();
             $FirmaElectronica->desde = $Firma->getFrom();
