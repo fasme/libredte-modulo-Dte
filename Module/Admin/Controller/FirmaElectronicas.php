@@ -81,7 +81,7 @@ class Controller_FirmaElectronicas extends \Controller_App
             // validar que vengan los datos de la firma
             if (!trim($Firma->getID())) {
                 \sowerphp\core\Model_Datasource_Session::message(
-                    'No fue posible obtener el RUN de la firma electrónica', 'error'
+                    'No fue posible obtener el RUN de la firma electrónica (verificar contraseña)', 'error'
                 );
                 return;
             }
