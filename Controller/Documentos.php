@@ -1143,7 +1143,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción que permite buscar masivamente los documentos asociados a un archivo masivo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2019-07-18
      */
     public function buscar_masivo()
     {
@@ -1213,7 +1213,8 @@ class Controller_Documentos extends \Controller_App
                 $datos[$i][] = implode(', ', $documento_encontrado);
             }
             // descargar archivo con resultados
-            \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, substr($_FILES['archivo']['name'], 0, -4).'_resultado_buscar_masivo');
+            $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($datos);
+            $this->response->sendContent($csv, substr($_FILES['archivo']['name'], 0, -4).'_resultado_buscar_masivo.csv');
         }
     }
 

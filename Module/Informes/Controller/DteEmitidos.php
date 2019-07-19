@@ -68,7 +68,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que entrega el informe de ventas en CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-28
+     * @version 2019-07-18
      */
     public function csv($desde, $hasta)
     {
@@ -130,7 +130,8 @@ class Controller_DteEmitidos extends \Controller_App
             $emitidos = $aux;
         }
         array_unshift($emitidos, $cols);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($emitidos, 'emitidos_'.$Emisor->rut.'_'.$desde.'_'.$hasta);
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($emitidos);
+        $this->response->sendContent($csv, 'emitidos_'.$Emisor->rut.'_'.$desde.'_'.$hasta.'.csv');
     }
 
     /**

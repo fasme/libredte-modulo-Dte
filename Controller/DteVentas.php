@@ -203,7 +203,7 @@ class Controller_DteVentas extends Controller_Base_Libros
      * Acción que genera el archivo CSV con el registro de ventas
      * En realidad esto descarga los datos que están localmente y no los del RV del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2019-07-18
      */
     public function descargar_registro_venta($periodo)
     {
@@ -222,13 +222,14 @@ class Controller_DteVentas extends Controller_Base_Libros
         unset($columnas['anulado']);
         $columnas['tipo_transaccion'] = 'Tipo Transaccion';
         array_unshift($ventas, $columnas);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($ventas, 'rv_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo, ';', '');
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($ventas);
+        $this->response->sendContent($csv, 'rv_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo.'.csv');
     }
 
     /**
      * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2019-07-18
      */
     public function descargar_resumenes($periodo)
     {
@@ -266,7 +267,8 @@ class Controller_DteVentas extends Controller_Base_Libros
                 $r['TotMntTotal'],
             ];
         }
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rv_resumenes_'.$periodo, ';', '');
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($datos);
+        $this->response->sendContent($csv, 'rv_resumenes_'.$periodo.'.csv');
     }
 
     /**

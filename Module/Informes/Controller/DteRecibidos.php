@@ -61,7 +61,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que entrega el informe de compras en CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-30
+     * @version 2019-07-18
      */
     public function csv($desde, $hasta)
     {
@@ -119,7 +119,8 @@ class Controller_DteRecibidos extends \Controller_App
             $recibidos = $aux;
         }
         array_unshift($recibidos, $cols);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($recibidos, 'recibidos_'.$Emisor->rut.'_'.$desde.'_'.$hasta);
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($recibidos);
+        $this->response->sendContent($csv, 'recibidos_'.$Emisor->rut.'_'.$desde.'_'.$hasta.'.csv');
     }
 
 }

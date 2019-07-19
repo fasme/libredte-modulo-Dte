@@ -327,7 +327,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que permite descargar del SII los folios según su estado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-07-18
      */
     public function descargar($dte, $folio, $estado = 'recibidos')
     {
@@ -353,7 +353,8 @@ class Controller_DteFolios extends \Controller_App
             $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
         }
         array_unshift($detalle, ['Folio inicial', 'Folio final', 'Cantidad de folios']);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, 'folios_'.$estado.'_'.$Emisor->rut.'_'.$dte.'_'.$folio.'_'.date('Y-m-d'));
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
+        $this->response->sendContent($csv, 'folios_'.$estado.'_'.$Emisor->rut.'_'.$dte.'_'.$folio.'_'.date('Y-m-d').'.csv');
     }
 
     /**

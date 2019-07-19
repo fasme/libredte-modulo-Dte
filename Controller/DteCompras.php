@@ -223,7 +223,7 @@ class Controller_DteCompras extends Controller_Base_Libros
      * Acción que genera el archivo CSV con el registro de compras
      * En realidad esto descarga los datos que están localmente y no los del RC del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-06
+     * @version 2019-07-18
      */
     public function descargar_registro_compra($periodo, $electronico = null)
     {
@@ -242,13 +242,14 @@ class Controller_DteCompras extends Controller_Base_Libros
         unset($columnas['anulado'], $columnas['impuesto_vehiculos'], $columnas['iva_uso_comun_factor']);
         $columnas['tipo_transaccion'] = 'Tipo Transaccion';
         array_unshift($compras, $columnas);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($compras, 'rc_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo, ';', '');
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($compras);
+        $this->response->sendContent($csv, 'rc_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo.'.csv');
     }
 
     /**
      * Acción que genera el archivo CSV con los resúmenes de ventas (ingresados manualmente)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-12
+     * @version 2019-07-18
      */
     public function descargar_tipo_transacciones($periodo)
     {
@@ -262,7 +263,8 @@ class Controller_DteCompras extends Controller_Base_Libros
             $this->redirect(str_replace('descargar_tipo_transacciones', 'ver', $this->request->request));
         }
         array_unshift($datos, ['Rut-DV', 'Codigo_Tipo_Doc', 'Folio_Doc', 'TpoTranCompra', 'Codigo_IVA_E_Imptos']);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($datos, 'rc_tipo_transacciones_'.$periodo, ';', '');
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($datos);
+        $this->response->sendContent($csv, 'rc_tipo_transacciones_'.$periodo.'.csv');
     }
 
     /**
