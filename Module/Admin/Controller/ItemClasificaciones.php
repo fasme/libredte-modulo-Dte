@@ -169,7 +169,7 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
     /**
      * Acción que permite exportar todas las clasificaciones de items a un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-23
+     * @version 2019-07-18
      */
     public function exportar()
     {
@@ -182,8 +182,8 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
             $this->redirect('/dte/admin/item_clasificaciones/listar');
         }
         array_unshift($clasificaciones, array_keys($clasificaciones[0]));
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($clasificaciones, 'item_clasificaciones_'.$Contribuyente->rut);
-        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($clasificaciones);
+        $this->response->sendContent($csv, 'item_clasificaciones_'.$Contribuyente->rut.'.csv');
     }
 
 }

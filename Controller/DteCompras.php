@@ -456,7 +456,7 @@ class Controller_DteCompras extends Controller_Base_Libros
      * eligiendo el tipo de formato, ya sea por defecto en formato RCV o en
      * formato IECV (esto permite importar el archivo en LibreDTE u otra app)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-02
+     * @version 2019-07-18
      */
     public function rcv_csv($periodo, $estado = 'REGISTRO', $tipo = 'rcv')
     {
@@ -472,8 +472,8 @@ class Controller_DteCompras extends Controller_Base_Libros
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
         array_unshift($detalle, array_keys($detalle[0]));
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, 'rc_'.$Emisor->rut.'_'.$periodo.'_'.$estado.'_'.$tipo);
-        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
+        $this->response->sendContent($csv, 'rc_'.$Emisor->rut.'_'.$periodo.'_'.$estado.'_'.$tipo.'.csv');
     }
 
 }

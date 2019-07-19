@@ -92,7 +92,7 @@ class Controller_DteBoletas extends \Controller_App
     /**
      * Acción para descargar libro de boletas en CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-07
+     * @version 2019-07-18
      */
     public function csv($periodo)
     {
@@ -126,8 +126,8 @@ class Controller_DteBoletas extends \Controller_App
         if ($detalle) {
             array_unshift($detalle, array_keys($detalle[0]));
         }
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, $file);
-        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
+        $this->response->sendContent($csv, $file.'.csv');
     }
 
 }

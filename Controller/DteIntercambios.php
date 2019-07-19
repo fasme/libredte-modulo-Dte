@@ -69,7 +69,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para descargar los intercambios pendientes de procesar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-15
+     * @version 2019-07-18
      */
     public function pendientes()
     {
@@ -90,8 +90,8 @@ class Controller_DteIntercambios extends \Controller_App
             }
         }
         array_unshift($pendientes, array_keys($pendientes[0]));
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($pendientes, $Emisor->rut.'_intercambios_pendientes_'.date('Ymd'));
-        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($pendientes);
+        $this->response->sendContent($csv, $Emisor->rut.'_intercambios_pendientes_'.date('Ymd').'.csv');
     }
 
     /**

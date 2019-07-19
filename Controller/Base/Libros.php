@@ -90,7 +90,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Acción que descarga los datos del libro del período en un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2019-07-18
      */
     public function csv($periodo)
     {
@@ -107,7 +107,8 @@ abstract class Controller_Base_Libros extends \Controller_App
         }
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
         array_unshift($detalle, $class::$libro_cols);
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($detalle, strtolower($this->config['model']['plural']).'_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo);
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
+        $this->response->sendContent($csv, strtolower($this->config['model']['plural']).'_'.$Emisor->rut.'-'.$Emisor->dv.'_'.$periodo.'.csv');
     }
 
     /**

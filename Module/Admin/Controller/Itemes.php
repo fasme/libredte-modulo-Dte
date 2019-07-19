@@ -217,7 +217,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción que permite exportar todos los items a un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-23
+     * @version 2019-07-18
      */
     public function exportar()
     {
@@ -230,8 +230,8 @@ class Controller_Itemes extends \Controller_Maintainer
             $this->redirect('/dte/admin/itemes/listar');
         }
         array_unshift($items, array_keys($items[0]));
-        \sowerphp\general\Utility_Spreadsheet_CSV::generate($items, 'items_'.$Contribuyente->rut);
-        exit; // TODO: enviar usando $this->response->send() / CSV::generate()
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($items);
+        $this->response->sendContent($csv, 'items_'.$Contribuyente->rut.'.csv');
     }
 
 }
