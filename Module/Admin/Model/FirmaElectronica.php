@@ -160,4 +160,14 @@ class Model_FirmaElectronica extends \Model_App
         'Model_Usuario' => 'website\Dte\Admin'
     ); ///< Namespaces que utiliza esta clase
 
+    /**
+     * Método para obtener la contraseña de la firma electrónica en texto plano
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-19
+     */
+    public function getContraseniaPlainText()
+    {
+        return  \website\Dte\Utility_Data::decrypt($this->contrasenia);
+    }
+
 }
