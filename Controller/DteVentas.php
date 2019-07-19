@@ -43,7 +43,7 @@ class Controller_DteVentas extends Controller_Base_Libros
      * Acción que envía el archivo XML del libro de ventas al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-21
+     * @version 2019-07-19
      */
     public function enviar_sii($periodo)
     {
@@ -155,13 +155,14 @@ class Controller_DteVentas extends Controller_Base_Libros
                 $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
             }
             \sowerphp\core\Model_Datasource_Session::message(
-                'Libro de ventas período '.$periodo.' envíado', 'ok'
+                'Libro de ventas período '.$periodo.' envíado al SII', 'ok'
             );
         }
         // no se envía el libro al SII (se trata de enviar resumen boletas si existe)
         else {
             // se envía resumen de boletas si corresponde
             $resumenes = $Libro->getResumenBoletas();
+            $resumenes_errores = [];
             foreach ($resumenes as $resumen) {
                 try {
                     $r = libredte_consume('/sii/rcv_set_resumen/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'/VENTA?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
@@ -178,7 +179,11 @@ class Controller_DteVentas extends Controller_Base_Libros
                             'det_mnt_exe' => $resumen['TotMntExe'],
                         ],
                     ]);
+                    if ($r['status']['code']!=200) {
+                        $resumenes_errores[] = $r['body'];
+                    }
                 } catch (\Exception $e) {
+                    $resumenes_errores[] = 'Esta versión de LibreDTE no puede enviar los resúmenes al SII de manera automática, debe copiarlos manualmente en el registro de ventas';
                 }
             }
             // libro generado
@@ -186,8 +191,14 @@ class Controller_DteVentas extends Controller_Base_Libros
             $revision_estado = 'Libro generado';
             $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
             \sowerphp\core\Model_Datasource_Session::message(
-                'Libro de ventas período '.$periodo.' generado, pero no se envió al SII, ya que se reemplazó por RCV', 'ok'
+                'Libro de ventas local del período '.$periodo.' generado, este libro se reemplazó con el Registro de Ventas', 'ok'
             );
+            // si hay errores de resúmenes se muestran
+            if (!empty($resumenes_errores)) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Ocurrió algún problema al enviar los resúmenes al SII:<br/>- '.implode('<br/>- ',$resumenes_errores), 'warning'
+                );
+            }
         }
         // guardar libro de ventas
         $DteVenta->documentos = $Libro->cantidad();

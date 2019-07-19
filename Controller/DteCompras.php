@@ -199,14 +199,14 @@ class Controller_DteCompras extends Controller_Base_Libros
                 $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
             }
             \sowerphp\core\Model_Datasource_Session::message(
-                'Libro de compras período '.$periodo.' envíado', 'ok'
+                'Libro de compras período '.$periodo.' envíado al SII', 'ok'
             );
         } else {
             $track_id = -1;
             $revision_estado = 'Libro generado';
             $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
             \sowerphp\core\Model_Datasource_Session::message(
-                'Libro de compras período '.$periodo.' generado, pero no se envió al SII, ya que se reemplazó por RCV', 'ok'
+                'Libro de compras local del período '.$periodo.' generado, este libro se reemplazó con el Registro de Compras', 'ok'
             );
         }
         // guardar libro de compras
