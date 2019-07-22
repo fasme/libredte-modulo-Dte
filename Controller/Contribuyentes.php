@@ -119,7 +119,7 @@ class Controller_Contribuyentes extends \Controller_App
             else {
                 $referer = $this->Auth->check('/dte') ? '/dte' : '/';
             }
-            $trigger_referer = \sowerphp\core\Trigger::run('contribuyente_seleccionar_referer', $Emisor, $this->Auth->User, $referer);
+            $trigger_referer = \sowerphp\core\Trigger::run('contribuyente_seleccionar_referer', $this, $referer);
             if ($trigger_referer) {
                 $referer = $trigger_referer;
             }
