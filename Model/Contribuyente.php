@@ -747,7 +747,7 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario al que se asignarán permisos
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-27
+     * @version 2019-07-21
      */
     public function setPermisos(&$Usuario)
     {
@@ -779,6 +779,8 @@ class Model_Contribuyente extends \Model_App
             if (in_array('distribuidor', $this->getUsuario()->getGroups())) {
                 $grupos[] = 'distribuidor';
             }
+            // siempre asignar el grupo 'usuarios' para mantener permisos básicos
+            $grupos[] = 'usuarios';
             // asignar permisos
             $Usuario->setAuths($this->getUsuario()->getAuths($grupos));
             $Usuario->setGroups($this->getUsuario()->getGroups($grupos));
