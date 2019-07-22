@@ -61,7 +61,7 @@ class Controller_Contribuyentes extends \Controller_App
      * @param rut Si se pasa un RUT se tratará de seleccionar
      * @param url URL a la que redirigir después de seleccionar el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-12-23
+     * @version 2019-07-21
      */
     public function seleccionar($rut = null, $url = null)
     {
@@ -109,13 +109,21 @@ class Controller_Contribuyentes extends \Controller_App
             $this->setContribuyente($Emisor);
             $Emisor->setPermisos($this->Auth->User);
             $this->Auth->saveCache();
-            // redireccionar
-            if ($referer)
+            // determinar página de redirección
+            if ($referer) {
                 \sowerphp\core\Model_Datasource_Session::delete('referer');
-            else if ($url)
+            }
+            else if ($url) {
                 $referer = base64_decode($url);
-            else
+            }
+            else {
                 $referer = $this->Auth->check('/dte') ? '/dte' : '/';
+            }
+            $trigger_referer = \sowerphp\core\Trigger::run('contribuyente_seleccionar_referer', $Emisor, $this->Auth->User, $referer);
+            if ($trigger_referer) {
+                $referer = $trigger_referer;
+            }
+            // redireccionar
             $this->redirect($referer);
         }
         // asignar variables para la vista
