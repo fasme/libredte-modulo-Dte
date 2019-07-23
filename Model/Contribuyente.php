@@ -2723,10 +2723,11 @@ class Model_Contribuyente extends \Model_App
      */
     public function getTotalDocumentosUsadosPeriodo($periodo = null)
     {
-        if (!$periodo)
+        if (!$periodo) {
             $periodo = date('Ym');
+        }
         $periodo_col = $this->db->date('Ym', 'fecha');
-        return $this->db->getValue('
+        return (int)$this->db->getValue('
             SELECT (e.total + r.total)
             FROM
                 (
