@@ -41,39 +41,40 @@ class Model_ItemClasificaciones extends \Model_Plural_App
     /**
      * Método que entrega el listado de clasificaciones
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-25
+     * @version 2019-07-25
      */
     public function getList()
     {
-        return $this->getListByContribuyente($this->getContribuyente()->rut);
-    }
-
-    /**
-     * Método que entrega el listado de clasificaciones de un contribuyente
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-26
-     */
-    public function getListByContribuyente($rut)
-    {
-        return $this->db->getTable('
-            SELECT codigo, clasificacion
-            FROM item_clasificacion
-            WHERE contribuyente = :rut AND activa = true
-            ORDER BY clasificacion
-        ', [':rut'=>$rut]);
+        return \sowerphp\core\Utility_Array::treeToList(
+            $this->getArbolItems(), 'clasificacion', 'clasificaciones'
+        );
     }
 
     /**
      * Método que entrega el listado de clasificaciones con sus items y valores brutos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-03
+     * @version 2019-07-25
      */
     public function getListItems()
     {
-        return \sowerphp\core\Utility_Array::tableToAssociativeArray(\sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($this->db->getTable('
+        return \sowerphp\core\Utility_Array::treeToAssociativeArray(
+            $this->getArbolItems(), 'clasificacion', 'clasificaciones'
+        );
+    }
+
+    /**
+     * Método que entrega el árbol de clasificaciones de items con los items y
+     * sus precios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-27
+     */
+    public function getArbolItems()
+    {
+        return \sowerphp\core\Utility_Array::toTree(\sowerphp\core\Utility_Array::tableToAssociativeArray(\sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($this->db->getTable('
             SELECT
                 c.codigo AS clasificacion_codigo,
                 c.clasificacion,
+                c.superior,
                 i.codigo,
                 i.item,
                 CASE WHEN i.bruto OR i.exento != 0 THEN
@@ -84,10 +85,10 @@ class Model_ItemClasificaciones extends \Model_Plural_App
                 i.moneda
             FROM
                 item AS i
-                JOIN item_clasificacion AS c ON i.contribuyente = c.contribuyente AND i.clasificacion = c.codigo
-            WHERE c.contribuyente = :rut AND c.activa = true AND i.activo = true
+                RIGHT JOIN item_clasificacion AS c ON i.contribuyente = c.contribuyente AND i.clasificacion = c.codigo
+            WHERE c.contribuyente = :rut AND c.activa = true AND (i.codigo IS NULL OR i.activo = true)
             ORDER BY c.clasificacion, i.item
-        ', [':rut'=>$this->getContribuyente()->rut]), 2, 'items'));
+        ', [':rut'=>$this->getContribuyente()->rut]), 3, 'items')), 'superior', 'clasificaciones');
     }
 
     /**

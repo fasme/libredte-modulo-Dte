@@ -56,14 +56,14 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
     /**
      * Acción para crear una clasificación de items
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-24
+     * @version 2019-07-25
      */
     public function crear()
     {
         $Contribuyente = $this->getContribuyente();
         $_POST['contribuyente'] = $Contribuyente->rut;
         $this->set([
-            'clasificaciones' => (new Model_ItemClasificaciones())->getListByContribuyente($Contribuyente->rut),
+            'clasificaciones' => (new Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList(),
         ]);
         parent::crear();
     }
@@ -71,14 +71,14 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
     /**
      * Acción para editar una clasificación de items
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-24
+     * @version 2019-07-25
      */
     public function editar($codigo)
     {
         $Contribuyente = $this->getContribuyente();
         $_POST['contribuyente'] = $Contribuyente->rut;
         $this->set([
-            'clasificaciones' => (new Model_ItemClasificaciones())->getListByContribuyente($Contribuyente->rut),
+            'clasificaciones' => (new Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList(),
         ]);
         parent::editar($Contribuyente->rut, $codigo);
     }

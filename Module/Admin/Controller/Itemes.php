@@ -52,7 +52,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción para crear un nuevo item
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-19
+     * @version 2019-07-25
      */
     public function crear()
     {
@@ -60,7 +60,7 @@ class Controller_Itemes extends \Controller_Maintainer
         $_POST['contribuyente'] = $Contribuyente->rut;
         $this->set([
             'Contribuyente' => $Contribuyente,
-            'clasificaciones' => (new Model_ItemClasificaciones())->getListByContribuyente($Contribuyente->rut),
+            'clasificaciones' => (new Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList(),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getListContribuyente($Contribuyente->config_extra_impuestos_adicionales),
         ]);
         parent::crear();
@@ -69,7 +69,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción para editar un item
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-03-19
+     * @version 2019-07-25
      */
     public function editar($codigo, $tipo = 'INT1')
     {
@@ -77,7 +77,7 @@ class Controller_Itemes extends \Controller_Maintainer
         $_POST['contribuyente'] = $Contribuyente->rut;
         $this->set([
             'Contribuyente' => $Contribuyente,
-            'clasificaciones' => (new Model_ItemClasificaciones())->getListByContribuyente($Contribuyente->rut),
+            'clasificaciones' => (new Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList(),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getListContribuyente($Contribuyente->config_extra_impuestos_adicionales),
         ]);
         parent::editar($Contribuyente->rut, $tipo, $codigo);

@@ -59,6 +59,21 @@ class Model_Itemes extends \Model_Plural_App
     }
 
     /**
+     * Método que entrega el listado de items del contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-07-25
+     */
+    public function getList()
+    {
+        return $this->db->getTable('
+            SELECT codigo, item
+            FROM item
+            WHERE contribuyente = :contribuyente
+            ORDER BY item
+        ', [':contribuyente'=>$this->getContribuyente()->rut]);
+    }
+
+    /**
      * Método que busca los items del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-06-04
