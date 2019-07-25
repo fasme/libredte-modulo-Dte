@@ -153,7 +153,7 @@ echo $f->input([
 <!-- FIN DATOS BASICOS -->
 
 <!-- INICIO LISTA DE PRECIOS -->
-<div role="tabpanel" class="tab-pane active" id="precios" aria-labelledby="precios-tab">
+<div role="tabpanel" class="tab-pane" id="precios" aria-labelledby="precios-tab">
 <div class="alert alert-warning">¡Próximamente disponible!</div>
 </div>
 <!-- FIN LISTA DE PRECIOS -->
