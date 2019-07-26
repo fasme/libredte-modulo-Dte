@@ -147,7 +147,7 @@ $input_detalle = [
     'label'=>'Detalle',
     'titles'=>$titles,
     'inputs'=>$inputs,
-    'accesskey' => 'D',
+    'accesskey' => 'I',
     'callback' => 'item_nuevo',
 ];
 if (isset($datos)) {
