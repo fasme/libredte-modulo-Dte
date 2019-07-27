@@ -92,6 +92,6 @@ echo $f->input([
     'type' => 'select',
     'name' => 'pdf',
     'label' => '¿Generar PDF?',
-    'options' => ['No generar PDF', 'Si, generar PDF y enviar enlace para descarga al correo'],
+    'options' => ['No generar PDF', 'Si, generar todos los PDF y enviar enlace para descarga en correo de resultado'],
 ]);
 echo $f->end('Emitir DTE masivamente');
