@@ -26,14 +26,14 @@ namespace website\Dte;
 /**
  * Comando que permite emitir masivamente DTE a partir de un archivo CSV
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2018-04-28
+ * @version 2019-07-26
  */
 class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
 {
 
     private $time_start;
 
-    public function main($emisor, $archivo, $usuario, $dte_real = false, $email = false)
+    public function main($emisor, $archivo, $usuario, $dte_real = false, $email = false, $pdf = false)
     {
         $this->time_start = microtime(true);
         // crear emisor/usuario y verificar permisos
@@ -43,19 +43,19 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         }
         $Usuario = new \sowerphp\app\Sistema\Usuarios\Model_Usuario($usuario);
         if (!$Emisor->usuarioAutorizado($Usuario, '/dte/documentos/emitir')) {
-            $this->notificarResultado($Emisor, $Usuario, 'Usuario '.$Usuario->usuario.' no está autorizado a operar con la empresa '.$Emisor->getNombre(), $dte_real, $email);
+            $this->notificarResultado($Emisor, $Usuario, 'Usuario '.$Usuario->usuario.' no está autorizado a operar con la empresa '.$Emisor->getNombre(), $dte_real, $email, $pdf);
             return 1;
         }
         // verificar sea leible
         if (!is_readable($archivo)) {
-            $this->notificarResultado($Emisor, $Usuario, 'Archivo '.$archivo.' no puede ser leído', $dte_real, $email);
+            $this->notificarResultado($Emisor, $Usuario, 'Archivo '.$archivo.' no puede ser leído', $dte_real, $email, $pdf);
             return 1;
         }
         // verificar archivo sea UTF-8
         exec('file -i '.$archivo, $output);
         $aux = explode('charset=', $output[0]);
         if (!isset($aux[1]) or !in_array($aux[1], ['us-ascii', 'utf-8'])) {
-            $this->notificarResultado($Emisor, $Usuario, 'Codificación del archivo es '.$aux[1].' y debe ser utf-8', $dte_real, $email);
+            $this->notificarResultado($Emisor, $Usuario, 'Codificación del archivo es '.$aux[1].' y debe ser utf-8', $dte_real, $email, $pdf);
             return 1;
         }
         // cargar archivo y crear documentos
@@ -114,7 +114,24 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         $documentos[] = $documento;
         // si hay errores de formato se notifica al usuario y se detiene la ejecución
         if ($error_formato) {
-            $this->notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email);
+            $this->notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email, $pdf);
+            return 1;
+        }
+        // si se solicitó incluir los PDF se crea directorio para irlos generando
+        $pdf = (boolean)$pdf;
+        if ($pdf) {
+            $dir = TMP.'/libredte_dte_emitido_pdf_'.$Emisor->rut.'_'.md5(date('U').$Usuario->ultimo_ingreso_hash);
+            if (file_exists($dir)) {
+                \sowerphp\general\Utility_File::rmdir($dir);
+            }
+            if (file_exists($dir)) {
+                $pdf = __('Error al crear directorio para ir guardando los PDF (%s) ya existe y no se pudo eliminar', $dir);
+            } else {
+                mkdir($dir);
+            }
+        }
+        if ($pdf and is_string($pdf)) {
+            $this->notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email, $pdf);
             return 1;
         }
         // ir generando cada documento
@@ -141,6 +158,14 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             }
             // procesar DTE temporal (ya que no se genera el real)
             if (!$dte_real) {
+                // crear PDF del DTE temporal
+                if ($pdf) {
+                    $response_pdf = $rest->get($Request->url.'/api/dte/dte_tmps/pdf/'.$response['body']['receptor'].'/'.$response['body']['dte'].'/'.$response['body']['codigo'].'/'.$response['body']['emisor'].'?cotizacion=1');
+                    if ($response_pdf['status']['code']==200) {
+                        $file_pdf = $dir.'/dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$response['body']['dte'].'F'.$response['body']['dte'].'-'.strtoupper(substr($response['body']['codigo'],0,7)).'.pdf';
+                        file_put_contents($file_pdf, $response_pdf['body']);
+                    }
+                }
                 // enviar DTE temporal por correo al receptor
                 if ($email) {
                     $DteTmp = new \website\Dte\Model_DteTmp(
@@ -184,6 +209,14 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                     );
                     continue;
                 }
+                // crear PDF del DTE real
+                if ($pdf===true) {
+                    $response_pdf = $rest->get($Request->url.'/api/dte/dte_emitidos/pdf/'.$response['body']['dte'].'/'.$response['body']['folio'].'/'.$response['body']['emisor']);
+                    if ($response_pdf['status']['code']==200) {
+                        $file_pdf = $dir.'/dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$response['body']['dte'].'F'.$response['body']['folio'].'.pdf';
+                        file_put_contents($file_pdf, $response_pdf['body']);
+                    }
+                }
                 // enviar DTE real por correo al receptor
                 if ($email) {
                     $DteEmitido = new \website\Dte\Model_DteEmitido($response['body']['emisor'], $response['body']['dte'], $response['body']['folio'], $Emisor->config_ambiente_en_certificacion);
@@ -209,8 +242,22 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 }
             }
         }
+        // si se solicitó PDF entonces se comprime directorio y se entrega
+        if ($pdf) {
+            $compress = 'zip';
+            \sowerphp\general\Utility_File::compress(
+                $dir, ['format'=>$compress, 'delete'=>true, 'download'=>false]
+            );
+            $output = $dir.'.'.$compress;
+            $filename = DIR_STATIC.'/emision_masiva_pdf/'.basename($output);
+            if (!rename($output, $filename)) {
+                $pdf = 'Error al mover el archivo comprimido al directorio de descarga';
+            } else {
+                $pdf = \sowerphp\core\Configure::read('app.url_static').'/emision_masiva_pdf/'.basename($filename).' (enlace válido por 24 horas)';
+            }
+        }
         // notificar al usuario que solicitó la emisión masiva
-        $this->notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email);
+        $this->notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email, $pdf);
         // estadisticas y terminar
         $this->showStats();
         return 0;
@@ -427,7 +474,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         }
     }
 
-    private function notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email)
+    private function notificarResultado($Emisor, $Usuario, $datos, $dte_real, $email, $pdf)
     {
         // datos del envío
         $id = date('YmdHis');
@@ -450,6 +497,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         }
         $msg .= '- Generar DTE real: '.($dte_real?'Si':'No')."\n";
         $msg .= '- Enviar DTE por correo: '.($email?'Si':'No')."\n";
+        $msg .= '- Descarga de PDF: '.($pdf?(is_string($pdf)?$pdf:'Si'):'No')."\n";
         $msg .= '- Tiempo ejecución: '.num($tiempo).' segundos'."\n";
         $Emisor->notificar($titulo, $msg, $Usuario->email, null, $file);
         if ($file) {

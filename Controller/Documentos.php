@@ -1026,7 +1026,7 @@ class Controller_Documentos extends \Controller_App
      * Acción que permite generar masivamente los DTE
      * En estrictor rigor esta opción sólo lanza un comando que permite hacer la generación masiva
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2019-07-26
      */
     public function emitir_masivo()
     {
@@ -1042,7 +1042,14 @@ class Controller_Documentos extends \Controller_App
             }
             $archivo = tempnam('/tmp', $Emisor->rut.'_dte_masivo_pendiente_');
             move_uploaded_file($_FILES['archivo']['tmp_name'], $archivo);
-            $cmd = 'Dte.Documentos_EmitirMasivo '.escapeshellcmd((int)$Emisor->rut).' '.$archivo.' '.escapeshellcmd((int)$this->Auth->User->id).' '.escapeshellcmd((int)$_POST['dte_emitido']).' '.escapeshellcmd((int)$_POST['email']).' -v';
+            $cmd = 'Dte.Documentos_EmitirMasivo';
+            $cmd .= ' '.escapeshellcmd((int)$Emisor->rut);
+            $cmd .= ' '.escapeshellcmd($archivo);
+            $cmd .= ' '.escapeshellcmd((int)$this->Auth->User->id);
+            $cmd .= ' '.escapeshellcmd((int)$_POST['dte_emitido']);
+            $cmd .= ' '.escapeshellcmd((int)$_POST['email']);
+            $cmd .= ' '.escapeshellcmd((int)$_POST['pdf']);
+            $cmd .= ' -v';
             $log = TMP.'/screen_documentos_emitir_masivo_'.$Emisor->rut.'_'.date('YmdHis').'.log';
             if ($this->shell($cmd, $log)) {
                 \sowerphp\core\Model_Datasource_Session::message(

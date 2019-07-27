@@ -88,4 +88,10 @@ echo $f->input([
     'label' => '¿Enviar email?',
     'options' => ['No enviar email al receptor', 'Si, enviar email al receptor con el documento'],
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'pdf',
+    'label' => '¿Generar PDF?',
+    'options' => ['No generar PDF', 'Si, generar PDF y enviar enlace para descarga al correo'],
+]);
 echo $f->end('Emitir DTE masivamente');
