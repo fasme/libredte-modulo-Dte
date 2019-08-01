@@ -26,10 +26,10 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
     <!-- DATOS DEL DOCUMENTO -->
 <?php if ($Emisor->puedeAsignarFolio($_Auth->User)) : ?>
     <div class="row">
-        <div class="form-group col-md-offset-9 col-md-3">
+        <div class="form-group offset-md-9 col-md-3">
             <div class="input-group">
-                <div class="input-group-addon">Folio</div>
-                <?=$f->input(['name' => 'Folio', 'placeholder'=>0, 'popover'=>'Puede asignar manualmente un folio para el DTE. Si lo deja en 0 se usará el siguiente disponible en el sistema.', 'check' => 'integer'])?>
+                <div class="input-group-prepend"><span class="input-group-text">Folio</span></div>
+                <input type="text" name="Folio" value="" id="FolioField" class="check integer form-control" placeholder="0"  data-toggle="popover" data-trigger="focus" title="Folio" data-placement="top" data-content="Puede asignar manualmente un folio para el DTE. Si lo deja en 0 se usará el siguiente disponible en el sistema." onmouseover="$(this).popover('show')" onmouseout="$(this).popover('hide')" />
             </div>
         </div>
     </div>
