@@ -415,7 +415,7 @@ $(function() {
 </script>
 
 <div class="modal fade modal-buscar-receptor" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Buscar receptor</h4>
