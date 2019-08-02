@@ -11,10 +11,8 @@
             <label class="control-label sr-only" for="periodoField">Período del dashboard</label>
             <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                    <span class="input-group-text">
-                        <a href="<?=$_base?>/dte/dashboard?periodo=<?=$periodo_anterior?>" class="btn btn-default btn-sm"><i class="fas fa-arrow-left"></i></a>
-                        <a href="<?=$_base?>/dte/dashboard?periodo=<?=$periodo_siguiente?>" class="btn btn-default btn-sm"><i class="fas fa-arrow-right"></i></a>
-                    </span>
+                    <a href="<?=$_base?>/dte/dashboard?periodo=<?=$periodo_anterior?>" class="btn btn-primary btn-sm"><i class="fas fa-arrow-left"></i></a>
+                    <a href="<?=$_base?>/dte/dashboard?periodo=<?=$periodo_siguiente?>" class="btn btn-primary btn-sm"><i class="fas fa-arrow-right"></i></a>
                 </div>
                 <input type="text" name="periodo" value="<?=$periodo?>" class="form-control check integer text-center" id="periodoField" placeholder="<?=$periodo_actual?>" size="7" onclick="this.select()" />
                 <div class="input-group-append">
