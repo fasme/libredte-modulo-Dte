@@ -257,7 +257,9 @@ echo $f->end(false);
 <div class="card mb-4">
     <div class="card-header"><i class="fas fa-code"></i> Error validación de esquema del XML de EnvioDTE</div>
     <div class="card-body">
-<?php debug(implode("\n\n", \sasco\LibreDTE\Log::readAll())); ?>
+        <pre>
+<?php print_r(implode("\n\n", \sasco\LibreDTE\Log::readAll())); ?>
+        </pre>
     </div>
 </div>
 <?php endif; ?>
