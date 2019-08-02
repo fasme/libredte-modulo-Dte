@@ -59,9 +59,9 @@ echo $f->end('Buscar documentos');
 if (isset($documentos)) {
     $DteTipos = new \website\Dte\Admin\Mantenedores\Model_DteTipos();
     foreach ($documentos as &$d) {
-        $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Emisor->getRUT().'/'.$d['dte'].'/'.$d['folio'].'/'.$d['emision'].'/'.$d['total'].'/'.$d['rut'].'\', 750, 550)" title="Verificar datos del documento en la web del SII" class="btn btn-default"><i class="fa fa-search fa-fw"></i></a>';
-        $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-default"><i class="fa fa-eye fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-default"><i class="fa fa-check fa-fw"></i></a>';
+        $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Emisor->getRUT().'/'.$d['dte'].'/'.$d['folio'].'/'.$d['emision'].'/'.$d['total'].'/'.$d['rut'].'\', 750, 550)" title="Verificar datos del documento en la web del SII" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
+        $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-check fa-fw"></i></a>';
         $d[] = \sowerphp\general\Utility_Date::count(\sowerphp\general\Utility_Date::format($d['recepcion'], 'Y-m-d'));
         $d[] = $acciones;
         if (is_numeric($d['dte'])) {
