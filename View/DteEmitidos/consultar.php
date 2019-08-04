@@ -19,6 +19,7 @@ if ($message) {
     echo '    <a href="#" class="close" data-dismiss="alert" aria-label="close" title="Cerrar">&times;</a>',"\n";
     echo '</div>'."\n";
 }
+$f = new \sowerphp\general\View_Helper_Form(false);
 ?>
 <?php if (!isset($DteEmitido)) : ?>
             <div class="card mb-4">
@@ -27,24 +28,16 @@ if ($message) {
                     <form action="<?=$_base.$_request?>" method="post" onsubmit="return Form.check()" class="mb-4">
                         <div class="form-group">
                             <label for="emisor" class="sr-only">RUT emisor</label>
-                            <input type="text" name="emisor" id="emisor" class="form-control form-control-lg check rut" required="required" placeholder="RUT emisor">
+                            <input type="text" name="emisor" id="emisor" class="form-control check rut" required="required" placeholder="RUT emisor">
                         </div>
-                        <div class="form-group">
-                            <label for="dte" class="sr-only">Tipo DTE</label>
-                            <select name="dte" id="dte" class="form-control form-control-lg" required="required">
-                                <option value="">Seleccionar tipo de DTE</option>
-<?php foreach ($dtes as $d) : ?>
-                                <option value="<?=$d['codigo']?>"<?=($d['codigo']==$dte?' selected="selected"':'')?>><?=$d['glosa']?></option>
-<?php endforeach; ?>
-                            </select>
-                        </div>
+                        <div class="form-group"><?=$f->input(['type'=>'select', 'name' => 'dte', 'label'=>'Tipo DTE', 'options'=>$dtes, 'value'=>$dte])?></div>
                         <div class="form-group">
                             <label for="folio" class="sr-only">Folio del DTE</label>
-                            <input type="number" name="folio" id="folio" class="form-control form-control-lg" required="required" placeholder="Folio del DTE">
+                            <input type="number" name="folio" id="folio" class="form-control" required="required" placeholder="Folio del DTE">
                         </div>
                         <div class="form-group">
                             <label for="fecha" class="sr-only">Fecha de emisión</label>
-                            <input type="text" name="fecha" id="fecha" class="form-control form-control-lg" required="required" placeholder="Fecha de emisión">
+                            <input type="text" name="fecha" id="fecha" class="form-control" required="required" placeholder="Fecha de emisión">
                             <script>
                                 $(function() {
                                     $("#fecha").datepicker({"format":"yyyy-mm-dd","weekStart":1,"todayBtn":"linked","language":"es","todayHighlight":true,"orientation":"auto"});
@@ -53,7 +46,7 @@ if ($message) {
                         </div>
                         <div class="form-group">
                             <label for="total" class="sr-only">Monto total</label>
-                            <input type="number" name="total" id="total" class="form-control form-control-lg" required="required" placeholder="Monto total">
+                            <input type="number" name="total" id="total" class="form-control" required="required" placeholder="Monto total">
                         </div>
 <?php if (!empty($public_key)) : ?>
                         <div class="g-recaptcha mb-3" data-sitekey="<?=$public_key?>" style="width:304px;margin:0 auto"></div>
