@@ -121,7 +121,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
     <div class="row">
         <div class="form-group col-md-12">
 <?php
-$titles = ['Código', 'Nombre', 'Detalle', 'Exento', 'Cant.', 'Unidad', 'P. Unitario', 'Desc.', '% / $'];
+$titles = ['Código', 'Nombre', 'Detalle', ['Exento', '6em'], 'Cant.', 'Unidad', 'P. Unitario', 'Desc.', ['% / $', '6em']];
 if ($Emisor->config_extra_impuestos_adicionales) {
    $titles[] = 'A / R';
 }
@@ -130,12 +130,12 @@ $inputs = [
     ['name'=>'VlrCodigo', 'attr'=>'maxlength="35" style="text-align:center;width:5em" onblur="DTE.setItem('.$Emisor->rut.', this)" autocomplete="off"', 'class'=>'typeahead', 'check'=>($Emisor->config_emision_solo_items_codificados?'notempty':false)],
     ['name'=>'NmbItem', 'attr'=>'maxlength="80"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':'')],
     ['name'=>'DscItem', 'attr'=>'maxlength="1000"'],
-    ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'attr'=>'style="width:5em" onblur="DTE.calcular()"'],
+    ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'attr'=>'onblur="DTE.calcular()"'],
     ['name'=>'QtyItem', 'value'=>1, 'attr'=>'maxlength="19" style="text-align:center;width:4em" onblur="DTE.calcular()"'],
     ['name'=>'UnmdItem', 'attr'=>'maxlength="4" style="width:5em"'],
     ['name'=>'PrcItem', 'attr'=>'maxlength="12" style="text-align:center;width:7em" onblur="DTE.calcular()"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':'')],
     ['name'=>'ValorDR', 'value'=>0, 'attr'=>'maxlength="12" style="text-align:center;width:5em" onblur="DTE.calcular()"'],
-    ['name'=>'TpoValor', 'type'=>'select', 'options'=>['%'=>'%','$'=>'$'], 'attr'=>'style="width:5em" onblur="DTE.calcular()"'],
+    ['name'=>'TpoValor', 'type'=>'select', 'options'=>['%'=>'%','$'=>'$'], 'attr'=>'onblur="DTE.calcular()"'],
 ];
 if ($Emisor->config_extra_impuestos_adicionales) {
     $inputs[] = ['name'=>'CodImpAdic', 'type'=>'select', 'options'=>[''=>'Sin impuesto adicional ni retención'] + $impuesto_adicionales, 'attr'=>'style="width:5em" onblur="DTE.calcular()"'];
@@ -231,7 +231,7 @@ echo $f->input([
     'type'=>'js',
     'id'=>'referencias',
     'label'=>'Referencias',
-    'titles'=>['Fecha referencia', 'Documento referenciado', 'Folio o N° doc. ref.', 'Código ref.', 'Razón referencia'],
+    'titles'=>['Fecha referencia', ['Documento referenciado', '20em'], ['Folio o N° doc. ref.', '10em'], ['Código ref.', '11em'], 'Razón referencia'],
     'inputs'=>[
         ['name'=>'FchRef', 'type'=>'date', 'check'=>'notempty date', 'value'=>date('Y-m-d')],
         ['name'=>'TpoDocRef', 'type'=>'select', 'options'=>[''=>'Tipo de documento referenciado'] + $tipos_dte_referencia, 'attr'=>'onblur="DTE.setFechaReferencia('.$Emisor->rut.', this)"', 'check'=>'notempty'],
