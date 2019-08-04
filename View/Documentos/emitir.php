@@ -35,9 +35,9 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
     </div>
 <?php endif; ?>
     <div class="row">
-        <div class="form-group col-md-3"><?=$f->input(['name'=>'TpoDoc', 'type'=>'select', 'options'=> $tipos_dte_autorizados, 'value'=>$dte_defecto, 'attr'=>'onblur="DTE.setTipo(this.value)"'])?></div>
+        <div class="form-group col-md-3"><?=$f->input(['name'=>'TpoDoc', 'type'=>'select', 'options'=> $tipos_dte_autorizados, 'value'=>$dte_defecto, 'onblur'=>'DTE.setTipo(this.value)'])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'date', 'name' => 'FchEmis', 'placeholder'=>'Fecha emisión DTE', 'popover'=>'Día en que se emite el documento', 'value'=>$hoy, 'check' => 'notempty date'])?></div>
-        <div class="form-group col-md-3"><?=$f->input(['name'=>'FmaPago', 'type'=>'select', 'options'=>[''=>'Sin forma de pago', 1=>'Contado', 2=>'Crédito', 3=>'Sin costo (entrega gratuita)'], 'value'=>!empty($datos['Encabezado']['IdDoc']['FmaPago'])?$datos['Encabezado']['IdDoc']['FmaPago']:$Emisor->config_emision_forma_pago, 'attr'=>'onblur="DTE.setFormaPago(this.value)"'])?></div>
+        <div class="form-group col-md-3"><?=$f->input(['name'=>'FmaPago', 'type'=>'select', 'options'=>[''=>'Sin forma de pago', 1=>'Contado', 2=>'Crédito', 3=>'Sin costo (entrega gratuita)'], 'value'=>!empty($datos['Encabezado']['IdDoc']['FmaPago'])?$datos['Encabezado']['IdDoc']['FmaPago']:$Emisor->config_emision_forma_pago, 'onblur'=>'DTE.setFormaPago(this.value)'])?></div>
         <div class="form-group col-md-3"><?=$f->input(['type' => 'date', 'name' => 'FchVenc', 'placeholder'=>'Vencimiento o pago anticipado', 'popover'=>'Día máximo a pagar (fecha mayor a emisión) o día en que se pagó el documento (fecha menor a emisión)', 'value'=>$hoy, 'check' => 'notempty date'])?></div>
     </div>
     <!-- INDICADOR DE SERVICIO -->
@@ -123,22 +123,22 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
 <?php
 $titles = ['Código', 'Nombre', 'Detalle', ['Exento', '6em'], 'Cant.', 'Unidad', 'P. Unitario', 'Desc.', ['% / $', '6em']];
 if ($Emisor->config_extra_impuestos_adicionales) {
-   $titles[] = 'A / R';
+   $titles[] = ['A / R', '6em'];
 }
 $titles[] = 'Subtotal';
 $inputs = [
     ['name'=>'VlrCodigo', 'attr'=>'maxlength="35" style="text-align:center;width:5em" onblur="DTE.setItem('.$Emisor->rut.', this)" autocomplete="off"', 'class'=>'typeahead', 'check'=>($Emisor->config_emision_solo_items_codificados?'notempty':false)],
     ['name'=>'NmbItem', 'attr'=>'maxlength="80"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':'')],
     ['name'=>'DscItem', 'attr'=>'maxlength="1000"'],
-    ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'attr'=>'onblur="DTE.calcular()"'],
+    ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'onblur'=>'DTE.calcular()'],
     ['name'=>'QtyItem', 'value'=>1, 'attr'=>'maxlength="19" style="text-align:center;width:4em" onblur="DTE.calcular()"'],
     ['name'=>'UnmdItem', 'attr'=>'maxlength="4" style="width:5em"'],
     ['name'=>'PrcItem', 'attr'=>'maxlength="12" style="text-align:center;width:7em" onblur="DTE.calcular()"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':'')],
     ['name'=>'ValorDR', 'value'=>0, 'attr'=>'maxlength="12" style="text-align:center;width:5em" onblur="DTE.calcular()"'],
-    ['name'=>'TpoValor', 'type'=>'select', 'options'=>['%'=>'%','$'=>'$'], 'attr'=>'onblur="DTE.calcular()"'],
+    ['name'=>'TpoValor', 'type'=>'select', 'options'=>['%'=>'%','$'=>'$'], 'onblur'=>'DTE.calcular()'],
 ];
 if ($Emisor->config_extra_impuestos_adicionales) {
-    $inputs[] = ['name'=>'CodImpAdic', 'type'=>'select', 'options'=>[''=>'Sin impuesto adicional ni retención'] + $impuesto_adicionales, 'attr'=>'style="width:5em" onblur="DTE.calcular()"'];
+    $inputs[] = ['name'=>'CodImpAdic', 'type'=>'select', 'options'=>[''=>'Sin impuesto adicional ni retención'] + $impuesto_adicionales, 'onblur'=>'DTE.calcular()'];
 }
 $inputs[] = ['name'=>'subtotal', 'value'=>0, 'attr'=>'readonly="readonly" style="text-align:center;width:7em"'];
 $input_detalle = [
@@ -234,7 +234,7 @@ echo $f->input([
     'titles'=>['Fecha referencia', ['Documento referenciado', '20em'], ['Folio o N° doc. ref.', '10em'], ['Código ref.', '11em'], 'Razón referencia'],
     'inputs'=>[
         ['name'=>'FchRef', 'type'=>'date', 'check'=>'notempty date', 'value'=>date('Y-m-d')],
-        ['name'=>'TpoDocRef', 'type'=>'select', 'options'=>[''=>'Tipo de documento referenciado'] + $tipos_dte_referencia, 'attr'=>'onblur="DTE.setFechaReferencia('.$Emisor->rut.', this)"', 'check'=>'notempty'],
+        ['name'=>'TpoDocRef', 'type'=>'select', 'options'=>[''=>'Tipo de documento referenciado'] + $tipos_dte_referencia, 'onblur'=>'DTE.setFechaReferencia('.$Emisor->rut.', this)', 'check'=>'notempty'],
         ['name'=>'FolioRef', 'check'=>'notempty', 'attr'=>'maxlength="18" onblur="DTE.setFechaReferencia('.$Emisor->rut.', this)"'],
         ['name'=>'CodRef', 'type'=>'select', 'options'=>[''=>''] + $tipos_referencia],
         ['name'=>'RazonRef', 'attr'=>'maxlength="90"'],
@@ -275,7 +275,7 @@ $totales = [
     $f->input(['name'=>'total', 'value'=>0, 'attr'=>'readonly="readonly"']),
 ];
 if (!$Emisor->config_extra_impuestos_adicionales) {
-    array_unshift($totales, $f->input(['name'=>'TpoValor_global', 'type'=>'select', 'options'=>['%'=>'%','$'=>'$'], 'value'=>$TpoValor_global, 'attr'=>'style="width:5em" onblur="DTE.calcular()"']));
+    array_unshift($totales, $f->input(['name'=>'TpoValor_global', 'type'=>'select', 'options'=>['%'=>'%','$'=>'$'], 'value'=>$TpoValor_global, 'attr'=>'style="width:5em"', 'onblur'=>'DTE.calcular()']));
     array_unshift($totales, $f->input(['name'=>'ValorDR_global', 'placeholder'=>'Descuento global', 'value'=>$ValorDR_global, 'check'=>'notempty integer', 'attr'=>'maxlength="12" style="text-align:center;width:7em" onblur="DTE.calcular()"', 'popover'=>'Descuento global que se aplica a todos los items del DTE']));
 }
 new \sowerphp\general\View_Helper_Table([$titles, $totales]);
@@ -291,7 +291,7 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     <!-- MEDIO DE PAGO -->
     <div class="row" id="medioPago">
         <div class="form-group col-md-3">
-            <?=$f->input(['name'=>'MedioPago', 'type'=>'select', 'options'=>[''=>'Cualquier medio de pago']+$MedioPago, 'value'=>!empty($datos['Encabezado']['IdDoc']['MedioPago'])?$datos['Encabezado']['IdDoc']['MedioPago']:'', 'attr'=>'onblur="DTE.setMedioPago(this.value)"'])?>
+            <?=$f->input(['name'=>'MedioPago', 'type'=>'select', 'options'=>[''=>'Cualquier medio de pago']+$MedioPago, 'value'=>!empty($datos['Encabezado']['IdDoc']['MedioPago'])?$datos['Encabezado']['IdDoc']['MedioPago']:'', 'onblur'=>'DTE.setMedioPago(this.value)'])?>
         </div>
         <div class="form-group col-md-3">
             <?=$f->input(['name'=>'BcoPago', 'placeholder'=>'Banco', 'value'=>!empty($datos['Encabezado']['IdDoc']['BcoPago'])?$datos['Encabezado']['IdDoc']['BcoPago']:'', 'attr'=>'maxlength="40"'])?>
@@ -460,14 +460,25 @@ echo $t->generate($clientes);
     </div>
 </div>
 <script> $(document).ready(function(){ dataTable("#clientes", [{"sWidth":120}, null, null]); }); </script>
+
+
+<!-- datos para medio de pago con transferencia -->
+<?php
+try {
+    $TransferenciaApp = $Emisor->getApp('mediospago.transferencia');
+} catch (\Exception $e) {
+    $TransferenciaApp = false;
+}
+?>
 <script>
-<?php if ($Emisor->config_pagos_cuenta_rut == $Emisor->getRUT()) : ?>
-    var BcoPago = "<?=mb_substr((new \website\Sistema\General\Model_Bancos())->get($Emisor->config_pagos_cuenta_banco)->banco,0,40)?>";
-    var TpoCtaPago = "<?=['C'=>'CORRIENTE', 'V'=>'VISTA', 'A'=>'AHORRO'][$Emisor->config_pagos_cuenta_tipo]?>";
-    var NumCtaPago = "<?=mb_substr($Emisor->config_pagos_cuenta_numero,0,20)?>";
+<?php if ($TransferenciaApp and $TransferenciaApp->getConfig()->disponible and  $TransferenciaApp->getConfig()->rut == $Emisor->getRUT()) : ?>
+    var BcoPago = "<?=mb_substr((new \website\Sistema\General\Model_Bancos())->get($TransferenciaApp->getConfig()->banco)->banco,0,40)?>";
+    var TpoCtaPago = "<?=['C'=>'CORRIENTE', 'V'=>'VISTA', 'A'=>'AHORRO'][$TransferenciaApp->getConfig()->tipo]?>";
+    var NumCtaPago = "<?=mb_substr($TransferenciaApp->getConfig()->numero,0,20)?>";
 <?php else : ?>
     var BcoPago = "";
     var TpoCtaPago = "";
     var NumCtaPago = "";
 <?php endif; ?>
 </script>
+<!-- fin datos para medio de pago con transferencia -->
