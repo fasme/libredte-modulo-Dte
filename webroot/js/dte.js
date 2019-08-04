@@ -8,9 +8,9 @@ Contribuyente.setDatos = function (form) {
     // resetear campos
     f.razon_social.value = "";
     f.giro.value = "";
-    f.actividad_economica.value = "";
+    $(f.actividad_economica).val("").trigger('change.select2');
     f.direccion.value = "";
-    f.comuna.value = "";
+    $(f.comuna).val("").trigger('change.select2');
     f.telefono.value = "";
     f.email.value = "";
     if (f.config_ambiente_produccion_fecha != undefined) {
@@ -36,9 +36,9 @@ Contribuyente.setDatos = function (form) {
         success: function (c) {
             f.razon_social.value = c.razon_social;
             f.giro.value = c.giro;
-            f.actividad_economica.value = c.actividad_economica;
+            $(f.actividad_economica).val(c.actividad_economica).trigger('change.select2');
             f.direccion.value = c.direccion;
-            f.comuna.value = c.comuna;
+            $(f.comuna).val(c.comuna).trigger('change.select2');
             f.telefono.value = c.telefono;
             f.email.value = c.email;
             if (f.config_ambiente_produccion_fecha != undefined) {
@@ -62,9 +62,9 @@ Emisor.setDatos = function (form) {
     // resetear campos
     f.RznSoc.value = "";
     f.GiroEmis.value = "";
-    f.Acteco.value = "";
+    $(f.Acteco).val("").trigger('change.select2');
     f.DirOrigen.value = "";
-    f.CmnaOrigen.value = "";
+    $(f.CmnaOrigen).val("").trigger('change.select2');
     f.Telefono.value = "";
     f.CorreoEmisor.value = "";
     f.FchResol.value = "";
@@ -88,9 +88,9 @@ Emisor.setDatos = function (form) {
         success: function (c) {
             f.RznSoc.value = c.razon_social !== undefined ? c.razon_social : null;
             f.GiroEmis.value = c.giro !== undefined ? c.giro : null;
-            f.Acteco.value = c.actividad_economica !== undefined ? c.actividad_economica : null;
+            $(f.Acteco).val(c.actividad_economica !== undefined ? c.actividad_economica : null).trigger('change.select2');
             f.DirOrigen.value = c.direccion !== undefined ? c.direccion : null;
-            f.CmnaOrigen.value = c.comuna !== undefined ? c.comuna : null;
+            $(f.CmnaOrigen).val(c.comuna !== undefined ? c.comuna : null).trigger('change.select2');
             f.Telefono.value = c.telefono !== undefined ? c.telefono : null;
             f.CorreoEmisor.value = c.email !== undefined ? c.email : null;
             f.FchResol.value = c.config_ambiente_produccion_fecha !== undefined ? c.config_ambiente_produccion_fecha : null;
@@ -113,7 +113,7 @@ Receptor.setDatos = function (form, tipo) {
     f.RznSocRecep.value = "";
     f.GiroRecep.value = "";
     f.DirRecep.value = "";
-    f.CmnaRecep.value = "";
+    $(f.CmnaRecep).val("").trigger('change.select2');
     f.Contacto.value = "";
     f.CorreoRecep.value = "";
     if (f.CdgIntRecep !== undefined) {
@@ -151,7 +151,7 @@ Receptor.setDatos = function (form, tipo) {
             f.RznSocRecep.value = c.razon_social;
             f.GiroRecep.value = (c.giro!==undefined && c.giro) ? c.giro.substr(0, 40) : '';
             f.DirRecep.value = (c.direccion!==undefined && c.direccion) ? c.direccion : '';
-            f.CmnaRecep.value = (c.comuna!==undefined && c.comuna) ? c.comuna : '';
+            $(f.CmnaRecep).val((c.comuna!==undefined && c.comuna) ? c.comuna : '').trigger('change.select2');
             f.Contacto.value = (c.telefono!==undefined && c.telefono) ? c.telefono : '';
             f.CorreoRecep.value = (c.email!==undefined && c.email) ? c.email : '';
             if (f.CdgIntRecep !== undefined) {
