@@ -570,7 +570,7 @@ echo $f->input([
             'name' => 'config_extra_impuestos_adicionales_codigo',
             'options' => [''=>'Seleccionar un impuesto adicional'] + $impuestos_adicionales,
             'check' => 'notempty',
-            'attr' => 'onblur="impuesto_adicional_sugerir_tasa(this, impuestos_adicionales_tasa)"'
+            'onblur'=>'impuesto_adicional_sugerir_tasa(this, impuestos_adicionales_tasa)',
         ],
         [
             'name' => 'config_extra_impuestos_adicionales_tasa',
