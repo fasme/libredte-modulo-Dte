@@ -128,8 +128,8 @@ if ($Emisor->config_extra_impuestos_adicionales) {
 $titles[] = 'Subtotal';
 $inputs = [
     ['name'=>'VlrCodigo', 'attr'=>'maxlength="35" style="text-align:center;width:5em" onblur="DTE.setItem('.$Emisor->rut.', this)" autocomplete="off"', 'class'=>'typeahead', 'check'=>($Emisor->config_emision_solo_items_codificados?'notempty':false)],
-    ['name'=>'NmbItem', 'attr'=>'maxlength="80"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':'')],
-    ['name'=>'DscItem', 'attr'=>'maxlength="1000"'],
+    ['name'=>'NmbItem', 'attr'=>'maxlength="80"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':''), 'growup'=>true],
+    ['name'=>'DscItem', 'attr'=>'maxlength="1000"', 'growup'=>true],
     ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'onblur'=>'DTE.calcular()'],
     ['name'=>'QtyItem', 'value'=>1, 'attr'=>'maxlength="19" style="text-align:center;width:4em" onblur="DTE.calcular()"'],
     ['name'=>'UnmdItem', 'attr'=>'maxlength="4" style="width:5em"'],
