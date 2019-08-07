@@ -121,7 +121,7 @@ echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsuali
     <div class="row">
         <div class="form-group col-md-12">
 <?php
-$titles = ['Código', 'Nombre', 'Detalle', ['Exento', '6em'], 'Cant.', 'Unidad', 'P. Unitario', 'Desc.', ['% / $', '6em']];
+$titles = ['Código', 'Nombre', 'Detalle', ['Exento', '4em'], 'Cant.', 'Unidad', 'P. Unitario', 'Desc.', ['% / $', '4em']];
 if ($Emisor->config_extra_impuestos_adicionales) {
    $titles[] = ['A / R', '6em'];
 }
@@ -231,13 +231,13 @@ echo $f->input([
     'type'=>'js',
     'id'=>'referencias',
     'label'=>'Referencias',
-    'titles'=>['Fecha referencia', ['Documento referenciado', '20em'], ['Folio o N° doc. ref.', '10em'], ['Código ref.', '11em'], 'Razón referencia'],
+    'titles'=>['Fecha referencia', ['Documento referenciado', '18em'], ['Folio o N° doc. ref.', '10em'], ['Código ref.', '12em'], 'Razón referencia'],
     'inputs'=>[
         ['name'=>'FchRef', 'type'=>'date', 'check'=>'notempty date', 'value'=>date('Y-m-d')],
         ['name'=>'TpoDocRef', 'type'=>'select', 'options'=>[''=>'Tipo de documento referenciado'] + $tipos_dte_referencia, 'onblur'=>'DTE.setFechaReferencia('.$Emisor->rut.', this)', 'check'=>'notempty'],
         ['name'=>'FolioRef', 'check'=>'notempty', 'attr'=>'maxlength="18" onblur="DTE.setFechaReferencia('.$Emisor->rut.', this)"'],
         ['name'=>'CodRef', 'type'=>'select', 'options'=>[''=>''] + $tipos_referencia],
-        ['name'=>'RazonRef', 'attr'=>'maxlength="90"'],
+        ['name'=>'RazonRef', 'attr'=>'maxlength="90"', 'growup'=>true],
     ],
     'accesskey' => 'R',
     'values' => $referencias_values,

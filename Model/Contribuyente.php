@@ -1412,7 +1412,7 @@ class Model_Contribuyente extends \Model_App
             $where[] = 'd.cesion_track_id IS NOT NULL';
         }
         // contar documentos emitidos
-        return $this->db->getValue(
+        return (integer)$this->db->getValue(
             'SELECT COUNT(*) FROM dte_emitido AS d WHERE '.implode(' AND ', $where),
             $vars
         );
@@ -1641,7 +1641,7 @@ class Model_Contribuyente extends \Model_App
     public function countVentas($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
-        return $this->db->getValue('
+        return (integer)$this->db->getValue('
             SELECT COUNT(*)
             FROM dte_emitido AS e JOIN dte_tipo AS t ON e.dte = t.codigo
             WHERE
@@ -1906,7 +1906,7 @@ class Model_Contribuyente extends \Model_App
     public function countGuias($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
-        return $this->db->getValue('
+        return (integer)$this->db->getValue('
             SELECT COUNT(*)
             FROM
                 dte_emitido AS e
@@ -2075,7 +2075,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el total de documentos recibidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-01-03
+     * @version 2019-08-07
      */
     public function countDocumentosRecibidos($filtros = [])
     {
@@ -2087,7 +2087,7 @@ class Model_Contribuyente extends \Model_App
                 $vars[':'.$c] = $filtros[$c];
             }
         }
-        return $this->db->getValue(
+        return (integer)$this->db->getValue(
             'SELECT COUNT(*) FROM dte_recibido AS d WHERE '.implode(' AND ', $where),
             $vars
         );
@@ -2727,7 +2727,7 @@ class Model_Contribuyente extends \Model_App
             $periodo = date('Ym');
         }
         $periodo_col = $this->db->date('Ym', 'fecha');
-        return (int)$this->db->getValue('
+        return (integer)$this->db->getValue('
             SELECT (e.total + r.total)
             FROM
                 (
