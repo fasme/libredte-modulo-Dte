@@ -3219,6 +3219,8 @@ class Model_Contribuyente extends \Model_App
                 $dte_cotizacion = 'documento tributario electrónico';
                 $dte_tipo = $Documento->getTipo()->tipo;
             }
+            $fecha_pago = $mostrar_pagado ? \sowerphp\general\Utility_Date::format($Cobro->pagado) : '00/00/0000';
+            $medio_pago = $mostrar_pagado ? $Cobro->getMedioPago()->getNombre() : '"sin pago"';
             return str_replace(
                 [
                     '{dte_cotizacion}',
@@ -3231,6 +3233,7 @@ class Model_Contribuyente extends \Model_App
                     '{link_pdf}',
                     '{msg_text}',
                     '{mostrar_pagado}',
+                    '{msg_pagado}',
                     '{fecha_pago}',
                     '{medio_pago}',
                     '{mostrar_pagar}',
@@ -3246,8 +3249,9 @@ class Model_Contribuyente extends \Model_App
                     $links['pdf'],
                     $msg_text ? str_replace("\n", '</p><p>', $msg_text) : null,
                     !$mostrar_pagado ? 'none' : '',
-                    $mostrar_pagado ? \sowerphp\general\Utility_Date::format($Cobro->pagado) : '00/00/0000',
-                    $mostrar_pagado ? $Cobro->getMedioPago()->getNombre() : '"sin pago"',
+                    $mostrar_pagado ? __('El documento se encuentra pagado con fecha %s usando el medio de pago %s', $fecha_pago, $medio_pago) : '',
+                    $fecha_pago,
+                    $medio_pago,
                     !$mostrar_pagar ? 'none' : '',
                 ],
                 $html
