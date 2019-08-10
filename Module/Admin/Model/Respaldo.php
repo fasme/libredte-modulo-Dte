@@ -111,6 +111,15 @@ class Model_Respaldo
         'item_clasificacion' => [
             'rut' => 'contribuyente',
         ],
+        'registro_compra' => [
+            'rut' => 'receptor',
+        ],
+        'boleta_honorario' => [
+            'rut' => 'receptor',
+        ],
+        'boleta_tercero' => [
+            'rut' => 'emisor',
+        ],
     ]; ///< Información de las tabla que se exportarán
 
     private $_pks = []; ///< Caché para las PKs

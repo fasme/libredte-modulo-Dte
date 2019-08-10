@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-18
+     * @version 2019-08-09
      */
     public function index()
     {
@@ -89,6 +89,18 @@ class Controller_Dashboard extends \Controller_App
         $emitidos_estados = $Emisor->getDocumentosEmitidosResumenEstados($desde, $hasta);
         $emitidos_eventos = $Emisor->getDocumentosEmitidosResumenEventos($desde, $hasta);
         $rcof_estados = (new Model_DteBoletaConsumos())->setContribuyente($Emisor)->getResumenEstados($desde, $hasta);
+        // pendientes de procesar en registro de compra
+        $n_registro_compra_pendientes = 0;
+        $registro_compra_pendientes = (new Model_RegistroCompras())->setContribuyente($Emisor)->getResumenPendientes();
+        foreach ($registro_compra_pendientes as $p) {
+            $n_registro_compra_pendientes += $p['cantidad'];
+        }
+        // boletas honorarios
+        $BoletaHonorarios = new Model_BoletaHonorarios();
+        $boletas_honorarios_resumen = $BoletaHonorarios->getPeriodo($periodo);
+        // boletas terceros
+        $BoletaTerceros = new Model_BoletaTerceros();
+        $boletas_terceros_resumen = $BoletaTerceros->getPeriodo($periodo);
         // asignar variables a la vista
         $this->set([
             'nav' => array_slice(\sowerphp\core\Configure::read('nav.module'), 1),
@@ -117,6 +129,10 @@ class Controller_Dashboard extends \Controller_App
             'documentos_rechazados' => $documentos_rechazados,
             'rcof_rechazados' => $rcof_rechazados,
             'rcof_estados' => $rcof_estados,
+            'registro_compra_pendientes' => $registro_compra_pendientes,
+            'n_registro_compra_pendientes' => $n_registro_compra_pendientes,
+            'boletas_honorarios_resumen' => $boletas_honorarios_resumen,
+            'boletas_terceros_resumen' => $boletas_terceros_resumen,
         ]);
     }
 

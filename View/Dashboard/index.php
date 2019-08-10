@@ -107,6 +107,20 @@ echo View_Helper_Dashboard::cards([
             </div>
 <?php endif; ?>
         <!-- fin alertas envío libro o propuesta f29 -->
+<?php if ($cuota) : ?>
+        <!-- dtes usados (totales de emitidos y recibidos) -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa fa-calculator fa-fw"></i>
+                Documentos usados
+            </div>
+            <div class="panel-body text-center p-4">
+                <span class="lead text-info"><?=num($n_dtes)?></span> <small class="text-muted"> de <?=num($cuota)?></small><br/>
+                <span class="small"><a href="<?=$_base?>/dte/informes/documentos_usados">ver detalle de uso</a></span>
+            </div>
+        </div>
+        <!-- fin dtes usados (totales de emitidos y recibidos) -->
+<?php endif; ?>
     </div>
     <!-- FIN PANEL IZQUIERDA -->
     <!-- PANEL CENTRO -->
@@ -174,6 +188,35 @@ echo View_Helper_Dashboard::cards([
 <?php endif; ?>
         </div>
         <!-- fin graficos ventas y compras -->
+<?php endif; ?>
+<?php if (!empty($registro_compra_pendientes)) : ?>
+        <!-- documentos recibidos en SII pendientes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="far fa-chart-bar fa-fw"></i> Documentos recibidos en SII pendientes de procesar (<?=num($n_registro_compra_pendientes)?>)
+                    </div>
+                    <div class="card-body">
+<?php
+foreach ($registro_compra_pendientes as &$p) {
+    $p['fecha_recepcion_sii_inicial'] = \sowerphp\general\Utility_Date::format($p['fecha_recepcion_sii_inicial'], 'd/m/Y H:i');
+    $p['fecha_recepcion_sii_final'] = \sowerphp\general\Utility_Date::format($p['fecha_recepcion_sii_final'], 'd/m/Y H:i');
+    $p['total'] = num($p['total']);
+    unset($p['dte']);
+}
+array_unshift($registro_compra_pendientes, ['Documento', 'Pendientes', 'Primero', 'Último', 'Total']);
+new \sowerphp\general\View_Helper_Table($registro_compra_pendientes);
+?>
+                        <a href="registro_compras/pendientes" class="btn btn-primary btn-block">Ver listado de documentos pendientes</a>
+                    </div>
+                    <div class="card-footer small">
+                        Datos actualizados una vez al día, si hay cambios en el SII los verá reflejados al día siguiente
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin documentos recibidos en SII pendientes -->
 <?php endif; ?>
 <?php if ($emitidos_estados) : ?>
         <!-- estado de documentos emitidos SII -->
@@ -256,19 +299,59 @@ echo View_Helper_Dashboard::cards([
             </div>
         </form>
         <!-- fin buscador documentos -->
-<?php if ($cuota) : ?>
-        <!-- dtes usados (totales de emitidos y recibidos) -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fa fa-calculator fa-fw"></i>
-                Documentos usados
-            </div>
-            <div class="panel-body text-center p-4">
-                <span class="lead text-info"><?=num($n_dtes)?></span> <small class="text-muted"> de <?=num($cuota)?></small><br/>
-                <span class="small"><a href="<?=$_base?>/dte/informes/documentos_usados">ver detalle de uso</a></span>
+<?php if (!empty($n_registro_compra_pendientes)) : ?>
+        <!-- documentos recibidos en SII pendientes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-paperclip fa-fw"></i> Recibidos pendientes en SII</div>
+                    <div class="card-body lead text-center">
+<?php if ($n_registro_compra_pendientes>1) : ?>
+                        <?=num($n_registro_compra_pendientes)?> documentos<br/>
+<?php else : ?>
+                        Un documento<br/>
+<?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- fin dtes usados (totales de emitidos y recibidos) -->
+        <!-- fin documentos recibidos en SII pendientes -->
+<?php endif; ?>
+<?php if (!empty($boletas_honorarios_resumen)) : ?>
+        <!-- boletas de honorarios -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-user-tie fa-fw"></i> Boletas de honorarios</div>
+                    <div class="card-body lead text-center">
+<?php if ($boletas_honorarios_resumen['cantidad']==1) : ?>
+                        Una <small>boleta de honorarios por</small> $<?=num($boletas_honorarios_resumen['honorarios'])?>.-
+<?php else : ?>
+                        <?=num($boletas_honorarios_resumen['cantidad'])?> <small>boletas de honorarios por</small> $<?=num($boletas_honorarios_resumen['honorarios'])?>.-
+<?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin boletas de honorarios -->
+<?php endif; ?>
+<?php if (!empty($boletas_terceros_resumen)) : ?>
+        <!-- boletas de terceros -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-user-secret fa-fw"></i> Boletas de terceros</div>
+                    <div class="card-body lead text-center">
+<?php if ($boletas_terceros_resumen['cantidad']==1) : ?>
+                        Una <small>boleta de terceros por</small> $<?=num($boletas_terceros_resumen['honorarios'])?>.-
+<?php else : ?>
+                        <?=num($boletas_terceros_resumen['cantidad'])?> <small>boletas de terceros por</small> $<?=num($boletas_terceros_resumen['honorarios'])?>.-
+<?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin boletas de terceros  -->
 <?php endif; ?>
         <!-- folios disponibles -->
         <div class="card mb-4">
@@ -280,6 +363,7 @@ echo View_Helper_Dashboard::cards([
                 </a>
             </div>
             <div class="card-body">
+<?php if ($folios) : ?>
 <?php foreach ($folios as $label => $value) : ?>
                 <span><?=$label?></span>
                 <div class="progress mb-3">
@@ -288,6 +372,9 @@ echo View_Helper_Dashboard::cards([
                     </div>
                 </div>
 <?php endforeach; ?>
+<?php else : ?>
+                <a href="<?=$_base?>/dte/admin/dte_folios/agregar" class="btn btn-primary btn-block btn-sm">Crear mantenedor de folio</a>
+<?php endif; ?>
             </div>
         </div>
         <!-- fin folios disponibles -->

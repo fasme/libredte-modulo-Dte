@@ -435,17 +435,31 @@ class Model_Contribuyente extends \Model_App
      * Los datos del contribuyente de documentos emitidos, recibidos, etc no se
      * eliminan por defecto, se debe solicitar específicamente.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-17
+     * @version 2019-08-10
      */
     public function delete($all = false)
     {
         $this->db->beginTransaction();
-        // limpieza general
+        // mantener correo de intercambio
         $this->config = [
             'email' => ['intercambio_user' => $this->config_email_intercambio_user],
         ];
+        // si el usuario tiene un contador asociado, se verifica que el contador
+        // exista como contribuyente y sea del grupo contadores, de esta forma
+        // se mantendrá la configuración básica para que el contador pueda operar
+        if ($this->config_contabilidad_contador_run) {
+            $Contador = (new Model_Contribuyentes())->get($this->config_contabilidad_contador_run);
+            if ($Contador->usuario and $Contador->getUsuario()->inGroup('contadores')) {
+                $this->config['sii']['pass'] = $this->config_sii_pass;
+                $this->config['ambiente']['en_certificacion'] = $this->config_ambiente_en_certificacion;
+                $this->config['contabilidad']['contador_run'] = $this->config_contabilidad_contador_run;
+                $mantener_datos_contador = true;
+            }
+        }
+        // desasociar contribuyente del usuario y eliminar su configuración extra
         $this->usuario = null;
         $this->db->query('DELETE FROM contribuyente_config WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+        // guardar el contribuyente para mantener la configuración que se desea guardar
         if (!$this->save()) {
             $this->db->rollback();
             return false;
@@ -470,6 +484,11 @@ class Model_Contribuyente extends \Model_App
             $this->db->query('DELETE FROM dte_tmp WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM dte_venta WHERE emisor = :rut', [':rut'=>$this->rut]);
             $this->db->query('DELETE FROM item_clasificacion WHERE contribuyente = :rut', [':rut'=>$this->rut]);
+            if (empty($mantener_datos_contador)) {
+                $this->db->query('DELETE FROM registro_compra WHERE receptor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM boleta_honorario WHERE receptor = :rut', [':rut'=>$this->rut]);
+                $this->db->query('DELETE FROM boleta_tercero WHERE emisor = :rut', [':rut'=>$this->rut]);
+            }
         }
         // aplicar cambios
         return $this->db->commit();
@@ -3010,7 +3029,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega la información del registro de compra y venta del SII
      * del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-15
+     * @version 2019-08-09
      */
     public function getRCV(array $filtros = [])
     {
@@ -3064,6 +3083,9 @@ class Model_Contribuyente extends \Model_App
             }
             if ($r['body']['respEstado']['codRespuesta']) {
                 $error = isset($errores[$r['body']['respEstado']['codRespuesta']]) ? $errores[$r['body']['respEstado']['codRespuesta']] : ('Código '.$r['body']['respEstado']['codRespuesta']);
+                if ($error == 'Sin datos') {
+                    return [];
+                }
                 throw new \Exception('No fue posible obtener el resumen: '.$r['body']['respEstado']['msgeRespuesta'].' ('.$error.')');
             }
             return $r['body']['data'];
@@ -3358,6 +3380,41 @@ class Model_Contribuyente extends \Model_App
         }
         // entregar aplicaciones
         return $apps;
+    }
+
+    /**
+     * Método que entrega el contador asociado al contribuyente
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-09
+     */
+    public function getContador()
+    {
+        if (!$this->config_contabilidad_contador_run) {
+            return false;
+        }
+        return (new Model_Contribuyentes())->get($this->config_contabilidad_contador_run);
+    }
+
+    /**
+     * Método que verifica si el contribuyente tiene la autorización necesaria
+     * en LibreDTE para trabajar. Ya sea porque pertenece el usuario del
+     * contribuyente a cierto grupo o porque el contador pertenece a un grupo
+     * específico (de contadores)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-09
+     */
+    public function getAuthLibreDTE($grupo_contribuyentes, $grupo_contadores = null)
+    {
+         if (!$this->usuario or !$this->getUsuario()->inGroup($grupo_contribuyentes)) {
+            if (!$grupo_contadores) {
+                return false;
+            }
+            $Contador = $this->getContador();
+            if (!$Contador or !$Contador->getUsuario()->inGroup($grupo_contadores)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

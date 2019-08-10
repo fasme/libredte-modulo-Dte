@@ -46,6 +46,16 @@
         'desc' => 'Revisar documentos recibidos',
         'icon' => 'fas fa-sign-in-alt',
     ],
+    '/dte_intercambios/listar' => [
+        'name' => 'Bandeja de intercambio',
+        'desc' => 'Menú de intercambio de DTE entre contribuyentes',
+        'icon' => 'fas fa-exchange-alt',
+    ],
+    '/registro_compras/pendientes' => [
+        'name' => 'Recibidos pendientes',
+        'desc' => 'Ver listado de documentos recibidos pendientes de procesar en SII',
+        'icon' => 'fas fa-paperclip',
+    ],
     '/dte_ventas' => [
         'name' => 'Libro de ventas',
         'desc' => 'Acceder al Libro de Ventas',
@@ -55,11 +65,6 @@
         'name' => 'Libro de compras',
         'desc' => 'Acceder al Libro de Compras',
         'icon' => 'fa fa-book',
-    ],
-    '/dte_intercambios/listar' => [
-        'name' => 'Bandeja de intercambio',
-        'desc' => 'Menú de intercambio de DTE entre contribuyentes',
-        'icon' => 'fas fa-exchange-alt',
     ],
     '/dte_guias' => [
         'name' => 'Libro de guías',
@@ -85,6 +90,16 @@
         'name' => 'Pagos programados',
         'desc' => 'Buscar pagos programados ventas a crédito',
         'icon' => 'fas fa-calendar-alt',
+    ],
+    '/boleta_honorarios' => [
+        'name' => 'Boletas de honorarios',
+        'desc' => 'Ver boletas de honorarios recibidas por cada período',
+        'icon' => 'fas fa-user-tie',
+    ],
+    '/boleta_terceros' => [
+        'name' => 'Boletas de terceros',
+        'desc' => 'Ver boletas de terceros emitidas por cada período',
+        'icon' => 'fas fa-user-secret',
     ],
     '/informes' => [
         'name' => 'Informes',

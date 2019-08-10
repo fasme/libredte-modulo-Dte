@@ -10,9 +10,6 @@
             <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII" class="dropdown-item">
                     DTE recibidos en SII (previo a RC)
             </a>
-            <a href="<?=$_base?>/dte/dte_recibidos/bhe" title="Buscar las boletas de honorarios electrónicas recibidas en el SII" class="dropdown-item">
-                Boletas honorarios en SII
-            </a>
         </div>
     </li>
     <li class="nav-item">
