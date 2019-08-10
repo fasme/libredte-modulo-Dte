@@ -31,7 +31,7 @@ namespace website\Dte;
 class Shell_Command_Sii_Sincronizar extends \Shell_App
 {
 
-    public function main($grupo = 'dte_plus,contadores', $meses = 2, $sincronizar = 'all')
+    public function main($grupo = 'dte_plus,contadores', $meses = 2, $sincronizar = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION)
     {
         // se pasó un contribuyente específico
         if (is_numeric($grupo)) {
@@ -62,19 +62,17 @@ class Shell_Command_Sii_Sincronizar extends \Shell_App
             if (!empty($grupo_contribuyentes) and !$Contribuyente->getAuthLibreDTE($grupo_contribuyentes, $grupo_contadores)) {
                 continue;
             }
+            // verificar que la empresa esté en el mismo ambiente que se solicitó al comando
+            if ($Contribuyente->config_ambiente_en_certificacion != $ambiente) {
+                continue;
+            }
             // sincronizar
             if ($this->verbose) {
                 $this->out('Sincronizando datos del SII de: '.$Contribuyente->razon_social);
             }
             try {
                 if (in_array($sincronizar, ['all', 'rc'])) {
-                    if ($Contribuyente->config_ambiente_en_certificacion == \sasco\LibreDTE\Sii::PRODUCCION) {
-                        (new Model_RegistroCompras())->setContribuyente($Contribuyente)->sincronizar('PENDIENTE', $meses);
-                    } else {
-                        if ($this->verbose) {
-                            $this->out('  - Ambiente no es producción, no se sincronizó registro de compras');
-                        }
-                    }
+                    (new Model_RegistroCompras())->setContribuyente($Contribuyente)->sincronizar('PENDIENTE', $meses);
                 }
                 if (in_array($sincronizar, ['all', 'bhe'])) {
                     (new Model_BoletaHonorarios())->setContribuyente($Contribuyente)->sincronizar($meses);
@@ -84,7 +82,7 @@ class Shell_Command_Sii_Sincronizar extends \Shell_App
                 }
             } catch (\Exception $e) {
                 if ($this->verbose) {
-                    $this->out(' '.$e->getMessage());
+                    $this->out('  - '.$e->getMessage());
                 }
             }
         }
