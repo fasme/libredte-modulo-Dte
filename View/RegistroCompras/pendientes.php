@@ -5,6 +5,12 @@
             Registro compras SII
         </a>
     </li>
+    <li class="nav-item" class="dropdown">
+        <a href="<?=$_base?>/dte/registro_compras/pendientes_actualizar" title="Actualizar documentos recibidos pendientes en SII" class="nav-link">
+            <i class="fas fa-sync"></i>
+            Actualizar
+        </a>
+    </li>
 </ul>
 <div class="page-header"><h1>Documentos recibidos pendientes en SII</h1></div>
 <p>Los siguientes documentos han sido recibidos en el SII y actualmente se encuentran pendientes, no han sido procesados.</p>

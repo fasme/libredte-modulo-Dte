@@ -85,4 +85,21 @@ class Controller_RegistroCompras extends \Controller_App
         $this->response->sendContent($csv, $Receptor->rut.'-'.$Receptor->dv.'_recibidos_pendientes.csv');
     }
 
+    /**
+     * Acción para actualizar el listado de documentos recibidos pendientes del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-10
+     */
+    public function pendientes_actualizar()
+    {
+        $Receptor = $this->getContribuyente();
+        try {
+            (new Model_RegistroCompras())->setContribuyente($Receptor)->sincronizar('PENDIENTE', 2);
+            \sowerphp\core\Model_Datasource_Session::message('Documentos recibidos pendientes actualizados', 'ok');
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+        }
+        $this->redirect('/dte/registro_compras/pendientes');
+    }
+
 }
