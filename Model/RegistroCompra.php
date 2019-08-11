@@ -43,10 +43,10 @@ class Model_RegistroCompra extends \Model_App
     public $periodo; ///< integer(32) NOT NULL DEFAULT ''
     public $estado; ///< smallint(16) NOT NULL DEFAULT ''
     public $certificacion; ///< boolean() NOT NULL DEFAULT 'false' PK
-    public $dhdrcodigo; ///< integer(32) NOT NULL DEFAULT ''
-    public $dcvcodigo; ///< integer(32) NOT NULL DEFAULT ''
+    public $dhdrcodigo; ///< bigint(64) NOT NULL DEFAULT ''
+    public $dcvcodigo; ///< bigint(64) NOT NULL DEFAULT ''
     public $dcvestadocontab; ///< character varying(20) NULL DEFAULT ''
-    public $detcodigo; ///< integer(32) NOT NULL DEFAULT ''
+    public $detcodigo; ///< bigint(64) NOT NULL DEFAULT ''
     public $dettipodoc; ///< smallint(16) NOT NULL DEFAULT '' PK
     public $detrutdoc; ///< integer(32) NOT NULL DEFAULT '' PK FK:contribuyente.rut
     public $detnrodoc; ///< integer(32) NOT NULL DEFAULT '' PK
@@ -154,8 +154,8 @@ class Model_RegistroCompra extends \Model_App
         'dhdrcodigo' => array(
             'name'      => 'Dhdrcodigo',
             'comment'   => '',
-            'type'      => 'integer',
-            'length'    => 32,
+            'type'      => 'bigint',
+            'length'    => 64,
             'null'      => false,
             'default'   => '',
             'auto'      => false,
@@ -165,8 +165,8 @@ class Model_RegistroCompra extends \Model_App
         'dcvcodigo' => array(
             'name'      => 'Dcvcodigo',
             'comment'   => '',
-            'type'      => 'integer',
-            'length'    => 32,
+            'type'      => 'bigint',
+            'length'    => 64,
             'null'      => false,
             'default'   => '',
             'auto'      => false,
@@ -187,8 +187,8 @@ class Model_RegistroCompra extends \Model_App
         'detcodigo' => array(
             'name'      => 'Detcodigo',
             'comment'   => '',
-            'type'      => 'integer',
-            'length'    => 32,
+            'type'      => 'bigint',
+            'length'    => 64,
             'null'      => false,
             'default'   => '',
             'auto'      => false,

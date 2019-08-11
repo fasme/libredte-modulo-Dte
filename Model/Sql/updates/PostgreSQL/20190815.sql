@@ -33,10 +33,10 @@ CREATE TABLE registro_compra (
     certificacion BOOLEAN NOT NULL DEFAULT false,
     -- campos que vienen del SII en la sincronización (se dejaron los mismos nombres del SII por simplicidad)
     -- postgresql transformará cada campo a minúsculas completo
-    dhdrCodigo INTEGER NOT NULL,
-    dcvCodigo INTEGER NOT NULL,
+    dhdrCodigo BIGINT NOT NULL,
+    dcvCodigo BIGINT NOT NULL,
     dcvEstadoContab VARCHAR(20),
-    detCodigo INTEGER NOT NULL,
+    detCodigo BIGINT NOT NULL,
     detTipoDoc SMALLINT NOT NULL,
     detRutDoc INTEGER NOT NULL,
     detNroDoc INTEGER NOT NULL,
