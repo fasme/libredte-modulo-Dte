@@ -97,14 +97,15 @@ class Shell_Command_Sii_Sincronizar extends \Shell_App
             SELECT DISTINCT c.rut
             FROM
                 contribuyente AS c
-                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
-                JOIN usuario_grupo AS ug ON ug.usuario = c.usuario
+                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut AND cc.configuracion = \'sii\' AND cc.variable = \'pass\'
+                LEFT JOIN usuario_grupo AS ug ON ug.usuario = c.usuario
                 LEFT JOIN grupo AS g ON ug.grupo = g.id AND g.grupo = :grupo
                 LEFT JOIN contribuyente_config AS cont ON cont.contribuyente = c.rut AND cont.configuracion = \'contabilidad\' AND cont.variable = \'contador_run\'
             WHERE
                 (g.grupo IS NOT NULL OR cont.valor IS NOT NULL)
-                AND cc.configuracion = \'sii\' AND cc.variable = \'pass\' AND cc.valor IS NOT NULL
+                AND cc.valor IS NOT NULL
         ', [':grupo' => $grupo]);
+        exit;
     }
 
 }
