@@ -202,7 +202,7 @@ class Model_RegistroCompras extends \Model_Plural_App
      * Método que entrega las cantidad de documentos de compras pendientes de
      * ser procesados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2019-08-11
      */
     public function getResumenPendientes()
     {
@@ -216,7 +216,6 @@ class Model_RegistroCompras extends \Model_Plural_App
                 SUM(rc.detmnttotal) AS total
             FROM
                 registro_compra AS rc
-                JOIN contribuyente AS p ON p.rut = rc.detrutdoc
                 JOIN dte_tipo AS t ON t.codigo = rc.dettipodoc
             WHERE
                 receptor = :receptor
