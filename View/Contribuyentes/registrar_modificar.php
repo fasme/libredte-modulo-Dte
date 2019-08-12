@@ -969,7 +969,7 @@ foreach ($api_servicios_disponibles as $api_codigo => $api_servicio) {
     }
     $api[] = [
         'config_api_codigo' => $api_codigo,
-        'config_api_servicio' => $api_servicio['name'].'<span>'.$api_servicio['desc'].(!empty($api_servicio['link'])?(' (<a href="'.$api_servicio['link'].'">más info</a>)'):'').'</span>',
+        'config_api_servicio' => $api_servicio['name'].'<br/><span class="small">'.$api_servicio['desc'].(!empty($api_servicio['link'])?(' (<a href="'.$api_servicio['link'].'">más info</a>)'):'').'</span>',
         'config_api_url' => isset($Contribuyente->config_api_servicios->$api_codigo->url) ? $Contribuyente->config_api_servicios->$api_codigo->url : null,
         'config_api_auth' => isset($Contribuyente->config_api_servicios->$api_codigo->auth) ? $Contribuyente->config_api_servicios->$api_codigo->auth : null,
         'config_api_credenciales' => isset($Contribuyente->config_api_servicios->$api_codigo->credenciales) ? $Contribuyente->config_api_servicios->$api_codigo->credenciales : null,
