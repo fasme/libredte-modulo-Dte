@@ -835,12 +835,12 @@ class Model_RegistroCompra extends \Model_App
     /**
      * Método que se ejecuta al insertar un nuevo registro en la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2019-08-11
      */
     protected function insert()
     {
         $Emisor = (new Model_Contribuyentes())->get($this->detrutdoc);
-        if (!$Emisor->dv) {
+        if (!$Emisor->modificado) {
             return false;
         }
         return parent::insert();
