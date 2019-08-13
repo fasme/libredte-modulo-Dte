@@ -47,6 +47,10 @@ echo $f->end('Buscar');
 
 if (!empty($documentos)) {
     foreach ($documentos as &$d) {
+        $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Receptor->getRUT().'/'.$d['dte'].'/'.$d['folio'].'/'.$d['fecha'].'/'.$d['total'].'/'.$d['proveedor_rut'].'-'.$d['proveedor_dv'].'\', 750, 550)" title="Verificar datos del documento en la web del SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
+        $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$d['proveedor_rut'].'-'.$d['proveedor_dv'].'/'.$d['dte'].'/'.$d['folio'].'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-book fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/registro_compras/ingresar_accion/'.$d['proveedor_rut'].'-'.$d['proveedor_dv'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
+        $d[] = $acciones;
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d['fecha_recepcion_sii'] = \sowerphp\general\Utility_Date::format($d['fecha_recepcion_sii'], 'd/m/Y H:i');
         $d['proveedor_razon_social'] .= '<span>'.num($d['proveedor_rut']).'-'.$d['proveedor_dv'].'</span>';
@@ -58,7 +62,7 @@ if (!empty($documentos)) {
         }
         unset($d['estado'], $d['proveedor_rut'], $d['proveedor_dv'], $d['dte'], $d['folio'], $d['dettipotransaccion'], $d['desctipotransaccion']);
     }
-    array_unshift($documentos, ['Proveedor','Documento', 'Fecha', 'Recepción SII', 'Exento', 'Neto', 'IVA', 'Total']);
+    array_unshift($documentos, ['Proveedor','Documento', 'Fecha', 'Recepción SII', 'Exento', 'Neto', 'IVA', 'Total', 'Acciones']);
     new \sowerphp\general\View_Helper_Table($documentos);
 ?>
 <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/registro_compras/csv?<?=http_build_query($filtros)?>" role="button">Descargar detalle de documentos</a>

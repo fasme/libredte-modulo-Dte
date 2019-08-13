@@ -12,7 +12,7 @@
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>DTE recibidos en SII <small>previo a RC</small></h1></div>
+<div class="page-header"><h1>DTE recibidos en SII <small>(previo a RC)</small></h1></div>
 <p>Aquí podrá consultar los documentos que el SII recibió para la empresa <?=$Emisor->razon_social?>.</p>
 <div class="row">
     <div class="col-md-8">
@@ -46,10 +46,16 @@ echo $f->end('Buscar documentos');
 ?>
     </div>
     <div class="col-md-4">
-        <div class="card bg-light">
-            <div class="card-header"><i class="fas fa-exclamation-circle text-warning"></i> Nuevo registro de compras</div>
+        <div class="card mb-4 bg-light">
+            <div class="card-header"><i class="fas fa-exclamation-circle text-warning"></i> ¿Buscas pendientes de procesar?</div>
             <div class="card-body">
-                Con la entrada en vigencia en agosto de 2017 del registro de compras esta opción queda obsoleta y se debe usar la <a href="<?=$_base?>/dte/dte_compras/registro_compras">búsqueda directa en el registro</a> desde esa fecha en adelante.
+                Recomendamos el <a href="<?=$_base?>/dte/registro_compras/pendientes">listado de documentos recibidos pendientes</a> sincronizado automáticamente con el SII.
+            </div>
+        </div>
+        <div class="card mb-4 bg-light">
+            <div class="card-header"><i class="fas fa-exclamation-circle text-warning"></i> ¡Usa el registro de compras!</div>
+            <div class="card-body">
+                Desde el registro de compras en agosto de 2017, se recomienda hacer la búsqueda directamente en <a href="<?=$_base?>/dte/dte_compras/registro_compras">dicho registro</a>.
             </div>
         </div>
     </div>
@@ -59,9 +65,9 @@ echo $f->end('Buscar documentos');
 if (isset($documentos)) {
     $DteTipos = new \website\Dte\Admin\Mantenedores\Model_DteTipos();
     foreach ($documentos as &$d) {
-        $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Emisor->getRUT().'/'.$d['dte'].'/'.$d['folio'].'/'.$d['emision'].'/'.$d['total'].'/'.$d['rut'].'\', 750, 550)" title="Verificar datos del documento en la web del SII" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-        $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-check fa-fw"></i></a>';
+        $acciones = '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Emisor->getRUT().'/'.$d['dte'].'/'.$d['folio'].'/'.$d['emision'].'/'.$d['total'].'/'.$d['rut'].'\', 750, 550)" title="Verificar datos del documento en la web del SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
+        $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-book fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/registro_compras/ingresar_accion/'.$d['rut'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
         $d[] = \sowerphp\general\Utility_Date::count(\sowerphp\general\Utility_Date::format($d['recepcion'], 'Y-m-d'));
         $d[] = $acciones;
         if (is_numeric($d['dte'])) {

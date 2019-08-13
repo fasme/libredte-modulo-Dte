@@ -51,7 +51,7 @@ class Controller_RegistroCompras extends \Controller_App
      * Acción para mostrar los documentos recibidos en SII con estado pendientes
      * de procesar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2019-08-13
      */
     public function pendientes()
     {
@@ -66,6 +66,7 @@ class Controller_RegistroCompras extends \Controller_App
         $Receptor = $this->getContribuyente();
         $documentos = (new Model_RegistroCompras())->setContribuyente($Receptor)->buscar($filtros);
         $this->set([
+            'Receptor' => $Receptor,
             'filtros' => $filtros,
             'documentos' => $documentos,
         ]);
@@ -183,6 +184,71 @@ class Controller_RegistroCompras extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
         }
         $this->redirect('/dte/registro_compras');
+    }
+
+    /**
+     * Acción que permite ingresar una acción al registro de compras del DTE en
+     * el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-13
+     */
+    public function ingresar_accion($emisor, $dte, $folio)
+    {
+        list($emisor_rut, $emisor_dv) = explode('-', str_replace('.', '', $emisor));
+        $Contribuyente = $this->getContribuyente();
+        $Firma = $Contribuyente->getFirma($this->Auth->User->id);
+        if (!$Firma) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe firma asociada', 'error'
+            );
+            $this->redirect('/dte/registro_compras/pendientes');
+        }
+        // hacer conexión al SII para obtener estado actual del registro de compras
+        try {
+            $RCV = new \sasco\LibreDTE\Sii\RegistroCompraVenta($Firma);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            $this->redirect($this->request->request);
+        }
+        // procesar formulario (antes de asignar variables para que se refleje en la vista)
+        if (isset($_POST['submit'])) {
+            try {
+                $r = $RCV->ingresarAceptacionReclamoDoc($emisor_rut, $emisor_dv, $dte, $folio, $_POST['accion']);
+                if ($r) {
+                    \sowerphp\core\Model_Datasource_Session::message($r['glosa'], !$r['codigo']?'ok':'error');
+                    if (!$r['codigo']) {
+                        try {
+                            $RegistroCompra = new Model_RegistroCompra($emisor_rut, $dte, $folio, (int)$Contribuyente->config_ambiente_en_certificacion);
+                            if ($RegistroCompra->estado == 0 and $RegistroCompra->receptor == $Contribuyente->rut) {
+                                $RegistroCompra->delete();
+                            }
+                        } catch (\Exception $e) {
+                        }
+                    }
+                } else {
+                    \sowerphp\core\Model_Datasource_Session::message('No fue posible ingresar la acción del DTE al SII', 'error');
+                }
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            }
+        }
+        // asignar variables para la vista
+        try {
+            $eventos = $RCV->listarEventosHistDoc($emisor_rut, $emisor_dv, $dte, $folio);
+            $cedible = $RCV->consultarDocDteCedible($emisor_rut, $emisor_dv, $dte, $folio);
+            $fecha_recepcion = $RCV->consultarFechaRecepcionSii($emisor_rut, $emisor_dv, $dte, $folio);
+            $this->set([
+                'Emisor' => new \website\Dte\Model_Contribuyente($emisor_rut),
+                'DteTipo' => new \website\Dte\Admin\Mantenedores\Model_DteTipo($dte),
+                'folio' => $folio,
+                'eventos' => $eventos!==false ? $eventos : null,
+                'cedible' => $cedible!==false ? $cedible : null,
+                'fecha_recepcion' => $fecha_recepcion!==false ? $fecha_recepcion : null,
+            ]);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            $this->redirect('/dte/registro_compras/pendientes');
+        }
     }
 
 }

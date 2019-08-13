@@ -1,9 +1,9 @@
 <ul class="nav nav-pills float-right">
 <?php if (isset($DteRecibido) and in_array($DteRecibido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_intercambios/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII" class="nav-link">
+        <a href="<?=$_base?>/dte/registro_compras/ingresar_accion/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII" class="nav-link">
             <i class="fa fa-edit"></i>
-            Ingresar RCV
+            Recibir / Reclamar
         </a>
     </li>
     <li class="nav-item">
