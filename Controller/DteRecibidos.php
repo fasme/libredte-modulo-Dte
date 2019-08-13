@@ -496,7 +496,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción de la API que permite buscar en el SII los documentos recibidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2019-08-13
      */
     public function _api_sii_GET($desde, $hasta, $receptor)
     {
@@ -509,7 +509,7 @@ class Controller_DteRecibidos extends \Controller_App
         if (!$Receptor->exists()) {
             $this->Api->send('Receptor no existe', 404);
         }
-        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/listar')) {
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/sii')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // armar datos con firma
