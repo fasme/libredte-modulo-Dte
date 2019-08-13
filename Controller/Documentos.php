@@ -964,7 +964,7 @@ class Controller_Documentos extends \Controller_App
                 $Receptor->telefono = mb_substr(trim($datos['Contacto']), 0, 20);
             }
         }
-        if (!empty($datos['CorreoRecep'])) {
+        if (!empty($datos['CorreoRecep']) and strpos($datos['CorreoRecep'], '@')) {
             $Receptor->email = mb_substr(trim($datos['CorreoRecep']), 0, 80);
         }
         if (!empty($datos['DirRecep'])) {
