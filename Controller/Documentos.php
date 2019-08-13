@@ -937,7 +937,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Método que guarda un Receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-28
+     * @version 2019-08-12
      */
     private function guardarReceptor($datos)
     {
@@ -948,27 +948,27 @@ class Controller_Documentos extends \Controller_App
         list($receptor, $dv) = $aux;
         $Receptor = new Model_Contribuyente($receptor);
         if ($Receptor->usuario) {
-            return $Receptor;
+            return $Receptor; // no se modifican contribuyentes registrados
         }
         $Receptor->dv = $dv;
         if (!empty($datos['RznSocRecep'])) {
-            $Receptor->razon_social = mb_substr($datos['RznSocRecep'], 0, 100);
+            $Receptor->razon_social = mb_substr(trim($datos['RznSocRecep']), 0, 100);
         }
         if (!empty($datos['GiroRecep'])) {
-            $Receptor->giro = mb_substr($datos['GiroRecep'], 0, 80);
+            $Receptor->giro = mb_substr(trim($datos['GiroRecep']), 0, 80);
         }
         if (!empty($datos['Contacto'])) {
             if (strpos($datos['Contacto'], '@')) {
-                $Receptor->email = mb_substr($datos['Contacto'], 0, 80);
+                $Receptor->email = mb_substr(trim($datos['Contacto']), 0, 80);
             } else {
-                $Receptor->telefono = mb_substr($datos['Contacto'], 0, 20);
+                $Receptor->telefono = mb_substr(trim($datos['Contacto']), 0, 20);
             }
         }
         if (!empty($datos['CorreoRecep'])) {
-            $Receptor->email = mb_substr($datos['CorreoRecep'], 0, 80);
+            $Receptor->email = mb_substr(trim($datos['CorreoRecep']), 0, 80);
         }
         if (!empty($datos['DirRecep'])) {
-            $Receptor->direccion = mb_substr($datos['DirRecep'], 0, 70);
+            $Receptor->direccion = mb_substr(trim($datos['DirRecep']), 0, 70);
         }
         if (!empty($datos['CmnaRecep'])) {
             if (is_numeric($datos['CmnaRecep'])) {
