@@ -174,10 +174,10 @@ class Controller_RegistroCompras extends \Controller_App
     public function actualizar()
     {
         $estado = 'PENDIENTE'; // forzar estado PENDIENTE
-        $dias = 2;
+        $meses = 2;
         $Receptor = $this->getContribuyente();
         try {
-            (new Model_RegistroCompras())->setContribuyente($Receptor)->sincronizar($estado, $dias);
+            (new Model_RegistroCompras())->setContribuyente($Receptor)->sincronizar($estado, $meses);
             \sowerphp\core\Model_Datasource_Session::message(__('Documentos recibidos con estado %s actualizados', $estado), 'ok');
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');

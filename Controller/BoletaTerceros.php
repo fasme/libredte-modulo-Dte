@@ -229,13 +229,14 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * Acción para actualizar el listado de boletas desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-13
      */
     public function actualizar()
     {
+        $meses = 2;
         $Emisor = $this->getContribuyente();
         try {
-            (new Model_BoletaTerceros())->setContribuyente($Emisor)->sincronizar(2);
+            (new Model_BoletaTerceros())->setContribuyente($Emisor)->sincronizar($meses);
             \sowerphp\core\Model_Datasource_Session::message('Boletas actualizadas', 'ok');
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');

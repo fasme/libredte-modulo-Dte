@@ -214,13 +214,14 @@ class Controller_BoletaHonorarios extends \Controller_App
     /**
      * Acción para actualizar el listado de boletas desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-13
      */
     public function actualizar()
     {
+        $meses = 2;
         $Receptor = $this->getContribuyente();
         try {
-            (new Model_BoletaHonorarios())->setContribuyente($Receptor)->sincronizar(2);
+            (new Model_BoletaHonorarios())->setContribuyente($Receptor)->sincronizar($meses);
             \sowerphp\core\Model_Datasource_Session::message('Boletas actualizadas', 'ok');
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
