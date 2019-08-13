@@ -126,7 +126,7 @@ class Model_RegistroCompras extends \Model_Plural_App
     /**
      * Método que entrega los documentos de compras pendientes de ser procesados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2019-08-13
      */
     public function buscar(array $filtros = [], $detalle = false)
     {
@@ -136,9 +136,26 @@ class Model_RegistroCompras extends \Model_Plural_App
             $where[] = 'rc.estado = :estado';
             $vars[':estado'] = $filtros['estado'];
         }
+        if (!empty($filtros['emisor'])) {
+            if (strpos($filtros['emisor'], '-')) {
+                list($rut, $dv) = explode('-', str_replace('.', '', $filtros['emisor']));
+            } else {
+                $rut = (int)$filtros['emisor'];
+            }
+            $where[] = 'rc.detrutdoc = :emisor';
+            $vars[':emisor'] = $rut;
+        }
         if (!empty($filtros['dte'])) {
             $where[] = 'rc.dettipodoc = :dte';
             $vars[':dte'] = $filtros['dte'];
+        }
+        if (!empty($filtros['fecha_desde'])) {
+            $where[] = 'rc.detfchdoc >= :fecha_desde';
+            $vars[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+        if (!empty($filtros['fecha_hasta'])) {
+            $where[] = 'rc.detfchdoc <= :fecha_hasta';
+            $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
         if (!empty($filtros['total_desde'])) {
             $where[] = 'rc.detmnttotal >= :total_desde';

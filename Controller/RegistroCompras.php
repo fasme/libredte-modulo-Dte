@@ -37,6 +37,17 @@ class Controller_RegistroCompras extends \Controller_App
 {
 
     /**
+     * Acción principal que redirecciona a los documentos pendientes, ya que no
+     * se deberían estar cargando de otro tipo actualmente, quizás en el futuro (?)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-13
+     */
+    public function index()
+    {
+        $this->redirect('/dte/registro_compras/pendientes');
+    }
+
+    /**
      * Acción para mostrar los documentos recibidos en SII con estado pendientes
      * de procesar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -45,19 +56,18 @@ class Controller_RegistroCompras extends \Controller_App
     public function pendientes()
     {
         $filtros = array_merge($this->getQuery([
+            'emisor' => null,
+            'fecha_desde' => null,
+            'fecha_hasta' => null,
             'dte' => null,
             'total_desde' => null,
             'total_hasta' => null,
-        ]), ['estado' => 0]);
+        ]), ['estado' => 0]); // forzar estado PENDIENTE
         $Receptor = $this->getContribuyente();
-        $pendientes = (new Model_RegistroCompras())->setContribuyente($Receptor)->buscar($filtros);
-        if (!$pendientes) {
-            \sowerphp\core\Model_Datasource_Session::message('No hay documentos recibidos pendientes en SII');
-            $this->redirect('/dte');
-        }
+        $documentos = (new Model_RegistroCompras())->setContribuyente($Receptor)->buscar($filtros);
         $this->set([
             'filtros' => $filtros,
-            'pendientes' => $pendientes,
+            'documentos' => $documentos,
         ]);
     }
 
@@ -67,39 +77,112 @@ class Controller_RegistroCompras extends \Controller_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-08-09
      */
-    public function pendientes_csv()
+    public function csv()
     {
         $filtros = array_merge($this->getQuery([
+            'emisor' => null,
+            'fecha_desde' => null,
+            'fecha_hasta' => null,
             'dte' => null,
             'total_desde' => null,
             'total_hasta' => null,
-        ]), ['estado' => 0]);
+        ]), ['estado' => 0]); // forzar estado PENDIENTE
         $Receptor = $this->getContribuyente();
-        $pendientes = (new Model_RegistroCompras())->setContribuyente($Receptor)->getDetalle($filtros);
-        if (!$pendientes) {
-            \sowerphp\core\Model_Datasource_Session::message('No hay documentos recibidos pendientes en SII');
-            $this->redirect('/dte');
+        $documentos = (new Model_RegistroCompras())->setContribuyente($Receptor)->getDetalle($filtros);
+        if (!$documentos) {
+            \sowerphp\core\Model_Datasource_Session::message('No hay documentos recibidos en SII para la búsqueda realizada');
+            $this->redirect('/dte/registro_compras');
         }
-        array_unshift($pendientes, array_keys($pendientes[0]));
-        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($pendientes);
-        $this->response->sendContent($csv, $Receptor->rut.'-'.$Receptor->dv.'_recibidos_pendientes.csv');
+        array_unshift($documentos, array_keys($documentos[0]));
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($documentos);
+        $this->response->sendContent($csv, $Receptor->rut.'-'.$Receptor->dv.'_recibidos_'.date('YmdHis').'.csv');
     }
 
     /**
-     * Acción para actualizar el listado de documentos recibidos pendientes del SII
+     * Acción para el buscador de documentos recibidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-13
      */
-    public function pendientes_actualizar()
+    public function buscar()
     {
         $Receptor = $this->getContribuyente();
+        $this->set([
+            'Receptor' => $Receptor,
+            'dte_tipos' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
+        ]);
+        if (isset($_POST['submit'])) {
+            unset($_POST['submit']);
+            $filtros = array_merge($_POST, ['estado' => 0]); // forzar estado PENDIENTE
+            // obtener PDF desde servicio web
+            $r = $this->consume('/api/dte/registro_compras/buscar/'.$Receptor->rut, $filtros);
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
+                return;
+            }
+            if (empty($r['body'])) {
+                \sowerphp\core\Model_Datasource_Session::message(__('No hay documentos recibidos en SII para la búsqueda realizada'), 'warning');
+            }
+            $this->set([
+                'filtros' => $filtros,
+                'documentos' => $r['body'],
+            ]);
+        }
+    }
+
+    /**
+     * API que permite buscar en los documentos recibidos en el registro de
+     * compras del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-13
+     */
+    public function _api_buscar_POST($receptor)
+    {
+        // usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear receptor
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send(__('Receptor no existe'), 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/registro_compras/buscar')) {
+            $this->Api->send(__('No está autorizado a operar con la empresa solicitada'), 403);
+        }
+        // obtener boletas
+        $filtros = [];
+        foreach ($this->Api->data as $key => $val) {
+            if (!empty($val)) {
+                $filtros[$key] = $val;
+            }
+        }
+        if (empty($filtros)) {
+            $this->Api->send(__('Debe definir a lo menos un filtro para la búsqueda'), 400);
+        }
+        $filtros['estado'] = 0; // forzar estado PENDIENTE
+        $documentos = (new Model_RegistroCompras())->setContribuyente($Receptor)->buscar($filtros);
+        $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Acción para actualizar el listado de documentos del registro de compras
+     * del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-13
+     */
+    public function actualizar()
+    {
+        $estado = 'PENDIENTE'; // forzar estado PENDIENTE
+        $dias = 2;
+        $Receptor = $this->getContribuyente();
         try {
-            (new Model_RegistroCompras())->setContribuyente($Receptor)->sincronizar('PENDIENTE', 2);
-            \sowerphp\core\Model_Datasource_Session::message('Documentos recibidos pendientes actualizados', 'ok');
+            (new Model_RegistroCompras())->setContribuyente($Receptor)->sincronizar($estado, $dias);
+            \sowerphp\core\Model_Datasource_Session::message(__('Documentos recibidos con estado %s actualizados', $estado), 'ok');
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
         }
-        $this->redirect('/dte/registro_compras/pendientes');
+        $this->redirect('/dte/registro_compras');
     }
 
 }
