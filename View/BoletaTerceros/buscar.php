@@ -41,7 +41,7 @@ echo $f->end('Buscar');
 
 if (!empty($boletas)) {
     foreach ($boletas as &$b) {
-        $b[] = '<a href="'.$_base.'/dte/boleta_terceros/html/'.$Emisor->rut.'/'.$b['numero'].'" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>';
+        $b[] = '<a href="'.$_base.'/dte/boleta_terceros/html/'.$b['numero'].'" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>';
         $b['receptor_rut'] = num($b['receptor_rut']).'-'.$b['receptor_dv'];
         $b['fecha'] = \sowerphp\general\Utility_Date::format($b['fecha']);
         $b['fecha_emision'] = \sowerphp\general\Utility_Date::format($b['fecha_emision']);

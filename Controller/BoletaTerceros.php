@@ -75,19 +75,19 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * API que permite buscar boletas de honorario electrónicas recibidas en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-13
      */
-    public function _api_buscar_POST($receptor)
+    public function _api_buscar_POST($emisor)
     {
         // usuario autenticado
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
-        // crear receptor
-        $Emisor = new Model_Contribuyente($receptor);
+        // crear emisor
+        $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
-            $this->Api->send('Receptor no existe', 404);
+            $this->Api->send('Emisor no existe', 404);
         }
         if (!$Emisor->usuarioAutorizado($User, '/dte/boleta_terceros/buscar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
@@ -109,18 +109,18 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * Acción que permite descargar el HTML de una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-13
      */
-    public function html($emisor, $numero)
+    public function html($numero)
     {
         $Emisor = $this->getContribuyente();
-        $BoletaTercero = new Model_BoletaTercero($emisor, $numero);
-        if (!$BoletaTercero->exists() or $BoletaTercero->emisor!=$Emisor->rut) {
+        $BoletaTercero = new Model_BoletaTercero($Emisor->rut, $numero);
+        if (!$BoletaTercero->exists()) {
             \sowerphp\core\Model_Datasource_Session::message('No existe la boleta solicitada', 'error');
             $this->redirect('/dte/boleta_terceros');
         }
         // obtener PDF desde servicio web
-        $r = $this->consume('/api/dte/boleta_terceros/html/'.$BoletaTercero->emisor.'/'.$BoletaTercero->numero.'/'.$Emisor->rut);
+        $r = $this->consume('/api/dte/boleta_terceros/html/'.$BoletaTercero->numero.'/'.$BoletaTercero->emisor);
         if ($r['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
             $this->redirect('/dte/boleta_terceros');
@@ -135,26 +135,26 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * API que permite descargar el HTML de una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-13
      */
-    public function _api_html_GET($emisor, $numero, $receptor)
+    public function _api_html_GET($numero, $emisor)
     {
         // usuario autenticado
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
-        // crear receptor
-        $Emisor = new Model_Contribuyente($receptor);
+        // crear emisor
+        $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
-            $this->Api->send('Receptor no existe', 404);
+            $this->Api->send('Emisor no existe', 404);
         }
         if (!$Emisor->usuarioAutorizado($User, '/dte/boleta_terceros/html')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // obtener boleta
         $BoletaTercero = new Model_BoletaTercero($emisor, $numero);
-        if (!$BoletaTercero->exists() or $BoletaTercero->emisor!=$Emisor->rut) {
+        if (!$BoletaTercero->exists()) {
             $this->Api->send('No existe la boleta solicitada', 404);
         }
         // obtener pdf
