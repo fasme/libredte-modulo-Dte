@@ -190,7 +190,7 @@ class Controller_RegistroCompras extends \Controller_App
      * Acción que permite ingresar una acción al registro de compras del DTE en
      * el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
+     * @version 2019-08-14
      */
     public function ingresar_accion($emisor, $dte, $folio)
     {
@@ -215,13 +215,14 @@ class Controller_RegistroCompras extends \Controller_App
             try {
                 $r = $RCV->ingresarAceptacionReclamoDoc($emisor_rut, $emisor_dv, $dte, $folio, $_POST['accion']);
                 if ($r) {
-                    \sowerphp\core\Model_Datasource_Session::message($r['glosa'], !$r['codigo']?'ok':'error');
-                    if (!$r['codigo']) {
+                    \sowerphp\core\Model_Datasource_Session::message($r['glosa'], in_array($r['codigo'], [0,7])?'ok':'error');
+                    if (in_array($r['codigo'], [0,7])) {
                         try {
-                            $RegistroCompra = new Model_RegistroCompra($emisor_rut, $dte, $folio, (int)$Contribuyente->config_ambiente_en_certificacion);
+                            $RegistroCompra = new Model_RegistroCompra((int)$Contribuyente->config_ambiente_en_certificacion, $dte, $emisor_rut, $folio);
                             if ($RegistroCompra->estado == 0 and $RegistroCompra->receptor == $Contribuyente->rut) {
                                 $RegistroCompra->delete();
                             }
+                            $this->redirect('/dte/registro_compras/pendientes');
                         } catch (\Exception $e) {
                         }
                     }

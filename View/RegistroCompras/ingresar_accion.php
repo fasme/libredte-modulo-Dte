@@ -1,3 +1,11 @@
+<ul class="nav nav-pills float-right">
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/registro_compras/pendientes" title="Ver listado de documentos pendientes" class="nav-link">
+            <i class="fas fa-paperclip"></i>
+            Recibidos pendientes
+        </a>
+    </li>
+</ul>
 <div class="page-header"><h1>Ingresar acción al registro de compra del SII</h1></div>
 <ul>
     <li><strong>Emisor</strong>: <?=$Emisor->razon_social?></li>
