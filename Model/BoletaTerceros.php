@@ -139,7 +139,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
     /**
      * Método que entrega las boletas de cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-15
      */
     public function buscar(array $filtros = [], $order = 'ASC')
     {
@@ -200,7 +200,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
                 LEFT JOIN contribuyente AS c ON c.rut = b.receptor
             WHERE
                 '.implode(' AND ', $where).'
-            ORDER BY b.fecha '.$order.'
+            ORDER BY b.fecha '.$order.', b.numero '.$order.'
         ', $vars);
     }
 
