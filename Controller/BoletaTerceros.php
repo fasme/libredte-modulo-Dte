@@ -232,7 +232,6 @@ class Controller_BoletaTerceros extends \Controller_App
 
     /**
      * Acción para emitir una boleta de terceros electrónica
-     * @todo Programar acción
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-08-15
      */
@@ -271,15 +270,16 @@ class Controller_BoletaTerceros extends \Controller_App
                     ];
                 }
             }
-            // emitir boleta
-            try {
-                $BoletaTercero = (new Model_BoletaTerceros())->setContribuyente($Emisor)->emitir($boleta);
-            } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            // emitir boleta y bajar HTML de boleta
+            $r = $this->consume('/api/dte/boleta_terceros/emitir/'.$Emisor->rut, $boleta);
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
                 $this->redirect('/dte/boleta_terceros/emitir');
             }
             // obtener html
             try {
+                $BoletaTercero = new Model_BoletaTercero();
+                $BoletaTercero->set($r['body']);
                 $html = $BoletaTercero->getHTML();
             } catch (\Exception $e) {
                 $this->Api->send($e->getMessage(), 500);
@@ -290,6 +290,35 @@ class Controller_BoletaTerceros extends \Controller_App
             $this->Api->response()->header('Pragma', 'no-cache');
             $this->Api->response()->header('Expires', 0);
             $this->Api->send($html);
+        }
+    }
+
+    /**
+     * API para emitir una boleta de terceros electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-15
+     */
+    public function _api_emitir_POST($emisor)
+    {
+        // usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear emisor
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/boleta_terceros/emitir')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // emitir boleta
+        try {
+            $BoletaTercero = (new Model_BoletaTerceros())->setContribuyente($Emisor)->emitir($this->Api->data);
+            $this->Api->send($BoletaTercero, 200, JSON_PRETTY_PRINT);
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), 500);
         }
     }
 
