@@ -233,7 +233,7 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * Acción para emitir una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-15
+     * @version 2019-08-16
      */
     public function emitir()
     {
@@ -271,7 +271,7 @@ class Controller_BoletaTerceros extends \Controller_App
                 }
             }
             // emitir boleta y bajar HTML de boleta
-            $r = $this->consume('/api/dte/boleta_terceros/emitir/'.$Emisor->rut, $boleta);
+            $r = $this->consume('/api/dte/boleta_terceros/emitir', $boleta);
             if ($r['status']['code']!=200) {
                 \sowerphp\core\Model_Datasource_Session::message($r['body'], 'error');
                 $this->redirect('/dte/boleta_terceros/emitir');
@@ -296,17 +296,22 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * API para emitir una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-15
+     * @version 2019-08-16
      */
-    public function _api_emitir_POST($emisor)
+    public function _api_emitir_POST()
     {
         // usuario autenticado
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
+        // verificar que venga RUTEmisor
+        $boleta = $this->Api->data;
+        if (empty($boleta['Encabezado']['Emisor']['RUTEmisor'])) {
+            $this->Api->send('Debe indicar RUT del emisor de la BTE', 400);
+        }
         // crear emisor
-        $Emisor = new Model_Contribuyente($emisor);
+        $Emisor = new Model_Contribuyente($boleta['Encabezado']['Emisor']['RUTEmisor']);
         if (!$Emisor->exists()) {
             $this->Api->send('Emisor no existe', 404);
         }
@@ -315,7 +320,7 @@ class Controller_BoletaTerceros extends \Controller_App
         }
         // emitir boleta
         try {
-            $BoletaTercero = (new Model_BoletaTerceros())->setContribuyente($Emisor)->emitir($this->Api->data);
+            $BoletaTercero = (new Model_BoletaTerceros())->setContribuyente($Emisor)->emitir($boleta);
             $this->Api->send($BoletaTercero, 200, JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), 500);
