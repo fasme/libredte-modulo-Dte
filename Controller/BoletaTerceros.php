@@ -157,7 +157,7 @@ class Controller_BoletaTerceros extends \Controller_App
         if (!$BoletaTercero->exists()) {
             $this->Api->send('No existe la boleta solicitada', 404);
         }
-        // obtener pdf
+        // obtener html
         try {
             $html = $BoletaTercero->getHTML();
         } catch (\Exception $e) {
@@ -213,20 +213,6 @@ class Controller_BoletaTerceros extends \Controller_App
     }
 
     /**
-     * Acción para emitir una boleta de terceros electrónica
-     * @todo Programar acción
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
-     */
-    public function emitir()
-    {
-        $Emisor = $this->getContribuyente();
-        $this->set([
-            'Emisor' => $Emisor,
-        ]);
-    }
-
-    /**
      * Acción para actualizar el listado de boletas desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-08-13
@@ -242,6 +228,69 @@ class Controller_BoletaTerceros extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
         }
         $this->redirect('/dte/boleta_terceros');
+    }
+
+    /**
+     * Acción para emitir una boleta de terceros electrónica
+     * @todo Programar acción
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-15
+     */
+    public function emitir()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+            'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
+        ]);
+        if (isset($_POST['submit'])) {
+            // armar arreglo con los datos de la boleta
+            $boleta = [
+                'Encabezado' => [
+                    'IdDoc' => [
+                        'FchEmis' => $_POST['FchEmis'],
+                    ],
+                    'Emisor' => [
+                        'RUTEmisor' => $Emisor->rut.'-'.$Emisor->dv,
+                    ],
+                    'Receptor' => [
+                        'RUTRecep' => str_replace('.', '', $_POST['RUTRecep']),
+                        'RznSocRecep' => $_POST['RznSocRecep'],
+                        'DirRecep' => $_POST['DirRecep'],
+                        'CmnaRecep' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->get($_POST['CmnaRecep'])->comuna,
+                    ],
+                ],
+                'Detalle' => [],
+            ];
+            $n_detalle = count($_POST['NmbItem']);
+            for ($i=0; $i<$n_detalle; $i++) {
+                if (!empty($_POST['NmbItem'][$i]) and !empty($_POST['MontoItem'][$i])) {
+                    $boleta['Detalle'][] = [
+                        'NmbItem' => $_POST['NmbItem'][$i],
+                        'MontoItem' => $_POST['MontoItem'][$i],
+                    ];
+                }
+            }
+            // emitir boleta
+            try {
+                $BoletaTercero = (new Model_BoletaTerceros())->setContribuyente($Emisor)->emitir($boleta);
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                $this->redirect('/dte/boleta_terceros/emitir');
+            }
+            // obtener html
+            try {
+                $html = $BoletaTercero->getHTML();
+            } catch (\Exception $e) {
+                $this->Api->send($e->getMessage(), 500);
+            }
+            // entregar boleta
+            $this->Api->response()->type('text/html');
+            $this->Api->response()->header('Content-Disposition', 'attachment; filename=bte_'.$BoletaTercero->emisor.'_'.$BoletaTercero->numero.'.html');
+            $this->Api->response()->header('Pragma', 'no-cache');
+            $this->Api->response()->header('Expires', 0);
+            $this->Api->send($html);
+        }
     }
 
 }

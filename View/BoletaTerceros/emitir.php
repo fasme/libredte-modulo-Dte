@@ -7,24 +7,116 @@
     </li>
 </ul>
 <div class="page-header"><h1>Emitir boleta de terceros</h1></div>
-<div class="alert alert-info text-center lead">
-    ¿Quieres emitir boletas de terceros desde LibreDTE?<br/>
-    <a href="https://libredte.cl/soporte?asunto=<?=urlencode('Emisión BTE desde LibreDTE')?>">Contáctanos</a> si estás interesado en que habilitemos esta opción
-</div>
+<script>
+function set_receptor(form) {
+    var f = document.getElementById(form);
+    // resetear campos
+    f.RznSocRecep.value = "";
+    f.DirRecep.value = "";
+    $(f.CmnaRecep).val("").trigger('change.select2');
+    // si no se indicó el rut no se hace nada más
+    if (__.empty(f.RUTRecep.value)) {
+        return;
+    }
+    // verificar validez del rut
+    if (Form.check_rut(f.RUTRecep) !== true) {
+        Form.alert('RUT receptor es incorrecto', f.RUTRecep);
+        return;
+    }
+    // buscar datos del rut en el servicio web y asignarlos si existen
+    var dv = f.RUTRecep.value.charAt(f.RUTRecep.value.length - 1),
+        rut = f.RUTRecep.value.replace(/\./g, "").replace("-", "");
+    rut = rut.substr(0, rut.length - 1);
+    url = _url+'/api/dte/contribuyentes/info/'+rut;
+    $.ajax({
+        type: "GET",
+        url: url,
+        dataType: "json",
+        success: function (c) {
+            f.RznSocRecep.value = c.razon_social;
+            f.DirRecep.value = (c.direccion!==undefined && c.direccion) ? c.direccion : '';
+            $(f.CmnaRecep).val((c.comuna!==undefined && c.comuna) ? c.comuna : '').trigger('change.select2');
+        },
+        error: function (jqXHR) {
+            console.log(jqXHR.responseJSON);
+        }
+    });
+}
+function item_nuevo(tr) {
+    var n_items = $('input[name="MontoItem[]"]').length;
+    if (n_items > 4) {
+        Form.alert('No puede agregar más de 4 filas de detalle');
+        Form.delJS(tr.childNodes[0].childNodes[0]);
+        return false;
+    }
+}
+function calcular() {
+    var MntBruto = 0;
+    $('input[name="MontoItem[]"]').each(function (i, e) {
+        if (!__.empty($(e).val())) {
+            MntBruto += parseInt($(e).val());
+        }
+    });
+    console.log(calcular);
+    $('input[name="MntBruto"]').val(MntBruto);
+    $('input[name="MntRetencion"]').val(Math.round(MntBruto*0.1));
+    $('input[name="MntNeto"]').val(MntBruto - $('input[name="MntRetencion"]').val());
+}
+</script>
 <?php
-/*$f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['onsubmit'=>'Form.check()']);
-echo $f->input([
-    'name' => 'rut',
-    'label' => 'RUT receptor',
-    'check' => 'notempty rut',
-]);
+$f = new \sowerphp\general\View_Helper_Form();
+echo $f->begin(['id'=>'formBTE', 'onsubmit'=>'Form.check() && Form.confirm(this, \'¿Desea emitir la boleta?\')']);
 echo $f->input([
     'type' => 'date',
-    'name' => 'fecha',
+    'name' => 'FchEmis',
     'label' => 'Fecha',
     'value' => date('Y-m-d'),
     'check' => 'notempty date',
 ]);
+echo $f->input([
+    'name' => 'RUTRecep',
+    'label' => 'RUT receptor',
+    'check' => 'notempty rut',
+    'attr' => 'onblur="set_receptor(\'formBTE\')"',
+]);
+echo $f->input([
+    'name' => 'RznSocRecep',
+    'label' => 'Nombre',
+    'check' => 'notempty',
+    'attr' => 'maxlength="100"',
+]);
+echo $f->input([
+    'name' => 'DirRecep',
+    'label' => 'Dirección',
+    'check' => 'notempty',
+    'attr' => 'maxlength="70"',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'CmnaRecep',
+    'label' => 'Comuna',
+    'options' => [''=>'Seleccionar comuna'] + $comunas,
+    'check' => 'notempty',
+]);
+$f->setStyle(false);
+echo $f->input([
+    'type'=>'js',
+    'id'=>'prestaciones',
+    'label'=>'Prestaciones',
+    'titles'=>['Prestación profesional', 'Valor bruto'],
+    'inputs'=>[
+        ['name'=>'NmbItem', 'check'=>'notempty', 'maxlength="100"'],
+        ['name'=>'MontoItem', 'attr'=>'onblur="calcular()"', 'check'=>'notempty integer'],
+    ],
+    'accesskey' => 'P',
+    'callback' => 'item_nuevo',
+]);
+$titles = ['Valor Bruto', 'Monto Retención', 'Líquido a pagar'];
+$totales = [
+    $f->input(['name'=>'MntBruto', 'value'=>0, 'attr'=>'readonly="readonly"']),
+    $f->input(['name'=>'MntRetencion', 'value'=>0, 'attr'=>'readonly="readonly"']),
+    $f->input(['name'=>'MntNeto', 'value'=>0, 'attr'=>'readonly="readonly"']),
+];
+new \sowerphp\general\View_Helper_Table([$titles, $totales]);
+$f->setStyle('horizontal');
 echo $f->end('Emitir boleta');
-*/

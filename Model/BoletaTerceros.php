@@ -204,4 +204,57 @@ class Model_BoletaTerceros extends \Model_Plural_App
         ', $vars);
     }
 
+    /**
+     * Método que emite una BTE en el SII y entrega el objeto local para trabajar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-15
+     */
+    public function emitir($boleta)
+    {
+        // consumir servicio web y emitir boleta
+        $r = libredte_consume('/sii/boleta_terceros_emitir', [
+            'auth'=>[
+                'rut' => $this->getContribuyente()->getRUT(),
+                'clave' => $this->getContribuyente()->config_sii_pass,
+            ],
+            'boleta' => $boleta,
+        ]);
+        if ($r['status']['code']!=200) {
+            throw new \Exception('Error al emitir boleta: '.$r['body'], $r['status']['code']);
+        }
+        $boleta = $r['body'];
+        if (empty($boleta['Encabezado']['IdDoc']['CodigoBarras'])) {
+            throw new \Exception('No fue posible emitir la boleta o bien no se pudo obtener el código de barras de la boleta emitida');
+        }
+        // crear registro de la boleta en la base de datos
+        $BoletaTercero = new Model_BoletaTercero();
+        $BoletaTercero->emisor = $this->getContribuyente()->rut;
+        $BoletaTercero->numero = $boleta['Encabezado']['IdDoc']['Folio'];
+        $BoletaTercero->codigo = $boleta['Encabezado']['IdDoc']['CodigoBarras'];
+        $BoletaTercero->receptor = explode('-', $boleta['Encabezado']['Receptor']['RUTRecep'])[0];
+        $BoletaTercero->fecha = $boleta['Encabezado']['IdDoc']['FchEmis'];
+        $BoletaTercero->fecha_emision = date('Y-m-d');
+        $BoletaTercero->total_honorarios = $boleta['Encabezado']['Totales']['MntBruto'];
+        $BoletaTercero->total_retencion = $boleta['Encabezado']['Totales']['MntRetencion'];
+        $BoletaTercero->total_liquido = $boleta['Encabezado']['Totales']['MntNeto'];
+        $BoletaTercero->anulada = 0;
+        $BoletaTercero->save();
+        // guardar datos del receptor si es posible
+        $Receptor = $BoletaTercero->getReceptor();
+        if (!$Receptor->usuario) {
+            $Receptor->razon_social = mb_substr($boleta['Encabezado']['Receptor']['RznSocRecep'],0,100);
+            $Receptor->direccion = mb_substr($boleta['Encabezado']['Receptor']['DirRecep'],0,70);
+            $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName($boleta['Encabezado']['Receptor']['CmnaRecep']);
+            if ($comuna) {
+                $Receptor->comuna = $comuna;
+            }
+            try {
+                $Receptor->save();
+            } catch (\Exception $e) {
+            }
+        }
+        // entregar boleta emitida
+        return $BoletaTercero;
+    }
+
 }
