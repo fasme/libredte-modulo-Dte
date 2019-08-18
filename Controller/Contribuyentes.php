@@ -227,7 +227,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite modificar contribuyente previamente registrado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-14
+     * @version 2019-08-18
      */
     public function modificar($rut)
     {
@@ -262,6 +262,7 @@ class Controller_Contribuyentes extends \Controller_App
             'form_id' => 'modificarContribuyente',
             'boton' => 'Modificar empresa',
             'tipos_dte' => $Contribuyente->getDocumentosAutorizados(),
+            'apps' => $Contribuyente->getApps('apps'),
         ]);
         // editar contribuyente
         if (isset($_POST['submit'])) {
