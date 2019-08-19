@@ -2685,19 +2685,11 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la cuota de documentos asignada al contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-16
+     * @version 2019-08-19
      */
     public function getCuota()
     {
-        $cuota_pagada = \sowerphp\core\Configure::read('dte.cuota');
-        $cuota_gratis = \sowerphp\core\Configure::read('dte.cuota_gratis');
-        if (!$this->getUsuario()->inGroup(['dte_plus'])) {
-            return $cuota_gratis ? $cuota_gratis : $cuota_pagada;
-        }
-        if ($this->config_libredte_cuota) {
-            return $this->config_libredte_cuota;
-        }
-        return $cuota_pagada;
+        return (int)$this->config_libredte_cuota;
     }
 
     /**

@@ -135,7 +135,7 @@ class Model_Contribuyentes extends \Model_Plural_App
      * @param rut Filtrar por el RUT de un contribuyente específico
      * @return Tabla con los contribuyentes y sus movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-11-10
+     * @version 2019-08-19
      */
     public function getConMovimientos($desde = 1, $hasta = null, $certificacion = false, $dte = null, $rut = null)
     {
@@ -194,13 +194,11 @@ class Model_Contribuyentes extends \Model_Plural_App
             WHERE (e.emitidos > 0 OR r.recibidos > 0)
             ORDER BY c.razon_social
         ', $vars), 9, 'grupos_aux');
-        $cuota = \sowerphp\core\Configure::read('dte.cuota');
         foreach ($contribuyentes as &$c) {
             $c['total'] = $c['emitidos'] + $c['recibidos'];
-            $c['sobre_cuota'] = ($cuota and ($c['total']-$cuota)>0) ? $c['total']-$cuota : null;
             $c['grupos'] = [];
             foreach ($c['grupos_aux'] as $g) {
-                if (!in_array($g['grupo'], ['sysadmin', 'appadmin', 'passwd', 'soporte', 'mantenedores', 'usuarios', 'dte_basico'])) {
+                if (!in_array($g['grupo'], ['sysadmin', 'appadmin', 'passwd', 'soporte', 'mantenedores', 'usuarios'])) {
                     $c['grupos'][] = $g['grupo'];
                 }
             }

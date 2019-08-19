@@ -43,6 +43,6 @@ if (isset($contribuyentes)) {
         $c['ambiente'] = $c['ambiente'] ? 'Certificación' : 'Producción';
         $c['grupos'] = implode(', ', $c['grupos']);
     }
-    array_unshift($contribuyentes, ['RUT', 'Razón social', 'Ambiente', 'Usuario', 'Grupos', 'Nombre', 'Email', 'Emitidos', 'Recibidos', 'Total', 'Sobre la cuota']);
+    array_unshift($contribuyentes, ['RUT', 'Razón social', 'Ambiente', 'Usuario', 'Grupos', 'Nombre', 'Email', 'Emitidos', 'Recibidos', 'Total']);
     new \sowerphp\general\View_Helper_Table($contribuyentes, 'documentos_emitidos_recibidos_'.$_POST['desde'].'_'.$_POST['hasta'], true);
 }
