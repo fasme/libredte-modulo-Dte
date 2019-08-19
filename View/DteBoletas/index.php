@@ -13,8 +13,8 @@ foreach ($periodos as &$p) {
     foreach(['exento', 'iva', 'neto', 'total'] as $col) {
         $p[$col] = $p[$col] ? num($p[$col]) : '';
     }
-    $p[] = '<a href="dte_boletas/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período" class="btn btn-primary"><i class="far fa-file-excel fa-fw"></i></a>'
-            .' <a href="dte_boletas/xml/'.$p['periodo'].'" title="Descargar XML del libro del período" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i></a>';
+    $p[] = '<a href="dte_boletas/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período" class="btn btn-primary mb-2"><i class="far fa-file-excel fa-fw"></i></a>'
+            .' <a href="dte_boletas/xml/'.$p['periodo'].'" title="Descargar XML del libro del período" class="btn btn-primary mb-2"><i class="far fa-file-code fa-fw"></i></a>';
 }
 array_unshift($periodos, ['Período', 'Emitidas', 'Desde', 'Hasta', 'Exento', 'Neto', 'IVA', 'Total', 'Descargar']);
 $t = new \sowerphp\general\View_Helper_Table();

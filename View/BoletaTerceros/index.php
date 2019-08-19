@@ -27,8 +27,8 @@
 <div class="page-header"><h1>Boletas de terceros electrónicas (BTE)</h1></div>
 <?php
 foreach ($periodos as &$p) {
-    $acciones = '<a href="boleta_terceros/ver/'.$p['periodo'].'" title="Ver listado de boletas emitidas" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-    $acciones .= ' <a href="boleta_terceros/csv/'.$p['periodo'].'" title="Descargar CSV de boletas del período" class="btn btn-primary"><i class="far fa-file-excel fa-fw"></i></a>';
+    $acciones = '<a href="boleta_terceros/ver/'.$p['periodo'].'" title="Ver listado de boletas emitidas" class="btn btn-primary mb-2"><i class="fa fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="boleta_terceros/csv/'.$p['periodo'].'" title="Descargar CSV de boletas del período" class="btn btn-primary mb-2"><i class="far fa-file-excel fa-fw"></i></a>';
     $p[] = $acciones;
     $p['fecha_inicial'] = \sowerphp\general\Utility_Date::format($p['fecha_inicial']);
     $p['fecha_final'] = \sowerphp\general\Utility_Date::format($p['fecha_final']);

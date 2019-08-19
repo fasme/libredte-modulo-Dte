@@ -52,8 +52,8 @@
 
 <?php
 foreach ($intercambios as &$i) {
-    $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$i['codigo'].'" title="Ver detalles del intercambio" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$i['codigo'].'" title="Descargar PDF del intercambio" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
+    $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$i['codigo'].'" title="Ver detalles del intercambio" class="btn btn-primary mb-2"><i class="fa fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_intercambios/pdf/'.$i['codigo'].'" title="Descargar PDF del intercambio" class="btn btn-primary mb-2"><i class="far fa-file-pdf fa-fw"></i></a>';
     $i[] = $acciones;
     if (is_numeric($i['emisor'])) {
         $i['emisor'] = \sowerphp\app\Utility_Rut::addDV($i['emisor']);

@@ -9,8 +9,8 @@
 <div class="page-header"><h1>Libro de guías de despacho</h1></div>
 <?php
 foreach ($periodos as &$p) {
-    $acciones = '<a href="dte_guias/ver/'.$p['periodo'].'" title="Ver estado del libro del período" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-    $acciones .= ' <a href="dte_guias/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período" class="btn btn-primary'.(!$p['emitidos']?' disabled':'').'"><i class="far fa-file-excel fa-fw"></i></a>';
+    $acciones = '<a href="dte_guias/ver/'.$p['periodo'].'" title="Ver estado del libro del período" class="btn btn-primary mb-2"><i class="fa fa-search fa-fw"></i></a>';
+    $acciones .= ' <a href="dte_guias/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período" class="btn btn-primary mb-2'.(!$p['emitidos']?' disabled':'').'"><i class="far fa-file-excel fa-fw"></i></a>';
     $p[] = $acciones;
 }
 array_unshift($periodos, ['Período', 'Emitidas', 'Envíadas', 'Track ID', 'Estado', 'Acciones']);
