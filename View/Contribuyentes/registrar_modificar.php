@@ -1022,33 +1022,6 @@ foreach($apps as $App) {
 <div role="tabpanel" class="tab-pane" id="general" aria-labelledby="general-tab">
     <div class="card mb-4">
         <div class="card-header">
-            <i class="fa fa-cogs"></i>
-            Configuración LibreDTE
-        </div>
-        <div class="card-body">
-<?php
-echo $f->input([
-    'type' => 'div',
-    'label' => 'Administrador',
-    'value' => $Contribuyente->getUsuario()->nombre.' ('.$Contribuyente->getUsuario()->usuario.')',
-]);
-if ($Contribuyente->getCuota()) {
-    echo $f->input([
-        'type' => 'div',
-        'label' => 'Cuota',
-        'value' => num($Contribuyente->getCuota()),
-    ]);
-}
-echo $f->input([
-    'type' => 'div',
-    'label' => 'Modificado',
-    'value' => \sowerphp\general\Utility_Date::format($Contribuyente->modificado, 'd/m/Y H:m'),
-]);
-?>
-        </div>
-    </div>
-    <div class="card mb-4">
-        <div class="card-header">
             <i class="far fa-envelope"></i>
             Datos de contacto
         </div>
