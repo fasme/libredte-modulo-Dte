@@ -29,15 +29,15 @@ namespace website\Dte;
  * solamente, ya que aunque no haya acuse de recibo, si hay recepción después de
  * 8 días se asume con acuse de recibo)
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2016-10-12
+ * @version 2019-08-20
  */
 class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
 {
 
-    public function main($desde = 7, $grupo = 'dte_plus', $certificacion = false)
+    public function main($grupo = 'dte_plus', $desde = 7, $certificacion = false)
     {
         $this->db = \sowerphp\core\Model_Datasource_Database::get();
-        $documentos = $this->getDocumentos($desde, $grupo, $certificacion);
+        $documentos = $this->getDocumentos($grupo, $desde, $certificacion);
         foreach ($documentos as $documento) {
             $this->enviarDTE($documento, $certificacion);
         }
@@ -61,7 +61,7 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
         }
     }
 
-    private function getDocumentos($desde, $grupo, $certificacion)
+    private function getDocumentos($grupo, $desde, $certificacion)
     {
         if (is_numeric($desde)) {
             $desde = date('Y-m-d', strtotime('-'.$desde.' days'));
