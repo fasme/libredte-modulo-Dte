@@ -132,7 +132,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método que procesa los datos de los contribuyentes y los actualiza en la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-01-01
+     * @version 2019-08-21
      */
     private function procesarContribuyentes($contribuyentes)
     {
@@ -145,35 +145,41 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
             if ($this->verbose) {
                 $this->out('Procesando '.num($procesados).'/'.$registros.': contribuyente '.$c[1]);
             }
-            // agregar y/o actualizar datos del contribuyente si no tiene usuario administrador
+            // crear objeto del contribuyente
             $modificado = false;
             list($rut, $dv) = explode('-', $c[0]);
             $Contribuyente = new Model_Contribuyente($rut);
             $Contribuyente->dv = $dv;
+            // agregar y/o actualizar datos del contribuyente si no tiene usuario administrador
             if (!$Contribuyente->usuario) {
+                $modificado = true;
+                // modificar razón social
                 $Contribuyente->razon_social = mb_substr($c[1], 0, 100);
-                $modificado = true;
-            }
-            if (is_numeric($c[2]) and $c[2]) {
-                $Contribuyente->config_ambiente_produccion_numero = (int)$c[2];
-                $modificado = true;
-            }
-            if (isset($c[3][9])) {
-                $aux = explode('-', $c[3]);
-                if (isset($aux[2])) {
-                    list($d, $m, $Y) = $aux;
-                    if ($Contribuyente->config_ambiente_produccion_numero) {
-                        $Contribuyente->config_ambiente_produccion_fecha = $Y.'-'.$m.'-'.$d;
-                    } else {
-                        $Contribuyente->config_ambiente_certificacion_fecha = $Y.'-'.$m.'-'.$d;
+                // asignar número de resolución en producción
+                if (is_numeric($c[2]) and $c[2]) {
+                    $resolucion_numero = (int)$c[2];
+                    $Contribuyente->__set('config_ambiente_produccion_numero', $resolucion_numero);
+                }
+                // modificar fecha de producción o de certificación (según si existe o no número de producción)
+                if (isset($c[3][9])) {
+                    $aux = explode('-', $c[3]);
+                    if (isset($aux[2])) {
+                        list($d, $m, $Y) = $aux;
+                        $resolucion_fecha = $Y.'-'.$m.'-'.$d;
+                        if (!empty($resolucion_numero)) {
+                            $Contribuyente->__set('config_ambiente_produccion_fecha', $resolucion_fecha);
+                        } else {
+                            $Contribuyente->__set('config_ambiente_certificacion_fecha', $resolucion_fecha);
+                        }
                     }
-                    $modificado = true;
                 }
             }
+            // asignar correo de intercambio (esto es lo más importante de la actualización)
             if (strpos($c[4], '@')) {
-                $Contribuyente->config_email_intercambio_user = $c[4];
+                $Contribuyente->__set('config_email_intercambio_user', $c[4]);
                 $modificado = true;
             }
+            // si el contribuyente está modificado, entonces se guarda
             if ($modificado) {
                 $Contribuyente->modificado = date('Y-m-d H:i:s');
                 try {
