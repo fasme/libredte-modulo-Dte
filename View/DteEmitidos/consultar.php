@@ -5,8 +5,8 @@
     <div class="row">
         <div class="offset-md-3 col-md-6">
 <?php
-$message = \sowerphp\core\Model_Datasource_Session::message();
-if ($message) {
+$messages = \sowerphp\core\Model_Datasource_Session::message();
+foreach ($messages as $message) {
     $icons = [
         'success' => 'ok',
         'info' => 'info-sign',
