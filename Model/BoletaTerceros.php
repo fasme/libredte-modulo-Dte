@@ -42,7 +42,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
      * Método que sincroniza las boletas de terceros recibidas por la empresa
      * en el SII con el registro local de boletas en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2019-08-23
      */
     public function sincronizar($meses)
     {
@@ -62,8 +62,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
                     $Receptor->razon_social = $boleta['receptor_nombre'];
                     $Receptor->save();
                 }
-                $BoletaTercero = new Model_BoletaTercero();
-                $BoletaTercero->emisor = $this->getContribuyente()->rut;
+                $BoletaTercero = new Model_BoletaTercero($this->getContribuyente()->rut, $boleta['numero']);
                 $BoletaTercero->receptor = $Receptor->rut;
                 $BoletaTercero->anulada = (int)($boleta['estado'] == 'ANUL');
                 $BoletaTercero->set($boleta);
@@ -139,7 +138,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
     /**
      * Método que entrega las boletas de cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-15
+     * @version 2019-08-23
      */
     public function buscar(array $filtros = [], $order = 'ASC')
     {
@@ -182,7 +181,15 @@ class Model_BoletaTerceros extends \Model_Plural_App
                 $where[] = 'b.anulada = false';
             }
         }
-        return $this->db->getTable('
+        if (isset($filtros['sucursal_sii']) and is_numeric($filtros['sucursal_sii'])) {
+            if ($filtros['sucursal_sii']) {
+                $where[] = 'b.sucursal_sii = :sucursal_sii';
+                $vars[':sucursal_sii'] = $filtros['sucursal_sii'];
+            } else {
+                $where[] = 'b.sucursal_sii IS NULL';
+            }
+        }
+        $boletas = $this->db->getTable('
             SELECT
                 b.codigo,
                 b.receptor AS receptor_rut,
@@ -194,7 +201,8 @@ class Model_BoletaTerceros extends \Model_Plural_App
                 b.total_honorarios AS honorarios,
                 b.total_liquido AS liquido,
                 b.total_retencion AS retencion,
-                b.anulada
+                b.anulada,
+                b.sucursal_sii
             FROM
                 boleta_tercero AS b
                 LEFT JOIN contribuyente AS c ON c.rut = b.receptor
@@ -202,12 +210,16 @@ class Model_BoletaTerceros extends \Model_Plural_App
                 '.implode(' AND ', $where).'
             ORDER BY b.fecha '.$order.', b.numero '.$order.'
         ', $vars);
+        foreach ($boletas as &$b) {
+            $b['sucursal'] = $this->getContribuyente()->getSucursal($b['sucursal_sii'])->sucursal;
+        }
+        return $boletas;
     }
 
     /**
      * Método que emite una BTE en el SII y entrega el objeto local para trabajar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-15
+     * @version 2019-08-23
      */
     public function emitir($boleta)
     {
@@ -238,6 +250,9 @@ class Model_BoletaTerceros extends \Model_Plural_App
         $BoletaTercero->total_retencion = $boleta['Encabezado']['Totales']['MntRetencion'];
         $BoletaTercero->total_liquido = $boleta['Encabezado']['Totales']['MntNeto'];
         $BoletaTercero->anulada = 0;
+        if (!empty($boleta['Encabezado']['Emisor']['CdgSIISucur'])) {
+            $BoletaTercero->sucursal_sii = $boleta['Encabezado']['Emisor']['CdgSIISucur'];
+        }
         $BoletaTercero->save();
         // guardar datos del receptor si es posible
         $Receptor = $BoletaTercero->getReceptor();

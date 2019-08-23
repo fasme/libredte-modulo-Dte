@@ -11,6 +11,12 @@
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['onsubmit'=>'Form.check()']);
 echo $f->input([
+    'type' => 'select',
+    'name' => 'sucursal_sii',
+    'label' => 'Sucursal Emisor',
+    'options' => [''=>'Todas las sucursales'] + $sucursales,
+]);
+echo $f->input([
     'name' => 'receptor',
     'label' => 'Receptor',
     'check' => 'rut',
@@ -49,8 +55,8 @@ if (!empty($boletas)) {
         $b['liquido'] = num($b['liquido']);
         $b['retencion'] = num($b['retencion']);
         $b['anulada'] = $b['anulada'] ? 'Si' : '';
-        unset($b['codigo'], $b['receptor_dv']);
+        unset($b['codigo'], $b['receptor_dv'], $b['sucursal_sii']);
     }
-    array_unshift($boletas, ['RUT', 'Receptor', 'Número', 'Fecha', 'Emisión', 'Honorarios', 'Líquido', 'Retención', 'Anulada', 'Ver']);
+    array_unshift($boletas, ['RUT', 'Receptor', 'Número', 'Fecha', 'Emisión', 'Honorarios', 'Líquido', 'Retención', 'Anulada', 'Sucursal', 'Ver']);
     new \sowerphp\general\View_Helper_Table($boletas, 'bhe', true);
 }

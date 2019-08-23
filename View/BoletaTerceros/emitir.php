@@ -67,6 +67,13 @@ function calcular() {
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['id'=>'formBTE', 'onsubmit'=>'Form.check() && Form.confirm(this, \'¿Desea emitir la boleta?\')']);
 echo $f->input([
+    'type' => 'select',
+    'name' => 'CdgSIISucur',
+    'label' => 'Sucursal Emisor',
+    'options' => $sucursales,
+    'check' => 'notempty',
+]);
+echo $f->input([
     'type' => 'date',
     'name' => 'FchEmis',
     'label' => 'Fecha',

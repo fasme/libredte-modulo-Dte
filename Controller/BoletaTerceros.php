@@ -51,12 +51,15 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * Acción para el buscador de boletas de honorario electróncias
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2019-08-23
      */
     public function buscar()
     {
         $Emisor = $this->getContribuyente();
-        $this->set('Emisor', $Emisor);
+        $this->set([
+            'Emisor' => $Emisor,
+            'sucursales' => $Emisor->getSucursales(),
+        ]);
         if (isset($_POST['submit'])) {
             unset($_POST['submit']);
             // obtener PDF desde servicio web
@@ -75,7 +78,7 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * API que permite buscar boletas de honorario electrónicas recibidas en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
+     * @version 2019-08-23
      */
     public function _api_buscar_POST($emisor)
     {
@@ -95,7 +98,7 @@ class Controller_BoletaTerceros extends \Controller_App
         // obtener boletas
         $filtros = [];
         foreach ($this->Api->data as $key => $val) {
-            if (!empty($val)) {
+            if (isset($val)) {
                 $filtros[$key] = $val;
             }
         }
@@ -233,13 +236,14 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * Acción para emitir una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-16
+     * @version 2019-08-23
      */
     public function emitir()
     {
         $Emisor = $this->getContribuyente();
         $this->set([
             'Emisor' => $Emisor,
+            'sucursales' => $Emisor->getSucursales(),
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
         ]);
         if (isset($_POST['submit'])) {
@@ -251,6 +255,7 @@ class Controller_BoletaTerceros extends \Controller_App
                     ],
                     'Emisor' => [
                         'RUTEmisor' => $Emisor->rut.'-'.$Emisor->dv,
+                        'CdgSIISucur' => !empty($_POST['CdgSIISucur']) ? $_POST['CdgSIISucur'] : false,
                     ],
                     'Receptor' => [
                         'RUTRecep' => str_replace('.', '', $_POST['RUTRecep']),

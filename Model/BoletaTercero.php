@@ -49,6 +49,7 @@ class Model_BoletaTercero extends \Model_App
     public $total_retencion; ///< integer(32) NOT NULL DEFAULT ''
     public $total_liquido; ///< integer(32) NOT NULL DEFAULT ''
     public $anulada; ///< boolean() NOT NULL DEFAULT 'false'
+    public $sucursal_sii; ///< integer(32) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -158,6 +159,17 @@ class Model_BoletaTercero extends \Model_App
             'length'    => null,
             'null'      => false,
             'default'   => 'false',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
+        'sucursal_sii' => array(
+            'name'      => 'Sucursal SII',
+            'comment'   => '',
+            'type'      => 'integer',
+            'length'    => 32,
+            'null'      => true,
+            'default'   => '',
             'auto'      => false,
             'pk'        => false,
             'fk'        => null
