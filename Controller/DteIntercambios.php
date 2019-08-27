@@ -248,7 +248,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Recurso para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2019-08-27
      */
     public function _api_pdf_GET($codigo, $contribuyente, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
@@ -286,7 +286,7 @@ class Controller_DteIntercambios extends \Controller_App
         $ApiDtePdfClient = $DteIntercambio->getEmisor()->getApiClient('dte_pdf');
         if (!$ApiDtePdfClient) {
             $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
+            $rest->setAuth($User->hash);
             $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
         }
         // consultar servicio web del contribuyente
