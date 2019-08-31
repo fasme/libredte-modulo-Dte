@@ -126,7 +126,7 @@ class Model_RegistroCompras extends \Model_Plural_App
     /**
      * Método que entrega los documentos de compras pendientes de ser procesados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
+     * @version 2019-08-31
      */
     public function buscar(array $filtros = [], $detalle = false)
     {
@@ -156,6 +156,14 @@ class Model_RegistroCompras extends \Model_Plural_App
         if (!empty($filtros['fecha_hasta'])) {
             $where[] = 'rc.detfchdoc <= :fecha_hasta';
             $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+        if (!empty($filtros['fecha_recepcion_sii_desde'])) {
+            $where[] = 'TO_CHAR(rc.detfecrecepcion, \'yyyy-mm-dd\') >= :fecha_recepcion_sii_desde';
+            $vars[':fecha_recepcion_sii_desde'] = $filtros['fecha_recepcion_sii_desde'];
+        }
+        if (!empty($filtros['fecha_recepcion_sii_hasta'])) {
+            $where[] = 'TO_CHAR(rc.detfecrecepcion, \'yyyy-mm-dd\') <= :fecha_recepcion_sii_hasta';
+            $vars[':fecha_recepcion_sii_hasta'] = $filtros['fecha_recepcion_sii_hasta'];
         }
         if (!empty($filtros['total_desde'])) {
             $where[] = 'rc.detmnttotal >= :total_desde';
@@ -241,6 +249,94 @@ class Model_RegistroCompras extends \Model_Plural_App
             GROUP BY rc.dettipodoc, t.tipo
             ORDER BY fecha_recepcion_sii_inicial
         ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+    }
+
+    /**
+     * Método que entrega las cantidad de documentos de compras pendientes de
+     * ser procesados agrupados por días
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-31
+     */
+    public function getByDias($dias = 8)
+    {
+        return $this->db->getTable('
+            SELECT
+                fecha_recepcion_sii,
+                fecha_aceptacion_automatica,
+                dias_aceptacion_automatica,
+                COUNT(cantidad) AS cantidad,
+                SUM(total) AS total
+            FROM
+                (
+                    SELECT
+                        TO_CHAR(rc.detfecrecepcion, \'yyyy-mm-dd\') AS fecha_recepcion_sii,
+                        TO_CHAR(rc.detfecrecepcion + (INTERVAL \'1\' DAY * :dias) - (INTERVAL \'1\' MINUTE), \'yyyy-mm-dd\') AS fecha_aceptacion_automatica,
+                        TO_CHAR((rc.detfecrecepcion + (INTERVAL \'1\' DAY * :dias) - (INTERVAL \'1\' MINUTE)) - NOW(), \'dd\')::INTEGER AS dias_aceptacion_automatica,
+                        rc.detfecrecepcion AS cantidad,
+                        rc.detmnttotal AS total
+                    FROM
+                        registro_compra AS rc
+                    WHERE
+                        rc.receptor = :receptor
+                        AND rc.certificacion = :certificacion
+                        AND rc.estado = 0
+                    ORDER BY fecha_recepcion_sii ASC
+                ) AS t
+            GROUP BY fecha_recepcion_sii, fecha_aceptacion_automatica, dias_aceptacion_automatica
+            ORDER BY fecha_recepcion_sii ASC
+        ', [
+            ':receptor' => $this->getContribuyente()->rut,
+            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+            ':dias' => $dias,
+        ]);
+    }
+
+    /**
+     * Método que entrega la cantidad de pendientes agrupados por rango de montos
+      y el monto total
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-31
+     */
+    public function getByRangoMontos()
+    {
+        $rangos = [
+            [         1,     100000],
+            [    100001,     500000],
+            [    500001,    1000000],
+            [   1000001,    5000000],
+            [   5000001,   10000000],
+            [  10000001,   50000000],
+            [  50000001,  100000000],
+            [ 100000001,  500000000],
+            [ 500000001, 2000000000],
+        ];
+        $query_template = '
+            (
+                SELECT {desde} AS desde, {hasta} AS hasta, COUNT(rc.detmnttotal) AS cantidad, SUM(rc.detmnttotal) AS total
+                FROM registro_compra AS rc
+                WHERE
+                    rc.receptor = :receptor
+                    AND rc.certificacion = :certificacion
+                    AND rc.estado = 0
+                    AND rc.detmnttotal BETWEEN {desde} AND {hasta}
+                GROUP BY desde, hasta
+            )
+        ';
+        $query = [];
+        foreach ($rangos as $rango) {
+            $query[] = str_replace(
+                ['{desde}', '{hasta}'],
+                $rango,
+                $query_template
+            );
+        }
+        return $this->db->getTable(
+            implode(' UNION ', $query)
+            .' ORDER BY hasta DESC'
+        , [
+            ':receptor' => $this->getContribuyente()->rut,
+            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+        ]);
     }
 
 }

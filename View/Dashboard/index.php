@@ -190,6 +190,16 @@ echo View_Helper_Dashboard::cards([
         <!-- fin graficos ventas y compras -->
 <?php endif; ?>
 <?php if (!empty($registro_compra_pendientes)) : ?>
+<?php if ($registro_compra_pendientes_dias) : ?>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="far fa-chart-bar fa-fw"></i> Documentos recibidos pendientes y su aceptación automática en SII
+            </div>
+            <div class="card-body">
+                <div id="grafico-registro_compra_pendientes_dias"></div>
+            </div>
+        </div>
+<?php endif; ?>
         <!-- documentos recibidos en SII pendientes -->
         <div class="row">
             <div class="col-md-12">
@@ -200,6 +210,7 @@ echo View_Helper_Dashboard::cards([
                     <div class="card-body">
 <?php
 foreach ($registro_compra_pendientes as &$p) {
+    $p['dte_glosa'] = '<a href="'.$_base.'/dte/registro_compras/pendientes?dte='.$p['dte'].'">'.$p['dte_glosa'].'</a>';
     $p['fecha_recepcion_sii_inicial'] = \sowerphp\general\Utility_Date::format($p['fecha_recepcion_sii_inicial'], 'd/m/Y H:i');
     $p['fecha_recepcion_sii_final'] = \sowerphp\general\Utility_Date::format($p['fecha_recepcion_sii_final'], 'd/m/Y H:i');
     $p['total'] = num($p['total']);
@@ -208,7 +219,14 @@ foreach ($registro_compra_pendientes as &$p) {
 array_unshift($registro_compra_pendientes, ['Documento', 'Pendientes', 'Primero', 'Último', 'Total']);
 new \sowerphp\general\View_Helper_Table($registro_compra_pendientes);
 ?>
-                        <a href="registro_compras/pendientes" class="btn btn-primary btn-block">Ver listado de documentos pendientes</a>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="registro_compras/pendientes_resumen_csv" class="btn btn-primary btn-block">Bajar resumen en CSV</a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="registro_compras/pendientes" class="btn btn-primary btn-block">Ver detalle documentos</a>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-footer small">
                         Datos actualizados una vez al día, si hay cambios en el SII los verá reflejados al día siguiente
@@ -299,23 +317,92 @@ new \sowerphp\general\View_Helper_Table($registro_compra_pendientes);
             </div>
         </form>
         <!-- fin buscador documentos -->
+<?php if (!empty($n_emitidos_reclamados)) : ?>
+        <!-- documentos emitidos con reclamo de receptor -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-exclamation-circle fa-fw"></i> Emitidos reclamados</div>
+                    <div class="card-body text-center">
+                        <span class="lead">
+<?php if ($n_emitidos_reclamados>1) : ?>
+                            <?=num($n_emitidos_reclamados)?> documentos<br/>
+<?php else : ?>
+                            Un documento<br/>
+<?php endif; ?>
+                        </span>
+                        <span class="small"><a href="<?=$_base?>/dte/informes/dte_emitidos/eventos_detalle/<?=$desde?>/<?=$hasta?>/R">ver detalle</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fin documentos emitidos con reclamo de receptor -->
+<?php endif; ?>
 <?php if (!empty($n_registro_compra_pendientes)) : ?>
         <!-- documentos recibidos en SII pendientes -->
         <div class="row">
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-header"><i class="fas fa-paperclip fa-fw"></i> Recibidos pendientes en SII</div>
-                    <div class="card-body lead text-center">
+                    <div class="card-body text-center">
+                        <span class="lead">
 <?php if ($n_registro_compra_pendientes>1) : ?>
-                        <?=num($n_registro_compra_pendientes)?> documentos<br/>
+                            <?=num($n_registro_compra_pendientes)?> documentos<br/>
 <?php else : ?>
-                        Un documento<br/>
+                            Un documento<br/>
 <?php endif; ?>
+                        </span>
+                        <span class="small"><a href="<?=$_base?>/dte/registro_compras/pendientes">ver detalle</a></span>
                     </div>
                 </div>
             </div>
         </div>
         <!-- fin documentos recibidos en SII pendientes -->
+        <!-- documentos recibidos pendientes por días faltantes -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa fa-calendar-alt fa-fw"></i>
+                Pendientes por días faltantes
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+<?php foreach ($registro_compra_pendientes_dias as $p) : ?>
+<?php
+if ($p['dias_aceptacion_automatica']<=1) {
+    $color = 'danger';
+} else if ($p['dias_aceptacion_automatica']<=4) {
+    $color = 'warning';
+} else {
+    $color = 'success';
+}
+?>
+                    <a href="<?=$_base?>/dte/registro_compras/pendientes?fecha_recepcion_sii_desde=<?=$p['fecha_recepcion_sii']?>&amp;fecha_recepcion_sii_hasta=<?=$p['fecha_recepcion_sii']?>" class="list-group-item">
+                        <span class="badge badge-pill badge-<?=$color?>"><?=\sowerphp\general\Utility_Date::format($p['fecha_aceptacion_automatica'])?> (en <?=$p['dias_aceptacion_automatica']?> días)</span>
+                        <span class="badge badge-pill border float-right"><?=num($p['cantidad'])?></span>
+                    </a>
+<?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+        <!-- fin documentos recibidos pendientes por días faltantes -->
+        <!-- documentos recibidos pendientes por rango montos -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa fa-search-dollar fa-fw"></i>
+                Pendientes por rango
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+<?php foreach ($registro_compra_pendientes_rango_montos as $p) : ?>
+                    <a href="<?=$_base?>/dte/registro_compras/pendientes?total_desde=<?=$p['desde']?>&amp;total_hasta=<?=$p['hasta']?>" class="list-group-item">
+                        <span class="badge badge-pill badge-info"><?=num($p['desde'])?> - <?=num($p['hasta'])?></span>
+                        <span class="badge badge-pill border float-right"><?=num($p['cantidad'])?></span>
+                    </a>
+<?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+        <!-- fin documentos recibidos pendientes por rango montos -->
 <?php endif; ?>
 <?php if (!empty($boletas_honorarios_resumen)) : ?>
         <!-- boletas de honorarios -->
@@ -323,12 +410,15 @@ new \sowerphp\general\View_Helper_Table($registro_compra_pendientes);
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-header"><i class="fas fa-user-tie fa-fw"></i> Boletas de honorarios</div>
-                    <div class="card-body lead text-center">
+                    <div class="card-body text-center">
+                        <span class="lead">
 <?php if ($boletas_honorarios_resumen['cantidad']==1) : ?>
-                        Una <small>boleta de honorarios por</small> $<?=num($boletas_honorarios_resumen['honorarios'])?>.-
+                            Una <small>boleta de honorarios por</small> $<?=num($boletas_honorarios_resumen['honorarios'])?>.-<br/>
 <?php else : ?>
-                        <?=num($boletas_honorarios_resumen['cantidad'])?> <small>boletas de honorarios por</small> $<?=num($boletas_honorarios_resumen['honorarios'])?>.-
+                            <?=num($boletas_honorarios_resumen['cantidad'])?> <small>boletas de honorarios por</small> $<?=num($boletas_honorarios_resumen['honorarios'])?>.-<br/>
 <?php endif; ?>
+                        </span>
+                        <span class="small"><a href="<?=$_base?>/dte/boleta_honorarios/ver/<?=$periodo?>">ver detalle</a></span>
                     </div>
                 </div>
             </div>
@@ -341,12 +431,15 @@ new \sowerphp\general\View_Helper_Table($registro_compra_pendientes);
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-header"><i class="fas fa-user-secret fa-fw"></i> Boletas de terceros</div>
-                    <div class="card-body lead text-center">
+                    <div class="card-body text-center">
+                        <span class="lead">
 <?php if ($boletas_terceros_resumen['cantidad']==1) : ?>
-                        Una <small>boleta de terceros por</small> $<?=num($boletas_terceros_resumen['honorarios'])?>.-
+                            Una <small>boleta de terceros por</small> $<?=num($boletas_terceros_resumen['honorarios'])?>.-<br/>
 <?php else : ?>
-                        <?=num($boletas_terceros_resumen['cantidad'])?> <small>boletas de terceros por</small> $<?=num($boletas_terceros_resumen['honorarios'])?>.-
+                            <?=num($boletas_terceros_resumen['cantidad'])?> <small>boletas de terceros por</small> $<?=num($boletas_terceros_resumen['honorarios'])?>.-<br/>
 <?php endif; ?>
+                        </span>
+                        <span class="small"><a href="<?=$_base?>/dte/boleta_terceros/ver/<?=$periodo?>">ver detalle</a></span>
                     </div>
                 </div>
             </div>
@@ -417,6 +510,21 @@ Morris.Donut({
     element: 'grafico-compras',
     data: <?=json_encode($compras_periodo)?>,
     resize: true
+});
+<?php endif; ?>
+<?php if ($registro_compra_pendientes_dias_grafico) : ?>
+Morris.Line({
+    element: 'grafico-registro_compra_pendientes_dias',
+    data: <?=json_encode($registro_compra_pendientes_dias_grafico)?>,
+    xkey: 'dia',
+    ykeys: ['recepcion_sii', 'aceptacion_automatica'],
+    labels: ['Recepción SII', 'Aceptación automática'],
+    xLabels: 'day',
+    events: ['<?=date('Y-m-d')?>'],
+    eventLineColors: ['#f00'],
+    resize: true,
+    xLabelAngle: 45,
+    lineColors: ['#16496f', '#e63e52']
 });
 <?php endif; ?>
 <?php if ($emitidos_estados) : ?>

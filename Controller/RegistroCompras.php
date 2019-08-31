@@ -51,7 +51,7 @@ class Controller_RegistroCompras extends \Controller_App
      * Acción para mostrar los documentos recibidos en SII con estado pendientes
      * de procesar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
+     * @version 2019-08-31
      */
     public function pendientes()
     {
@@ -60,6 +60,8 @@ class Controller_RegistroCompras extends \Controller_App
             'fecha_desde' => null,
             'fecha_hasta' => null,
             'dte' => null,
+            'fecha_recepcion_sii_desde' => null,
+            'fecha_recepcion_sii_hasta' => null,
             'total_desde' => null,
             'total_hasta' => null,
         ]), ['estado' => 0]); // forzar estado PENDIENTE
@@ -97,6 +99,24 @@ class Controller_RegistroCompras extends \Controller_App
         array_unshift($documentos, array_keys($documentos[0]));
         $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($documentos);
         $this->response->sendContent($csv, $Receptor->rut.'-'.$Receptor->dv.'_recibidos_'.date('YmdHis').'.csv');
+    }
+
+    /**
+     * Acción para generar un CSV con el resumen de los documentos pendientes
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-08-31
+     */
+    public function pendientes_resumen_csv()
+    {
+        $Receptor = $this->getContribuyente();
+        $resumen = (new Model_RegistroCompras())->setContribuyente($Receptor)->getResumenPendientes();
+        if (!$resumen) {
+            \sowerphp\core\Model_Datasource_Session::message('No hay documentos recibidos pendientes en SII');
+            $this->redirect('/dte');
+        }
+        array_unshift($resumen, array_keys($resumen[0]));
+        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($resumen);
+        $this->response->sendContent($csv, $Receptor->rut.'-'.$Receptor->dv.'_resumen_recibidos_pendientes_'.date('YmdHis').'.csv');
     }
 
     /**
