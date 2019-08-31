@@ -779,6 +779,7 @@ CREATE TABLE boleta_tercero (
     total_retencion INTEGER NOT NULL,
     total_liquido INTEGER NOT NULL,
     anulada BOOLEAN NOT NULL DEFAULT false,
+    sucursal_sii INTEGER,
     CONSTRAINT boleta_tercero_pk PRIMARY KEY(emisor, numero),
     CONSTRAINT boleta_tercero_emisor_fk FOREIGN KEY (emisor)
         REFERENCES contribuyente (rut) MATCH FULL
