@@ -72,7 +72,7 @@ echo $f->input([
     'type' => 'js',
     'id' => 'usuarios',
     'label' => 'Usuarios autorizados',
-    'titles' => array_merge(['Usuario'], array_keys($permisos_usuarios)),
+    'titles' => array_merge(['Email o usuario'], array_keys($permisos_usuarios)),
     'inputs' => $inputs,
     'values' => $usuarios,
 ]);
