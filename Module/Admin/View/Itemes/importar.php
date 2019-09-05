@@ -18,3 +18,8 @@ echo $f->input([
     'attr' => 'accept="csv"',
 ]);
 echo $f->end('Importar productos y/o servicios');
+
+// tabla con los resultados
+if (!empty($resumen)) {
+    new \sowerphp\general\View_Helper_Table($items, 'items_importados', true);
+}
