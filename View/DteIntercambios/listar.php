@@ -1,16 +1,9 @@
 <ul class="nav nav-pills float-right">
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-university"></i> Recibidos en SII
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="nav-link">
+            <i class="fa fa-university"></i>
+            Registro de compras
         </a>
-        <div class="dropdown-menu">
-            <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="dropdown-item">
-                Registro de compras
-            </a>
-            <a href="<?=$_base?>/dte/dte_recibidos/bhe" title="Buscar las boletas de honorarios electrónicas recibidas en el SII" class="dropdown-item">
-                Boletas honorarios en SII
-            </a>
-        </div>
     </li>
 <?php if ($soloPendientes) : ?>
     <li class="nav-item">
