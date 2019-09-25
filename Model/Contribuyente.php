@@ -216,7 +216,7 @@ class Model_Contribuyente extends \Model_App
         if (!is_numeric($rut) and strpos($rut, '-')) {
             $rut = explode('-', str_replace('.', '', $rut))[0];
         }
-        parent::__construct(+$rut);
+        parent::__construct((int)$rut);
         if ($this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
             try {
