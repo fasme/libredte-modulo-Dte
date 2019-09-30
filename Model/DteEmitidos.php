@@ -45,12 +45,13 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-28
+     * @version 2019-09-30
      */
     public function getDetalle($desde, $hasta, $detalle)
     {
         // datos del xml
-        list($razon_social, $nacionalidad, $moneda, $moneda_total, $fecha_hora) = $this->db->xml('e.xml', [
+        list($vendedor, $razon_social, $nacionalidad, $moneda, $moneda_total, $fecha_hora) = $this->db->xml('e.xml', [
+            '/EnvioDTE/SetDTE/DTE/*/Encabezado/Emisor/CdgVendedor',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/Extranjero/Nacionalidad',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Totales/TpoMoneda',
@@ -84,7 +85,8 @@ class Model_DteEmitidos extends \Model_Plural_App
                 '.$fecha_hora.' AS fecha_hora,
                 i.glosa AS intercambio,
                 e.receptor_evento,
-                e.cesion_track_id
+                e.cesion_track_id,
+                '.$vendedor.' AS vendedor
                 '.$detalle_items.'
             FROM
                 dte_emitido AS e
@@ -104,7 +106,7 @@ class Model_DteEmitidos extends \Model_Plural_App
             $dato['id'] = 'T'.$dato['id'].'F'.$dato['folio'];
         }
         if ($detalle) {
-            $datos = \sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($datos, 19, 'items');
+            $datos = \sowerphp\core\Utility_Array::fromTableWithHeaderAndBody($datos, 20, 'items');
         }
         foreach ($datos as &$d) {
             if ($d['nacionalidad']) {
