@@ -207,16 +207,20 @@ new \sowerphp\general\View_Helper_Table($impuestos);
 <?php
 $referencias_values = [];
 if (isset($datos)) {
-    // no se agregan referencias de boletas (ya que no tienen todos los campos requeridos en la vista)
-    // WARNING: no se agregan las referencias del documento padre para evitar problemas con, por ejemplo: notas de débito que anulan nota de crédito que anuló una factura
-    /*if (!in_array($datos['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
+    // no se agregan referencias de boletas (ya que no tienen todos los campos requeridos en la vista).
+    if (!in_array($datos['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
         if (!empty($datos['Referencia'])) {
             if (!isset($datos['Referencia'][0])) {
                 $datos['Referencia'] = [$datos['Referencia']];
             }
-            $referencias_values = $datos['Referencia'];
+            foreach ($datos['Referencia'] as $r) {
+                // si es una NC o ND que tiene código de referencia (anulación, corrige texto o monto) no se copia
+                if (!(in_array($datos['Encabezado']['IdDoc']['TipoDTE'], [61, 56, 111, 112]) and !empty($r['CodRef']))) {
+                    $referencias_values[] = $r;
+                }
+            }
         }
-    }*/
+    }
     // si es un DTE que referencia a otro se agrega la referencia
     if ($referencia=='referencia') {
         array_unshift($referencias_values, [
