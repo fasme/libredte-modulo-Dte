@@ -40,6 +40,7 @@ class Model_DteEmitidos extends \Model_Plural_App
 
     public static $revision_estados = [
         'rechazados' => ['RSC', 'RCT', 'RCH', 'RFR'],
+        'no_final' => ['002', '004', '005', '007', '106', '107', '-11', '-8', 'VOF', 'PRD', 'SOK', 'CRT'],
     ]; ///< Posibles estados de revisión de envío al SII de los DTE
 
     /**

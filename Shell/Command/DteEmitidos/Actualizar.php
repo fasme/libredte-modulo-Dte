@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando para actualizar los documentos emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2018-04-25
+ * @version 2019-10-04
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
@@ -112,8 +112,9 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 
     private function getContribuyentes($grupo, $certificacion)
     {
-        if (is_numeric($grupo))
+        if (is_numeric($grupo)) {
             return [$grupo];
+        }
         if ($grupo) {
             return $this->db->getCol('
                 SELECT DISTINCT c.rut
@@ -135,7 +136,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                             (
                                 e.revision_estado IS NULL
                                 OR e.revision_estado LIKE \'-%\'
-                                OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\'SOK\', \'CRT\')
+                                OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', Model_DteEmitidos::$revision_estados['no_final']).'\')
                             )
                             AND e.track_id > 0
                         )
@@ -159,7 +160,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
                             (
                                 e.revision_estado IS NULL
                                 OR e.revision_estado LIKE \'-%\'
-                                OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\'SOK\', \'CRT\')
+                                OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', Model_DteEmitidos::$revision_estados['no_final']).'\')
                             )
                             AND e.track_id > 0
                         )
