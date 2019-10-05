@@ -692,17 +692,38 @@ echo $f->input([
                 </div>
                 <div class="col-md-6">
 <?php
-$config_pdf_imprimir_options = [''=>'No, se imprimirá bajando el archivo', 'pdf'=>'Imprimir directamente el PDF'];
-if (class_exists('\sasco\LibreDTE\Sii\Dte\ESCPOS\Dte')) {
-    $config_pdf_imprimir_options['escpos'] = 'Imprimir directamente en impresora térmica';
-}
+$config_pdf_imprimir_options = [''=>'No, se imprimirá bajando el archivo', 'pdf'=>'Imprimir usando el PDF'];
 echo $f->input([
     'type' => 'select',
     'name' => 'config_pdf_imprimir',
-    'label' => '¿Impresión directa?',
+    'label' => 'Impresión directa',
     'options' => $config_pdf_imprimir_options,
     'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_imprimir : '',
     'help' => '¿Se debe enviar a imprimir directamente a la impresora seleccionada?',
+]);
+?>
+                </div>
+<div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_emision_previsualizacion_automatica',
+    'label' => 'Previsualización PDF',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_previsualizacion_automatica : 0,
+    'help' => '¿Se debe mostrar automáticamente la previsualización del PDF en la pantalla de previsualización?',
+]);
+?>
+                </div>
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pdf_disposition',
+    'label' => 'Descargar PDF',
+    'options' => ['Si, descargar PDF', 'No, mostrar PDF en el navegador'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_disposition : 0,
+    'help' => '¿El PDF generado se debe descargar al equipo o se debe mostrar en el navegador?',
 ]);
 ?>
                 </div>
@@ -722,14 +743,24 @@ echo $f->input([
 <?php
 echo $f->input([
     'type' => 'select',
-    'name' => 'config_pdf_disposition',
-    'label' => 'Descargar PDF',
-    'options' => ['Si, descargar PDF', 'No, mostrar PDF en el navegador'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_disposition : 0,
-    'help' => '¿El PDF generado se debe descargar al equipo o se debe mostrar en el navegador?',
+    'name' => 'config_pdf_continuo_logo',
+    'label' => 'Logo en PDF contínuo',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_continuo_logo : 0,
+    'help' => '¿Se debe agregar el logo al formato de PDF en papel contínuo?',
 ]);
 ?>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="far fa-file-pdf"></i>
+            Opciones para PDF formato hoja carta
+        </div>
+        <div class="card-body">
+            <div class="row">
                 <div class="col-md-6">
 <?php
 echo $f->input([
@@ -775,18 +806,6 @@ echo $f->input([
     'options' => ['Al pie de la página', 'Inmediatamente bajo el detalle'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_timbre_posicion : 0,
     'help' => '¿Dónde debe ir el timbre, acuse y totales?',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_emision_previsualizacion_automatica',
-    'label' => 'Previsualización PDF',
-    'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_previsualizacion_automatica : 0,
-    'help' => '¿Se debe mostrar automáticamente la previsualización del PDF en la pantalla de previsualización?',
 ]);
 ?>
                 </div>
