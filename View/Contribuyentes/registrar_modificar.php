@@ -743,10 +743,10 @@ echo $f->input([
 <?php
 echo $f->input([
     'type' => 'select',
-    'name' => 'config_pdf_continuo_logo',
+    'name' => 'config_pdf_logo_continuo',
     'label' => 'Logo en papel contínuo',
     'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_continuo_logo : 0,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_logo_continuo : 0,
     'help' => '¿Se debe agregar el logo al formato de papel contínuo?',
 ]);
 ?>
