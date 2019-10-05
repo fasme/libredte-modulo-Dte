@@ -35,7 +35,7 @@ class Controller_Dashboard extends \Controller_App
     /**
      * Acción principal que muestra el dashboard
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-31
+     * @version 2019-10-05
      */
     public function index()
     {
@@ -55,7 +55,7 @@ class Controller_Dashboard extends \Controller_App
         $rcof_rechazados = (new Model_DteBoletaConsumos())->setContribuyente($Emisor)->getTotalRechazados();
         // valores para cuota
         $cuota = $Emisor->getCuota();
-        $n_dtes = $cuota ? $Emisor->getTotalDocumentosUsadosPeriodo() : false;
+        $n_dtes = $cuota ? $Emisor->getTotalDocumentosUsadosPeriodo($periodo) : false;
         // libros pendientes de enviar del período anterior
         $libro_ventas_existe = (new Model_DteVentas())->setContribuyente($Emisor)->libroGenerado($periodo_anterior);
         $libro_compras_existe = (new Model_DteCompras())->setContribuyente($Emisor)->libroGenerado($periodo_anterior);
