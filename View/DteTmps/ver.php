@@ -1,6 +1,17 @@
 <ul class="nav nav-pills float-right">
-<?php if ($Emisor->config_pdf_imprimir) : ?>
-<?php if ($DteTmp->getTipo()->permiteCotizacion()) : ?>
+<?php if ($Emisor->config_pdf_imprimir and $DteTmp->getTipo()->permiteCotizacion()) : ?>
+<?php if ($Emisor->config_pdf_imprimir == 'pdf_escpos') : ?>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-print"></i>
+            Imprimir
+        </a>
+        <div class="dropdown-menu">
+            <a href="#" onclick="dte_imprimir('pdf', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" class="dropdown-item">PDF</a>
+            <a href="#" onclick="dte_imprimir('escpos', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" accesskey="P" class="dropdown-item">ESCPOS</a>
+        </div>
+    </li>
+<?php else: ?>
     <li class="nav-item">
         <a href="#" onclick="dte_imprimir('<?=$Emisor->config_pdf_imprimir?>', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" title="Imprimir el documento (<?=$Emisor->config_pdf_imprimir?>)" accesskey="P" class="nav-link">
             <i class="fa fa-print"></i>
@@ -32,7 +43,7 @@
     <li class="nav-item">
         <a href="javascript:__.popup('<?=$_base?>/dte/dte_tmps/vale/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>', 280, 180)" class="nav-link">
             <i class="fa fa-file-invoice-dollar"></i>
-            Ver vale
+            Vale
         </a>
     </li>
     <li class="nav-item">
