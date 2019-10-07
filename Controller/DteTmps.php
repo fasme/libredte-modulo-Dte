@@ -90,14 +90,14 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2019-10-07
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
         $Emisor = $emisor===null ? $this->getContribuyente() : new Model_Contribuyente($emisor);
         // datos por defecto
         extract($this->getQuery([
-            'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
             'compress' => false,
         ]));
         // realizar consulta a la API
@@ -125,14 +125,14 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2019-10-07
      */
     public function pdf($receptor, $dte, $codigo, $disposition = 'attachment')
     {
         $Emisor = $this->getContribuyente();
         // datos por defecto
         extract($this->getQuery([
-            'papelContinuo' => !empty($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
             'compress' => false,
         ]));
         // realizar consulta a la API

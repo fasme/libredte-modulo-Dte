@@ -142,7 +142,7 @@ echo $f->input([
     'label' => 'Documento',
     'options' => ['cotizacion'=>'Cotización', 'pdf'=>'Previsualización'],
     'check' => 'notempty',
-    'attr' => 'onblur="pdf_set_action(this.value)"',
+    'onblur' => 'pdf_set_action(this.value)',
 ]);
 echo $f->input([
     'type' => 'select',
