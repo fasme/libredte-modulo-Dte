@@ -1,7 +1,7 @@
 BEGIN;
 
 --
--- Actualización al día 18 de septiembre de 2019
+-- Actualización al día 12 de octubre de 2019 (parche versión 20190815)
 --
 
 -- actualización tabla para boletas de terceros electrónicas
