@@ -156,23 +156,23 @@ new \sowerphp\general\View_Helper_Table([
         </div>
         <div class="card-body">
 <?php
-$titulos = [];
 $total = ['TpoDoc' => '<strong>Total</strong>'];
 foreach ($resumen as &$r) {
-    $titulos = array_keys($r);
     foreach (['FctProp'] as $c) {
-        unset($r[$c], $titulos[array_search($c, $titulos)]);
+        unset($r[$c]);
     }
     // sumar campos que se suman directamente
     foreach (['TotDoc', 'TotAnulado', 'TotOpExe'] as $c) {
-        if (!isset($total[$c]))
+        if (!isset($total[$c])) {
             $total[$c] = 0;
+        }
         $total[$c] += $r[$c];
     }
     // sumar o restar campos segun operación
-    foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntActivoFijo', 'TotMntIVAActivoFijo', 'TotIVANoRec', 'TotIVAUsoComun', 'TotCredIVAUsoComun', 'TotIVAFueraPlazo', 'TotOtrosImp', 'TotIVARetTotal', 'TotIVARetParcial', 'TotImpSinCredito', 'TotMntTotal', 'TotIVANoRetenido', 'TotMntNoFact', 'TotMntPeriodo'] as $c) {
-        if (!isset($total[$c]))
+    foreach (['TotMntExe', 'TotMntNeto', 'TotMntIVA', 'TotIVAPropio', 'TotIVATerceros', 'TotLey18211', 'TotMntActivoFijo', 'TotMntIVAActivoFijo', 'TotIVANoRec', 'TotIVAUsoComun', 'TotCredIVAUsoComun', 'TotIVAFueraPlazo', 'TotOtrosImp', 'TotIVARetTotal', 'TotIVARetParcial', 'TotImpSinCredito', 'TotMntTotal', 'TotIVANoRetenido', 'TotMntNoFact', 'TotMntPeriodo', 'TotPsjNac', 'TotPsjInt', 'TotTabPuros', 'TotTabCigarrillos', 'TotTabElaborado', 'TotImpVehiculo'] as $c) {
+        if (!isset($total[$c])) {
             $total[$c] = 0;
+        }
         if (is_array($r[$c])) {
             $valor = 0;
             if ($c=='TotOtrosImp') {
@@ -186,21 +186,25 @@ foreach ($resumen as &$r) {
             }
             $r[$c] = $valor;
         }
-        if ($operaciones[$r['TpoDoc']]=='S')
+        if ($operaciones[$r['TpoDoc']]=='S') {
             $total[$c] += $r[$c];
-        else if ($operaciones[$r['TpoDoc']]=='R')
+        } else if ($operaciones[$r['TpoDoc']]=='R') {
             $total[$c] -= $r[$c];
+        }
     }
     // dar formato de número
     foreach ($r as &$v) {
-        if ($v)
+        if ($v) {
             $v = num($v);
+        }
     }
 }
 foreach ($total as &$tot) {
-    if (is_numeric($tot))
+    if (is_numeric($tot)) {
         $tot = $tot>0 ? num($tot) : null;
+    }
 }
+$titulos = ['Tipo Doc.', '# docs', 'Anulados', 'Op. exen.', 'Exento', 'Neto', 'IVA', 'IVA propio', 'IVA terc.', 'Ley 18211', 'Activo fijo', 'IVA activo fijo', 'IVA no rec.', 'IVA uso común', 'Créd IVA uso común', 'IVA fuera plazo', 'Otros imp.', 'IVA ret. total', 'IVA ret. parcial', 'Imp. sin crédito', 'Monto total', 'IVA no retenido', 'No fact.', 'Total periodo', 'Pasaje nac.', 'Pasaje int.', 'Puros', 'Cigarrillos', 'Tabaco elaborado', 'Imp. vehículo'];
 array_unshift($resumen, $titulos);
 $resumen[] = $total;
 $t = new \sowerphp\general\View_Helper_Table();
