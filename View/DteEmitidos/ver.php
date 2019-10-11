@@ -129,8 +129,15 @@ echo $t->generate([
             <div class="card mb-4 bg-light">
                 <div class="card-header lead text-center">Track ID SII: <?=$DteEmitido->track_id?></div>
                 <div class="card-body text-center">
-                    <p><strong><?=$DteEmitido->revision_estado?></strong></p>
+<?php if ($DteEmitido->revision_estado): ?>
+                    <p>
+                        <strong><?=$DteEmitido->revision_estado?></strong>
+<?php if (!$DteEmitido->tieneEstadoRevisionEnvioSIIFinal()) : ?>
+                        <br/><span class="small">(no es el estado final de revisión)</span>
+<?php endif; ?>
+                    </p>
                     <p><?=$DteEmitido->revision_detalle?></p>
+<?php endif; ?>
 <?php if ($DteEmitido->track_id) : ?>
                     <p>
                         <a class="btn btn-primary<?=$DteEmitido->track_id==-1?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>

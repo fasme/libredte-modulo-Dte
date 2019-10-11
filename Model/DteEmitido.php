@@ -1177,4 +1177,23 @@ class Model_DteEmitido extends Model_Base_Envio
         return $links_trigger ? $links_trigger : $links;
     }
 
+    /**
+     * Método que indica si el estado de revisión del DTE en el envío al SII es
+     * un estado final o bien aun faltan estados por obtener
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-10-11
+     */
+    public function tieneEstadoRevisionEnvioSIIFinal()
+    {
+        if (!$this->revision_estado) {
+            return false;
+        }
+        $aux = explode('-', $this->revision_estado);
+        $codigo_estado = trim($aux[0]);
+        if (in_array($codigo_estado, Model_DteEmitidos::$revision_estados['no_final'])) {
+            return false;
+        }
+        return true;
+    }
+
 }
