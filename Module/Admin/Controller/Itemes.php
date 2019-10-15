@@ -156,7 +156,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción que permite importar los items desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-09-05
+     * @version 2019-10-14
      */
     public function importar()
     {
@@ -217,7 +217,9 @@ class Controller_Itemes extends \Controller_Maintainer
                             $resumen['nuevos']++;
                         }
                     } else {
-                        $resumen['error'][] = $Item->codigo_tipo.'/'.$Item->codigo;
+                        $resumen['error']++;
+                        $item[] = 'No';
+                        $item[] = 'Error al guardar';
                     }
                 } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                     $resumen['error']++;
