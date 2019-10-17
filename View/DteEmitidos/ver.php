@@ -137,6 +137,9 @@ echo $t->generate([
 <?php endif; ?>
                     </p>
                     <p><?=$DteEmitido->revision_detalle?></p>
+<?php if ($DteEmitido->getEstado()=='R') : ?>
+                    <p class="small text-danger"><?=$DteEmitido->getAyudaEstadoEnvioSII()?></p>
+<?php endif; ?>
 <?php endif; ?>
 <?php if ($DteEmitido->track_id) : ?>
                     <p>

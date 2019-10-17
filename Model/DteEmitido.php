@@ -323,6 +323,16 @@ class Model_DteEmitido extends Model_Base_Envio
     private $datos_cesion; ///< Arreglo con los datos del XML de cesión del DTE
     private $Receptor = null; /// caché para el receptor
 
+    private static $envio_sii_ayudas = [
+        'RCH' => [
+            'CAF-3-517' => 'El CAF (archivo de folios) que contiene al folio {folio} se encuentra vencido y ya no es válido. Debe eliminar el DTE, anular los folios del CAF vencido y solicitar un nuevo CAF. Finalmente emitir nuevamente el DTE con el primer folio disponible del nuevo CAF.',
+            'DTE-3-100' => 'Posible problema con doble envío al SII. Usar opción "verificar documento en SII" y corroborar el estado real.',
+            'DTE-3-101' => 'El folio {folio} ya fue usado para enviar un DTE al SII con otros datos. Debe eliminar el DTE y corregir el folio siguiente si es necesario a uno que no haya sido usado previamente. Finalmente emitir nuevamente el DTE.',
+            'REF-3-750' => 'El DTE emitido T{dte}F{folio} hace referencia a un documento que no existe en SII. Normalmente esto ocurre al hacer referencia a un documento rechazado. Los documentos rechazados no se deben referenciar, ya que no son válidos. Ejemplo: no puede crear una nota de crédito para una factura rechazada por el SII.',
+            'REF-3-415' => 'Se está generando un DTE que requiere referencias y no se está colocando una referencia válida. Ejemplo: no puede anular una guía de despacho con una nota de crédito, puesto que la guía no genera un débito fiscal.',
+        ],
+    ]; ///< listado de ayudas disponibles para los tipos de estado del SII
+
     /**
      * Constructor clase DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -1194,6 +1204,30 @@ class Model_DteEmitido extends Model_Base_Envio
             return false;
         }
         return true;
+    }
+
+    /**
+     * Método que entrega posibles ayudas para los estados del envío al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-10-17
+     */
+    public function getAyudaEstadoEnvioSII()
+    {
+        if (empty($this->revision_estado) or empty($this->revision_detalle)) {
+            return null;
+        }
+        $estado = substr($this->revision_estado,0,3);
+        if (!empty(self::$envio_sii_ayudas[$estado])) {
+            foreach (self::$envio_sii_ayudas[$estado] as $detalle => $ayuda) {
+                if (strpos($this->revision_detalle, '('.$detalle.')')===0) {
+                    return str_replace(
+                        ['{dte}', '{folio}'],
+                        [$this->dte, $this->folio],
+                        $ayuda
+                    );
+                }
+            }
+        }
     }
 
 }
