@@ -766,14 +766,18 @@ class Model_Contribuyente extends \Model_App
      * @param Usuario Objeto \sowerphp\app\Sistema\Usuarios\Model_Usuario al que se asignarán permisos
      * @return =true si está autorizado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-21
+     * @version 2019-10-21
      */
     public function setPermisos(&$Usuario)
     {
-        // si el usuario es el administrador de la empresa se colocan sus permisos estándares (tambien si es de soporte)
-        if ($this->usuario == $Usuario->id or $Usuario->inGroup(['soporte'])) {
-            $Usuario->auths(true);
-            $Usuario->groups(true);
+        $grupos_usuario = $Usuario->groups(true);
+        // si el usuario es el administrador de la empresa se colocan sus permisos estándares
+        if ($this->usuario == $Usuario->id) {
+            $grupos = $grupos_usuario;
+        }
+        // si el usuario es de soporte se colocan los permisos completos del usuario principal de la empresa
+        else if ($this->config_app_soporte and $Usuario->inGroup(['soporte'])) {
+            $grupos = $this->getUsuario()->groups(true);
         }
         // si es un usuario autorizado, entonces se copian los permisos asignados de los disponibles en el
         // administrador
@@ -800,10 +804,21 @@ class Model_Contribuyente extends \Model_App
             }
             // siempre asignar el grupo 'usuarios' para mantener permisos básicos
             $grupos[] = 'usuarios';
-            // asignar permisos
-            $Usuario->setAuths($this->getUsuario()->getAuths($grupos));
-            $Usuario->setGroups($this->getUsuario()->getGroups($grupos));
         }
+        // buscar permisos y grupos del usuario principal administrador
+        $auths = $this->getUsuario()->getAuths($grupos);
+        $grupos = $this->getUsuario()->getGroups($grupos);
+        // corregir permisos con soporte si corresponde
+        if (in_array('soporte', $grupos_usuario)) {
+            foreach (['appadmin', 'passwd', 'soporte', 'sysadmin'] as $grupo) {
+                if (!in_array($grupo, $grupos)) {
+                    $auths = array_merge($auths, $Usuario->getAuths([$grupo]));
+                    $grupos[] = $grupo;
+                }
+            }
+        }
+        $Usuario->setAuths($auths);
+        $Usuario->setGroups($grupos);
     }
 
     /**
