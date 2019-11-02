@@ -90,8 +90,9 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
 
     private function getContribuyentes($grupo = null)
     {
-        if (is_numeric($grupo))
+        if (is_numeric($grupo)) {
             return [$grupo];
+        }
         $db = \sowerphp\core\Model_Datasource_Database::get();
         if ($grupo) {
             return $db->getCol('
@@ -106,6 +107,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
                     g.grupo = :grupo
                     AND cc.configuracion = \'email\'
                     AND cc.variable = \'intercambio_pass\'
+                    AND cc.valor IS NOT NULL
             ', [':grupo' => $grupo]);
         } else {
             return $db->getCol('
@@ -117,6 +119,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
                     c.usuario IS NOT NULL
                     AND cc.configuracion = \'email\'
                     AND cc.variable = \'intercambio_pass\'
+                    AND cc.valor IS NOT NULL
             ');
         }
     }
