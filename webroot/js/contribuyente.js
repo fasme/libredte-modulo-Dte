@@ -1,7 +1,7 @@
 var email_config = {
     'gmail.com': {
         'smtp': 'ssl://smtp.gmail.com:465',
-        'imap': '{imap.gmail.com:993/imap/ssl}INBOX'
+        'imap': '{imap.gmail.com:993/imap/ssl/novalidate-cert}INBOX'
     }
 };
 
