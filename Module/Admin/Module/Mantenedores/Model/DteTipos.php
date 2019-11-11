@@ -39,8 +39,9 @@ class Model_DteTipos extends \Model_Plural_App
     protected $_table = 'dte_tipo'; ///< Tabla del modelo
 
     private $internos = [
-        'HES' => 'Hoja de entrada de servicios',
-        'EM' => 'Entrada de mercadería',
+        'HEM' => 'Hoja de entrada de materiales (HEM)',
+        'HES' => 'Hoja de entrada de servicios (HES)',
+        'EM' => 'Entrada de mercadería (EM)',
         'RDM' => 'Recepción de material/mercadería (RDM)',
     ]; ///< Tipos de documentos internos de LibreDTE (sin código oficial del SII)
 
