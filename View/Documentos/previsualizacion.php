@@ -1,4 +1,4 @@
-<div class="page-header"><h1>Previsualización DTE</h1></div>
+<div class="page-header"><h1>Previsualización documento temporal (borrador)</h1></div>
 <?php
 foreach (['MntExe', 'MntNeto', 'MntIVA', 'MntTotal'] as $m) {
     if ($resumen[$m]) {

@@ -347,9 +347,13 @@ new \sowerphp\general\View_Helper_Table([$titles, $totales]);
     </div>
     <!-- BOTÓN PARA GENERAR DOCUMENTO -->
     <div class="row">
-        <div class="form-group offset-md-4 col-md-4">
-            <button type="submit" name="submit" class="btn btn-primary" style="width:100%">
-                Generar documento
+        <div class="form-group col-md-12">
+            <button type="submit" name="submit" class="btn btn-primary btn-lg btn-block" style="width:100%">
+<?php if ($Emisor->config_sii_envio_automatico) : ?>
+                Generar documento real (DTE)
+<?php else : ?>
+                Emitir documento temporal (borrador)
+<?php endif; ?>
             </button>
         </div>
     </div>
