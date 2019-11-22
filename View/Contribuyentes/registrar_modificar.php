@@ -767,7 +767,7 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_pdf_logo_posicion',
     'label' => 'Posición logo en PDF',
-    'options' => ['Izquierda', 'Arriba'],
+    'options' => ['Izquierda', 'Arriba', 'Reemplaza datos del emisor'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_logo_posicion : 0,
     'help' => '¿El logo va a la izquierda o arriba de los datos del contribuyente?',
 ]);
