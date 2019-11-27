@@ -206,7 +206,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-28
+     * @version 2019-11-28
      */
     public function __construct($rut = null)
     {
@@ -224,7 +224,7 @@ class Model_Contribuyente extends \Model_App
                 if ($response['status']['code']==200) {
                     $info = $response['body'];
                     if (!empty($info['razon_social'])) {
-                        $this->razon_social = substr($info['razon_social'], 0, 100);
+                        $this->razon_social = mb_substr($info['razon_social'], 0, 100);
                     }
                     if (!empty($info['actividades'][0]['codigo'])) {
                         $ActividadEconomica = new \website\Sistema\General\Model_ActividadEconomica($info['actividades'][0]['codigo']);
@@ -233,7 +233,7 @@ class Model_Contribuyente extends \Model_App
                         }
                     }
                     if (!empty($info['actividades'][0]['glosa'])) {
-                        $this->giro = substr($info['actividades'][0]['glosa'], 0, 80);
+                        $this->giro = mb_substr($info['actividades'][0]['glosa'], 0, 80);
                     }
                     $this->save();
                 }
@@ -358,7 +358,7 @@ class Model_Contribuyente extends \Model_App
      * @param registrado Se usa para indicar que el contribuyente que se esta guardando es uno registrado por un usuario (se validan otros datos)
      * @param no_modificar =true Evita que se modifiquen ciertos contribuyentes reservados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-21
+     * @version 2019-11-27
      */
     public function save($registrado = false, $no_modificar = true)
     {
@@ -393,15 +393,16 @@ class Model_Contribuyente extends \Model_App
         }
         // corregir datos
         $this->dv = strtoupper($this->dv);
-        $this->razon_social = substr($this->razon_social, 0, 100);
-        $this->giro = substr($this->giro, 0, 80);
-        $this->telefono = substr($this->telefono, 0, 20);
-        $this->email = substr($this->email, 0, 80);
-        $this->direccion = substr($this->direccion, 0, 70);
+        $this->razon_social = mb_substr($this->razon_social, 0, 100);
+        $this->giro = mb_substr($this->giro, 0, 80);
+        $this->telefono = mb_substr($this->telefono, 0, 20);
+        $this->email = mb_substr($this->email, 0, 80);
+        $this->direccion = mb_substr($this->direccion, 0, 70);
         $this->modificado = date('Y-m-d H:i:s');
         // guardar contribuyente
-        if (!parent::save())
+        if (!parent::save()) {
             return false;
+        }
         // guardar configuración
         if ($this->config) {
             foreach ($this->config as $configuracion => $datos) {
