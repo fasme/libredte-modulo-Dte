@@ -378,7 +378,7 @@ class Model_DteIntercambios extends \Model_Plural_App
      * Método que busca el o los intercambios asociados a un DTE
      * @warning Esta función es muy costosa, ya que debe buscar en los XML y además abrir luego cada intercambio para confirmar que el DTE que se encontró es correcto
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2019-11-29
      */
     public function buscarIntercambiosDte($emisor, $dte, $folio)
     {
@@ -410,6 +410,7 @@ class Model_DteIntercambios extends \Model_Plural_App
         $intercambios_reales = [];
         foreach ($intercambios as $DteIntercambio) {
             if ($DteIntercambio->getDocumento($emisor, $dte, $folio)) {
+                $DteIntercambio->certificacion = (int)$DteIntercambio->certificacion;
                 $intercambios_reales[] = $DteIntercambio;
             }
         }
