@@ -61,6 +61,7 @@ class Model_DteEmitido extends Model_Base_Envio
     public $cesion_xml; ///< text() NOT NULL DEFAULT ''
     public $cesion_track_id; ///< integer(32) NULL DEFAULT ''
     public $receptor_evento; ///< char(1) NULL DEFAULT ''
+    public $fecha_hora_creacion; ///< timestamp without time zone() NOT NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -306,6 +307,17 @@ class Model_DteEmitido extends Model_Base_Envio
             'pk'        => false,
             'fk'        => null
         ),
+        'fecha_hora_creacion' => array(
+            'name'      => 'Fecha Hora Creación',
+            'comment'   => '',
+            'type'      => 'timestamp without time zone',
+            'length'    => null,
+            'null'      => false,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
 
     );
 
@@ -362,6 +374,19 @@ class Model_DteEmitido extends Model_Base_Envio
         \sowerphp\core\Trigger::run('dte_dte_emitido_guardar', $this);
         // guardar DTE emitido
         return parent::save();
+    }
+
+    /**
+     * Método que inserta un registro nuevo en la base de datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-12-01
+     */
+    public function insert()
+    {
+        if (!$this->fecha_hora_creacion) {
+            $this->fecha_hora_creacion = date('Y-m-d H:i:s');
+        }
+        parent::insert();
     }
 
     /**

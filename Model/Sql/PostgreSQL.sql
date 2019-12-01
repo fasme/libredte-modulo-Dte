@@ -262,6 +262,7 @@ CREATE TABLE dte_emitido (
 	cesion_xml TEXT,
 	cesion_track_id BIGINT,
 	receptor_evento CHAR(1),
+	fecha_hora_creacion TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	CONSTRAINT dte_emitido_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_emitido_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL
@@ -410,6 +411,7 @@ CREATE TABLE dte_recibido (
 	sucursal_sii_receptor INTEGER,
 	rcv_accion CHAR(3),
 	tipo_transaccion SMALLINT,
+	fecha_hora_creacion TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	CONSTRAINT dte_recibido_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_recibido_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL

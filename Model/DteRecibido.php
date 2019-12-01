@@ -72,6 +72,7 @@ class Model_DteRecibido extends \Model_App
     public $sucursal_sii_receptor; ///< integer(32) NULL DEFAULT ''
     public $rcv_accion; ///< character(3) NULL DEFAULT ''
     public $tipo_transaccion; ///< smallint(16) NULL DEFAULT ''
+    public $fecha_hora_creacion; ///< timestamp without time zone() NOT NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -438,6 +439,17 @@ class Model_DteRecibido extends \Model_App
             'pk'        => false,
             'fk'        => null
         ),
+        'fecha_hora_creacion' => array(
+            'name'      => 'Fecha Hora Creación',
+            'comment'   => '',
+            'type'      => 'timestamp without time zone',
+            'length'    => null,
+            'null'      => false,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
 
     );
 
@@ -520,6 +532,19 @@ class Model_DteRecibido extends \Model_App
         }
         // entregar estado
         return $status;
+    }
+
+    /**
+     * Método que inserta un registro nuevo en la base de datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-12-01
+     */
+    public function insert()
+    {
+        if (!$this->fecha_hora_creacion) {
+            $this->fecha_hora_creacion = date('Y-m-d H:i:s');
+        }
+        parent::insert();
     }
 
     /**
