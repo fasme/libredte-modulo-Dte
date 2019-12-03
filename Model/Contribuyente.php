@@ -195,6 +195,7 @@ class Model_Contribuyente extends \Model_App
     ]; ///< valores por defecto para columnas de la configuración en caso que no estén especificadas
 
     private static $reservados = [
+        0,
         55555555,
         66666666,
         88888888,
