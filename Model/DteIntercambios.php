@@ -55,7 +55,7 @@ class Model_DteIntercambios extends \Model_Plural_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-12
+     * @version 2019-12-09
      */
     public function buscar(array $filter = [])
     {
@@ -67,8 +67,21 @@ class Model_DteIntercambios extends \Model_Plural_App
         $totales = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/Totales/MntTotal', 'http://www.sii.cl/SiiDte');
         $where = [];
         $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
-        if ($filter['soloPendientes']) {
-            $where[] = 'i.estado IS NULL';
+        if (!empty($filter['recibido_desde'])) {
+            $where[] = 'i.fecha_hora_email >= :recibido_desde';
+            $vars[':recibido_desde'] = $filter['recibido_desde'];
+        }
+        if (!empty($filter['recibido_hasta'])) {
+            $where[] = 'i.fecha_hora_email <= :recibido_hasta';
+            $vars[':recibido_hasta'] = $filter['recibido_hasta'].' 23:59:59';
+        }
+        if (!empty($filter['asunto'])) {
+            $where[] = 'LOWER(i.asunto) LIKE :asunto';
+            $vars[':asunto'] = '%'.strtolower($filter['asunto']).'%';
+        }
+        if (!empty($filter['de'])) {
+            $where[] = 'LOWER(i.de) LIKE :de';
+            $vars[':de'] = '%'.strtolower($filter['de']).'%';
         }
         if (!empty($filter['emisor'])) {
             if (strpos($filter['emisor'], '-') or is_numeric($filter['emisor'])) {
@@ -82,18 +95,22 @@ class Model_DteIntercambios extends \Model_Plural_App
                 $vars['emisor'] = '%'.strtolower($filter['emisor']).'%';
             }
         }
-        if (!empty($filter['folio'])) {
-            $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
-            $where[] = $folio_where.' LIKE :folio';
-            $vars['folio'] = $filter['folio'];
+        if (!empty($filter['firma_desde'])) {
+            $where[] = 'i.fecha_hora_firma >= :firma_desde';
+            $vars[':firma_desde'] = $filter['firma_desde'];
         }
-        if (!empty($filter['recibido_desde'])) {
-            $where[] = 'fecha_hora_email >= :recibido_desde';
-            $vars[':recibido_desde'] = $filter['recibido_desde'];
+        if (!empty($filter['firma_hasta'])) {
+            $where[] = 'i.fecha_hora_firma <= :firma_hasta';
+            $vars[':firma_hasta'] = $filter['firma_hasta'].' 23:59:59';
         }
-        if (!empty($filter['recibido_hasta'])) {
-            $where[] = 'fecha_hora_email <= :recibido_hasta';
-            $vars[':recibido_hasta'] = $filter['recibido_hasta'].' 23:59:59';
+        if (isset($filter['estado'])) {
+            if ($filter['estado'] == 1) {
+                $where[] = 'i.estado IS NULL'; // sólo pendientes
+            } else if ($filter['estado'] == 2) {
+                $where[] = 'i.estado IS NOT NULL'; // sólo procesados
+            }
+        } else if ($filter['soloPendientes']) {
+            $where[] = 'i.estado IS NULL';
         }
         if (!empty($filter['usuario'])) {
             if ($filter['usuario']=='!null') {
@@ -101,6 +118,49 @@ class Model_DteIntercambios extends \Model_Plural_App
             } else {
                 $where[] = 'u.usuario = :usuario';
                 $vars[':usuario'] = $filter['usuario'];
+            }
+        }
+        // si se debe hacer búsqueda dentro de los XML
+        if (!empty($filter['dte'])) {
+            $dte_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE', 'http://www.sii.cl/SiiDte');
+            $where[] = $dte_where.' LIKE :dte';
+            $vars['dte'] = (int)$filter['dte'];
+        }
+        if (!empty($filter['folio'])) {
+            $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
+            $where[] = $folio_where.' LIKE :folio';
+            $vars['folio'] = (int)$filter['folio'];
+        }
+        if (!empty($filter['item'])) {
+            $item_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Detalle/NmbItem', 'http://www.sii.cl/SiiDte');
+            $where[] = 'LOWER('.$item_where.') LIKE :item';
+            $vars[':item'] = '%'.strtolower($filter['item']).'%';
+        }
+        if (!empty($filter['fecha_emision_desde'])) {
+            $fecha_emision_desde = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/FchEmis', 'http://www.sii.cl/SiiDte');
+            $where[] = $fecha_emision_desde.' >= :fecha_emision_desde';
+            $vars[':fecha_emision_desde'] = $filter['fecha_emision_desde'];
+        }
+        if (!empty($filter['fecha_emision_hasta'])) {
+            $fecha_emision_hasta = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/FchEmis', 'http://www.sii.cl/SiiDte');
+            $where[] = $fecha_emision_hasta.' <= :fecha_emision_hasta';
+            $vars[':fecha_emision_hasta'] = $filter['fecha_emision_hasta'];
+        }
+        if (!empty($filter['total_desde'])) {
+            $where[] = $totales.'::INTEGER >= :total_desde';
+            $vars[':total_desde'] = (int)$filter['total_desde'];
+        }
+        if (!empty($filter['total_hasta'])) {
+            $where[] = $totales.'::INTEGER <= :total_hasta';
+            $vars[':total_hasta'] = (int)$filter['total_hasta'];
+        }
+        if (!empty($filter['xml'])) {
+            $i = 1;
+            foreach ($filter['xml'] as $nodo => $valor) {
+                $nodo = preg_replace('/[^A-Za-z\/]/', '', $nodo);
+                $where[] = 'LOWER('.$this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/'.$nodo, 'http://www.sii.cl/SiiDte').') LIKE :xml'.$i;
+                $vars[':xml'.$i] = '%'.strtolower($valor).'%';
+                $i++;
             }
         }
         if ($filter['p']) {

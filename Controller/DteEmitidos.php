@@ -1044,36 +1044,37 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción que permite realizar una búsqueda avanzada dentro de los DTE
      * emitidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-04-05
+     * @version 2019-12-09
      */
     public function buscar()
     {
         $Emisor = $this->getContribuyente();
         $this->set([
             'tipos_dte' => $Emisor->getDocumentosAutorizados(),
+            'values_xml' => [],
         ]);
         if (isset($_POST['submit'])) {
-            $xml = [];
+            $_POST['xml'] = [];
+            $values_xml = [];
             if (!empty($_POST['xml_nodo'])) {
                 $n_xml = count($_POST['xml_nodo']);
                 for ($i=0; $i<$n_xml; $i++) {
                     if (!empty($_POST['xml_nodo'][$i]) and !empty($_POST['xml_valor'][$i])) {
-                        $xml[$_POST['xml_nodo'][$i]] = $_POST['xml_valor'][$i];
+                        $_POST['xml'][$_POST['xml_nodo'][$i]] = $_POST['xml_valor'][$i];
+                        $values_xml[] = [
+                            'xml_nodo' => $_POST['xml_nodo'][$i],
+                            'xml_valor' => $_POST['xml_valor'][$i],
+                        ];
                     }
+                    unset($_POST['xml_nodo'][$i], $_POST['xml_valor'][$i]);
                 }
             }
+            $this->set([
+                'values_xml' => $values_xml,
+            ]);
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->Auth->User->hash);
-            $response = $rest->post($this->request->url.'/api/dte/dte_emitidos/buscar/'.$Emisor->rut, [
-                'dte' => $_POST['dte'],
-                'receptor' => $_POST['receptor'],
-                'razon_social' => $_POST['razon_social'],
-                'fecha_desde' => $_POST['fecha_desde'],
-                'fecha_hasta' => $_POST['fecha_hasta'],
-                'total_desde' => $_POST['total_desde'],
-                'total_hasta' => $_POST['total_hasta'],
-                'xml' => $xml,
-            ]);
+            $response = $rest->post($this->request->url.'/api/dte/dte_emitidos/buscar/'.$Emisor->rut, $_POST);
             if ($response===false) {
                 \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             }
@@ -1635,7 +1636,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción de la API que permite realizar una búsqueda avanzada dentro de los
      * DTEs emitidos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2019-12-09
      */
     public function _api_buscar_POST($emisor)
     {
@@ -1650,13 +1651,18 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // verificar permisos del usuario autenticado sobre el emisor del DTE
         $Emisor = new Model_Contribuyente($emisor);
-        if (!$Emisor->exists())
+        if (!$Emisor->exists()) {
             $this->Api->send('Emisor no existe', 404);
+        }
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/buscar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // buscar documentos
-        $this->Api->send($Emisor->getDocumentosEmitidos($this->Api->data, true), 200, JSON_PRETTY_PRINT);
+        $documentos = $Emisor->getDocumentosEmitidos($this->Api->data, true);
+        if (!$documentos) {
+            $this->Api->send('No se encontraron documentos emitidos que coincidan con la búsqueda', 404);
+        }
+        $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
     }
 
     /**

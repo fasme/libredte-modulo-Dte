@@ -32,7 +32,7 @@ echo $f->input([
         ['name'=>'xml_nodo', 'check'=>'notempty'],
         ['name'=>'xml_valor', 'check'=>'notempty'],
     ],
-    'values' => [],
+    'values' => $values_xml,
 ]);
 ?>
 <p>Los nodos deben ser los del XML desde el tag Documento del DTE. Por ejemplo para buscar en los productos usar: Detalle/NmbItem</p>
@@ -44,10 +44,12 @@ if (isset($documentos)) {
     // procesar documentos
     $total = 0;
     foreach ($documentos as &$d) {
-        $filename = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.pdf';
+        $filename_pdf = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.pdf';
+        $filename_xml = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.xml';
         $total += $d['total'];
         $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary" download="'.$filename.'" data-click="pdf"><i class="far fa-file-pdf fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/xml/'.$d['dte'].'/'.$d['folio'].'" title="Descargar XML del documento" class="btn btn-primary" download="'.$filename_xml.'" data-click="xml"><i class="far fa-file-code fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary" download="'.$filename_pdf.'" data-click="pdf"><i class="far fa-file-pdf fa-fw"></i></a>';
         $d[] = $acciones;
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d['total'] = num($d['total']);
@@ -58,7 +60,7 @@ if (isset($documentos)) {
     // agregar tabla
     array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Sucursal', 'Usuario', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
-    $t->setColsWidth([null, null, null, null, null, null, null, null, 110]);
+    $t->setColsWidth([null, null, null, null, null, null, null, null, 160]);
     $t->setId('dte_emitidos_'.$Emisor->rut);
     $t->setExport(true);
     echo $t->generate($documentos);

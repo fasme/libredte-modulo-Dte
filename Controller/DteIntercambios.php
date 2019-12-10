@@ -211,41 +211,6 @@ class Controller_DteIntercambios extends \Controller_App
     }
 
     /**
-     * Acción de la API que permite buscar dentro de la bandeja de intercambio
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-07
-     */
-    public function _api_buscar_GET($receptor)
-    {
-        // crear receptor y verificar autorización
-        $User = $this->Api->getAuthUser();
-        if (is_string($User)) {
-            $this->Api->send($User, 401);
-        }
-        $Receptor = new Model_Contribuyente($receptor);
-        if (!$Receptor->exists()) {
-            $this->Api->send('Receptor no existe', 404);
-        }
-        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_intercambios/listar')) {
-            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
-        }
-        // buscar documentos
-        $filtros = $this->getQuery([
-            'soloPendientes' => true,
-            'emisor' => null,
-            'folio' => null,
-            'recibido_desde' => date('Y-m-01'),
-            'recibido_hasta' => date('Y-m-d'),
-            'usuario' => null,
-        ]);
-        $documentos = (new Model_DteIntercambios())->setContribuyente($Receptor)->buscar($filtros);
-        if (!$documentos) {
-            $this->Api->send('No se encontraron documentos de intercambio', 404);
-        }
-        $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
-    }
-
-    /**
      * Recurso para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-08-27
@@ -532,6 +497,121 @@ class Controller_DteIntercambios extends \Controller_App
         }
         // redireccionar
         $this->redirect(str_replace('responder', 'ver', $this->request->request));
+    }
+
+    /**
+     * Acción que permite realizar una búsqueda avanzada dentro de los
+     * documentos de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-12-09
+     */
+    public function buscar()
+    {
+        $Receptor = $this->getContribuyente();
+        $usuarios = array_keys($Receptor->getUsuarios());
+        $this->set([
+            'Receptor' => $Receptor,
+            'tipos_dte' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(),
+            'usuarios' => array_combine($usuarios, $usuarios),
+            'values_xml' => [],
+        ]);
+        if (isset($_POST['submit'])) {
+            $_POST['xml'] = [];
+            $values_xml = [];
+            if (!empty($_POST['xml_nodo'])) {
+                $n_xml = count($_POST['xml_nodo']);
+                for ($i=0; $i<$n_xml; $i++) {
+                    if (!empty($_POST['xml_nodo'][$i]) and !empty($_POST['xml_valor'][$i])) {
+                        $_POST['xml'][$_POST['xml_nodo'][$i]] = $_POST['xml_valor'][$i];
+                        $values_xml[] = [
+                            'xml_nodo' => $_POST['xml_nodo'][$i],
+                            'xml_valor' => $_POST['xml_valor'][$i],
+                        ];
+                    }
+                    unset($_POST['xml_nodo'][$i], $_POST['xml_valor'][$i]);
+                }
+            }
+            $this->set([
+                'values_xml' => $values_xml,
+            ]);
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->Auth->User->hash);
+            $response = $rest->post($this->request->url.'/api/dte/dte_intercambios/buscar/'.$Receptor->rut, $_POST);
+            if ($response===false) {
+                \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+            }
+            else if ($response['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+            }
+            else {
+                $this->set([
+                    'intercambios' => $response['body'],
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Acción de la API que permite realizar una búsqueda avanzada dentro de los
+     * documentos de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-12-09
+     */
+    public function _api_buscar_POST($receptor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // verificar permisos del usuario autenticado sobre el emisor del DTE
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists())
+            $this->Api->send('Emisor no existe', 404);
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_intercambios/buscar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // buscar documentos
+        $intercambios = (new Model_DteIntercambios())->setContribuyente($Receptor)->buscar($this->Api->data);
+        if (!$intercambios) {
+            $this->Api->send('No se encontraron documentos de intercambio que coincidan con la búsqueda', 404);
+        }
+        $this->Api->send($intercambios, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Acción de la API que permite buscar dentro de la bandeja de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2019-03-07
+     */
+    public function _api_buscar_GET($receptor)
+    {
+        // crear receptor y verificar autorización
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_intercambios/listar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // buscar documentos
+        $filtros = $this->getQuery([
+            'soloPendientes' => true,
+            'emisor' => null,
+            'folio' => null,
+            'recibido_desde' => date('Y-m-01'),
+            'recibido_hasta' => date('Y-m-d'),
+            'usuario' => null,
+        ]);
+        $intercambios = (new Model_DteIntercambios())->setContribuyente($Receptor)->buscar($filtros);
+        if (!$intercambios) {
+            $this->Api->send('No se encontraron documentos de intercambio', 404);
+        }
+        $this->Api->send($intercambios, 200, JSON_PRETTY_PRINT);
     }
 
 }

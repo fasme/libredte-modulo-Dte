@@ -26,6 +26,12 @@
             Descargar
         </a>
     </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_intercambios/buscar" title="Búsqueda avanzada de los documentos de intercambio" class="nav-link">
+            <i class="fa fa-search"></i>
+            Buscar
+        </a>
+    </li>
     <li class="nav-item" class="dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-sync"></i> Actualizar
@@ -41,7 +47,7 @@
 </ul>
 
 <div class="page-header"><h1>Bandeja de intercambio</h1></div>
-<p>Aquí podrá revisar, aceptar o rechazar aquellos documentos que otros contribuyentes han envíado a <?=$Emisor->razon_social?> de manera electrónica.</p>
+<p>Aquí podrá revisar los documentos que ha recibido en su correo de intercambio, tanto los procesados como los pendientes. Para estos últimos podrá aceptar o reclamar según corresponda.</p>
 
 <?php
 foreach ($intercambios as &$i) {
