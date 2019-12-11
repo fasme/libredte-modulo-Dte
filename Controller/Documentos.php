@@ -822,7 +822,7 @@ class Controller_Documentos extends \Controller_App
      * Función de la API que permite emitir un DTE a partir de un documento
      * temporal, asignando folio, firmando y enviando al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-04
+     * @version 2019-12-10
      */
     public function _api_generar_POST()
     {
@@ -830,6 +830,8 @@ class Controller_Documentos extends \Controller_App
             'getXML' => false,
             'email' => false,
             'links' => false,
+            'retry' => null,
+            'gzip' => null,
         ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
@@ -869,7 +871,7 @@ class Controller_Documentos extends \Controller_App
         }
         // generar DTE real
         try {
-            $DteEmitido = $DteTmp->generar($User->id);
+            $DteEmitido = $DteTmp->generar($User->id, null, $retry, $gzip);
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), $e->getCode());
         }

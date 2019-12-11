@@ -26,17 +26,17 @@ namespace website\Dte;
 /**
  * Comando para actualizar los documentos emitidos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-10-04
+ * @version 2019-12-10
  */
 class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
 {
 
-    public function main($grupo = null, $certificacion = 0, $meses = 2)
+    public function main($grupo = null, $certificacion = 0, $meses = 2, $retry = 3)
     {
         $this->db = \sowerphp\core\Model_Datasource_Database::get();
         $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
         foreach ($contribuyentes as $rut) {
-            $this->actualizarDocumentosEmitidos($rut, $certificacion);
+            $this->actualizarDocumentosEmitidos($rut, $certificacion, $retry);
         }
         try {
             $this->actualizarEventosReceptor($meses, $grupo, $certificacion);
@@ -49,7 +49,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         return 0;
     }
 
-    private function actualizarDocumentosEmitidos($rut, $certificacion)
+    private function actualizarDocumentosEmitidos($rut, $certificacion, $retry = null)
     {
         $Contribuyente = (new Model_Contribuyentes())->get($rut);
         if ($this->verbose) {
@@ -98,7 +98,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             }
             $DteEmitido = new Model_DteEmitido($Contribuyente->rut, $d['dte'], $d['folio'], (int)$Contribuyente->config_ambiente_en_certificacion);
             try {
-                $DteEmitido->enviar();
+                $DteEmitido->enviar(null, $retry);
                 if ($this->verbose) {
                     $this->out($DteEmitido->track_id);
                 }

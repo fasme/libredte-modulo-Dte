@@ -162,14 +162,14 @@ class Controller_DteEmitidos extends \Controller_App
      * @param dte Tipo de DTE
      * @param folio Folio del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-05
+     * @version 2019-12-10
      */
-    public function enviar_sii($dte, $folio)
+    public function enviar_sii($dte, $folio, $retry = 1)
     {
         $Emisor = $this->getContribuyente();
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
-        $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/enviar_sii/'.$dte.'/'.$folio.'/'.$Emisor->rut);
+        $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/enviar_sii/'.$dte.'/'.$folio.'/'.$Emisor->rut.'/'.$retry);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
         }
@@ -1369,24 +1369,20 @@ class Controller_DteEmitidos extends \Controller_App
      * @param dte Tipo de DTE
      * @param folio Folio del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-05
+     * @version 2019-12-10
      */
-    public function _api_enviar_sii_GET($dte, $folio, $emisor)
+    public function _api_enviar_sii_GET($dte, $folio, $emisor, $retry = 1)
     {
         // verificar permisos y crear DteEmitido
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
             $this->Api->send('Emisor no existe', 404);
         }
-        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/enviar_sii')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
@@ -1399,7 +1395,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // enviar DTE (si no se puede enviar se generará excepción)
         try {
-            $DteEmitido->enviar($User->id);
+            $DteEmitido->enviar($User->id, $retry);
             return $DteEmitido;
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), 500);

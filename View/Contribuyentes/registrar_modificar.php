@@ -962,6 +962,22 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_sii_estado_dte_webservice : 0,
     'help' => 'Permite definir cómo se consultará el estado de los DTE emitidos por defecto en la aplicación web',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_sii_envio_intentos',
+    'label' => 'Intentos envío DTE',
+    'options' => [0,1,2,3,4,5,6,7,8,9,10],
+    'value' => isset($Contribuyente) ? ($Contribuyente->config_sii_envio_intentos!==null?$Contribuyente->config_sii_envio_intentos:10) : 10,
+    'help' => '¿Cuántos intentos de envío del XML del DTE se deberán hacer al generar el documento?',
+]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_sii_envio_gzip',
+    'label' => '¿Enviar comprimido?',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_sii_envio_gzip : 0,
+    'help' => '¿Se debe enviar el XML del DTE comprimido al SII?',
+]);
 ?>
         </div>
     </div>

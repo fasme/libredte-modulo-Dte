@@ -281,9 +281,9 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-11
+     * @version 2019-12-10
      */
-    public function generar($user_id = null, $fecha_emision = null)
+    public function generar($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
     {
         $Emisor = $this->getEmisor();
         if (!$user_id) {
@@ -441,7 +441,7 @@ class Model_DteTmp extends \Model_App
         }
         // enviar al SII
         try {
-            $DteEmitido->enviar($user_id);
+            $DteEmitido->enviar($user_id, $retry, $gzip);
         } catch (\Exception $e) {
         }
         // ejecutar trigger asociado a la generación del DTE real

@@ -745,14 +745,27 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que envía el DTE emitido al SII, básicamente lo saca del sobre y
      * lo pone en uno nuevo con el RUT del SII
      * @param user ID del usuari oque hace el envío
+     * @param retry Número de intentos que se usarán para enviar el DTE al SII (=null, valor por defecto LibreDTE, =0 no se enviará, >0 cantidad de intentos)
+     * @param gzip Indica si se debe enviar comprimido el XML del DTE al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-08-05
+     * @version 2019-12-10
      */
-    public function enviar($user = null)
+    public function enviar($user = null, $retry = null, $gzip = null)
     {
         $Emisor = $this->getEmisor();
         // boletas no se envían
         if (in_array($this->dte, [39, 41])) {
+            return false; // no hay excepción para hacerlo "silenciosamente"
+        }
+        // determinar retry y gzip
+        if ($retry === null) {
+            $retry = $Emisor->config_sii_envio_intentos;
+        }
+        if ($gzip === null) {
+            $gzip = (bool)(int)$Emisor->config_sii_envio_gzip;
+        }
+        // si hay que hacer 0 intentos de envio no se envía
+        if ($retry !== null and ($retry===0 or $retry==='0')) {
             return false; // no hay excepción para hacerlo "silenciosamente"
         }
         // si hay track_id y el DTE no está rechazado entonces no se permite
@@ -797,7 +810,7 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
         }
         // enviar XML
-        $result = \sasco\LibreDTE\Sii::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token);
+        $result = \sasco\LibreDTE\Sii::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
         if ($result===false or $result->STATUS!='0') {
             throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
         }
