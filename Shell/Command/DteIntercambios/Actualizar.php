@@ -49,13 +49,16 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
     private function actualizarIntercambio($rut, $dias)
     {
         $Contribuyente = (new Model_Contribuyentes())->get($rut);
-        if (!$Contribuyente->exists() or !$Contribuyente->getEmailImap()) {
+        if (!$Contribuyente->exists()) {
             return false;
         }
-        if ($this->verbose) {
-            $this->out('Actualizando bandeja '.$Contribuyente->config_email_intercambio_user.' del contribuyente '.$Contribuyente->razon_social);
-        }
         try {
+            if (!$Contribuyente->getEmailImap()) {
+                return false;
+            }
+            if ($this->verbose) {
+                $this->out('Actualizando bandeja '.$Contribuyente->config_email_intercambio_user.' del contribuyente '.$Contribuyente->razon_social);
+            }
             $resultado = $Contribuyente->actualizarBandejaIntercambio($dias);
             if ($resultado['n_EnvioDTE']) {
                 $msg = $Contribuyente->razon_social.','."\n\n";
@@ -108,6 +111,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
                     AND cc.configuracion = \'email\'
                     AND cc.variable = \'intercambio_pass\'
                     AND cc.valor IS NOT NULL
+                ORDER BY c.razon_social
             ', [':grupo' => $grupo]);
         } else {
             return $db->getCol('
@@ -120,6 +124,7 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
                     AND cc.configuracion = \'email\'
                     AND cc.variable = \'intercambio_pass\'
                     AND cc.valor IS NOT NULL
+                ORDER BY c.razon_social
             ');
         }
     }
