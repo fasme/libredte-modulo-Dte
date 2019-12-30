@@ -31,6 +31,12 @@ namespace website\Dte;
 class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
 {
 
+    private $monedas = [
+        'USD' => 'DOLAR USA',
+        'EUR' => 'EURO',
+        'CLP' => 'PESO CL',
+    ]; // Tipo moneda para documentos de exportación
+
     private $time_start;
 
     public function main($emisor, $archivo, $usuario, $dte_real = false, $email = false, $pdf = false)
@@ -350,6 +356,15 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 throw new \Exception('Fecha período hasta '.$datos[21].' es incorrecta, debe ser formato AAAA-MM-DD');
             }
             $documento['Encabezado']['IdDoc']['PeriodoHasta'] = $datos[21];
+        }
+        if (in_array($documento['Encabezado']['IdDoc']['TipoDTE'], [110,111,112])) {
+            if (empty($datos[33])) {
+                $datos[33] = 'USD';
+            }
+            if (empty($this->monedas[$datos[33]])) {
+                throw new \Exception('El tipo de moneda '.$datos[33].' no está permitido, sólo: USD, EUR y CLP');
+            }
+            $documento['Encabezado']['Totales']['TpoMoneda'] = $this->monedas[$datos[33]];
         }
         $this->agregarItem($documento, array_slice($datos, 11, 8));
         $this->agregarTransporte($documento, array_slice($datos, 22, 6));
