@@ -57,7 +57,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
         foreach ($periodos as $periodo) {
             $boletas = $this->getBoletas($periodo);
             foreach ($boletas as $boleta) {
-                list($receptor_rut, $receptor_dv) = explode('-', explode('-', $boleta['receptor_rut']));
+                list($receptor_rut, $receptor_dv) = explode('-', $boleta['receptor_rut']);
                 $Receptor = new Model_Contribuyente($receptor_rut);
                 if (!$Receptor->razon_social) {
                     $Receptor->rut = $receptor_rut;
