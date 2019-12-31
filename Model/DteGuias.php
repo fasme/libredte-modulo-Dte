@@ -153,12 +153,13 @@ class Model_DteGuias extends \Model_Plural_App
      * Método que realiza la facturación masiva de las guías de despacho
      * Creará una factura para cada RUT que se esté facturando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-26
+     * @version 2019-12-31
      */
-    public function facturar(array $folios, $fecha = null)
+    public function facturar(array $folios, array $datos = [])
     {
-        if (!$fecha)
-            $fecha = date('Y-m-d');
+        if (!empty($datos['fecha'])) {
+            $datos['fecha'] = date('Y-m-d');
+        }
         // armar arreglo con las guías por cada receptor
         sort($folios);
         $facturacion = [];
@@ -169,7 +170,7 @@ class Model_DteGuias extends \Model_Plural_App
         // crear el documento temporal de cada receptor
         $temporales = [];
         foreach ($facturacion as $receptor => &$guias) {
-            $DteTmp = $this->crearDteTmp($guias, $fecha);
+            $DteTmp = $this->crearDteTmp($guias, $datos);
             $temporales[] = $DteTmp;
         }
         return $temporales;
@@ -181,7 +182,7 @@ class Model_DteGuias extends \Model_Plural_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2016-12-26
      */
-    private function crearDteTmp($guias, $fecha)
+    private function crearDteTmp($guias, array $datos = [])
     {
         $guias_max = 10;
         // crear detalle y referencia usando indicador global
@@ -201,7 +202,7 @@ class Model_DteGuias extends \Model_Plural_App
                 'TpoDocRef' => 52,
                 'IndGlobal' => 1,
                 'FolioRef' => 0,
-                'FchRef' => $fecha,
+                'FchRef' => $datos['fecha'],
                 'RazonRef' => 'Se facturan '.count($guias).' guías',
             ];
         }
@@ -222,12 +223,21 @@ class Model_DteGuias extends \Model_Plural_App
                 ];
             }
         }
+        // agregar orden de compra
+        if (!empty($datos['orden_compra'])) {
+            $Referencia[] = [
+                'TpoDocRef' => 801,
+                'FolioRef' => $datos['orden_compra'],
+                'FchRef' => $datos['fecha'],
+                'RazonRef' => 'OC',
+            ];
+        }
         // preparar datos del DTE
         $dte = [
             'Encabezado' => [
                 'IdDoc' => [
                     'TipoDTE' => 33,
-                    'FchEmis' => $fecha,
+                    'FchEmis' => $datos['fecha'],
                 ],
                 'Emisor' => [
                     'RUTEmisor' => $this->getContribuyente()->rut.'-'.$this->getContribuyente()->dv,
@@ -245,6 +255,14 @@ class Model_DteGuias extends \Model_Plural_App
             'Detalle' => $Detalle,
             'Referencia' => $Referencia,
         ];
+        // agregar descuento global
+        if (!empty($datos['descuento_global'])) {
+            $dte['DscRcgGlobal'] = [
+                'TpoMov' => 'D',
+                'TpoValor' => '$',
+                'ValorDR' => $datos['descuento_global'],
+            ];
+        }
         // consumir servicio web para crear documento temporal
         $Request = new \sowerphp\core\Network_Request();
         $rest = new \sowerphp\core\Network_Http_Rest();

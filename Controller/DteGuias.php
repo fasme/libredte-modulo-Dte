@@ -124,7 +124,7 @@ class Controller_DteGuias extends Controller_Base_Libros
     /**
      * Método que permite buscar las guías que se desean facturar masivamente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-02-03
+     * @version 2019-12-31
      */
     public function facturar()
     {
@@ -140,7 +140,11 @@ class Controller_DteGuias extends Controller_Base_Libros
         else if (!empty($_POST['guias'])) {
             try {
                 $this->set([
-                    'temporales' => (new Model_DteGuias())->setContribuyente($Emisor)->facturar($_POST['guias'], $_POST['fecha'])
+                    'temporales' => (new Model_DteGuias())->setContribuyente($Emisor)->facturar($_POST['guias'], [
+                        'fecha' => !empty($_POST['fecha']) ? $_POST['fecha'] : null,
+                        'orden_compra' => !empty($_POST['orden_compra']) ? $_POST['orden_compra'] : null,
+                        'descuento_global' => !empty($_POST['descuento_global']) ? $_POST['descuento_global'] : null,
+                    ])
                 ]);
             } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message(

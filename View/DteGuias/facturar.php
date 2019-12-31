@@ -28,12 +28,14 @@ echo $f->input([
     'name' => 'receptor',
     'label' => 'Receptor',
     'check' => 'rut',
+    'help' => 'Si se busca por un RUT en específico se podrá ingresar además: orden de compra y/o descuento global',
 ]);
 echo $f->input([
     'type' => 'select',
     'name' => 'con_referencia',
     'label' => '¿Con referencia?',
     'options' => ['Sólo guías sin referencia (sin facturar)', 'Incluir guías que tengan una referencia (podrían estar facturadas)'],
+    'help' => 'Por defecto sólo se buscan guías que no tengan una referencia asociada (se asumen sin facturar)',
 ]);
 echo $f->end('Buscar guías a facturar');
 // mostrar guías
@@ -62,6 +64,20 @@ if (isset($guias)) {
         'check' => 'notempty date',
         'help' => 'Fecha de emisión de la factura',
     ]);
+if (!empty($_POST['receptor'])) {
+    echo $f->input([
+        'name' => 'orden_compra',
+        'label' => 'Orden de compra',
+        'attr' => 'maxlength="18"',
+        'help' => 'Número de orden de compra asociado a todas las guías que se están facturando',
+    ]);
+    echo $f->input([
+        'name' => 'descuento_global',
+        'label' => 'Descuento global',
+        'check' => 'integer',
+        'help' => 'Descuento global neto (sin IVA) que se debe aplicar a la factura de las guías',
+    ]);
+}
     echo $f->end('Facturar guías seleccionadas');
 }
 // mostrar resultado de temporales creados
