@@ -42,7 +42,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
      * Método que sincroniza las boletas de terceros recibidas por la empresa
      * en el SII con el registro local de boletas en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-23
+     * @version 2019-12-31
      */
     public function sincronizar($meses)
     {
@@ -57,9 +57,12 @@ class Model_BoletaTerceros extends \Model_Plural_App
         foreach ($periodos as $periodo) {
             $boletas = $this->getBoletas($periodo);
             foreach ($boletas as $boleta) {
-                $Receptor = new Model_Contribuyente(explode('-', $boleta['receptor_rut'])[0]);
+                list($receptor_rut, $receptor_dv) = explode('-', explode('-', $boleta['receptor_rut']));
+                $Receptor = new Model_Contribuyente($receptor_rut);
                 if (!$Receptor->razon_social) {
-                    $Receptor->razon_social = $boleta['receptor_nombre'];
+                    $Receptor->rut = $receptor_rut;
+                    $Receptor->dv = $receptor_dv;
+                    $Receptor->razon_social = mb_substr($boleta['receptor_nombre'], 0, 100);
                     $Receptor->save();
                 }
                 $BoletaTercero = new Model_BoletaTercero($this->getContribuyente()->rut, $boleta['numero']);
@@ -219,10 +222,19 @@ class Model_BoletaTerceros extends \Model_Plural_App
     /**
      * Método que emite una BTE en el SII y entrega el objeto local para trabajar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-23
+     * @version 2019-12-31
      */
     public function emitir($boleta)
     {
+        // crear receptor si no existe
+        list($receptor_rut, $receptor_dv) = explode('-', $boleta['Encabezado']['Receptor']['RUTRecep']);
+        $Receptor = new Model_Contribuyente($receptor_rut);
+        if (!$Receptor->razon_social) {
+            $Receptor->rut = $receptor_rut;
+            $Receptor->dv = $receptor_dv;
+            $Receptor->razon_social = mb_substr($boleta['Encabezado']['Receptor']['RznSocRecep'], 0, 100);
+            $Receptor->save();
+        }
         // consumir servicio web y emitir boleta
         $r = libredte_consume('/sii/boleta_terceros_emitir', [
             'auth'=>[
@@ -243,7 +255,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
         $BoletaTercero->emisor = $this->getContribuyente()->rut;
         $BoletaTercero->numero = $boleta['Encabezado']['IdDoc']['Folio'];
         $BoletaTercero->codigo = $boleta['Encabezado']['IdDoc']['CodigoBarras'];
-        $BoletaTercero->receptor = explode('-', $boleta['Encabezado']['Receptor']['RUTRecep'])[0];
+        $BoletaTercero->receptor = $Receptor->rut;
         $BoletaTercero->fecha = $boleta['Encabezado']['IdDoc']['FchEmis'];
         $BoletaTercero->fecha_emision = date('Y-m-d');
         $BoletaTercero->total_honorarios = $boleta['Encabezado']['Totales']['MntBruto'];
