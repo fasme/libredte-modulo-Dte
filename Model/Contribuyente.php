@@ -2725,7 +2725,7 @@ class Model_Contribuyente extends \Model_App
         if ($periodo) {
             $periodos = [$periodo];
         } else {
-            $periodo_min = min(array_filter($this->db->getCol('
+            $periodos_min = array_filter($this->db->getCol('
                 (
                     SELECT MIN('.$periodo_col.')
                     FROM dte_emitido
@@ -2739,8 +2739,9 @@ class Model_Contribuyente extends \Model_App
                     FROM dte_recibido
                     WHERE receptor = :rut AND certificacion = :certificacion AND emisor = 1
                 )
-            ', $vars)));
-            $periodo_max = max(array_filter($this->db->getCol('
+            ', $vars));
+            $periodo_min = $periodos_min ? min($periodos_min) : date('Ym');
+            $periodos_max = array_filter($this->db->getCol('
                 (
                     SELECT MAX('.$periodo_col.')
                     FROM dte_emitido
@@ -2754,7 +2755,8 @@ class Model_Contribuyente extends \Model_App
                     FROM dte_recibido
                     WHERE receptor = :rut AND certificacion = :certificacion AND emisor = 1
                 )
-            ', $vars)));
+            ', $vars));
+            $periodo_max = $periodos_max ? max($periodos_max) : date('Ym');
             $periodos = [];
             $p_aux = $periodo_min;
             do {
