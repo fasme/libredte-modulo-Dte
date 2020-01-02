@@ -2710,35 +2710,117 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
-     * Método que entrega los documentos usados por el contribuyente en todos los periodos
+     * Método que entrega los documentos usados por el contribuyente. Ya sea en
+     * todos los períodos o en uno en específico.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2020-01-01
      */
-    public function getDocumentosUsados()
+    public function getDocumentosUsados($periodo = null)
     {
-        $periodo_col = $this->db->date('Ym', 'fecha');
+        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        // columnas de periodos
+        $periodo_col = $this->db->date('Ym', 'fecha_hora_creacion');
+        $intercambio_periodo_col = $this->db->date('Ym', 'fecha_hora_email');
+        // listado de periodos
+        if ($periodo) {
+            $periodos = [$periodo];
+        } else {
+            $periodo_min = min(array_filter($this->db->getCol('
+                (
+                    SELECT MIN('.$periodo_col.')
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion AND dte NOT IN (39,41)
+                ) UNION (
+                    SELECT MIN('.$periodo_col.')
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39,41)
+                ) UNION (
+                    SELECT MIN('.$periodo_col.')
+                    FROM dte_recibido
+                    WHERE receptor = :rut AND certificacion = :certificacion AND emisor = 1
+                )
+            ', $vars)));
+            $periodo_max = max(array_filter($this->db->getCol('
+                (
+                    SELECT MAX('.$periodo_col.')
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion AND dte NOT IN (39,41)
+                ) UNION (
+                    SELECT MAX('.$periodo_col.')
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39,41)
+                ) UNION (
+                    SELECT MAX('.$periodo_col.')
+                    FROM dte_recibido
+                    WHERE receptor = :rut AND certificacion = :certificacion AND emisor = 1
+                )
+            ', $vars)));
+            $periodos = [];
+            $p_aux = $periodo_min;
+            do {
+                $periodos[] = $p_aux;
+                $p_aux = \sowerphp\general\Utility_Date::nextPeriod($p_aux);
+            } while($p_aux <= $periodo_max);
+        }
+        // consulta SQL
+        if ($periodo) {
+            $periodo_where = ' AND '.$periodo_col.' = :periodo';
+            $intercambio_periodo_where = ' AND '.$intercambio_periodo_col.' = :periodo';
+            $vars[':periodo'] = $periodo;
+        } else {
+            $periodo_where = $intercambio_periodo_where = '';
+        }
+        $periodos = array_map(function($p) { return '(SELECT '.$p.' AS periodo)'; }, $periodos);
         $datos = $this->db->getTable('
-            SELECT e.periodo, e.total AS emitidos, r.total AS recibidos
+            SELECT
+                p.periodo,
+                e.total AS emitidos,
+                b.total AS boletas,
+                r.total AS recibidos,
+                i.total AS intercambios
             FROM
                 (
+                    SELECT periodo::TEXT
+                    FROM ('.implode(' UNION ', $periodos).') AS t
+                ) AS p
+                LEFT JOIN (
                     SELECT '.$periodo_col.' AS periodo, COUNT(*) AS total
                     FROM dte_emitido
-                    WHERE emisor = :rut AND certificacion = :certificacion
+                    WHERE emisor = :rut AND certificacion = :certificacion AND dte NOT IN (39,41) '.$periodo_where.'
                     GROUP BY '.$periodo_col.'
-                ) AS e
-                LEFT JOIN
-                (
+                ) AS e ON e.periodo = p.periodo
+                LEFT JOIN (
+                    SELECT '.$periodo_col.' AS periodo, COUNT(*) AS total
+                    FROM dte_emitido
+                    WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39,41) '.$periodo_where.'
+                    GROUP BY '.$periodo_col.'
+                ) AS b ON b.periodo = p.periodo
+                LEFT JOIN (
                     SELECT '.$periodo_col.' AS periodo, COUNT(*) AS total
                     FROM dte_recibido
-                    WHERE receptor = :rut AND certificacion = :certificacion
+                    WHERE receptor = :rut AND certificacion = :certificacion '.$periodo_where.'
                     GROUP BY '.$periodo_col.'
-                ) AS r ON e.periodo = r.periodo
-            ORDER BY e.periodo DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
-        $cuota = $this->getCuota();
+                ) AS r ON r.periodo = p.periodo
+                LEFT JOIN (
+                    SELECT '.$intercambio_periodo_col.' AS periodo, COUNT(*) AS total
+                    FROM dte_intercambio
+                    WHERE receptor = :rut AND certificacion = :certificacion '.$intercambio_periodo_where.'
+                    GROUP BY '.$intercambio_periodo_col.'
+                ) AS i ON i.periodo = p.periodo
+            ORDER BY periodo DESC
+        ', $vars);
         foreach ($datos as &$d) {
-            $d['total'] = $d['emitidos'] + $d['recibidos'];
-            $d['sobre_cuota'] = ($cuota and ($d['total']-$cuota)>0) ? $d['total']-$cuota : null;
+            $d['total'] = $d['emitidos'] + $d['boletas'] + $d['recibidos'];
+        }
+        if ($periodo) {
+            return !empty($datos) ? $datos[0] : [
+                'periodo' => 0,
+                'emitidos' => 0,
+                'boletas' => 0,
+                'recibidos' => 0,
+                'intercambios' => 0,
+                'total' => 0,
+            ];
         }
         return $datos;
     }
@@ -2747,28 +2829,14 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el total de documentos usados por el contribuyente en
      * un periodo en particular
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-27
+     * @version 2020-01-01
      */
     public function getTotalDocumentosUsadosPeriodo($periodo = null)
     {
         if (!$periodo) {
             $periodo = date('Ym');
         }
-        $periodo_col = $this->db->date('Ym', 'fecha');
-        return (integer)$this->db->getValue('
-            SELECT (e.total + r.total)
-            FROM
-                (
-                    SELECT COUNT(*) AS total
-                    FROM dte_emitido
-                    WHERE emisor = :rut AND certificacion = :certificacion AND '.$periodo_col.' = :periodo
-                ) AS e,
-                (
-                    SELECT COUNT(*) AS total
-                    FROM dte_recibido
-                    WHERE receptor = :rut AND certificacion = :certificacion AND '.$periodo_col.' = :periodo
-                ) AS r
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        return $this->getDocumentosUsados($periodo)['total'];
     }
 
     /**

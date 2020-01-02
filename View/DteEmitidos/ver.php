@@ -782,7 +782,30 @@ echo $f->end('Modificar sucursal');
 ?>
     </div>
 </div>
-<p style="margin-top:2em;font-size:0.8em" class="text-right">Documento timbrado el <?=str_replace('T', ' ', $DteEmitido->getDte()->getDatos()['TED']['DD']['TSTED'])?></p>
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="fas fa-file-code"></i>
+        Datos del documento
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <th>ID del DTE</th>
+                    <td><?=$DteEmitido->getDte()->getID()?></td>
+                </tr>
+                <tr>
+                    <th>Timbraje del XML</th>
+                    <td><?=\sowerphp\general\Utility_Date::format(str_replace('T', ' ', $DteEmitido->getDte()->getDatos()['TED']['DD']['TSTED']), 'd/m/Y H:i:s')?></td>
+                </tr>
+                <tr>
+                    <th>Creación en LibreDTE</th>
+                    <td><?=\sowerphp\general\Utility_Date::format($DteEmitido->fecha_hora_creacion, 'd/m/Y H:i:s')?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </div>
 <!-- FIN AVANZADO -->
 

@@ -107,7 +107,6 @@ echo View_Helper_Dashboard::cards([
             </div>
 <?php endif; ?>
         <!-- fin alertas envío libro o propuesta f29 -->
-<?php if ($cuota) : ?>
         <!-- dtes usados (totales de emitidos y recibidos) -->
         <div class="card mb-4">
             <div class="card-header">
@@ -115,12 +114,15 @@ echo View_Helper_Dashboard::cards([
                 Documentos usados
             </div>
             <div class="panel-body text-center p-4">
-                <span class="lead text-info"><?=num($n_dtes)?></span> <small class="text-muted"> de <?=num($cuota)?></small><br/>
+                <span class="lead text-info"><?=num($n_dtes)?></span>
+<?php if ($cuota) : ?>
+                <small class="text-muted"> de <?=num($cuota)?></small>
+<?php endif; ?>
+                <br/>
                 <span class="small"><a href="<?=$_base?>/dte/informes/documentos_usados">ver detalle de uso</a></span>
             </div>
         </div>
         <!-- fin dtes usados (totales de emitidos y recibidos) -->
-<?php endif; ?>
     </div>
     <!-- FIN PANEL IZQUIERDA -->
     <!-- PANEL CENTRO -->
