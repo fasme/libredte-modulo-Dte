@@ -2725,6 +2725,12 @@ class Model_Contribuyente extends \Model_App
         if ($periodo) {
             $periodos = [$periodo];
         } else {
+            // WARNING al ser muchos períodos (casos raros donde un cliente emitió con período
+            // del año 2130) sale: "ERROR:  stack depth limit exceeded" (error de SQL)
+            // por eso se usa un período mínimo base que es enero del 2000 y un periodo máximo
+            // que es el períodi siguiente al actual
+            // el error ocurre por la gran cantidad de UNION que aparecen
+            $periodo_actual = date('Ym');
             $periodos_min = array_filter($this->db->getCol('
                 (
                     SELECT MIN('.$periodo_col.')
@@ -2740,7 +2746,7 @@ class Model_Contribuyente extends \Model_App
                     WHERE receptor = :rut AND certificacion = :certificacion AND emisor = 1
                 )
             ', $vars));
-            $periodo_min = $periodos_min ? min($periodos_min) : date('Ym');
+            $periodo_min = max($periodos_min ? min($periodos_min) : $periodo_actual, 200001);
             $periodos_max = array_filter($this->db->getCol('
                 (
                     SELECT MAX('.$periodo_col.')
@@ -2756,7 +2762,7 @@ class Model_Contribuyente extends \Model_App
                     WHERE receptor = :rut AND certificacion = :certificacion AND emisor = 1
                 )
             ', $vars));
-            $periodo_max = $periodos_max ? max($periodos_max) : date('Ym');
+            $periodo_max = min($periodos_max ? max($periodos_max) : $periodo_actual, \sowerphp\general\Utility_Date::nextPeriod($periodo_actual));
             $periodos = [];
             $p_aux = $periodo_min;
             do {
