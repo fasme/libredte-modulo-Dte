@@ -27,8 +27,24 @@ namespace website\Dte;
  * Comando para actualizar los contribuyentes desde el SII
  * Usa por defecto los servicios web de la versión oficial de LibreDTE o bien
  * se puede usar el archivo CSV descargado directamente desde el SII
+ *
+ * Ejemplos ejecución:
+ *  1) Actualizar usando el servicio web de LibreDTE (es la opción por defecto)
+ *     $ ./shell.php Dte.Contribuyentes_Actualizar
+ *     $ ./shell.php Dte.Contribuyentes_Actualizar libredte
+ *  2) Actualizar cargando un archivo CSV descargado desde SII
+ *     $ ./shell.php Dte.Contribuyentes_Actualizar csv archivo.csv
+ *  3) Corregir los datos de contribuyentes con servicio web de LibreDTE
+ *     Esta opción es "peligrosa" si se deja programada, ya que puede tomar
+ *     varios días en actualizar toda la base de datos cuando nunca se ha
+ *     realizado. Se recomienda ejecutar este proceso manualmente o bien hacerlo
+ *     programado pero una vez a la semana o una vez al mes. Al menos hasta
+ *     corroborar que el proceso se demore poco (porque ya tenga casi todo
+ *     actualizado).
+ *     $ ./shell.php Dte.Contribuyentes_Actualizar corregir
+ *
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-07-02
+ * @version 2020-01-03
  */
 class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
 {
@@ -36,7 +52,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-02
+     * @version 2020-01-03
      */
     public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
     {
@@ -53,7 +69,6 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         } else {
             try {
                 $this->libredte($ambiente, $dia);
-                $this->corregir();
             } catch (\Exception $e) {
                 $this->out(
                     '<error>'.$e->getMessage().'</error>'
