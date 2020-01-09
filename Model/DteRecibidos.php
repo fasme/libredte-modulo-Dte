@@ -71,6 +71,7 @@ class Model_DteRecibidos extends \Model_Plural_App
         $recibidos = $this->db->getTable('
             SELECT
                 r.fecha,
+                r.periodo,
                 r.sucursal_sii_receptor AS sucursal,
                 e.razon_social,
                 r.emisor,

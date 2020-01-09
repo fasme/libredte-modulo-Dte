@@ -41,7 +41,7 @@ if (isset($compras)) {
         $c[] = $acciones;
         unset($c['emisor'], $c['intercambio'], $c['dte']);
     }
-    array_unshift($compras, ['Fecha', 'Sucursal', 'Emisor', 'Documento', 'Folio', 'Neto', 'Monto activo', 'Tipo', 'Items', 'Precios', 'Acciones']);
+    array_unshift($compras, ['Fecha', 'Período', 'Sucursal', 'Emisor', 'Documento', 'Folio', 'Neto', 'Monto activo', 'Tipo', 'Items', 'Precios', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setID('activos_fijos_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta']);
     $t->setExport(true);
