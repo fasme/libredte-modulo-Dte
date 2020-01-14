@@ -358,6 +358,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             $documento['Encabezado']['IdDoc']['PeriodoHasta'] = $datos[21];
         }
         if (in_array($documento['Encabezado']['IdDoc']['TipoDTE'], [110,111,112])) {
+            // agregar moneda
             if (empty($datos[33])) {
                 $datos[33] = 'USD';
             }
@@ -365,6 +366,25 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 throw new \Exception('El tipo de moneda '.$datos[33].' no está permitido, sólo: USD, EUR y CLP');
             }
             $documento['Encabezado']['Totales']['TpoMoneda'] = $this->monedas[$datos[33]];
+            // agregar ID del receptor
+            if (!empty($datos[34])) {
+                $documento['Encabezado']['Receptor']['Extranjero']['NumId'] = mb_substr(trim($datos[34]), 0, 20);
+            }
+        }
+        if (!empty($datos[35])) {
+            if (strpos($datos[35], '%')) {
+                $TpoValor_global = '%';
+                $ValorDR_global = (float)substr($datos[35], 0, -1);
+            } else {
+                $TpoValor_global = '$';
+                $ValorDR_global = (float)$datos[35];
+            }
+            $documento['DscRcgGlobal'][] = [
+                'TpoMov' => 'D',
+                'TpoValor' => $TpoValor_global,
+                'ValorDR' => $ValorDR_global,
+                'IndExeDR' => 1,
+            ];
         }
         $this->agregarItem($documento, array_slice($datos, 11, 8));
         $this->agregarTransporte($documento, array_slice($datos, 22, 6));
@@ -406,8 +426,8 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             $detalle['UnmdItem'] = mb_substr(trim($item[5]), 0, 4);
         }
         if (!empty($item[7])) {
-            if (strpos($item[7], ',') or strpos($item[7], '.')) {
-                $detalle['DescuentoPct'] = (int)((float)(str_replace(',','.', $item[7]))*100);
+            if (strpos($item[7], '%')) {
+                $detalle['DescuentoPct'] = (float)substr($item[7], 0, -1);
             } else {
                 $detalle['DescuentoMonto'] = (float)$item[7];
             }
