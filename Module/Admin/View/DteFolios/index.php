@@ -28,7 +28,7 @@ foreach ($folios as &$f) {
     $acciones .= ' <a href="dte_folios/modificar/'.$f['dte'].'" title="Editar folios de tipo '.$f['dte'].'" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
     $f[] = $acciones;
 }
-array_unshift($folios, ['Código', 'Documento', 'Siguiente folio', 'Total disponibles', 'Alertar', 'Acciones']);
+array_unshift($folios, ['Código', 'Documento', 'Siguiente folio', 'Total disponibles', 'Alerta', 'Acciones']);
 new \sowerphp\general\View_Helper_Table($folios);
 ?>
 <div class="card mt-4">
