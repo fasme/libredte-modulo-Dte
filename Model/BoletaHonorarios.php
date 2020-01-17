@@ -42,10 +42,11 @@ class Model_BoletaHonorarios extends \Model_Plural_App
      * Método que sincroniza las boletas de honorarios recibidas por la empresa
      * en el SII con el registro local de boletas en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2020-01-17
      */
     public function sincronizar($meses)
     {
+        $meses = 1; // WARNING
         // periodos a procesar
         $periodo_actual = (int)date('Ym');
         $periodos = [$periodo_actual];
@@ -57,11 +58,24 @@ class Model_BoletaHonorarios extends \Model_Plural_App
         foreach ($periodos as $periodo) {
             $boletas = $this->getBoletas($periodo);
             foreach ($boletas as $boleta) {
+                // buscar emisor de la boleta
+                $Emisor = new Model_Contribuyente($boleta['rut']);
+                if (!$Emisor->razon_social) {
+                    $Emisor->rut = $boleta['rut'];
+                    $Emisor->dv = $boleta['dv'];
+                    $Emisor->razon_social = mb_substr($boleta['nombre'], 0, 100);
+                    $Emisor->save();
+                }
+                // guardar boleta
                 $BoletaHonorario = new Model_BoletaHonorario();
                 $BoletaHonorario->emisor = $boleta['rut'];
                 $BoletaHonorario->receptor = $this->getContribuyente()->rut;
                 $BoletaHonorario->set($boleta);
-                $BoletaHonorario->save();
+                if (!$BoletaHonorario->save()) {
+                    debug($BoletaHonorario);
+                    exit;
+                    throw new \Exception('No fue posible guardar la BHE #'.$BoletaHonorario->numero.' de '.$Emisor->getRUT().' del día '.\sowerphp\general\Utility_Date::format($BoletaHonorario->fecha));
+                }
             }
         }
     }

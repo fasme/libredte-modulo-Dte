@@ -42,7 +42,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
      * Método que sincroniza las boletas de terceros recibidas por la empresa
      * en el SII con el registro local de boletas en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-31
+     * @version 2020-01-17
      */
     public function sincronizar($meses)
     {
@@ -69,7 +69,9 @@ class Model_BoletaTerceros extends \Model_Plural_App
                 $BoletaTercero->receptor = $Receptor->rut;
                 $BoletaTercero->anulada = (int)($boleta['estado'] == 'ANUL');
                 $BoletaTercero->set($boleta);
-                $BoletaTercero->save();
+                if (!$BoletaTercero->save()) {
+                    throw new \Exception('No fue posible guardar la BTE #'.$BoletaTercero->numero.' de '.$Receptor->getRUT().' del día '.\sowerphp\general\Utility_Date::format($BoletaTercero->fecha));
+                }
             }
         }
     }

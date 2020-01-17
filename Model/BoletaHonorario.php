@@ -161,20 +161,6 @@ class Model_BoletaHonorario extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     /**
-     * Método que se ejecuta al insertar un nuevo registro en la base de datos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
-     */
-    protected function insert()
-    {
-        $Emisor = (new Model_Contribuyentes())->get($this->emisor);
-        if (!$Emisor->dv) {
-            return false;
-        }
-        return parent::insert();
-    }
-
-    /**
      * Método que entrega el objeto del emisor de la boleta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-08-10
