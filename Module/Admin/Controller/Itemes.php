@@ -156,7 +156,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción que permite importar los items desde un archivo CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-10-14
+     * @version 2020-01-17
      */
     public function importar()
     {
@@ -181,7 +181,9 @@ class Controller_Itemes extends \Controller_Maintainer
                 $Item = new Model_Item();
                 $Item->contribuyente = $Contribuyente->rut;
                 for ($i=0; $i<$n_cols; $i++) {
-                    $Item->{$cols[$i]} = $item[$i];
+                    if (isset($item[$i])) {
+                        $Item->{$cols[$i]} = $item[$i];
+                    }
                 }
                 // verificar codificación del nombre y descripción del item
                 if (mb_detect_encoding($Item->item, 'UTF-8', true) === false or mb_detect_encoding($Item->descripcion, 'UTF-8', true) === false) {
