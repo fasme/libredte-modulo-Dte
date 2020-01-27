@@ -90,7 +90,7 @@ class Controller_Cesiones extends \Controller_App
     /**
      * Acción que permite buscar en las cesiones de documentos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-07
+     * @version 2020-01-26
      */
     public function buscar($consulta = null)
     {
@@ -111,17 +111,18 @@ class Controller_Cesiones extends \Controller_App
                 'cedente' => 1,
                 'cesionario' => 2,
             ][$consulta];
-            $data = [
-                'auth'=>[
-                    'rut' => $Contribuyente->rut.'-'.$Contribuyente->dv,
-                    'clave' => $Contribuyente->config_sii_pass,
-                ],
-            ];
             $certificacion = (int)$Contribuyente->config_ambiente_en_certificacion;
             try {
-                $response = libredte_consume(
-                    '/sii/rtc_cesiones_periodo/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$consulta_codigo.'/json?certificacion='.$certificacion,
-                    $data
+                $response = libredte_api_consume(
+                    '/sii/rtc/cesiones/documentos/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$consulta_codigo.'?formato=json&certificacion='.$certificacion,
+                    [
+                        'auth' => [
+                            'pass' => [
+                                'rut' => $Contribuyente->rut.'-'.$Contribuyente->dv,
+                                'clave' => $Contribuyente->config_sii_pass,
+                            ],
+                        ],
+                    ]
                 );
             } catch (\Exception $e) {
                 \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');

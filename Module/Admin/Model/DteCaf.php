@@ -167,7 +167,7 @@ class Model_DteCaf extends \Model_App
      * Método que entrega los folios en SII con cierto estado
      * @param estado String recibidos, anulados o pendientes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-18
+     * @version 2020-01-26
      */
     private function getFoliosByEstadoSII($estado)
     {
@@ -178,13 +178,17 @@ class Model_DteCaf extends \Model_App
             throw new \Exception('No hay firma electrónica');
         }
         // solicitar listado de folios según estado
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
-        $r = libredte_consume('/sii/caf_folios_estado/'.$Emisor->getRUT().'/'.$this->dte.'/'.$this->desde.'/'.$this->hasta.'/'.$estado.'?certificacion='.(int)$this->certificacion, $data);
+        $r = libredte_api_consume(
+            '/sii/dte/caf/estados/'.$Emisor->getRUT().'/'.$this->dte.'/'.$this->desde.'/'.$this->hasta.'/'.$estado.'?certificacion='.(int)$this->certificacion,
+            [
+                'auth' => [
+                    'cert' => [
+                        'cert-data' => $Firma->getCertificate(),
+                        'pkey-data' => $Firma->getPrivateKey(),
+                    ],
+                ],
+            ]
+        );
         if ($r['status']['code']!=200) {
             throw new \Exception($r['body']);
         }

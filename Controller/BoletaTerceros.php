@@ -236,7 +236,7 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * Acción para emitir una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-23
+     * @version 2020-01-26
      */
     public function emitir()
     {
@@ -245,6 +245,7 @@ class Controller_BoletaTerceros extends \Controller_App
             'Emisor' => $Emisor,
             'sucursales' => $Emisor->getSucursales(),
             'comunas' => (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getList(),
+            'tasas_retencion' => (new Model_BoletaTerceros())->getTasasRetencion(),
         ]);
         if (isset($_POST['submit'])) {
             // armar arreglo con los datos de la boleta

@@ -207,7 +207,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-11-28
+     * @version 2020-01-26
      */
     public function __construct($rut = null)
     {
@@ -221,7 +221,7 @@ class Model_Contribuyente extends \Model_App
         if ($this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
             try {
-                $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$this->getRUT());
+                $response = libredte_api_consume('/sii/contribuyentes/situacion_tributaria/tercero/'.$this->rut.'-'.$this->dv);
                 if ($response['status']['code']==200) {
                     $info = $response['body'];
                     if (!empty($info['razon_social'])) {
@@ -3114,12 +3114,12 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega la información del registro de compra y venta del SII
      * del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2020-01-26
      */
     public function getRCV(array $filtros = [])
     {
         if (!$this->config_sii_pass) {
-            throw new \Exception('No está configurada la contraseña del SII');
+            throw new \Exception('Primero debe agregar la contraseña del SII, en la configuración de la empresa');
         }
         // filtros por defecto
         $filtros = array_merge([
@@ -3157,11 +3157,19 @@ class Model_Contribuyente extends \Model_App
         ];
         // consumir servicio web de resumen
         if (!$filtros['detalle']) {
-            $r = libredte_consume(
-                sprintf(
-                    '/sii/rcv_resumen/%d-%s/%s/%d/%s?formato=json&certificacion=%d',
-                    $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $filtros['estado'], (int)$this->config_ambiente_en_certificacion
-                ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
+            if ($filtros['operacion']=='COMPRA') {
+                $url = sprintf(
+                    '/sii/rcv/compras/resumen/%d-%s/%d/%s?formato=json&certificacion=%d',
+                    $this->rut, $this->dv, $filtros['periodo'], $filtros['estado'], (int)$this->config_ambiente_en_certificacion
+                );
+            } else {
+                $url = sprintf(
+                    '/sii/rcv/ventas/resumen/%d-%s/%d?formato=json&certificacion=%d',
+                    $this->rut, $this->dv, $filtros['periodo'], (int)$this->config_ambiente_en_certificacion
+                );
+            }
+            $r = libredte_api_consume(
+                $url, ['auth'=>['pass'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]]
             );
             if ($r['status']['code']!=200) {
                 throw new \Exception('Error al obtener el resumen del RCV: '.$r['body']);
@@ -3179,11 +3187,19 @@ class Model_Contribuyente extends \Model_App
         else {
             $detalle = [];
             foreach ($filtros['dte'] as $dte) {
-                $r = libredte_consume(
-                    sprintf(
-                        '/sii/rcv_detalle/%d-%s/%s/%d/%d/%s?formato=json&certificacion=%d&tipo=%s',
-                        $this->rut, $this->dv, $filtros['operacion'], $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
-                    ), ['auth'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]
+                if ($filtros['operacion']=='COMPRA') {
+                    $url = sprintf(
+                        '/sii/rcv/compras/detalle/%d-%s/%d/%d/%s?formato=json&certificacion=%d&tipo=%s',
+                        $this->rut, $this->dv, $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
+                    );
+                } else {
+                    $url = sprintf(
+                        '/sii/rcv/ventas/detalle/%d-%s/%d/%d?formato=json&certificacion=%d&tipo=%s',
+                        $this->rut, $this->dv, $filtros['periodo'], $dte, (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
+                    );
+                }
+                $r = libredte_api_consume(
+                    $url, ['auth'=>['pass'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]]
                 );
                 if ($r['status']['code']!=200) {
                     throw new \Exception('Error al obtener el detalle del RCV: '.$r['body']);

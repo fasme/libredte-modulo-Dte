@@ -275,16 +275,20 @@ class Controller_DteFolios extends \Controller_App
             }
             // solicitar timbraje
             try {
-                $Folios = $DteFolio->timbrar($_POST['cantidad']);
+                $xml = $DteFolio->timbrar($_POST['cantidad']);
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+                return;
+            }
+            // guardar timbraje
+            try {
+                $Folios = $DteFolio->guardarFolios($xml);
                 \sowerphp\core\Model_Datasource_Session::message(
                     'El CAF para el documento de tipo '.$Folios->getTipo().' que inicia en '.$Folios->getDesde().' fue cargado, el siguiente folio disponible es '.$DteFolio->siguiente, 'ok'
                 );
                 $this->redirect('/dte/admin/dte_folios');
             } catch (\Exception $e) {
-                \sowerphp\core\Model_Datasource_Session::message(
-                    $e->getMessage(), 'error'
-                );
-                return;
+                throw new \Exception('No fue posible guardar el CAF obtenido desde el SII: '.$e->getMessage());
             }
         }
     }
@@ -292,12 +296,12 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Acción que muestra la página con el estado del folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-17
+     * @version 2020-01-26
      */
     public function estado($dte, $folio)
     {
         $Emisor = $this->getContribuyente();
-        $r = $this->consume('/api/dte/admin/dte_folios/estado/'.$dte.'/'.$folio.'/'.$Emisor->rut);
+        $r = $this->consume('/api/dte/admin/dte_folios/estado/'.$dte.'/'.$folio.'/'.$Emisor->rut.'?formato=html');
         if ($r['status']['code']!=200) {
             die($r['body']);
         }
@@ -306,23 +310,23 @@ class Controller_DteFolios extends \Controller_App
             'Emisor' => $Emisor,
             'dte' => $dte,
             'folio' => $folio,
-            'estado_web' => utf8_encode($r['body']),
+            'estado_web' => $r['body'],
         ]);
     }
 
     /**
      * Acción que permite anular un folio directamente en el sitio del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function anular($dte, $folio)
     {
         $Emisor = $this->getContribuyente();
-        $r = $this->consume('/api/dte/admin/dte_folios/anular/'.$dte.'/'.$folio.'/'.$Emisor->rut);
+        $r = $this->consume('/api/dte/admin/dte_folios/anular/'.$dte.'/'.$folio.'/'.$Emisor->rut.'?formato=html');
         if ($r['status']['code']!=200) {
             $this->response->send($r['body']);
         }
-        $this->response->send(utf8_encode($r['body']));
+        $this->response->send($r['body']);
     }
 
     /**
@@ -470,7 +474,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite solicitar un CAF al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-06
+     * @version 2020-01-26
      */
     public function _api_solicitar_caf_GET($dte, $cantidad, $emisor)
     {
@@ -494,32 +498,23 @@ class Controller_DteFolios extends \Controller_App
         if (!$DteFolio->siguiente) {
             $this->Api->send('Debe tener al menos un CAF cargado manualmente antes de solicitar timbraje vía LibreDTE', 500);
         }
-        // recuperar firma electrónica
-        $Firma = $Emisor->getFirma($User->id);
-        if (!$Firma) {
-            $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de timbrar', 506);
-        }
         // solicitar timbraje
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
-        $r = libredte_consume('/sii/caf_solicitar/'.$Emisor->getRUT().'/'.$dte.'/'.$cantidad.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, $data);
-        if ($r['status']['code']!=200) {
-            $this->Api->send('No fue posible timbrar: '.$r['body'], 500);
+        try {
+            $xml = $DteFolio->timbrar($cantidad);
+            return base64_encode($xml);
+        } catch (\Exception $e) {
+            $this->Api->send('No fue posible timbrar: '.$e->getMessage(), 500);
         }
-        return base64_encode($r['body']);
     }
 
     /**
      * Recurso que permite consultar el estado de un folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function _api_estado_GET($dte, $folio, $emisor)
     {
+        extract($this->getQuery(['formato'=>'json']));
         // crear usuario, emisor y verificar permisos
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -538,13 +533,17 @@ class Controller_DteFolios extends \Controller_App
             $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de consultar el estado de un folio', 506);
         }
         // consultar estado del folio
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
-        $r = libredte_consume('/sii/folio_estado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, $data);
+        $r = libredte_api_consume(
+            '/sii/dte/caf/estado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?formato='.$formato.'&certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+            [
+                'auth' => [
+                    'cert' => [
+                        'cert-data' => $Firma->getCertificate(),
+                        'pkey-data' => $Firma->getPrivateKey(),
+                    ],
+                ],
+            ]
+        );
         if ($r['status']['code']!=200) {
             $this->Api->send('No fue posible consultar el estado del folio: '.$r['body'], 500);
         }
@@ -555,10 +554,11 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite anular un folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function _api_anular_GET($dte, $folio, $emisor)
     {
+        extract($this->getQuery(['formato'=>'json']));
         // crear usuario, emisor y verificar permisos
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -577,13 +577,17 @@ class Controller_DteFolios extends \Controller_App
             $this->Api->send('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de anular un folio', 506);
         }
         // anular folio
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
-        $r = libredte_consume('/sii/folio_anular/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, $data);
+        $r = libredte_api_consume(
+            '/sii/dte/caf/anular/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?formato='.$formato.'&certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+            [
+                'auth' => [
+                    'cert' => [
+                        'cert-data' => $Firma->getCertificate(),
+                        'pkey-data' => $Firma->getPrivateKey(),
+                    ],
+                ],
+            ]
+        );
         if ($r['status']['code']!=200) {
             $this->Api->send('No fue posible anular el folio: '.$r['body'], 500);
         }

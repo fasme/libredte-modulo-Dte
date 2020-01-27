@@ -550,7 +550,7 @@ class Model_DteRecibido extends \Model_App
     /**
      * Método que determina y envía al SII el tipo de transacción del DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-18
+     * @version 2020-01-26
      */
     public function setTipoTransaccionSII()
     {
@@ -573,15 +573,26 @@ class Model_DteRecibido extends \Model_App
             }
             // enviar al SII
             try {
-                $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.(int)$this->getReceptor()->config_ambiente_en_certificacion, [
-                    'auth'=> [
-                        'rut' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
-                        'clave' => $this->getReceptor()->config_sii_pass,
-                    ],
-                    'documentos' => [
-                        [$this->getEmisor()->rut.'-'.$this->getEmisor()->dv, $this->dte, $this->folio, $this->tipo_transaccion, $codigo_impuesto]
-                    ],
-                ]);
+                $r = libredte_api_consume(
+                    '/sii/rcv/compras/set_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.(int)$this->getReceptor()->config_ambiente_en_certificacion,
+                    [
+                        'auth' => [
+                            'pass' => [
+                                'rut' => $this->getReceptor()->rut.'-'.$this->getReceptor()->dv,
+                                'clave' => $this->getReceptor()->config_sii_pass,
+                            ],
+                        ],
+                        'documentos' => [
+                            [
+                                'emisor' => $this->getEmisor()->rut.'-'.$this->getEmisor()->dv,
+                                'dte' => $this->dte,
+                                'folio' => $this->folio,
+                                'tipo_transaccion' => $this->tipo_transaccion,
+                                'codigo_iva' => $codigo_impuesto
+                            ],
+                        ],
+                    ]
+                );
                 if (!empty($r['body']['metaData']['errors'])) {
                     $asignado_prev = strpos($r['body']['metaData']['errors'][0]['descripcion'], 'El archivo posee documentos que no cambian el tipo de transaccion') === 0;
                     if (!$asignado_prev) {

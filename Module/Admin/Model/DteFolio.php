@@ -247,7 +247,7 @@ class Model_DteFolio extends \Model_App
     /**
      * Método que permite realizar el timbraje de manera automática
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-11-05
+     * @version 2020-01-26
      */
     public function timbrar($cantidad = null)
     {
@@ -265,22 +265,22 @@ class Model_DteFolio extends \Model_App
             throw new \Exception('No hay firma electrónica');
         }
         // solicitar timbraje
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
-        $r = libredte_consume('/sii/caf_solicitar/'.$Emisor->getRUT().'/'.$this->dte.'/'.$cantidad.'?certificacion='.(int)$this->certificacion, $data);
+        $r = libredte_api_consume(
+            '/sii/dte/caf/solicitar/'.$Emisor->getRUT().'/'.$this->dte.'/'.$cantidad.'?certificacion='.(int)$this->certificacion,
+            [
+                'auth' => [
+                    'cert' => [
+                        'cert-data' => $Firma->getCertificate(),
+                        'pkey-data' => $Firma->getPrivateKey(),
+                    ],
+                ],
+            ]
+        );
         if ($r['status']['code']!=200) {
             throw new \Exception('No se pudo obtener el CAF desde el SII: '.$r['body']);
         }
-        // cargar caf
-        try {
-            return $this->guardarFolios($r['body']);
-        } catch (\Exception $e) {
-            throw new \Exception('No fue posible guardar el CAF obtenido desde el SII: '.$e->getMessage());
-        }
+        // entregar XML
+        return $r['body'];
     }
 
     /**

@@ -38,6 +38,19 @@ class Model_BoletaTerceros extends \Model_Plural_App
     protected $_database = 'default'; ///< Base de datos del modelo
     protected $_table = 'boleta_tercero'; ///< Tabla del modelo
 
+    private $tasas_retencion = [
+        201608 => 0.1000,
+        202001 => 0.1075,
+        202101 => 0.1150,
+        202201 => 0.1225,
+        202301 => 0.1300,
+        202401 => 0.1375,
+        202501 => 0.1450,
+        202601 => 0.1525,
+        202701 => 0.1600,
+        202801 => 0.1700,
+    ];
+
     /**
      * Método que sincroniza las boletas de terceros recibidas por la empresa
      * en el SII con el registro local de boletas en LibreDTE
@@ -79,14 +92,16 @@ class Model_BoletaTerceros extends \Model_Plural_App
     /**
      * Método que obtiene las boletas emitidas desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2020-01-26
      */
     public function getBoletas($periodo)
     {
-        $r = libredte_consume('/sii/boletas_terceros_emitidas/'.$this->getContribuyente()->getRUT().'/'.$periodo.'?formato=json', [
-            'auth'=>[
-                'rut' => $this->getContribuyente()->getRUT(),
-                'clave' => $this->getContribuyente()->config_sii_pass,
+        $r = libredte_api_consume('/sii/bte/emitidas/documentos/'.$this->getContribuyente()->getRUT().'/'.$periodo.'?formato=json', [
+            'auth' => [
+                'pass' => [
+                    'rut' => $this->getContribuyente()->getRUT(),
+                    'clave' => $this->getContribuyente()->config_sii_pass,
+                ],
             ],
         ]);
         if ($r['status']['code']!=200) {
@@ -224,7 +239,7 @@ class Model_BoletaTerceros extends \Model_Plural_App
     /**
      * Método que emite una BTE en el SII y entrega el objeto local para trabajar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-31
+     * @version 2020-01-26
      */
     public function emitir($boleta)
     {
@@ -238,10 +253,12 @@ class Model_BoletaTerceros extends \Model_Plural_App
             $Receptor->save();
         }
         // consumir servicio web y emitir boleta
-        $r = libredte_consume('/sii/boleta_terceros_emitir', [
-            'auth'=>[
-                'rut' => $this->getContribuyente()->getRUT(),
-                'clave' => $this->getContribuyente()->config_sii_pass,
+        $r = libredte_api_consume('/sii/bte/emitidas/emitir', [
+            'auth' => [
+                'pass' => [
+                    'rut' => $this->getContribuyente()->getRUT(),
+                    'clave' => $this->getContribuyente()->config_sii_pass,
+                ],
             ],
             'boleta' => $boleta,
         ]);
@@ -284,6 +301,17 @@ class Model_BoletaTerceros extends \Model_Plural_App
         }
         // entregar boleta emitida
         return $BoletaTercero;
+    }
+
+    /**
+     * Método que entrega las tasas de retencion para personas a honorarios
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-01-26
+     */
+    public function getTasasRetencion()
+    {
+        krsort($this->tasas_retencion);
+        return $this->tasas_retencion;
     }
 
 }

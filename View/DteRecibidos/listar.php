@@ -1,16 +1,8 @@
 <ul class="nav nav-pills float-right">
-    <li class="nav-item" class="dropdown">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-university"></i> Recibidos en SII
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="nav-link">
+            <i class="fas fa-university"></i> Registro compras SII
         </a>
-        <div class="dropdown-menu">
-            <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="dropdown-item">
-                Registro de compras
-            </a>
-            <a href="<?=$_base?>/dte/dte_recibidos/sii" title="Buscar los documentos recibidos en el SII" class="dropdown-item">
-                    DTE recibidos en SII (previo a RC)
-            </a>
-        </div>
     </li>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_compras/importar" title="Importar libro IEC desde archivo CSV" class="nav-link">

@@ -208,18 +208,24 @@ class Model_BoletaTercero extends \Model_App
     /**
      * Método que obtiene el HTML de la boleta de terceros desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2020-01-26
      */
     public function getHTML()
     {
-        $r = libredte_consume('/sii/boleta_terceros_html/'.$this->codigo, [
-            'auth'=>[
-                'rut' => $this->getEmisor()->getRUT(),
-                'clave' => $this->getEmisor()->config_sii_pass,
+        $r = libredte_api_consume('/sii/bte/emitidas/html/'.$this->codigo, [
+            'auth' => [
+                'pass' => [
+                    'rut' => $this->getEmisor()->getRUT(),
+                    'clave' => $this->getEmisor()->config_sii_pass,
+                ],
             ],
         ]);
         if ($r['status']['code']!=200 or empty($r['body'])) {
-            throw new \Exception('No fue posible descargar el HTML de la boleta de terceros desde el SII');
+            $message = 'No fue posible descargar el HTML de la boleta de terceros desde el SII';
+            if (!empty($r['body'])) {
+                $message .= ': '.$r['body'];
+            }
+            throw new \Exception($message);
         }
         return $r['body'];
     }

@@ -106,15 +106,33 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método que descarga el listado de contribuyentes desde el servicio web de LibreDTE (versión oficial)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-12
+     * @version 2020-01-26
      */
     private function libredte($ambiente, $dia)
     {
         if (!$dia) {
             $dia = date('Y-m-d');
         }
+        // obtener firma
+        $Firma = new \sasco\LibreDTE\FirmaElectronica();
+        $cert_data = $Firma->getCertificate();
+        if (!$cert_data) {
+            $this->out('<error>No hay firma electrónica por defecto asignada en LibreDTE o no pudo ser cargada</error>');
+            return;
+        }
+        $pkey_data = $Firma->getPrivateKey();
         // obtener contribuyentes desde el servicio web de LibreDTE
-        $response = libredte_consume('/sii/contribuyentes_autorizados/'.$dia.'?certificacion='.$ambiente.'&formato=csv_sii');
+        $response = libredte_api_consume(
+            '/sii/dte/contribuyentes/autorizados?dia='.$dia.'&certificacion='.$ambiente.'&formato=csv_sii',
+            [
+                'auth' => [
+                    'cert' => [
+                        'cert-data' => $cert_data,
+                        'pkey-data' => $pkey_data,
+                    ],
+                ],
+            ]
+        );
         if ($response['status']['code']!=200 or empty($response['body'])) {
             $msg = 'No fue posible obtener los contribuyentes desde el SII';
             if ($response['body']) {
@@ -215,7 +233,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
      *  - giro
      *  - actividad económica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-17
+     * @version 2020-01-26
      */
     private function corregir()
     {
@@ -236,7 +254,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
         $actualizados = 0;
         foreach ($contribuyentes as $rut) {
             $Contribuyente = new Model_Contribuyente($rut);
-            $response = libredte_consume('/sii/contribuyente_situacion_tributaria/'.$Contribuyente->getRUT());
+            $response = libredte_api_consume('/sii/contribuyentes/situacion_tributaria/tercero/'.$Contribuyente->getRUT());
             if ($response['status']['code']==200) {
                 $info = $response['body'];
                 $procesados++;

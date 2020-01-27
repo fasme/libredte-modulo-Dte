@@ -2,7 +2,7 @@
     <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="nav-link">
             <i class="fa fa-university"></i>
-            Registro de compras
+            Registro compras SII
         </a>
     </li>
 <?php if ($soloPendientes) : ?>

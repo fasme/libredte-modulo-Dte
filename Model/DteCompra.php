@@ -215,7 +215,7 @@ class Model_DteCompra extends Model_Base_Libro
     /**
      * Método que entrega los tipos de transacciones de las compras del período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-12
+     * @version 2020-01-26
      */
     public function getTiposTransacciones()
     {
@@ -237,11 +237,11 @@ class Model_DteCompra extends Model_Base_Libro
                 $codigo_impuesto = $c['iva_no_recuperable_codigo'];
             }
             $datos[] = [
-                $c['rut'],
-                $c['dte'],
-                $c['folio'],
-                $c['tipo_transaccion'],
-                $codigo_impuesto,
+                'emisor' => $c['rut'],
+                'dte' => $c['dte'],
+                'folio' => $c['folio'],
+                'tipo_transaccion' => $c['tipo_transaccion'],
+                'codigo_iva' => $codigo_impuesto,
             ];
         }
         return $datos;

@@ -307,46 +307,6 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
-     * Acción que permite buscar documentos recibidos en el SII
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-06
-     */
-    public function sii()
-    {
-        $Emisor = $this->getContribuyente();
-        $this->set([
-            'Emisor' => $Emisor,
-            'hoy' => date('Y-m-d'),
-        ]);
-        if (isset($_POST['submit'])) {
-            $r = $this->consume('/api/dte/dte_recibidos/sii/'.$_POST['desde'].'/'.$_POST['hasta'].'/'.$Emisor->rut.'?formato=json');
-            if ($r['status']['code']!=200) {
-                \sowerphp\core\Model_Datasource_Session::message('No fue posible obtener los documentos desde el SII, intente nuevamente: '.$r['body'], 'error');
-                return;
-            }
-            if (empty($r['body'])) {
-                \sowerphp\core\Model_Datasource_Session::message('No se encontraron documentos, se recomienda reintentar la consulta ya que a veces no se obtiene la respuesta correcta desde el SII', 'warning');
-                return;
-            }
-            $documentos = $r['body'];
-            if ($_POST['excluir_en_libro']) {
-                $n_documentos = count($documentos);
-                for ($i=0; $i<$n_documentos; $i++) {
-                    list($rut, $dv) = explode('-', $documentos[$i]['rut']);
-                    try {
-                        $DteRecibido = new Model_DteRecibido($rut, $documentos[$i]['dte'], $documentos[$i]['folio'], (int)$Emisor->config_ambiente_en_certificacion);
-                        if ($DteRecibido->usuario) {
-                            unset($documentos[$i]);
-                        }
-                    } catch (\Exception $e) {
-                    }
-                }
-            }
-            $this->set('documentos', $documentos);
-        }
-    }
-
-    /**
      * Acción de la API que permite obtener la información de un documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2017-06-21
@@ -491,56 +451,6 @@ class Controller_DteRecibidos extends \Controller_App
             $this->Api->send('No se encontraron documentos', 404);
         }
         $this->Api->send($documentos, 200, JSON_PRETTY_PRINT);
-    }
-
-    /**
-     * Acción de la API que permite buscar en el SII los documentos recibidos
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
-     */
-    public function _api_sii_GET($desde, $hasta, $receptor)
-    {
-        // crear receptor y verificar autorización
-        $User = $this->Api->getAuthUser();
-        if (is_string($User)) {
-            $this->Api->send($User, 401);
-        }
-        $Receptor = new Model_Contribuyente($receptor);
-        if (!$Receptor->exists()) {
-            $this->Api->send('Receptor no existe', 404);
-        }
-        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/sii')) {
-            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
-        }
-        // armar datos con firma
-        $Firma = $Receptor->getFirma($User->id);
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
-        // buscar documentos
-        extract($this->getQuery([
-            'formato' => 'csv',
-        ]));
-        $certificacion = (int)$Receptor->config_ambiente_en_certificacion;
-        $response = libredte_consume(
-            '/sii/dte_recibidos/'.$Receptor->getRUT().'/'.$desde.'/'.$hasta.'?formato='.$formato.'&certificacion='.$certificacion,
-            $data
-        );
-        if ($response['status']['code']!=200) {
-            $this->Api->send($response['body'], $response['status']['code']);
-        }
-        if ($formato=='json') {
-            $this->Api->send($response['body'], 200, JSON_PRETTY_PRINT);
-        } else {
-            $this->Api->response()->type('text/csv');
-            $this->Api->response()->header('Content-Disposition', 'attachment; filename=dte_recibidos_'.($certificacion?'certificacion':'produccion').'_'.$receptor.'_'.$desde.'_'.$hasta.'.csv');
-            $this->Api->response()->header('Pragma', 'no-cache');
-            $this->Api->response()->header('Expires', 0);
-            $this->Api->send($response['body']);
-        }
     }
 
 }

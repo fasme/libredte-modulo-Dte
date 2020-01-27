@@ -339,7 +339,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     /**
      * Recurso de la API que entrega el código de reemplazo de libro para cierto período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-08-06
+     * @version 2020-01-26
      */
     public function _api_codigo_reemplazo_GET($periodo, $contribuyente)
     {
@@ -363,17 +363,18 @@ abstract class Controller_Base_Libros extends \Controller_App
         }
         // consultar código reemplazo libro
         $Firma = $Contribuyente->getFirma($User->id);
-        $data = [
-            'firma' => [
-                'cert-data' => $Firma->getCertificate(),
-                'key-data' => $Firma->getPrivateKey(),
-            ],
-        ];
         $datos = $Libro->getDatos();
         $operacion = $datos['LibroCompraVenta']['EnvioLibro']['Caratula']['TipoOperacion'];
         $tipo_libro = $datos['LibroCompraVenta']['EnvioLibro']['Caratula']['TipoLibro'];
-        $url = '/sii/iecv_codigo_reemplazo/'.$Contribuyente->getRUT().'/'.$periodo.'/'.$operacion.'/'.$tipo_libro.'/'.$Libro->track_id.'?certificacion='.(int)$Contribuyente->config_ambiente_en_certificacion;
-        $response = libredte_consume($url, $data);
+        $url = '/sii/dte/iecv/codigo_reemplazo/'.$Contribuyente->getRUT().'/'.$periodo.'/'.$operacion.'/'.$tipo_libro.'/'.$Libro->track_id.'?certificacion='.(int)$Contribuyente->config_ambiente_en_certificacion;
+        $response = libredte_api_consume($url, [
+            'auth' => [
+                'cert' => [
+                    'cert-data' => $Firma->getCertificate(),
+                    'pkey-data' => $Firma->getPrivateKey(),
+                ],
+            ],
+        ]);
         if ($response['status']['code']!=200) {
             $this->Api->send('No fue posible obtener el código de reemplazo del libro: '.$response['body'], $response['status']['code']);
         }

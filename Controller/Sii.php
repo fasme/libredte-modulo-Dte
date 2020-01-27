@@ -35,7 +35,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los datos de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function contribuyente_datos($rut)
     {
@@ -47,16 +47,17 @@ class Controller_Sii extends \Controller_App
                 $this->redirect('/dte/contribuyentes/seleccionar');
             }
             $Firma = $Emisor->getFirma($this->Auth->User->id);
-            $data = [
-                'firma' => [
-                    'cert-data' => $Firma->getCertificate(),
-                    'key-data' => $Firma->getPrivateKey(),
-                ],
-            ];
             $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
-            $response = libredte_consume(
-                '/sii/dte_contribuyente_datos/'.$Emisor->getRUT().'?certificacion='.$certificacion,
-                $data
+            $response = libredte_api_consume(
+                '/sii/dte/contribuyentes/datos/'.$Emisor->getRUT().'?formato=html&certificacion='.$certificacion,
+                [
+                    'auth' => [
+                        'cert' => [
+                            'cert-data' => $Firma->getCertificate(),
+                            'pkey-data' => $Firma->getPrivateKey(),
+                        ],
+                    ],
+                ]
             );
             $this->response->send($response['body']);
         }
@@ -69,7 +70,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener los usuarios de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function contribuyente_usuarios($rut)
     {
@@ -84,16 +85,17 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $data = [
-                'firma' => [
-                    'cert-data' => $Firma->getCertificate(),
-                    'key-data' => $Firma->getPrivateKey(),
-                ],
-            ];
             $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
-            $response = libredte_consume(
-                '/sii/dte_contribuyente_usuarios/'.$Emisor->getRUT().'?certificacion='.$certificacion,
-                $data
+            $response = libredte_api_consume(
+                '/sii/dte/contribuyentes/usuarios/'.$Emisor->getRUT().'?formato=html&certificacion='.$certificacion,
+                [
+                    'auth' => [
+                        'cert' => [
+                            'cert-data' => $Firma->getCertificate(),
+                            'pkey-data' => $Firma->getPrivateKey(),
+                        ],
+                    ],
+                ]
             );
             $this->response->send($response['body']);
         }
@@ -106,7 +108,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener si la empresa está o no autorizada para usar facturación electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function contribuyente_autorizado($rut)
     {
@@ -115,8 +117,8 @@ class Controller_Sii extends \Controller_App
         ]));
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
         try {
-            $response = libredte_consume(
-                '/sii/dte_contribuyente_autorizado/'.$rut.'?certificacion='.$certificacion
+            $response = libredte_api_consume(
+                '/sii/dte/contribuyentes/autorizado/'.$rut.'?formato=html&certificacion='.$certificacion
             );
             $this->response->send($response['body']);
         }
@@ -129,14 +131,14 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite obtener la situación tributaria de la empresa desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function contribuyente_situacion_tributaria($rut)
     {
         // si existe el proveedor libredte se consulta al servicio web de LibreDTE oficial
         try {
-            $response = libredte_consume(
-                '/sii/contribuyente_situacion_tributaria/'.$rut.'?formato=web'
+            $response = libredte_api_consume(
+                '/sii/contribuyentes/situacion_tributaria/tercero/'.$rut.'?formato=html'
             );
             $this->response->send($response['body']);
         }
@@ -149,7 +151,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-01-26
      */
     public function estado_envio($track_id)
     {
@@ -160,16 +162,17 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $data = [
-                'firma' => [
-                    'cert-data' => $Firma->getCertificate(),
-                    'key-data' => $Firma->getPrivateKey(),
-                ],
-            ];
             $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
-            $response = libredte_consume(
-                '/sii/dte_emitido_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
-                $data
+            $response = libredte_api_consume(
+                '/sii/dte/emitidos/estado_envio/'.$Emisor->getRUT().'/'.$track_id.'?certificacion='.$certificacion.'&formato=html',
+                [
+                    'auth' => [
+                        'cert' => [
+                            'cert-data' => $Firma->getCertificate(),
+                            'pkey-data' => $Firma->getPrivateKey(),
+                        ],
+                    ],
+                ]
             );
             $this->response->send($response['body']);
         }
@@ -274,7 +277,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el estado de un envío en el SII a partir del Track ID del AEC
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2019-01-26
      */
     public function cesion_estado_envio($track_id)
     {
@@ -285,16 +288,17 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $data = [
-                'firma' => [
-                    'cert-data' => $Firma->getCertificate(),
-                    'key-data' => $Firma->getPrivateKey(),
-                ],
-            ];
             $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
-            $response = libredte_consume(
-                '/sii/cesion_estado_envio/'.$Emisor->getRUT().'/'.$track_id.'&certificacion='.$certificacion.'&formato=web',
-                $data
+            $response = libredte_api_consume(
+                '/sii/rtc/cesiones/estado_envio/'.$track_id.'?certificacion='.$certificacion.'&formato=html',
+                [
+                    'auth' => [
+                        'cert' => [
+                            'cert-data' => $Firma->getCertificate(),
+                            'pkey-data' => $Firma->getPrivateKey(),
+                        ],
+                    ],
+                ]
             );
             $this->response->send($response['body']);
         }
@@ -307,7 +311,7 @@ class Controller_Sii extends \Controller_App
     /**
      * Acción que permite consultar el certificado de cesión de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2019-01-26
      */
     public function cesion_certificado($dte, $folio, $fecha)
     {
@@ -318,16 +322,17 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $data = [
-                'auth' => [
-                    'rut' => $Emisor->getRUT(),
-                    'clave' => $Emisor->config_sii_pass,
-                ],
-            ];
             $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
-            $response = libredte_consume(
-                '/sii/cesion_certificado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'/'.$fecha.'&certificacion='.$certificacion,
-                $data
+            $response = libredte_api_consume(
+                '/sii/rtc/cesiones/certificado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'/'.$fecha.'?certificacion='.$certificacion,
+                [
+                    'auth' => [
+                        'pass' => [
+                            'rut' => $Emisor->getRUT(),
+                            'clave' => $Emisor->config_sii_pass,
+                        ],
+                    ],
+                ]
             );
             $this->response->send($response['body']);
         }

@@ -83,14 +83,16 @@ class Model_BoletaHonorarios extends \Model_Plural_App
     /**
      * Método que obtiene las boletas recibidas desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-09
+     * @version 2020-01-26
      */
     public function getBoletas($periodo)
     {
-        $r = libredte_consume('/sii/boletas_honorarios_recibidas/'.$this->getContribuyente()->getRUT().'/'.$periodo.'?formato=json', [
-            'auth'=>[
-                'rut' => $this->getContribuyente()->getRUT(),
-                'clave' => $this->getContribuyente()->config_sii_pass,
+        $r = libredte_api_consume('/sii/bhe/recibidas/documentos/'.$this->getContribuyente()->getRUT().'/'.$periodo.'?formato=json', [
+            'auth' => [
+                'pass' => [
+                    'rut' => $this->getContribuyente()->getRUT(),
+                    'clave' => $this->getContribuyente()->config_sii_pass,
+                ],
             ],
         ]);
         if ($r['status']['code']!=200) {

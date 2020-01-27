@@ -404,15 +404,17 @@ class Controller_DteCompras extends Controller_Base_Libros
             $this->redirect(str_replace('rcv_sincronizar_tipo_transacciones', 'ver', $this->request->request));
         }
         // enviar al SII
-        $r = libredte_consume('/sii/rcv_tipo_transaccion/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
-            'auth'=> [
-                'rut' => $Emisor->rut.'-'.$Emisor->dv,
-                'clave' => $Emisor->config_sii_pass,
+        $r = libredte_api_consume('/sii/rcv/compras/set_tipo_transaccion/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+            'auth' => [
+                'pass' => [
+                    'rut' => $Emisor->rut.'-'.$Emisor->dv,
+                    'clave' => $Emisor->config_sii_pass,
+                ],
             ],
             'documentos' => $datos,
         ]);
         // mostrar resultado
-        $msg = $r['body']['data']['mensaje'];
+        $msg = utf8_decode($r['body']['data']['mensaje']);
         $tipo = $r['body']['data']['codigo'] ? 'error' : 'ok';
         if (!empty($r['body']['metaData']['errors'])) {
             $errores = [];

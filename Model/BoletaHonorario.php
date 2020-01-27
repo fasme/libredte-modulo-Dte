@@ -183,18 +183,24 @@ class Model_BoletaHonorario extends \Model_App
     /**
      * Método que obtiene el PDF de la boleta de honorarios desde el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2020-01-26
      */
     public function getPDF()
     {
-        $r = libredte_consume('/sii/boleta_honorarios_pdf/'.$this->codigo, [
-            'auth'=>[
-                'rut' => $this->getReceptor()->getRUT(),
-                'clave' => $this->getReceptor()->config_sii_pass,
+        $r = libredte_api_consume('/sii/bhe/recibidas/pdf/'.$this->codigo, [
+            'auth' => [
+                'pass' => [
+                    'rut' => $this->getReceptor()->getRUT(),
+                    'clave' => $this->getReceptor()->config_sii_pass,
+                ],
             ],
         ]);
         if ($r['status']['code']!=200 or empty($r['body'])) {
-            throw new \Exception('No fue posible descargar el PDF de la boleta de honorarios desde el SII');
+            $message = 'No fue posible descargar el PDF de la boleta de honorarios desde el SII';
+            if (!empty($r['body'])) {
+                $message .= ': '.$r['body'];
+            }
+            throw new \Exception($message);
         }
         return $r['body'];
     }

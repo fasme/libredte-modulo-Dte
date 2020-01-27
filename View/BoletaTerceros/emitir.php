@@ -8,6 +8,7 @@
 </ul>
 <div class="page-header"><h1>Emitir boleta de terceros</h1></div>
 <script>
+var tasas_retencion = <?=json_encode($tasas_retencion)?>;
 function set_receptor(form) {
     var f = document.getElementById(form);
     // resetear campos
@@ -50,6 +51,16 @@ function item_nuevo(tr) {
         return false;
     }
 }
+function get_tasa_retencion() {
+    periodo = document.getElementById('FchEmisField').value.replace('-','').substring(0,6);
+    tasa = 0;
+    Object.keys(tasas_retencion).forEach(function(k) {
+        if (periodo >= k) {
+            tasa = tasas_retencion[k];
+        }
+    });
+    return tasa;
+}
 function calcular() {
     var MntBruto = 0;
     $('input[name="MontoItem[]"]').each(function (i, e) {
@@ -57,9 +68,8 @@ function calcular() {
             MntBruto += parseInt($(e).val());
         }
     });
-    console.log(calcular);
     $('input[name="MntBruto"]').val(MntBruto);
-    $('input[name="MntRetencion"]').val(Math.round(MntBruto*0.1));
+    $('input[name="MntRetencion"]').val(Math.round(MntBruto*get_tasa_retencion()));
     $('input[name="MntNeto"]').val(MntBruto - $('input[name="MntRetencion"]').val());
 }
 </script>
@@ -79,6 +89,7 @@ echo $f->input([
     'label' => 'Fecha',
     'value' => date('Y-m-d'),
     'check' => 'notempty date',
+    'attr' => 'onblur="calcular()"',
 ]);
 echo $f->input([
     'name' => 'RUTRecep',
