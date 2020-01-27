@@ -1,7 +1,7 @@
 BEGIN;
 
 --
--- Actualización 2020.01
+-- Actualización 20.01
 --
 
 -- actualización tabla emitidos y recibidos
