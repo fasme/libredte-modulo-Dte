@@ -128,7 +128,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-04
+     * @version 2020-01-30
      */
     public function _api_emitir_POST()
     {
@@ -227,7 +227,7 @@ class Controller_Documentos extends \Controller_App
         // asignar giro u otros campos si no fue entregado y existe en la base de datos,
         // no se recomienda confiar en que exista el giro en la base de datos, pero ayuda
         // a reducir reparos leves del DTE
-        if ($normalizar) {
+        if ($normalizar and !in_array($Receptor->rut, [55555555, 66666666])) {
             if (empty($dte['Encabezado']['Receptor']['RznSocRecep']) and $Receptor->razon_social) {
                 $dte['Encabezado']['Receptor']['RznSocRecep'] = $Receptor->razon_social;
             }
