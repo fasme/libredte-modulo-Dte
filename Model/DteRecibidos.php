@@ -42,7 +42,7 @@ class Model_DteRecibidos extends \Model_Plural_App
      * Método que entrega el listado de documentos que tienen compras de
      * activos fijos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-25
+     * @version 2020-01-31
      */
     public function getActivosFijos($filtros)
     {
@@ -81,6 +81,7 @@ class Model_DteRecibidos extends \Model_Plural_App
                 r.folio,
                 r.neto,
                 r.monto_activo_fijo,
+                r.monto_iva_activo_fijo,
                 CASE WHEN r.neto = r.monto_activo_fijo THEN \'Total\' ELSE \'Parcial\' END AS montos,
                 CASE WHEN r.intercambio IS NOT NULL THEN '.$items.' ELSE NULL END AS items,
                 CASE WHEN r.intercambio IS NOT NULL THEN '.$precios.' ELSE NULL END AS precios

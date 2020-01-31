@@ -34,6 +34,7 @@ if (isset($compras)) {
         $c['fecha'] = \sowerphp\general\Utility_Date::format($c['fecha']);
         $c['neto'] = num($c['neto']);
         $c['monto_activo_fijo'] = num($c['monto_activo_fijo']);
+        $c['monto_iva_activo_fijo'] = num($c['monto_iva_activo_fijo']);
         $c['items'] = implode('<br/>', $c['items']);
         $c['precios'] = implode('<br/>', array_map('num', $c['precios']));
         $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$c['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-primary'.(!$c['intercambio']?' disabled':'').'"><i class="fa fa-search fa-fw"></i></a>';
@@ -41,7 +42,7 @@ if (isset($compras)) {
         $c[] = $acciones;
         unset($c['emisor'], $c['intercambio'], $c['dte']);
     }
-    array_unshift($compras, ['Fecha', 'Período', 'Sucursal', 'Emisor', 'Documento', 'Folio', 'Neto', 'Monto activo', 'Tipo', 'Items', 'Precios', 'Acciones']);
+    array_unshift($compras, ['Fecha', 'Período', 'Sucursal', 'Emisor', 'Documento', 'Folio', 'Neto', 'Monto activo', 'IVA activo', 'Tipo', 'Items', 'Precios', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setID('activos_fijos_'.$Emisor->rut.'_'.$_POST['desde'].'_'.$_POST['hasta']);
     $t->setExport(true);
