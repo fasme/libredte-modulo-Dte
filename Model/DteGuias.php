@@ -153,11 +153,11 @@ class Model_DteGuias extends \Model_Plural_App
      * Método que realiza la facturación masiva de las guías de despacho
      * Creará una factura para cada RUT que se esté facturando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-31
+     * @version 2020-02-03
      */
     public function facturar(array $folios, array $datos = [])
     {
-        if (!empty($datos['fecha'])) {
+        if (empty($datos['fecha'])) {
             $datos['fecha'] = date('Y-m-d');
         }
         // armar arreglo con las guías por cada receptor
