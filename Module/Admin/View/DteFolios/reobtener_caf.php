@@ -23,6 +23,7 @@ echo $f->end('Buscar folios sin cargar');
 if (isset($solicitudes)) {
     foreach ($solicitudes as &$s) {
         $s[] = '<a href="'.$_url.'/dte/admin/dte_folios/reobtener_caf_cargar/'.$dte.'/'.$s['inicial'].'/'.$s['final'].'/'.$s['fecha'].'" title="Reobtener el CAF y cargar en LibreDTE" class="btn btn-primary"><i class="fa fa-download fa-fw"></i></a>';
+        $s['fecha'] = \sowerphp\general\Utility_Date::format($s['fecha']);
     }
     array_unshift($solicitudes, ['Desde', 'Hasta', 'Cantidad', 'Fecha autorización', 'Solicitante', 'Reobtener']);
     new \sowerphp\general\View_Helper_Table($solicitudes);
