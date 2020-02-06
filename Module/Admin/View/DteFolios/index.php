@@ -5,6 +5,11 @@
         </a>
     </li>
     <li class="nav-item">
+        <a href="dte_folios/reobtener_caf" class="nav-link">
+            <i class="fa fa-download"></i> Reobtener CAF
+        </a>
+    </li>
+    <li class="nav-item">
         <a href="dte_folios/solicitar_caf" class="nav-link">
             <i class="fa fa-download"></i> Solicitar CAF
         </a>
@@ -20,8 +25,8 @@
         </a>
     </li>
 </ul>
-<div class="page-header"><h1>Mantenedor de timbraje (CAF)</h1></div>
-<p>Aquí podrá administrar los códigos de autorización de folios (CAF) disponibles para la empresa <?=$Emisor->getNombre()?>.</p>
+<div class="page-header"><h1>Mantenedor de Folios</h1></div>
+<p>Aquí podrá administrar los Códigos de Autorización de Folios (CAF) disponibles para la empresa <?=$Emisor->getNombre()?>.</p>
 <?php
 foreach ($folios as &$f) {
     $acciones = '<a href="dte_folios/ver/'.$f['dte'].'" title="Ver mantenedor del folio tipo '.$f['dte'].'" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';

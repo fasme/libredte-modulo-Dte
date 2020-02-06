@@ -16,7 +16,7 @@
     </li>
 </ul>
 
-<div class="page-header"><h1>Mantenedor folios <?=$DteFolio->getTipo()->tipo?> <small>código <?=$DteFolio->dte?></small></h1></div>
+<div class="page-header"><h1>Folios de <?=$DteFolio->getTipo()->tipo?></h1></div>
 
 <div class="card-deck">
     <div class="card mb-4">

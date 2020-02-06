@@ -251,6 +251,152 @@ class Controller_DteFolios extends \Controller_App
     }
 
     /**
+     * Acción que permite reobtener un archivo CAF al SII y cargarlo en LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-05
+     */
+    public function reobtener_caf($dte = null)
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set([
+            'Emisor' => $Emisor,
+            'dte_tipos' => $Emisor->getDocumentosAutorizados(),
+            'dte' => $dte,
+        ]);
+        // procesar solicitud de folios
+        if (isset($_POST['submit'])) {
+            // buscar el mantenedor de folios del CAF
+            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], (int)$Emisor->config_ambiente_en_certificacion);
+            if (!$DteFolio->exists()) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Primero debe crear el mantenedor de los folios de tipo '.$_POST['dte'], 'error'
+                );
+                return;
+            }
+            // recuperar firma electrónica
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            if (!$Firma) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de reobtener un CAF', 'error'
+                );
+                return;
+            }
+            // consultar listado de solicitudes
+            $r = libredte_api_consume(
+                '/sii/dte/caf/solicitudes/'.$Emisor->getRUT().'/'.$DteFolio->dte.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+                [
+                    'auth' => [
+                        'cert' => [
+                            'cert-data' => $Firma->getCertificate(),
+                            'pkey-data' => $Firma->getPrivateKey(),
+                        ],
+                    ],
+                ]
+            );
+            if ($r['status']['code']!=200) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No fue posible obtener el listado de CAFs solicitados en SII: '.$r['body'], 'error'
+                );
+                return;
+            }
+            // no hay folios timbrados en SII
+            if (empty($r['body'])) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No hay folios solicitados para el tipo de documento '.$DteFolio->dte.' en SII', 'warning'
+                );
+                return;
+            }
+            // armar listado de solicitudes de folios que no están en LibreDTE
+            $solicitudes = [];
+            foreach ($r['body'] as $s) {
+                $DteCaf = new Model_DteCaf($Emisor->rut, $DteFolio->dte, (int)$Emisor->config_ambiente_en_certificacion, $s['inicial']);
+                if (!$DteCaf->hasta) {
+                    $solicitudes[] = $s;
+                }
+            }
+            // si todo está cargado -> ok
+            if (empty($solicitudes)) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Todos los folios solicitados al SII se encuentran cargados en LibreDTE', 'ok'
+                );
+                return;
+            }
+            // asignar variables para la vista
+            $this->set([
+                'solicitudes' => $solicitudes,
+                'dte' => $DteFolio->dte,
+            ]);
+        }
+    }
+
+    /**
+     * Acción que permite descargar un archivo CAF previamente solicitado al SII
+     * y cargarlo en LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-05
+     */
+    public function reobtener_caf_cargar($dte, $folio_inicial, $folio_final, $fecha_autorizacion)
+    {
+        $Emisor = $this->getContribuyente();
+        // buscar el mantenedor de folios del CAF
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteFolio->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Primero debe crear el mantenedor de los folios de tipo '.$dte, 'error'
+            );
+            $this->redirect('/dte/admin/dte_folios');
+        }
+        // si ya existe un caf no se vuelve a cargar
+        $DteCaf = new Model_DteCaf($Emisor->rut, $DteFolio->dte, (int)$Emisor->config_ambiente_en_certificacion, $folio_inicial);
+        if ($DteCaf->hasta) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El CAF solicitado ya se encontraba cargado', 'ok'
+            );
+            $this->redirect('/dte/admin/dte_folios/reobtener_caf/'.$DteFolio->dte);
+        }
+        // recuperar firma electrónica
+        $Firma = $Emisor->getFirma($this->Auth->User->id);
+        if (!$Firma) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de reobtener un CAF', 'error'
+            );
+            $this->redirect('/dte/admin/dte_folios');
+        }
+        // consultar listado de solicitudes
+        $r = libredte_api_consume(
+            '/sii/dte/caf/xml/'.$Emisor->getRUT().'/'.$DteFolio->dte.'/'.$folio_inicial.'/'.$folio_final.'/'.$fecha_autorizacion.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+            [
+                'auth' => [
+                    'cert' => [
+                        'cert-data' => $Firma->getCertificate(),
+                        'pkey-data' => $Firma->getPrivateKey(),
+                    ],
+                ],
+            ]
+        );
+        if ($r['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible obtener el CAF desde el SII: '.$r['body'], 'error'
+            );
+            $this->redirect('/dte/admin/dte_folios/reobtener_caf/'.$DteFolio->dte);
+        }
+        // guardar el CAF
+        try {
+            $DteFolio->guardarFolios($r['body']);
+            $Folios = new \sasco\LibreDTE\Sii\Folios($r['body']);
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El CAF para el documento de tipo '.$Folios->getTipo().' que inicia en '.$Folios->getDesde().' fue cargado, el siguiente folio disponible es '.$DteFolio->siguiente, 'ok'
+            );
+            $this->redirect('/dte/admin/dte_folios/reobtener_caf/'.$DteFolio->dte);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                $e->getMessage(), 'error'
+            );
+            $this->redirect('/dte/admin/dte_folios/reobtener_caf/'.$DteFolio->dte);
+        }
+    }
+
+    /**
      * Acción que permite solicitar un archivo CAF al SII y cargarlo en LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2018-10-20
