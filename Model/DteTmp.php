@@ -281,7 +281,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-10
+     * @version 2020-02-09
      */
     public function generar($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
     {
@@ -312,12 +312,13 @@ class Model_DteTmp extends \Model_App
             throw new \Exception('Se obtuvo el CAF para el folio T'.$FolioInfo->DteFolio->dte.'F'.$FolioInfo->folio.', sin embargo el CAF no está vigente. Debe anular los folios del CAF vencido y solicitar uno nuevo.', 508);
         }
         // si quedan pocos folios timbrar o alertar según corresponda
-        if ($FolioInfo->DteFolio->disponibles<=$FolioInfo->DteFolio->alerta) {
+        if ($FolioInfo->DteFolio->disponibles <= $FolioInfo->DteFolio->alerta) {
             $timbrado = false;
             // timbrar automáticmente
             if ($Emisor->config_sii_timbraje_automatico==1) {
                 try {
-                    $FolioInfo->DteFolio->timbrar($FolioInfo->DteFolio->alerta*$Emisor->config_sii_timbraje_multiplicador);
+                    $xml = $FolioInfo->DteFolio->timbrar($FolioInfo->DteFolio->alerta*$Emisor->config_sii_timbraje_multiplicador);
+                    $FolioInfo->DteFolio->guardarFolios($xml);
                     $timbrado = true;
                 } catch (\Exception $e) {
                 }
