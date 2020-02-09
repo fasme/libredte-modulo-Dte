@@ -1459,9 +1459,9 @@ class Model_Contribuyente extends \Model_App
      * @param email Email que se quiere obteber: intercambio o sii
      * @return \sowerphp\core\Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-07
+     * @version 2020-02-09
      */
-    public function getEmailSmtp($email = 'intercambio')
+    public function getEmailSmtp($email = 'intercambio', $debug = false)
     {
         $user = $this->{'config_email_'.$email.'_user'};
         $pass = $this->{'config_email_'.$email.'_pass'};
@@ -1483,6 +1483,7 @@ class Model_Contribuyente extends \Model_App
             'user' => $user,
             'pass' => $pass,
             'from' => ['email'=>$user, 'name'=>str_replace(',', '', $this->getNombre())],
+            'debug' => $debug,
         ]);
     }
 
