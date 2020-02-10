@@ -46,7 +46,6 @@ class Model_BoletaHonorarios extends \Model_Plural_App
      */
     public function sincronizar($meses)
     {
-        $meses = 1; // WARNING
         // periodos a procesar
         $periodo_actual = (int)date('Ym');
         $periodos = [$periodo_actual];
