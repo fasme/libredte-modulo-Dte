@@ -66,7 +66,7 @@ class Model_ItemClasificaciones extends \Model_Plural_App
      * Método que entrega el árbol de clasificaciones de items con los items y
      * sus precios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-27
+     * @version 2020-02-10
      */
     public function getArbolItems()
     {
@@ -82,7 +82,13 @@ class Model_ItemClasificaciones extends \Model_Plural_App
                 ELSE
                     i.precio * 1.'.\sasco\LibreDTE\Sii::getIVA().'
                 END AS precio,
-                i.moneda
+                i.moneda,
+                CASE WHEN i.descuento_tipo = \'%\' OR i.bruto OR i.exento != 0 THEN
+                    i.descuento
+                ELSE
+                    i.descuento * 1.'.\sasco\LibreDTE\Sii::getIVA().'
+                END AS descuento,
+                i.descuento_tipo
             FROM
                 item AS i
                 RIGHT JOIN item_clasificacion AS c ON i.contribuyente = c.contribuyente AND i.clasificacion = c.codigo
