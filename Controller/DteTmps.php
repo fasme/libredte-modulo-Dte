@@ -456,7 +456,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que elimina un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2015-09-23
+     * @version 2020-02-11
      */
     public function eliminar($receptor, $dte, $codigo)
     {
@@ -466,6 +466,13 @@ class Controller_DteTmps extends \Controller_App
         if (!$DteTmp->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE temporal solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_tmps');
+        }
+        // verificar que el usuario pueda trabajar con el tipo de dte
+        if (!$Emisor->documentoAutorizado($DteTmp->dte, $this->Auth->User)) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No está autorizado a eliminar el tipo de documento '.$DteTmp->dte, 'error'
             );
             $this->redirect('/dte/dte_tmps');
         }
@@ -487,7 +494,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Servicio web que elimina un DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-28
+     * @version 2020-02-11
      */
     public function _api_eliminar_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -507,6 +514,11 @@ class Controller_DteTmps extends \Controller_App
         $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
         if (!$DteTmp->exists()) {
             $this->Api->send('No existe el DTE temporal solicitado', 404);
+        }
+        // verificar que el usuario pueda trabajar con el tipo de dte
+        if (!$Emisor->documentoAutorizado($DteTmp->dte, $User)) {
+            $this->Api->send('No está autorizado a eliminar el tipo de documento '.$DteTmp->dte, 403);
+            $this->redirect('/dte/dte_tmps');
         }
         // eliminar
         return $DteTmp->delete();
