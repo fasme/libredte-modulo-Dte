@@ -1043,7 +1043,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-06-17
+     * @version 2020-02-14
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -1054,6 +1054,9 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         if (!$to) {
             throw new \Exception('No hay correo a quien enviar el DTE');
+        }
+        if ($to == 'all') {
+            $to = $this->getEmails();
         }
         if (!is_array($to)) {
             $to = [$to];
