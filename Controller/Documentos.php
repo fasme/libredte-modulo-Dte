@@ -133,9 +133,10 @@ class Controller_Documentos extends \Controller_App
     public function _api_emitir_POST()
     {
         extract($this->getQuery([
+            'formato' => 'json',
             'normalizar' => true,
-            'email' => false,
             'links' => false,
+            'email' => false,
         ]));
         // verificar si se pasaron credenciales de un usuario
         $User = $this->Api->getAuthUser();
@@ -145,7 +146,6 @@ class Controller_Documentos extends \Controller_App
         // definir formato de los datos que se están usando como entrada
         // y si es diferente a JSON se busca un parser para poder cargar los
         // datos a un arreglo de PHP (formato JSON)
-        $formato = !empty($_GET['formato'])?$_GET['formato']:'json';
         if ($formato!='json') {
             try {
                 $this->Api->data = \sasco\LibreDTE\Sii\Dte\Formatos::toArray(
