@@ -317,7 +317,8 @@ class Model_DteTmp extends \Model_App
             // timbrar automáticmente
             if ($Emisor->config_sii_timbraje_automatico==1) {
                 try {
-                    $FolioInfo->DteFolio->timbrar($FolioInfo->DteFolio->alerta*$Emisor->config_sii_timbraje_multiplicador);
+                    $xml = $FolioInfo->DteFolio->timbrar($FolioInfo->DteFolio->alerta*$Emisor->config_sii_timbraje_multiplicador);
+                    $FolioInfo->DteFolio->guardarFolios($xml);
                     $timbrado = true;
                 } catch (\Exception $e) {
                 }
