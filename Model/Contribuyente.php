@@ -203,6 +203,7 @@ class Model_Contribuyente extends \Model_App
 
     public $contribuyente; ///< Copia de razon_social
     private $config = null; ///< Caché para configuraciones
+    private $firmas = []; ///< Caché de las firmas del contribuyente
 
     /**
      * Constructor del contribuyente
@@ -1117,40 +1118,43 @@ class Model_Contribuyente extends \Model_App
      * @param user ID del usuario que desea obtener la firma
      * @return \sasco\LibreDTE\FirmaElectronica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-05-12
+     * @version 2020-02-22
      */
-    public function getFirma($user = null)
+    public function getFirma($user_id = null)
     {
-        // buscar firma del usuario administrador de la empresa
-        $datos = $this->db->getRow('
-            SELECT f.archivo, f.contrasenia
-            FROM firma_electronica AS f, contribuyente AS c
-            WHERE f.usuario = c.usuario AND c.rut = :rut
-        ', [':rut'=>$this->rut]);
-        // buscar firma del usuario que está haciendo la solicitud
-        if (empty($datos) and $user and $user!=$this->usuario) {
+        if (!isset($this->firmas[(int)$user_id])) {
+            // buscar firma del usuario administrador de la empresa
             $datos = $this->db->getRow('
-                SELECT archivo, contrasenia
-                FROM firma_electronica
-                WHERE usuario = :usuario
-            ', [':usuario'=>$user]);
+                SELECT f.archivo, f.contrasenia
+                FROM firma_electronica AS f, contribuyente AS c
+                WHERE f.usuario = c.usuario AND c.rut = :rut
+            ', [':rut'=>$this->rut]);
+            // buscar firma del usuario que está haciendo la solicitud
+            if (empty($datos) and $user_id and $user_id!=$this->usuario) {
+                $datos = $this->db->getRow('
+                    SELECT archivo, contrasenia
+                    FROM firma_electronica
+                    WHERE usuario = :usuario
+                ', [':usuario'=>$user_id]);
+            }
+            if (empty($datos)) {
+                return false;
+            }
+            // si se obtuvo una firma se trata de usar
+            $pass = Utility_Data::decrypt($datos['contrasenia']);
+            if (!$pass) {
+                return false;
+            }
+            try {
+                $this->firmas[(int)$user_id] = new \sasco\LibreDTE\FirmaElectronica([
+                    'data' => base64_decode($datos['archivo']),
+                    'pass' => $pass,
+                ]);
+            } catch (\sowerphp\core\Exception $e) {
+                $this->firmas[(int)$user_id] = false;
+            }
         }
-        if (empty($datos))
-            return false;
-        // si se obtuvo una firma se trata de usar
-        $pass = Utility_Data::decrypt($datos['contrasenia']);
-        if (!$pass)
-            return false;
-        try {
-            $Firma = new \sasco\LibreDTE\FirmaElectronica([
-                'data' => base64_decode($datos['archivo']),
-                'pass' => $pass,
-            ]);
-            return $Firma;
-        } catch (\sowerphp\core\Exception $e) {
-            return false;
-        }
-        return false;
+        return $this->firmas[(int)$user_id];
     }
 
     /**
@@ -1242,7 +1246,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-06
+     * @version 2020-02-21
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1351,7 +1355,8 @@ class Model_Contribuyente extends \Model_App
                 t.tipo,
                 r.razon_social,
                 i.glosa AS intercambio,
-                u.usuario
+                u.usuario,
+                CASE WHEN d.xml IS NOT NULL OR d.mipyme IS NOT NULL THEN true ELSE false END AS has_xml
             FROM
                 dte_emitido AS d
                 JOIN dte_tipo AS t ON d.dte = t.codigo
@@ -1379,7 +1384,8 @@ class Model_Contribuyente extends \Model_App
                 d.revision_estado AS estado,
                 e.intercambio,
                 d.sucursal_sii,
-                e.usuario
+                e.usuario,
+                CASE WHEN d.xml IS NOT NULL OR d.mipyme IS NOT NULL THEN true ELSE false END AS has_xml
             FROM
                 dte_emitido AS d
                 JOIN ('.$query.') AS e ON d.emisor = e.emisor AND e.dte = d.dte AND e.folio = d.folio AND e.certificacion = d.certificacion
@@ -2031,7 +2037,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos recibidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-04
+     * @version 2020-02-10
      */
     public function getDocumentosRecibidos($filtros = [])
     {
@@ -2096,7 +2102,7 @@ class Model_Contribuyente extends \Model_App
         }
         // armar consulta
         $query = '
-            SELECT d.dte, t.tipo, d.folio, d.emisor, e.razon_social, d.fecha, d.total, d.intercambio, u.usuario, d.emisor
+            SELECT d.dte, t.tipo, d.folio, d.emisor, e.razon_social, d.fecha, d.total, d.intercambio, u.usuario, d.emisor, d.mipyme
             FROM dte_recibido AS d, dte_tipo AS t, contribuyente AS e, usuario AS u
             WHERE d.dte = t.codigo AND d.emisor = e.rut AND d.usuario = u.id AND '.implode(' AND ', $where).'
             ORDER BY d.fecha DESC, t.tipo, e.razon_social
@@ -2988,7 +2994,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el detalle de los documentos emitidos que aun no han
      * sido enviado al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2020-02-21
      */
     public function getDocumentosEmitidosSinEnviar()
     {
@@ -3021,6 +3027,7 @@ class Model_Contribuyente extends \Model_App
                 AND d.certificacion = :certificacion
                 AND d.dte NOT IN (39, 41)
                 AND d.track_id IS NULL
+                AND d.xml IS NOT NULL
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
 
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
@@ -3115,12 +3122,15 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega la información del registro de compra y venta del SII
      * del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-01-26
+     * @version 2020-02-22
      */
     public function getRCV(array $filtros = [])
     {
-        if (!$this->config_sii_pass) {
-            throw new \Exception('Primero debe agregar la contraseña del SII, en la configuración de la empresa');
+        // definir autenticación
+        try {
+            $auth = $this->getSiiAuth();
+        } catch (\Exception $e) {
+            $auth = $this->getSiiAuthUser();
         }
         // filtros por defecto
         $filtros = array_merge([
@@ -3129,20 +3139,33 @@ class Model_Contribuyente extends \Model_App
             'estado' => 'REGISTRO',
             'periodo' => date('Ym'),
             'dte' => null,
-            'tipo' => 'rcv', // tipo de formato a usar cuando se pide el detalle de documentos (rcv o iecv)
+            'tipo' => 'rcv', // tipo de archivo a usar cuando se pide el detalle de documentos (rcv, iecv o rcv_csv)
+            'formato' => 'json', // formato en el que se debe entregar la respuesta, siempre debería ser json, excepto si es rcv_csv que podría ser csv
         ], $filtros);
         // si se pide el detalle pero no se indicó el tipo de documento se buscan todos los posible
         if ($filtros['detalle']===true) {
             // si no se indicó dte se colocan todos los posibles
             if (!$filtros['dte']) {
-                $dtes = [];
-                $resumen = $this->getRCV(['operacion' => $filtros['operacion'], 'periodo' => $filtros['periodo'], 'estado' => $filtros['estado'], 'detalle'=>false]);
-                foreach ($resumen as $r) {
-                    if ($r['rsmnTotDoc']) {
-                        $dtes[] = $r['rsmnTipoDocInteger'];
-                    }
+                // si se solicita el ripo rcv_csv no se indican los DTE; se obtiene todo por defecto
+                if ($filtros['tipo'] == 'rcv_csv') {
+                    $filtros['dte'] = [0];
                 }
-                $filtros['dte'] = $dtes;
+                // si es tipo rcv o iecv se deben buscar los posibles tipos de documentos
+                else {
+                    $dtes = [];
+                    $resumen = $this->getRCV([
+                        'operacion' => $filtros['operacion'],
+                        'periodo' => $filtros['periodo'],
+                        'estado' => $filtros['estado'],
+                        'detalle' => false
+                    ]);
+                    foreach ($resumen as $r) {
+                        if ($r['rsmnTotDoc']) {
+                            $dtes[] = $r['rsmnTipoDocInteger'];
+                        }
+                    }
+                    $filtros['dte'] = $dtes;
+                }
             }
             // si el dte es sólo uno se coloca como arreglo
             else if (!is_array($filtros['dte'])) {
@@ -3169,9 +3192,7 @@ class Model_Contribuyente extends \Model_App
                     $this->rut, $this->dv, $filtros['periodo'], (int)$this->config_ambiente_en_certificacion
                 );
             }
-            $r = libredte_api_consume(
-                $url, ['auth'=>['pass'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]]
-            );
+            $r = libredte_api_consume($url, ['auth'=>$auth]);
             if ($r['status']['code']!=200) {
                 throw new \Exception('Error al obtener el resumen del RCV: '.$r['body']);
             }
@@ -3190,26 +3211,28 @@ class Model_Contribuyente extends \Model_App
             foreach ($filtros['dte'] as $dte) {
                 if ($filtros['operacion']=='COMPRA') {
                     $url = sprintf(
-                        '/sii/rcv/compras/detalle/%d-%s/%d/%d/%s?formato=json&certificacion=%d&tipo=%s',
+                        '/sii/rcv/compras/detalle/%d-%s/%d/%d/%s?formato='.$filtros['formato'].'&certificacion=%d&tipo=%s',
                         $this->rut, $this->dv, $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
                     );
                 } else {
                     $url = sprintf(
-                        '/sii/rcv/ventas/detalle/%d-%s/%d/%d?formato=json&certificacion=%d&tipo=%s',
+                        '/sii/rcv/ventas/detalle/%d-%s/%d/%d?formato='.$filtros['formato'].'&certificacion=%d&tipo=%s',
                         $this->rut, $this->dv, $filtros['periodo'], $dte, (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
                     );
                 }
-                $r = libredte_api_consume(
-                    $url, ['auth'=>['pass'=>['rut' => $this->rut.'-'.$this->dv, 'clave' => $this->config_sii_pass]]]
-                );
+                $r = libredte_api_consume($url, ['auth'=>$auth]);
                 if ($r['status']['code']!=200) {
                     throw new \Exception('Error al obtener el detalle del RCV: '.$r['body']);
                 }
-                if ($r['body']['respEstado']['codRespuesta']) {
-                    $error = isset($errores[$r['body']['respEstado']['codRespuesta']]) ? $errores[$r['body']['respEstado']['codRespuesta']] : ('Código '.$r['body']['respEstado']['codRespuesta']);
-                    throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta'].' ('.$error.')');
+                if ($filtros['tipo'] == 'rcv_csv') {
+                    return $r['body'];
+                } else {
+                    if ($r['body']['respEstado']['codRespuesta']) {
+                        $error = isset($errores[$r['body']['respEstado']['codRespuesta']]) ? $errores[$r['body']['respEstado']['codRespuesta']] : ('Código '.$r['body']['respEstado']['codRespuesta']);
+                        throw new \Exception('No fue posible obtener el detalle: '.$r['body']['respEstado']['msgeRespuesta'].' ('.$error.')');
+                    }
+                    $detalle = array_merge($detalle, $r['body']['data']);
                 }
-                $detalle = array_merge($detalle, $r['body']['data']);
             }
             return $detalle;
         }
@@ -3517,6 +3540,72 @@ class Model_Contribuyente extends \Model_App
             }
         }
         return true;
+    }
+
+    /**
+     * Método que entrega las credenciales de empresa para autenticación en el
+     * SII.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getSiiAuth()
+    {
+        if (!$this->config_sii_pass) {
+            throw new \Exception('Falta la contraseña del SII en la configuración de la empresa');
+        }
+        return [
+            'pass' => [
+                'rut' => $this->rut.'-'.$this->dv,
+                'clave' => $this->config_sii_pass
+            ]
+        ];
+    }
+
+    /**
+     * Método que entrega las credenciales de usuario para autenticación en el
+     * SII. Se puede entregar las credenciales rut/clave del usuario o en
+     * segunda instancia la firma electrónica del usuario
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getSiiAuthUser($user_id = null)
+    {
+        // si no se indicó usuario se usa el por defecto de la empresa
+        if (!$user_id) {
+            $user_id = $this->usuario;
+        }
+        // mediante rut/clave del usuario
+        $Usuario = $user_id == $this->usuario ? $this->getUsuario() : (new \sowerphp\app\Sistema\Usuarios\Model_Usuarios())->get($user_id);
+        if ($Usuario->config_sii_rut and $Usuario->config_sii_pass) {
+            return [
+                'pass' => [
+                    'rut' => str_replace('.', '', $Usuario->config_sii_rut),
+                    'clave' => $Usuario->config_sii_pass,
+                ],
+            ];
+        }
+        // mediante firma electrónica del usuario
+        return $this->getSiiAuthCert($user_id);
+    }
+
+    /**
+     * Método que entrega las credenciales de usuario para autenticación en el
+     * SII usando firma electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getSiiAuthCert($user_id = null)
+    {
+        $Firma = $this->getFirma($user_id);
+        if (!$Firma) {
+            throw new \Exception('No fue posible obtener credenciales de autenticación del usuario para el SII, falta firma electrónica');
+        }
+        return [
+            'cert' => [
+                'cert-data' => $Firma->getCertificate(),
+                'pkey-data' => $Firma->getPrivateKey(),
+            ],
+        ];
     }
 
 }

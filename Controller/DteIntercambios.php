@@ -555,7 +555,7 @@ class Controller_DteIntercambios extends \Controller_App
      * Acción de la API que permite realizar una búsqueda avanzada dentro de los
      * documentos de intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-09
+     * @version 2020-02-18
      */
     public function _api_buscar_POST($receptor)
     {
@@ -572,7 +572,7 @@ class Controller_DteIntercambios extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // buscar documentos
-        $intercambios = (new Model_DteIntercambios())->setContribuyente($Receptor)->buscar($this->Api->data);
+        $intercambios = (new Model_DteIntercambios())->setContribuyente($Receptor)->buscar((array)$this->Api->data);
         if (!$intercambios) {
             $this->Api->send('No se encontraron documentos de intercambio que coincidan con la búsqueda', 404);
         }

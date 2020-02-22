@@ -114,4 +114,135 @@ class Model_DteVentas extends \Model_Plural_App
         return $resumen;
     }
 
+    /**
+     * Método que sincroniza el libro de ventas local con el registro de ventas del SII
+     * - Se agregan documentos "registrados" en el registro de ventas del SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-19
+     */
+    public function sincronizarRegistroVentasSII($meses = 2)
+    {
+        $documentos_encontrados = 0;
+        // periodos a procesar
+        $periodo_actual = (int)date('Ym');
+        $periodos = [$periodo_actual];
+        for ($i = 0; $i < $meses-1; $i++) {
+            $periodos[] = \sowerphp\general\Utility_Date::previousPeriod($periodos[$i]);
+        }
+        sort($periodos);
+        // sincronizar periodos
+        foreach ($periodos as $periodo) {
+            $config = ['periodo'=>$periodo];
+            $documentos = $this->getContribuyente()->getRCV([
+                'operacion' => 'VENTA',
+                'periodo' => $periodo,
+                'tipo' => 'iecv'
+            ]);
+            $documentos_encontrados += count($documentos);
+            $this->agregarMasivo($documentos, $config);
+        }
+        return $documentos_encontrados;
+    }
+
+    /**
+     * Método que agrega masivamente documentos emitidos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-21
+     */
+    private function agregarMasivo($documentos, array $config = [])
+    {
+        $config = array_merge([
+            'periodo' => (int)date('Ym'),
+            'sucursal' => 0,
+        ], $config);
+        $Receptores = new Model_Contribuyentes();
+        foreach ($documentos as $doc) {
+            // si el documento está anulado se omite
+            if ($doc['anulado']) {
+                continue;
+            }
+            // si el documento no tiene RUT es probable que sea un resumen -> se omite
+            if (!$doc['rut']) {
+                continue;
+            }
+            // agregar el documento emitido si no existe
+            $Receptor = $Receptores->get(substr($doc['rut'],0,-2));
+            $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $doc['dte'], $doc['folio'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            if (!$DteEmitido->usuario or $DteEmitido->mipyme) {
+                $DteEmitido->tasa = $doc['tasa'] ? $doc['tasa'] : 0;
+                $DteEmitido->fecha = $doc['fecha'];
+                $DteEmitido->sucursal_sii = $doc['sucursal_sii'] ? $doc['sucursal_sii'] : null;
+                $DteEmitido->receptor = $Receptor->rut;
+                $DteEmitido->exento = $doc['exento'] ? $doc['exento'] : null;
+                $DteEmitido->neto = $doc['neto'] ? $doc['neto'] : null;
+                $DteEmitido->iva = $doc['iva'] ? $doc['iva'] : 0;
+                $DteEmitido->total = $doc['total'] ? $doc['total'] : 0;
+                $DteEmitido->usuario = $this->getContribuyente()->getUsuario()->id;
+                $DteEmitido->track_id = -2;
+                $DteEmitido->save();
+            }
+        }
+    }
+
+    /**
+     * Método que sincroniza los documentos emitidos del Portal MIPYME con
+     * LibreDTE, cargando los datos que estén en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function sincronizarEmitidosPortalMipymeSII($meses = 2)
+    {
+        $documentos_encontrados = 0;
+        // periodos a procesar
+        $periodo_actual = (int)date('Ym');
+        $periodos = [$periodo_actual];
+        for ($i = 0; $i < $meses-1; $i++) {
+            $periodos[] = \sowerphp\general\Utility_Date::previousPeriod($periodos[$i]);
+        }
+        sort($periodos);
+        // se requiere firma electrónica
+        $Firma = $this->getContribuyente()->getFirma();
+        if (!$Firma) {
+            throw new \Exception('No es posible sincronizar MIPYME, falta firma electrónica');
+        }
+        // sincronizar periodos
+        foreach ($periodos as $periodo) {
+            // obtener documentos emitidos en el portal mipyme
+            $r = libredte_api_consume(
+                '/sii/mipyme/emitidos/documentos/'.$this->getContribuyente()->getRUT().'?formato=json',
+                [
+                    'auth' => $this->getContribuyente()->getSiiAuthUser(),
+                    'filtros' => [
+                        'FEC_DESDE' => \sowerphp\general\Utility_Date::normalize($periodo.'01'),
+                        'FEC_HASTA' => \sowerphp\general\Utility_Date::lastDayPeriod($periodo),
+                    ],
+                ]
+            );
+            if ($r['status']['code'] != 200) {
+                throw new \Exception('Error al sincronizar emitidos del período '.$periodo.': '.$r['body'], $r['status']['code']);
+            }
+            // guardar documentos encontrados
+            $Receptores = new Model_Contribuyentes();
+            $documentos = (array)$r['body'];
+            $documentos_encontrados += count($documentos);
+            foreach($documentos as $dte) {
+                $Receptor = $Receptores->get($dte['rut']);
+                $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $dte['dte'], $dte['folio'], 0);
+                if ($DteEmitido->mipyme and $DteEmitido->revision_detalle == $dte['estado']) {
+                    continue;
+                }
+                $DteEmitido->receptor = $Receptor->rut;
+                $DteEmitido->fecha = $dte['fecha'];
+                $DteEmitido->total = $dte['total'];
+                $DteEmitido->mipyme = $dte['codigo'];
+                $DteEmitido->revision_estado = 'DTE MIPYME';
+                $DteEmitido->revision_detalle = $dte['estado'];
+                $DteEmitido->usuario = $this->getContribuyente()->usuario;
+                $DteEmitido->track_id = -2;
+                $DteEmitido->save();
+            }
+        }
+        return $documentos_encontrados;
+    }
+
 }

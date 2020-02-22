@@ -73,6 +73,7 @@ class Model_DteRecibido extends \Model_App
     public $rcv_accion; ///< character(3) NULL DEFAULT ''
     public $tipo_transaccion; ///< smallint(16) NULL DEFAULT ''
     public $fecha_hora_creacion; ///< timestamp without time zone() NOT NULL DEFAULT ''
+    public $mipyme; ///< bigint(64) NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -450,6 +451,17 @@ class Model_DteRecibido extends \Model_App
             'pk'        => false,
             'fk'        => null
         ),
+        'mipyme' => array(
+            'name'      => 'Código MIPYME',
+            'comment'   => '',
+            'type'      => 'bigint',
+            'length'    => 64,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
 
     );
 
@@ -465,9 +477,11 @@ class Model_DteRecibido extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     // cachés
+    private $Emisor; ///< Objeto con el Emisor del DTE recibido
     private $DteIntercambio; ///< Objeto con el DTE de intercambio
-    public $xml; ///< XML asociado del intercambio
+    public $xml; ///< XML del DTE recibido, ya sea asociado del intercambio o por portal mipyme
     public $detalle; ///< Detalle del documento del intercambio
+    private $datos; /// Datos del DTE
 
     /**
      * Método que asigna los campos iva_no_recuperable e impuesto_adicional si
@@ -744,50 +758,170 @@ class Model_DteRecibido extends \Model_App
     }
 
     /**
-     * Método que entrega el XML del documento recibido si existe intercambio asociado
+     * Método que entrega los datos del DTE (el XML como arreglo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-21
+     * @version 2020-02-22
      */
-    public function getXML()
+    public function getDatos()
     {
-        // si no está asignado el XML se busca
-        if (!isset($this->xml)) {
-            // no hay documento intercambio
-            if (!$this->intercambio) {
-                $this->xml = false;
+        // si no está asignado el Detalle se busca
+        if (!isset($this->datos)) {
+            // hay intercambio
+            if ($this->intercambio) {
+                $this->datos = $this->getDteIntercambio()->getDocumento($this->emisor, $this->dte, $this->folio)->getDatos();
             }
-            // hay documento intercambio
+            // es documento mipyme
+            else if ($this->mipyme) {
+                $XML = new \sasco\LibreDTE\XML();
+                $XML->loadXML($this->getXML());
+                $doc = $XML->toArray();
+                foreach (['Documento', 'Liquidacion', 'Exportacion'] as $tipo) {
+                    if (isset($doc['DTE'][$tipo])) {
+                        $this->datos = $doc['DTE'][$tipo];
+                        break;
+                    }
+                }
+            }
+            // no hay documento XML asociado (ni por intercambio, ni por MIPYME)
             else {
-                $this->xml = base64_encode($this->getDteIntercambio()->getDocumento($this->emisor, $this->dte, $this->folio)->saveXML());
+                $this->datos = false;
             }
         }
         // entregar documento intercambio
-        return $this->xml;
+        return $this->datos;
     }
 
     /**
      * Método que entrega el detalle del documento recibido si existe intercambio asociado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-21
+     * @version 2020-02-22
      */
     public function getDetalle()
     {
         // si no está asignado el Detalle se busca
         if (!isset($this->detalle)) {
-            // no hay documento intercambio
-            if (!$this->intercambio) {
+            // no hay documento XML asociado (ni por intercambio, ni por MIPYME)
+            if (!$this->intercambio and !$this->mipyme) {
                 $this->detalle = false;
             }
             // hay documento intercambio
             else {
-                $this->detalle = $this->getDteIntercambio()->getDocumento($this->emisor, $this->dte, $this->folio)->getDatos()['Detalle'];
-                if (!isset($this->detalle[0])) {
+                $this->detalle = $this->getDatos()['Detalle'];
+                if ($this->detalle and !isset($this->detalle[0])) {
                     $this->detalle = [$this->detalle];
                 }
             }
         }
         // entregar documento intercambio
         return $this->detalle;
+    }
+
+    /**
+     * Método que entrega el XML del documento recibido.
+     * Entrega el XML asociado a un intercambio en LibreDTE o bien recibido con
+     * el Portal MIPYME del SII.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getXML()
+    {
+        // si está en caché se entrega
+        if (isset($this->xml)) {
+            return $this->xml;
+        }
+        // buscar en intercambio
+        if ($this->intercambio) {
+            $this->xml = $this->getDteIntercambio()->getDocumento($this->emisor, $this->dte, $this->folio)->saveXML();
+            return $this->xml;
+        }
+        // si no hay XML en la base de datos, se busca si es un DTE del Portal
+        // MIPYME en cuyo casi se obtiene el XML directo desde el SII
+        if ($this->mipyme) {
+            $r = libredte_api_consume(
+                sprintf(
+                    '/sii/mipyme/recibidos/xml/%s/%s/%d/%d',
+                    $this->getReceptor()->getRUT(),
+                    $this->getEmisor()->getRUT(),
+                    $this->dte,
+                    $this->folio
+                ),
+                [
+                    'auth' => $this->getReceptor()->getSiiAuthUser(),
+                ]
+            );
+            if ($r['status']['code'] != 200) {
+                if ($r['status']['code'] == 404) {
+                    $this->xml = false;
+                } else {
+                    throw new \Exception('Error al obtener el XML: '.$r['body'], $r['status']['code']);
+                }
+            } else {
+                $XML = new \sasco\LibreDTE\XML();
+                $XML->loadXML($r['body']);
+                $this->xml =
+                    '<?xml version="1.0" encoding="ISO-8859-1"?>'."\n".
+                    $XML->saveXML($XML->getElementsByTagName('DTE')->item(0))
+                ;
+            }
+            return $this->xml;
+        }
+        // en caso que no exista el XML => null (ej: porque se eliminó el intercambio o nunca se tuvo)
+        $this->xml = false;
+        return $this->xml;
+    }
+
+    /**
+     * Método que entrega el PDF del documento recibido.
+     * Entrega el PDF que se ha generado con LibreDTE a partir del XML del DTE
+     * recibido o bien el PDF generado con el PortalMIPYME del SII.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getPDF($cedible = 0)
+    {
+        // si es un DTE del portal MIPYME se busca el PDF ahí
+        if ($this->mipyme) {
+            $r = libredte_api_consume(
+                sprintf(
+                    '/sii/mipyme/recibidos/pdf/%s/%s/%d',
+                    $this->getReceptor()->getRUT(),
+                    $this->getEmisor()->getRUT(),
+                    $this->mipyme
+                ),
+                [
+                    'auth' => $this->getReceptor()->getSiiAuthUser(),
+                ]
+            );
+            if ($r['status']['code'] != 200) {
+                throw new \Exception('Error al obtener el PDF: '.$r['body'], $r['status']['code']);
+            }
+            return $r['body'];
+        }
+        // si es un DTE con intercambio se busca en LibreDTE
+        else if ($this->intercambio) {
+            $Request = new \sowerphp\core\Network_Request();
+            $url = sprintf(
+                $Request->url.'/api/dte/dte_intercambios/pdf/%d/%d/%d/%d/%d/%d',
+                $this->intercambio,
+                $this->receptor,
+                (int)$cedible,
+                $this->emisor,
+                $this->dte,
+                $this->folio
+            );
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($this->getReceptor()->getUsuario()->hash);
+            $response = $rest->get($url);
+            if ($response['status']['code']!=200) {
+                throw new \Exception($response['body'], $response['status']['code']);
+
+            }
+            return $response['body'];
+        }
+        // si no es mipyme ni intercambio error
+        else {
+            throw new \Exception('No es posible obtener el PDF del DTE recibido');
+        }
     }
 
 }

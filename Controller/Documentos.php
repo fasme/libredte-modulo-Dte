@@ -367,7 +367,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-04
+     * @version 2020-02-21
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -388,6 +388,12 @@ class Controller_Documentos extends \Controller_App
                         'Documento T'.$referencia_dte.'F'.$referencia_folio.' no existe, no se puede referenciar', 'error'
                     );
                     $this->redirect('/dte/dte_emitidos/listar');
+                }
+                if (!$DocumentoOriginal->hasXML()) {
+                    \sowerphp\core\Model_Datasource_Session::message(
+                        'Documento T'.$referencia_dte.'F'.$referencia_folio.' no tiene un XML asociado, sólo se puede referenciar manualmente', 'error'
+                    );
+                    $this->redirect('/dte/dte_emitidos/ver/'.$referencia_dte.'/'.$referencia_folio.'#referencias');
                 }
             }
             // si el folio de referencia es alfanumérico se busca un DTE temporal
@@ -822,7 +828,7 @@ class Controller_Documentos extends \Controller_App
      * Función de la API que permite emitir un DTE a partir de un documento
      * temporal, asignando folio, firmando y enviando al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-10
+     * @version 2020-02-16
      */
     public function _api_generar_POST()
     {
@@ -891,6 +897,8 @@ class Controller_Documentos extends \Controller_App
         // quitar XML si no se pidió
         if (!$getXML) {
             $datos_dte_emitido['xml'] = false;
+        } else {
+            $datos_dte_emitido['xml'] = base64_encode($DteEmitido->getXML());
         }
         // entregar DTE emitido al cliente de la API
         return $datos_dte_emitido;

@@ -53,14 +53,77 @@ class Model_DteCompras extends \Model_Plural_App
     }
 
     /**
+     * Método que entrega el total mensual del libro de compras
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-20
+     */
+    public function getTotalesMensuales($anio)
+    {
+        $periodo_actual = date('Ym');
+        $periodo = $anio.'01';
+        $totales_mensuales = [];
+        for ($i=0; $i<12; $i++) {
+            if ($periodo>$periodo_actual) {
+                break;
+            }
+            $totales_mensuales[$periodo] = array_merge(
+                ['periodo'=>$periodo],
+                (new Model_DteCompra($this->getContribuyente()->rut, $periodo, $this->getContribuyente()->config_ambiente_en_certificacion))->getTotales()
+            );
+            $periodo = \sowerphp\general\Utility_Date::nextPeriod($periodo);
+        }
+        return $totales_mensuales;
+    }
+
+    /**
+     * Método que entrega el resumen anual de compras
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-20
+     */
+    public function getResumenAnual($anio)
+    {
+        $libros = [];
+        foreach (range(1,12) as $mes) {
+            $mes = $mes < 10 ? '0'.$mes : $mes;
+            $DteCompra = new Model_DteCompra($this->getContribuyente()->rut, (int)($anio.$mes), (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $resumen = $DteCompra->getResumen();
+            if ($resumen) {
+                $libros[$anio][$mes] = $resumen;
+            }
+        }
+        // ir sumando en el resumen anual
+        $resumen = [];
+        if (!empty($libros[$anio])) {
+            foreach($libros[$anio] as $mes => $resumen_mensual) {
+                foreach ($resumen_mensual as $r) {
+                    $cols = array_keys($r);
+                    unset($cols[array_search('TpoDoc',$cols)]);
+                    if (!isset($resumen[$r['TpoDoc']])) {
+                        $resumen[$r['TpoDoc']] = ['TpoDoc' => $r['TpoDoc']];
+                        foreach ($cols as $col) {
+                            $resumen[$r['TpoDoc']][$col] = 0;
+                        }
+                    }
+                    foreach ($cols as $col) {
+                        $resumen[$r['TpoDoc']][$col] += (float)$r[$col];
+                    }
+                }
+            }
+        }
+        ksort($resumen);
+        return $resumen;
+    }
+
+    /**
      * Método que sincroniza el libro de compras local con el registro de compras del SII
      * - Se agregan documentos "registrados" en el registro de compras del SII
      * - Se eliminan documentos que están en el SII marcados como "no incluir" o "reclamados"
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2020-02-19
      */
     public function sincronizarRegistroComprasSII($meses = 2)
     {
+        $documentos_encontrados = 0;
         // periodos a procesar
         $periodo_actual = (int)date('Ym');
         $periodos = [$periodo_actual];
@@ -71,16 +134,38 @@ class Model_DteCompras extends \Model_Plural_App
         // sincronizar periodos
         foreach ($periodos as $periodo) {
             $config = ['periodo'=>$periodo];
-            $this->agregarMasivo($this->getContribuyente()->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'estado' => 'REGISTRO', 'tipo' => 'iecv']), $config);
-            $this->eliminarMasivo($this->getContribuyente()->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'estado' => 'NO_INCLUIR', 'tipo' => 'iecv']));
-            $this->eliminarMasivo($this->getContribuyente()->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'estado' => 'RECLAMADO', 'tipo' => 'iecv']));
+            $documentos = $this->getContribuyente()->getRCV([
+                'operacion' => 'COMPRA',
+                'periodo' => $periodo,
+                'estado' => 'REGISTRO',
+                'tipo' => 'iecv'
+            ]);
+            $documentos_encontrados += count($documentos);
+            $this->agregarMasivo($documentos, $config);
+            $this->eliminarMasivo(
+                $this->getContribuyente()->getRCV([
+                    'operacion' => 'COMPRA',
+                    'periodo' => $periodo,
+                    'estado' => 'NO_INCLUIR',
+                    'tipo' => 'iecv'
+                ])
+            );
+            $this->eliminarMasivo(
+                $this->getContribuyente()->getRCV([
+                    'operacion' => 'COMPRA',
+                    'periodo' => $periodo,
+                    'estado' => 'RECLAMADO',
+                    'tipo' => 'iecv'
+                ])
+            );
         }
+        return $documentos_encontrados;
     }
 
     /**
      * Método que agrega masivamente documentos recibidos y acepta los intercambios asociados al DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-22
+     * @version 2020-02-19
      */
     private function agregarMasivo($documentos, array $config = [])
     {
@@ -88,6 +173,7 @@ class Model_DteCompras extends \Model_Plural_App
             'periodo' => (int)date('Ym'),
             'sucursal' => 0,
         ], $config);
+        $Emisores = new Model_Contribuyentes();
         $DteIntercambios = (new Model_DteIntercambios())->setContribuyente($this->getContribuyente());
         foreach ($documentos as $doc) {
             // si el documento está anulado se omite
@@ -104,17 +190,22 @@ class Model_DteCompras extends \Model_Plural_App
                 }
             }
             // agregar el documento recibido si no existe
-            $DteRecibido = new Model_DteRecibido(substr($doc['rut'],0,-2), $doc['dte'], $doc['folio'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
-            if (!$DteRecibido->usuario) {
-                $DteRecibido->tasa = $doc['tasa'];
+            $Emisor = $Emisores->get(substr($doc['rut'],0,-2));
+            $DteRecibido = new Model_DteRecibido($Emisor->rut, $doc['dte'], $doc['folio'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            if (!$DteRecibido->usuario or $DteRecibido->mipyme) {
+                $DteRecibido->tasa = (float)$doc['tasa'];
                 $DteRecibido->fecha = $doc['fecha'];
                 $DteRecibido->sucursal_sii = $doc['sucursal_sii'];
                 $DteRecibido->exento = $doc['exento'];
                 $DteRecibido->neto = $doc['neto'];
-                $DteRecibido->iva = $doc['iva'];
-                $DteRecibido->total = $doc['total'];
+                $DteRecibido->iva = $doc['iva'] ? $doc['iva'] : 0;
+                $DteRecibido->total = $doc['total'] ? $doc['total'] : 0;
                 $DteRecibido->iva_uso_comun = $doc['iva_uso_comun'];
-                $DteRecibido->iva_no_recuperable = $doc['iva_no_recuperable_monto'] ? json_encode([['codigo'=>$doc['iva_no_recuperable_codigo'], 'monto'=>$doc['iva_no_recuperable_monto']]]) : null;
+                $DteRecibido->iva_no_recuperable =
+                    $doc['iva_no_recuperable_monto']
+                    ? json_encode([['codigo'=>$doc['iva_no_recuperable_codigo'], 'monto'=>$doc['iva_no_recuperable_monto']]])
+                    : null
+                ;
                 $DteRecibido->impuesto_adicional = null;
                 $DteRecibido->impuesto_tipo = $doc['impuesto_tipo'];
                 $DteRecibido->impuesto_sin_credito = $doc['impuesto_sin_credito'];
@@ -172,6 +263,59 @@ class Model_DteCompras extends \Model_Plural_App
                 }
             }
         }
+    }
+
+    /**
+     * Método que sincroniza los documentos recibidos del Portal MIPYME con
+     * LibreDTE, cargando los datos que estén en el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function sincronizarRecibidosPortalMipymeSII($meses = 2)
+    {
+        $documentos_encontrados = 0;
+        // periodos a procesar
+        $periodo_actual = (int)date('Ym');
+        $periodos = [$periodo_actual];
+        for ($i = 0; $i < $meses-1; $i++) {
+            $periodos[] = \sowerphp\general\Utility_Date::previousPeriod($periodos[$i]);
+        }
+        sort($periodos);
+        // sincronizar periodos
+        foreach ($periodos as $periodo) {
+            // obtener documentos recibidos en el portal mipyme
+            $r = libredte_api_consume(
+                '/sii/mipyme/recibidos/documentos/'.$this->getContribuyente()->getRUT().'?formato=json',
+                [
+                    'auth' => $this->getContribuyente()->getSiiAuthUser(),
+                    'filtros' => [
+                        'FEC_DESDE' => \sowerphp\general\Utility_Date::normalize($periodo.'01'),
+                        'FEC_HASTA' => \sowerphp\general\Utility_Date::lastDayPeriod($periodo),
+                    ],
+                ]
+            );
+            if ($r['status']['code'] != 200) {
+                throw new \Exception('Error al sincronizar recibidos del período '.$periodo.': '.$r['body'], $r['status']['code']);
+            }
+            // guardar documentos encontrados
+            $Emisores = new Model_Contribuyentes();
+            $documentos = (array)$r['body'];
+            $documentos_encontrados += count($documentos);
+            foreach($documentos as $dte) {
+                $Emisor = $Emisores->get($dte['rut']);
+                $DteRecibido = new Model_DteRecibido($Emisor->rut, $dte['dte'], $dte['folio'], 0);
+                if ($DteRecibido->mipyme) {
+                    continue;
+                }
+                $DteRecibido->receptor = $this->getContribuyente()->rut;
+                $DteRecibido->fecha = $dte['fecha'];
+                $DteRecibido->total = $dte['total'];
+                $DteRecibido->mipyme = $dte['codigo'];
+                $DteRecibido->usuario = $this->getContribuyente()->usuario;
+                $DteRecibido->save();
+            }
+        }
+        return $documentos_encontrados;
     }
 
 }

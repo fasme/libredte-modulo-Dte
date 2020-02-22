@@ -102,7 +102,7 @@ echo View_Helper_Dashboard::cards([
             <div class="card mb-4">
                 <div class="card-body text-center">
                     <p class="lead">¿Sabía que si asigna la contraseña del SII de la empresa podría desbloquear funcionalidades adicionales?</p>
-                    <p class="small">Por ejemplo la sincronización con el registro de compras y ventas del SII</p>
+                    <p class="small">Por ejemplo la sincronización de Boletas de Honorarios y de Terceros</p>
                 </div>
             </div>
 <?php endif; ?>

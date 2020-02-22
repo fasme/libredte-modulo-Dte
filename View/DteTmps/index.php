@@ -46,7 +46,7 @@ foreach ($dtes as &$dte) {
     $documentos[] = [
         $dte->getReceptor()->razon_social,
         $dte->getReceptor()->rut.'-'.$dte->getReceptor()->dv,
-        $dte->getDte()->tipo,
+        $dte->getTipo()->tipo,
         $dte->getFolio(),
         \sowerphp\general\Utility_Date::format($dte->fecha),
         num($dte->total),

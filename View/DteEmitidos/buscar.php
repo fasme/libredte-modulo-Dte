@@ -47,13 +47,13 @@ if (isset($documentos)) {
         $filename_pdf = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.pdf';
         $filename_xml = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.xml';
         $total += $d['total'];
-        $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/xml/'.$d['dte'].'/'.$d['folio'].'" title="Descargar XML del documento" class="btn btn-primary" download="'.$filename_xml.'" data-click="xml"><i class="far fa-file-code fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary" download="'.$filename_pdf.'" data-click="pdf"><i class="far fa-file-pdf fa-fw"></i></a>';
+        $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary mb-2"><i class="fa fa-search fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/xml/'.$d['dte'].'/'.$d['folio'].'" title="Descargar XML del documento" class="btn btn-primary mb-2'.(!$d['has_xml']?' disabled':'').'" download="'.$filename_xml.'" data-click="xml"><i class="far fa-file-code fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary mb-2'.(!$d['has_xml']?' disabled':'').'" download="'.$filename_pdf.'" data-click="pdf"><i class="far fa-file-pdf fa-fw"></i></a>';
         $d[] = $acciones;
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d['total'] = num($d['total']);
-        unset($d['receptor'], $d['dte'], $d['intercambio']);
+        unset($d['receptor'], $d['dte'], $d['intercambio'], $d['has_xml']);
     }
     // agregar resumen
     echo '<div class="card mt-4 mb-4"><div class="card-body lead text-center">Se encontraron '.num(count($documentos)).' documentos por un total de $'.num($total).'.-</div></div>';

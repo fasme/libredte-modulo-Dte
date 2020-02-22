@@ -460,13 +460,19 @@ class Controller_DteCompras extends Controller_Base_Libros
      * eligiendo el tipo de formato, ya sea por defecto en formato RCV o en
      * formato IECV (esto permite importar el archivo en LibreDTE u otra app)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-18
+     * @version 2020-02-19
      */
     public function rcv_csv($periodo, $estado = 'REGISTRO', $tipo = 'rcv')
     {
         $Emisor = $this->getContribuyente();
         try {
-            $detalle = $Emisor->getRCV(['operacion' => 'COMPRA', 'periodo' => $periodo, 'estado' => $estado, 'tipo' => $tipo]);
+            $detalle = $Emisor->getRCV([
+                'operacion' => 'COMPRA',
+                'periodo' => $periodo,
+                'estado' => $estado,
+                'tipo' => $tipo,
+                'formato' => $tipo == 'rcv_csv' ? 'csv' : 'json',
+            ]);
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
@@ -475,9 +481,43 @@ class Controller_DteCompras extends Controller_Base_Libros
             \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
             $this->redirect('/dte/dte_compras/ver/'.$periodo);
         }
-        array_unshift($detalle, array_keys($detalle[0]));
-        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
-        $this->response->sendContent($csv, 'rc_'.$Emisor->rut.'_'.$periodo.'_'.$estado.'_'.$tipo.'.csv');
+        if ($tipo == 'rcv_csv') {
+            $this->response->sendContent($detalle, 'rc_'.$Emisor->rut.'_'.$periodo.'_'.$estado.'_'.$tipo.'.csv');
+        } else {
+            array_unshift($detalle, array_keys($detalle[0]));
+            $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
+            $this->response->sendContent($csv, 'rc_'.$Emisor->rut.'_'.$periodo.'_'.$estado.'_'.$tipo.'.csv');
+        }
+    }
+
+    /**
+     * Acción que genera un resumen de las compras de un año completo
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-20
+     */
+    public function resumen($anio = null)
+    {
+        $Emisor = $this->getContribuyente();
+        if (!empty($_POST['anio'])) {
+            $this->redirect('/dte/dte_compras/resumen/'.(int)$_POST['anio']);
+        }
+        if ($anio) {
+            // obtener libros de cada mes con su resumen
+            $DteCompras = (new Model_DteCompras())->setContribuyente($Emisor);
+            $resumen = $DteCompras->getResumenAnual($anio);
+            // crear operaciones
+            $operaciones = [];
+            foreach ($resumen as $r) {
+                $operaciones[$r['TpoDoc']] = (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($r['TpoDoc'])->operacion;
+            }
+            // asignar variable a vista
+            $this->set([
+                'anio' => $anio,
+                'resumen' => $resumen,
+                'operaciones' => $operaciones,
+                'totales_mensuales' => $DteCompras->getTotalesMensuales($anio),
+            ]);
+        }
     }
 
 }

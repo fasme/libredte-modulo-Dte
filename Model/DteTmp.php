@@ -238,17 +238,6 @@ class Model_DteTmp extends \Model_App
 
     /**
      * Método que entrega el objeto del tipo de dte
-     * @deprecated Ya que en DteEmitido este método retorna \sasco\LibreDTE\Sii\Dte
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-02-04
-     */
-    public function getDte()
-    {
-        return $this->getTipo();
-    }
-
-    /**
-     * Método que entrega el objeto del tipo de dte
      * @return \website\Dte\Admin\Mantenedores\Model_DteTipo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-02-04
@@ -281,7 +270,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-09
+     * @version 2020-02-16
      */
     public function generar($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
     {
@@ -355,7 +344,7 @@ class Model_DteTmp extends \Model_App
             }
         }
         $DteEmitido->receptor = substr($DteEmitido->receptor, 0, -2);
-        $DteEmitido->xml = base64_encode($xml);
+        $DteEmitido->xml = $xml; // guardar XML generado en LibreDTE
         $DteEmitido->usuario = $user_id;
         if (in_array($DteEmitido->dte, [110, 111, 112])) {
             $DteEmitido->total = $DteEmitido->exento = $this->total;

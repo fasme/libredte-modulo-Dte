@@ -423,13 +423,18 @@ class Controller_DteVentas extends Controller_Base_Libros
      * eligiendo el tipo de formato, ya sea por defecto en formato RCV o en
      * formato IECV (esto permite importar el archivo en LibreDTE u otra app)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-18
+     * @version 2020-02-19
      */
     public function rcv_csv($periodo, $tipo = 'rcv')
     {
         $Emisor = $this->getContribuyente();
         try {
-            $detalle = $Emisor->getRCV(['operacion' => 'VENTA', 'periodo' => $periodo, 'tipo' => $tipo]);
+            $detalle = $Emisor->getRCV([
+                'operacion' => 'VENTA',
+                'periodo' => $periodo,
+                'tipo' => $tipo,
+                'formato' => $tipo == 'rcv_csv' ? 'csv' : 'json',
+            ]);
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
             $this->redirect('/dte/dte_ventas/ver/'.$periodo);
@@ -438,9 +443,13 @@ class Controller_DteVentas extends Controller_Base_Libros
             \sowerphp\core\Model_Datasource_Session::message('No hay detalle para el período y estado solicitados', 'warning');
             $this->redirect('/dte/dte_ventas/ver/'.$periodo);
         }
-        array_unshift($detalle, array_keys($detalle[0]));
-        $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
-        $this->response->sendContent($csv, 'rv_'.$Emisor->rut.'_'.$periodo.'_'.$tipo.'.csv');
+        if ($tipo == 'rcv_csv') {
+            $this->response->sendContent($detalle, 'rv_'.$Emisor->rut.'_'.$periodo.'_'.$tipo.'.csv');
+        } else {
+            array_unshift($detalle, array_keys($detalle[0]));
+            $csv = \sowerphp\general\Utility_Spreadsheet_CSV::get($detalle);
+            $this->response->sendContent($csv, 'rv_'.$Emisor->rut.'_'.$periodo.'_'.$tipo.'.csv');
+        }
     }
 
 }

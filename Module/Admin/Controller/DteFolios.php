@@ -656,7 +656,7 @@ class Controller_DteFolios extends \Controller_App
     /**
      * Recurso que permite consultar el estado de un folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-01-26
+     * @version 2020-02-18
      */
     public function _api_estado_GET($dte, $folio, $emisor)
     {
@@ -693,14 +693,18 @@ class Controller_DteFolios extends \Controller_App
         if ($r['status']['code']!=200) {
             $this->Api->send('No fue posible consultar el estado del folio: '.$r['body'], 500);
         }
-        $this->Api->response()->type('text/html');
+        if ($formato=='html') {
+            $this->Api->response()->type('text/html');
+        } else {
+            $this->Api->response()->type('application/json');
+        }
         $this->Api->send($r['body']);
     }
 
     /**
      * Recurso que permite anular un folio en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-01-26
+     * @version 2020-02-18
      */
     public function _api_anular_GET($dte, $folio, $emisor)
     {
@@ -737,7 +741,11 @@ class Controller_DteFolios extends \Controller_App
         if ($r['status']['code']!=200) {
             $this->Api->send('No fue posible anular el folio: '.$r['body'], 500);
         }
-        $this->Api->response()->type('text/html');
+        if ($formato=='html') {
+            $this->Api->response()->type('text/html');
+        } else {
+            $this->Api->response()->type('application/json');
+        }
         $this->Api->send($r['body']);
     }
 

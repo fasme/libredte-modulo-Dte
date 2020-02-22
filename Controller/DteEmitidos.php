@@ -122,7 +122,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-09
+     * @version 2020-02-22
      */
     public function ver($dte, $folio)
     {
@@ -140,7 +140,7 @@ class Controller_DteEmitidos extends \Controller_App
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
             'Emisor' => $Emisor,
             'DteEmitido' => $DteEmitido,
-            'datos' => $DteEmitido->getDatos(),
+            'datos' => $DteEmitido->hasLocalXML() ? $DteEmitido->getDatos() : [],
             'Receptor' => $DteEmitido->getReceptor(),
             'emails' => $DteEmitido->getEmails(),
             'referenciados' => $DteEmitido->getReferenciados(),
@@ -250,7 +250,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-02-16
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -301,49 +301,36 @@ class Controller_DteEmitidos extends \Controller_App
                 $webVerificacion = $this->request->url.'/boletas';
             }
         }
-        $data = [
-            'xml' => $DteEmitido->xml,
+        $config = [
             'cedible' => $cedible,
-            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $Emisor->config_pdf_dte_papel ),
             'compress' => $compress,
-            'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
             'copias_tributarias' => $copias_tributarias,
             'copias_cedibles' => $copias_cedibles,
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $Emisor->config_pdf_dte_papel ),
+            'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
         ];
-        // consultar servicio web de LibreDTE
-        $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
-        if (!$ApiDtePdfClient) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($this->Auth->User ? $this->Auth->User->hash : \sowerphp\core\Configure::read('api.default.token'));
-            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
-        }
-        // consultar servicio web del contribuyente
-        else {
-            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
-        }
-        // procesar respuesta
-        if ($response===false) {
-            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
-            $this->redirect('/dte/dte_emitidos/listar');
-        }
-        if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            $this->redirect('/dte/dte_emitidos/listar');
-        }
-        // si dió código 200 se entrega la respuesta del servicio web
-        $this->response->type('application/pdf');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->response->header($header, $response['header'][$header]);
+        // generar PDF
+        try {
+            $response = $DteEmitido->getPDF($config);
+            $this->response->type('application/pdf');
+            foreach (['Content-Disposition', 'Content-Length'] as $header) {
+                if (isset($response['header'][$header])) {
+                    $this->response->header($header, $response['header'][$header]);
+                }
             }
+            $this->response->send($response['body']);
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                $e->getMessage(), 'error'
+            );
+            $this->redirect('/');
         }
-        $this->response->send($response['body']);
     }
 
     /**
      * Acción que descarga el XML del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-02-16
      */
     public function xml($dte, $folio, $emisor = null, $fecha = null, $total = null)
     {
@@ -370,6 +357,13 @@ class Controller_DteEmitidos extends \Controller_App
             );
             $this->redirect('/dte/dte_emitidos/listar');
         }
+        // si no tiene XML error
+        if (!$DteEmitido->hasXML()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El DTE no tiene XML asociado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
         // si se está pidiendo con un emisor por parámetro se debe verificar
         // fecha de emisión y monto total del dte
         if ($emisor and ($DteEmitido->fecha!=$fecha or $DteEmitido->total!=$total)) {
@@ -380,7 +374,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // entregar XML
         $file = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml';
-        $xml = base64_decode($DteEmitido->xml);
+        $xml = $DteEmitido->getXML();
         $this->response->type('application/xml', 'ISO-8859-1');
         $this->response->header('Content-Length', strlen($xml));
         $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
@@ -390,7 +384,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el JSON del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-02-22
      */
     public function json($dte, $folio)
     {
@@ -402,6 +396,13 @@ class Controller_DteEmitidos extends \Controller_App
                 'No existe el DTE solicitado', 'error'
             );
             $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // si no tiene XML error
+        if (!$DteEmitido->hasXML()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El DTE no tiene XML asociado para convertir a JSON', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
         }
         // entregar JSON
         $file = 'dte_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.json';
@@ -455,7 +456,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Recurso de la API que descarga el código
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-02-16
      */
     public function _api_escpos_GET($dte, $folio, $contribuyente)
     {
@@ -494,7 +495,7 @@ class Controller_DteEmitidos extends \Controller_App
             }
         }
         $data = [
-            'xml' => $DteEmitido->xml,
+            'xml' => base64_encode($DteEmitido->getXML()),
             'cedible' => $cedible,
             'compress' => $compress,
             'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
@@ -812,7 +813,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Recurso de la API que permite anular un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-02-20
+     * @version 2020-02-18
      */
     public function _api_avanzado_anular_POST($dte, $folio, $emisor)
     {
@@ -832,7 +833,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('Sólo es posible anular guias de despacho con la opción avanzada', 400);
         }
         // cambiar estado anulado del documento
-        $DteEmitido->anulado = (int)$this->Api->data['anulado'];
+        $DteEmitido->anulado = isset($this->Api->data['anulado']) ? (int)$this->Api->data['anulado'] : 1;
         $DteEmitido->save();
         return (int)$DteEmitido->anulado;
     }
@@ -892,7 +893,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite actualizar el tipo de cambio de un documento de exportación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2020-02-21
      */
     public function avanzado_tipo_cambio($dte, $folio)
     {
@@ -906,11 +907,18 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/listar');
         }
         // verificar que sea de exportación
-        if (!$DteEmitido->getDte()->esExportacion()) {
+        if (!$DteEmitido->getTipo()->esExportacion()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Documento no es de exportación', 'error'
             );
             $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request).'#avanzado');
+        }
+        //
+        if (!$DteEmitido->hasLocalXML()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Documento no tiene un XML en LibreDTE', 'error'
+            );
+            $this->redirect(str_replace('avanzado_tipo_cambio', 'ver', $this->request->request));
         }
         // sólo administrador puede cambiar el tipo de cambio
         if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
@@ -1093,7 +1101,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener la información de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-11
+     * @version 2020-02-16
      */
     public function _api_info_GET($dte, $folio, $emisor)
     {
@@ -1125,7 +1133,9 @@ class Controller_DteEmitidos extends \Controller_App
             unset($DteEmitido->datos_dte['TED']);
         }
         if (!$getXML) {
-            $DteEmitido->xml = false;
+            $DteEmitido->xml = false; // olvidar XML
+        } else {
+            $DteEmitido->xml = base64_encode($DteEmitido->getXML()); // codificar XML
         }
         $this->Api->send($DteEmitido, 200, JSON_PRETTY_PRINT);
     }
@@ -1133,7 +1143,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-10-05
+     * @version 2020-02-16
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
@@ -1153,59 +1163,43 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         // datos por defecto
-        extract($this->getQuery([
+        $config = $this->getQuery([
             'cedible' => $Emisor->config_pdf_dte_cedible,
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias ? $Emisor->config_pdf_copias_tributarias : 1,
             'copias_cedibles' => $Emisor->config_pdf_copias_cedibles ? $Emisor->config_pdf_copias_cedibles : $Emisor->config_pdf_dte_cedible,
-        ]));
+            'hash' => $User->hash,
+        ]);
         // armar datos con archivo XML y flag para indicar si es cedible o no
-        $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
-        if (!$webVerificacion) {
-            $webVerificacion = $this->request->url.'/boletas';
-        }
-        $data = [
-            'xml' => $DteEmitido->xml,
-            'cedible' => $cedible,
-            'papelContinuo' => $papelContinuo,
-            'compress' => $compress,
-            'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
-            'copias_tributarias' => $copias_tributarias,
-            'copias_cedibles' => $copias_cedibles,
-        ];
-        // consultar servicio web de LibreDTE
-        $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
-        if (!$ApiDtePdfClient) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($User->hash);
-            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
-        }
-        // consultar servicio web del contribuyente
-        else {
-            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
-        }
-        // procesar respuesta
-        if ($response===false) {
-            $this->Api->send(implode('<br/>', $rest->getErrors(), 500));
-        }
-        if ($response['status']['code']!=200) {
-            $this->Api->send($response['body'], $response['status']['code']);
-        }
-        // si dió código 200 se entrega la respuesta del servicio web
-        $this->Api->response()->type('application/pdf');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->Api->response()->header($header, $response['header'][$header]);
+        if ($Emisor->config_pdf_web_verificacion) {
+            $webVerificacion = $Emisor->config_pdf_web_verificacion;
+        } else {
+            $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
+            if (!$webVerificacion) {
+                $webVerificacion = $this->request->url.'/boletas';
             }
         }
-        $this->Api->send($response['body']);
+        $config['webVerificacion'] = in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false;
+        // generar PDF
+        try {
+            $response = $DteEmitido->getPDF($config);
+            $this->Api->response()->type('application/pdf');
+            foreach (['Content-Disposition', 'Content-Length'] as $header) {
+                if (isset($response['header'][$header])) {
+                    $this->Api->response()->header($header, $response['header'][$header]);
+                }
+            }
+            $this->Api->send($response['body']);
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
      * Acción de la API que permite obtener el XML de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-02
+     * @version 2020-02-16
      */
     public function _api_xml_GET($dte, $folio, $emisor)
     {
@@ -1226,15 +1220,15 @@ class Controller_DteEmitidos extends \Controller_App
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
-            $this->Api->send('No existe el documento solicitado T.'.$dte.'F'.$folio, 404);
+            $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
-        return $DteEmitido->xml;
+        return base64_encode($DteEmitido->getXML());
     }
 
     /**
      * Acción de la API que permite obtener el timbre de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-01-10
+     * @version 2020-02-16
      */
     public function _api_ted_GET($dte, $folio, $emisor)
     {
@@ -1259,7 +1253,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
-        $EnvioDte->loadXML(base64_decode($DteEmitido->xml));
+        $EnvioDte->loadXML($DteEmitido->getXML());
         $ted = $EnvioDte->getDocumentos()[0]->getTED();
         if ($formato == 'xml') {
             return base64_encode($ted);
@@ -1290,18 +1284,14 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite consultar el estado del envío del DTE al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-07-02
+     * @version 2020-02-21
      */
     public function _api_estado_GET($dte, $folio, $emisor)
     {
         extract($this->getQuery(['avanzado'=>false]));
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
@@ -1316,7 +1306,10 @@ class Controller_DteEmitidos extends \Controller_App
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
-            $this->Api->send('No existe el documento solicitado T.'.$dte.'F'.$folio, 404);
+            $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
+        if (!$DteEmitido->getDte()) {
+            $this->Api->send('El documento T'.$dte.'F'.$folio.' no tiene XML en LibreDTE', 400);
         }
         \sasco\LibreDTE\Sii::setAmbiente($Emisor->config_ambiente_en_certificacion);
         return $avanzado ? $DteEmitido->getDte()->getEstadoAvanzado($Firma) : $DteEmitido->getDte()->getEstado($Firma);
@@ -1617,14 +1610,14 @@ class Controller_DteEmitidos extends \Controller_App
                 $DteEmitido->$attr = $r[$col];
         }
         $DteEmitido->receptor = substr($DteEmitido->receptor, 0, -2);
-        $DteEmitido->xml = base64_encode($xml);
+        $DteEmitido->xml = $xml; // guardar XML que se está cargando
         $DteEmitido->usuario = $User->id;
         $DteEmitido->track_id = !empty($_GET['track_id']) ? (int)$_GET['track_id'] : -1;
         $DteEmitido->save();
         if ($DteEmitido->track_id!=-1) {
             $DteEmitido->actualizarEstado();
         }
-        $DteEmitido->xml = null;
+        $DteEmitido->xml = false; // olvidar XML que se subió
         $this->Api->send($DteEmitido, 200, JSON_PRETTY_PRINT);
     }
 
@@ -1712,7 +1705,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Función de la API para consultar por un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-11
+     * @version 2020-02-16
      */
     public function _api_consultar_POST()
     {
@@ -1726,8 +1719,9 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // verificar que se hayan pasado los índices básicos
         foreach (['emisor', 'dte', 'folio', 'fecha', 'total'] as $key) {
-            if (!isset($this->Api->data[$key]))
+            if (!isset($this->Api->data[$key])) {
                 $this->Api->send('Falta índice/variable '.$key.' por POST', 400);
+            }
         }
         // verificar si el emisor existe
         $Emisor = new Model_Contribuyente($this->Api->data['emisor']);
@@ -1745,7 +1739,9 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // quitar XML si no se pidió explícitamente
         if (!$getXML) {
-            $DteEmitido->xml = false;
+            $DteEmitido->xml = false; // olvidar XML
+        } else {
+            $DteEmitido->xml = base64_encode($DteEmitido->getXML()); // codificar XML
         }
         // enviar DteEmitido
         return $DteEmitido;

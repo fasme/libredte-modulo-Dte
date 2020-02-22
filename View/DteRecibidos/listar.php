@@ -27,12 +27,12 @@
 <?php
 foreach ($documentos as &$d) {
     $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-primary mb-2'.(!$d['intercambio']?' disabled':'').'" role="button"><i class="fa fa-search fa-fw"></i></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-primary mb-2'.(!$d['intercambio']?' disabled':'').'" role="button"><i class="far fa-file-pdf fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-primary mb-2'.((!$d['intercambio']and!$d['mipyme'])?' disabled':'').'" role="button"><i class="far fa-file-pdf fa-fw"></i></a>';
     $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-primary mb-2"><i class="fa fa-edit fa-fw"></i></a>';
     $d[] = $acciones;
     $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
     $d['total'] = num($d['total']);
-    unset($d['emisor'], $d['dte'], $d['intercambio']);
+    unset($d['emisor'], $d['dte'], $d['intercambio'], $d['mipyme']);
 }
 $f = new \sowerphp\general\View_Helper_Form(false);
 array_unshift($documentos, [

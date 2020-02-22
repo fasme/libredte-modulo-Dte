@@ -291,25 +291,37 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite descargar el PDF del documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-05
+     * @version 2020-02-19
      */
     public function pdf($emisor, $dte, $folio)
     {
         $Receptor = $this->getContribuyente();
         $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
-        if (!$DteRecibido->exists() or !$DteRecibido->intercambio) {
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No fue posible obtener el PDF, el DTE recibido solicitado no existe o bien no tiene intercambio asociado', 'warning'
             );
             $this->redirect('/dte/dte_recibidos/listar');
         }
-        $this->redirect('/dte/dte_intercambios/pdf/'.$DteRecibido->intercambio.'/0/'.$emisor.'/'.$dte.'/'.$folio);
+        try {
+            $pdf = $DteRecibido->getPDF();
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                $e->getMessage(), 'error'
+            );
+            $this->redirect('/dte/dte_recibidos/listar');
+        }
+        $file_name = 'DTE_recibido_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.pdf';
+        $this->response->type('application/pdf');
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+        $this->response->header('Content-Length', strlen($pdf));
+        $this->response->send($pdf);
     }
 
     /**
      * Acción de la API que permite obtener la información de un documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-21
+     * @version 2020-02-22
      */
     public function _api_info_GET($emisor, $dte, $folio, $receptor)
     {
@@ -341,12 +353,21 @@ class Controller_DteRecibidos extends \Controller_App
         extract($this->getQuery([
             'getXML' => false,
             'getDetalle' => false,
+            'getDatosDte' => false,
         ]));
-        if ($getXML and $DteRecibido->intercambio) {
-            $DteRecibido->getXML();
-        }
-        if ($getDetalle and $DteRecibido->intercambio) {
-            $DteRecibido->getDetalle();
+        if ($DteRecibido->intercambio or $DteRecibido->mipyme) {
+            if ($getDetalle) {
+                $DteRecibido->detalle = $DteRecibido->getDetalle();
+            }
+            if ($getDatosDte) {
+                $DteRecibido->datos_dte = $DteRecibido->getDatos();
+                unset($DteRecibido->datos_dte['TED']);
+            }
+            if ($getXML) {
+                $DteRecibido->xml = base64_encode($DteRecibido->getXML());
+            } else {
+                $DteRecibido->xml = null;
+            }
         }
         $this->Api->send($DteRecibido, 200, JSON_PRETTY_PRINT);
     }

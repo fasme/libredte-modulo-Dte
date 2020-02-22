@@ -105,7 +105,6 @@ class Shell_Command_Sii_Sincronizar extends \Shell_App
                 (g.grupo IS NOT NULL OR cont.valor IS NOT NULL)
                 AND cc.valor IS NOT NULL
         ', [':grupo' => $grupo]);
-        exit;
     }
 
 }

@@ -387,7 +387,7 @@ class Model_DteEmitidos extends \Model_Plural_App
      * Método que entrega el listado de documentos en cierto rango de fecha que
      * no han sido enviados al correo de intercambio del receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-01-26
+     * @version 2020-02-21
      */
     public function getSinEnvioIntercambio($desde, $hasta)
     {
@@ -421,6 +421,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                         d.emisor = :emisor AND d.dte NOT IN (39, 41, 110, 111, 112) AND d.certificacion = :certificacion AND d.fecha BETWEEN :desde AND :hasta
                         AND de.email::text = re.valor
                 )
+                AND d.xml IS NOT NULL
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
         ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
     }

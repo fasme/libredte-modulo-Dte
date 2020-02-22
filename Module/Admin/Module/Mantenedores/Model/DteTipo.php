@@ -199,4 +199,37 @@ class Model_DteTipo extends \Model_App
         return !in_array($this->codigo, [39, 41, 110, 111, 112]);
     }
 
+    /**
+     * Método que indica si el documento es o no cedible
+     * @return =true si el documento es cedible
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2015-09-10
+     */
+    public function esCedible()
+    {
+        return !in_array($this->codigo, [39, 41, 56, 61, 110, 111, 112]);
+    }
+
+    /**
+     * Método que indica si el documento es o no una boleta electrónica
+     * @return =true si el documento es una boleta electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2015-12-11
+     */
+    public function esBoleta()
+    {
+        return in_array($this->codigo, [39, 41]);
+    }
+
+    /**
+     * Método que indica si el documento es o no una exportación
+     * @return =true si el documento es una exportación
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2016-04-05
+     */
+    public function esExportacion()
+    {
+        return in_array($this->codigo, [110, 111, 112]);
+    }
+
 }

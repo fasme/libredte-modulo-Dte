@@ -5,10 +5,13 @@
         </a>
         <div class="dropdown-menu">
             <a href="<?=$_base?>/dte/dte_ventas/rcv_csv/<?=$periodo?>/rcv" class="dropdown-item">
-                    En formato RV
+                En formato RV
             </a>
             <a href="<?=$_base?>/dte/dte_ventas/rcv_csv/<?=$periodo?>/iecv" class="dropdown-item">
-                    En formato IEV
+                En formato IEV
+            </a>
+            <a href="<?=$_base?>/dte/dte_ventas/rcv_csv/<?=$periodo?>/rcv_csv" class="dropdown-item">
+                En formato RV CSV
             </a>
         </div>
     </li>

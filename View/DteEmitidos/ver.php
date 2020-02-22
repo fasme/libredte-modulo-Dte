@@ -65,8 +65,10 @@ $(function() {
 <div role="tabpanel">
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item"><a href="#datos" aria-controls="datos" role="tab" data-toggle="tab" id="datos-tab" class="nav-link active" aria-selected="true">Datos básicos</a></li>
+<?php if ($DteEmitido->hasXML()) : ?>
         <li class="nav-item"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab" id="pdf-tab" class="nav-link">PDF</a></li>
         <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link">Enviar por email</a></li>
+<?php endif; ?>
 <?php if ($DteEmitido->getTipo()->permiteIntercambio()): ?>
         <li class="nav-item"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab" id="intercambio-tab" class="nav-link">Resultado intercambio</a></li>
 <?php endif; ?>
@@ -74,7 +76,7 @@ $(function() {
         <li class="nav-item"><a href="#pagos" aria-controls="pagos" role="tab" data-toggle="tab" id="pagos-tab" class="nav-link">Pagos</a></li>
 <?php endif; ?>
         <li class="nav-item"><a href="#referencias" aria-controls="referencias" role="tab" data-toggle="tab" id="referencias-tab" class="nav-link">Referencias</a></li>
-<?php if ($DteEmitido->getTipo()->cedible) : ?>
+<?php if ($DteEmitido->getTipo()->cedible and $DteEmitido->hasLocalXML()) : ?>
         <li class="nav-item"><a href="#cesion" aria-controls="cesion" role="tab" data-toggle="tab" id="cesion-tab" class="nav-link">Cesión</a></li>
 <?php endif; ?>
         <li class="nav-item"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab" id="avanzado-tab" class="nav-link">Avanzado</a></li>
@@ -105,19 +107,19 @@ echo $t->generate([
 ?>
             <div class="row mt-2">
                 <div class="col-md-4 mb-2">
-                    <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
+                    <a class="btn btn-primary btn-lg btn-block<?=(!$DteEmitido->hasXML()?' disabled':'')?>" href="<?=$_base?>/dte/dte_emitidos/pdf/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$Emisor->config_pdf_dte_cedible?>" role="button">
                         <span class="far fa-file-pdf"></span>
                         Descargar PDF
                     </a>
                 </div>
                 <div class="col-md-4 mb-2">
-                    <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+                    <a class="btn btn-primary btn-lg btn-block<?=(!$DteEmitido->hasXML()?' disabled':'')?>" href="<?=$_base?>/dte/dte_emitidos/xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
                         <span class="far fa-file-code"></span>
                         Descargar XML
                     </a>
                 </div>
                 <div class="col-md-4 mb-2">
-                    <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/json/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+                    <a class="btn btn-primary btn-lg btn-block<?=(!$DteEmitido->hasXML()?' disabled':'')?>" href="<?=$_base?>/dte/dte_emitidos/json/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
                         <span class="far fa-file-code"></span>
                         Descargar JSON
                     </a>
@@ -127,7 +129,7 @@ echo $t->generate([
 <?php if ($enviar_sii) : ?>
         <div class="col-md-3">
             <div class="card mb-4 bg-light">
-                <div class="card-header lead text-center">Track ID SII: <?=$DteEmitido->track_id?></div>
+                <div class="card-header lead text-center">Track ID SII: <?=$DteEmitido->getTrackID()?></div>
                 <div class="card-body text-center">
 <?php if ($DteEmitido->revision_estado): ?>
                     <p>
@@ -143,22 +145,24 @@ echo $t->generate([
 <?php endif; ?>
 <?php if ($DteEmitido->track_id) : ?>
                     <p>
-                        <a class="btn btn-primary<?=$DteEmitido->track_id==-1?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
+                        <a class="btn btn-primary<?=$DteEmitido->track_id < 0 ?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
                         <span style="font-size:0.8em">
-<?php if (!$Emisor->config_sii_estado_dte_webservice and $DteEmitido->track_id!=-1) : ?>
+<?php if (!$Emisor->config_sii_estado_dte_webservice and $DteEmitido->track_id > 0) : ?>
                             <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII">solicitar nueva revisión</a>
                             <br/>
 <?php endif; ?>
-<?php if ($DteEmitido->track_id!=-1) : ?>
+<?php if ($DteEmitido->track_id > 0) : ?>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$DteEmitido->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
 <?php endif; ?>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
+<?php if ($DteEmitido->hasLocalXML()) : ?>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/verificar_datos_avanzado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 750)" title="Verificar datos avanzados del documento con el servicio web del SII">verificación avanzada en SII</a>
+<?php endif; ?>
 <?php if (substr($DteEmitido->revision_estado,0,3)=='RFR') : ?>
                             <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" onclick="return Form.confirm(this, '¿Confirmar el reenvío del DTE al SII?')">reenviar DTE al SII</a>
 <?php endif; ?>
-<?php if ($DteEmitido->getEstado()=='R' or $DteEmitido->track_id==-1) : ?>
+<?php if ($DteEmitido->getEstado()=='R' or $DteEmitido->track_id == -1) : ?>
                             <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">eliminar documento</a>
 <?php endif; ?>
@@ -166,7 +170,7 @@ echo $t->generate([
                     </p>
 <?php else: ?>
                     <p>
-                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
+                        <a class="btn btn-primary<?=(!$DteEmitido->hasLocalXML()?' disabled':'')?>" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
                         <br/>
                         <span style="font-size:0.8em">
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
@@ -308,8 +312,11 @@ $color = [
     <?=($DteEmitido->receptor_evento?\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$DteEmitido->receptor_evento]:'Sin evento registrado')?><br/>
     <small>(ver datos en el registro de compra/venta en el SII)</small>
 </a>
+<?php if ($DteEmitido->hasLocalXML()) : ?>
 <hr/>
 <?php endif; ?>
+<?php endif; ?>
+<?php if ($DteEmitido->hasLocalXML()) : ?>
    <div class="card mb-4">
         <div class="card-header">Recibo</div>
         <div class="card-body">
@@ -393,6 +400,7 @@ if ($Resultado) {
 ?>
         </div>
     </div>
+<?php endif; ?>
 </div>
 <!-- FIN INTERCAMBIO -->
 <?php endif; ?>
@@ -448,6 +456,7 @@ if ($Cobro->datos) {
     </div>
 </div>
 <?php endif; ?>
+<?php if ($DteEmitido->hasLocalXML()) : ?>
 <!-- módulo Cobranza -->
 <div class="card mb-4">
     <div class="card-header">
@@ -477,12 +486,14 @@ if ($cobranza) {
 ?>
     </div>
 </div>
+<?php endif; ?>
 </div>
 <!-- FIN PAGOS -->
 <?php endif; ?>
 
 <!-- INICIO REFERENCIAS -->
 <div role="tabpanel" class="tab-pane" id="referencias" aria-labelledby="referencias-tab">
+<?php if ($DteEmitido->hasLocalXML()) : ?>
     <div class="card mb-4">
         <div class="card-header">Documentos referenciados</div>
         <div class="card-body">
@@ -499,6 +510,7 @@ if ($referenciados) {
 ?>
         </div>
     </div>
+<?php endif; ?>
     <div class="card mb-4">
         <div class="card-header">Documentos que referencian este</div>
         <div class="card-body">
@@ -522,13 +534,13 @@ if ($referencias) {
 <div class="row">
 <?php if (!empty($referencia)) : ?>
     <div class="col-md-<?=(!empty($referencia)?6:12)?> mb-2">
-        <a class="btn btn-<?=$referencia['color']?> btn-lg btn-block" href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$referencia['dte']?>/<?=$referencia['codigo']?>/<?=urlencode($referencia['razon'])?>" role="button">
+        <a class="btn btn-<?=$referencia['color']?> btn-lg btn-block<?=(!$DteEmitido->hasXML()?' disabled':'')?>" href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$referencia['dte']?>/<?=$referencia['codigo']?>/<?=urlencode($referencia['razon'])?>" role="button">
             <?=$referencia['titulo']?>
         </a>
     </div>
 <?php endif; ?>
     <div class="col-md-<?=(!empty($referencia)?6:12)?> mb-2">
-        <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+        <a class="btn btn-primary btn-lg btn-block<?=(!$DteEmitido->hasXML()?' disabled':'')?>" href="<?=$_base?>/dte/documentos/emitir/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
             Crear referencia
         </a>
     </div>
@@ -536,7 +548,7 @@ if ($referencias) {
 </div>
 <!-- FIN REFERENCIAS -->
 
-<?php if ($DteEmitido->getTipo()->cedible) : ?>
+<?php if ($DteEmitido->getTipo()->cedible and $DteEmitido->hasLocalXML()) : ?>
 <!-- INICIO CESIÓN -->
 <div role="tabpanel" class="tab-pane" id="cesion" aria-labelledby="cesion-tab">
 <?php if ($DteEmitido->cesion_track_id) : ?>
@@ -707,7 +719,7 @@ echo $f->end('Guardar');
 <?php endif; ?>
 <?php
 // si es exportación permitir cambiar tipo de cambio (sólo si es usuario administrador)
-if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getDte()->esExportacion()) :
+if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getTipo()->esExportacion() and $DteEmitido->hasLocalXML()) :
 ?>
 <div class="card mt-4">
     <div class="card-header">
@@ -790,14 +802,16 @@ echo $f->end('Modificar sucursal');
     <div class="card-body">
         <table class="table table-striped">
             <tbody>
+<?php if ($DteEmitido->hasLocalXML()) : ?>
                 <tr>
                     <th>ID del DTE</th>
-                    <td><?=$DteEmitido->getDte()->getID()?></td>
+                    <td><?=$DteEmitido->getDatos()['@attributes']['ID']?></td>
                 </tr>
                 <tr>
                     <th>Timbraje del XML</th>
-                    <td><?=\sowerphp\general\Utility_Date::format(str_replace('T', ' ', $DteEmitido->getDte()->getDatos()['TED']['DD']['TSTED']), 'd/m/Y H:i:s')?></td>
+                    <td><?=\sowerphp\general\Utility_Date::format(str_replace('T', ' ', $DteEmitido->getDatos()['TED']['DD']['TSTED']), 'd/m/Y H:i:s')?></td>
                 </tr>
+<?php endif; ?>
                 <tr>
                     <th>Creación en LibreDTE</th>
                     <td><?=\sowerphp\general\Utility_Date::format($DteEmitido->fecha_hora_creacion, 'd/m/Y H:i:s')?></td>

@@ -74,7 +74,7 @@ class Controller_BoletaHonorarios extends \Controller_App
     /**
      * API que permite buscar boletas de honorario electrónicas recibidas en el SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-10
+     * @version 2020-02-17
      */
     public function _api_buscar_POST($receptor)
     {
@@ -93,7 +93,7 @@ class Controller_BoletaHonorarios extends \Controller_App
         }
         // obtener boletas
         $filtros = [];
-        foreach ($this->Api->data as $key => $val) {
+        foreach ((array)$this->Api->data as $key => $val) {
             if (!empty($val)) {
                 $filtros[$key] = $val;
             }

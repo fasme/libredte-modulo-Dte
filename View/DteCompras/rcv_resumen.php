@@ -5,7 +5,7 @@
         </a>
         <div class="dropdown-menu">
             <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/rcv" class="dropdown-item">
-                    Registrados formato RC
+                Registrados formato RC
             </a>
             <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/rcv" class="dropdown-item">
                 Pendientes formato RC
@@ -18,7 +18,7 @@
             </a>
             <div class="dropdown-divider"></div>
             <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/iecv" class="dropdown-item">
-                    Registrados formato IEC
+                Registrados formato IEC
             </a>
             <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/iecv" class="dropdown-item">
                 Pendientes formato IEC
@@ -28,6 +28,19 @@
             </a>
             <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/RECLAMADO/iecv" class="dropdown-item">
                 Reclamados formato IEC
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/REGISTRO/rcv_csv" class="dropdown-item">
+                Registrados formato RC CSV
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/PENDIENTE/rcv_csv" class="dropdown-item">
+                Pendientes formato RC CSV
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/NO_INCLUIR/rcv_csv" class="dropdown-item">
+                No incluídos formato RC CSV
+            </a>
+            <a href="<?=$_base?>/dte/dte_compras/rcv_csv/<?=$periodo?>/RECLAMADO/rcv_csv" class="dropdown-item">
+                Reclamados formato RC CSV
             </a>
         </div>
     </li>

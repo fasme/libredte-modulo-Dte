@@ -154,7 +154,7 @@ class Controller_RegistroCompras extends \Controller_App
      * API que permite buscar en los documentos recibidos en el registro de
      * compras del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
+     * @version 2020-02-17
      */
     public function _api_buscar_POST($receptor)
     {
@@ -173,8 +173,8 @@ class Controller_RegistroCompras extends \Controller_App
         }
         // obtener boletas
         $filtros = [];
-        foreach ($this->Api->data as $key => $val) {
-            if (!empty($val)) {
+        foreach ((array)$this->Api->data as $key => $val) {
+            if (!empty($val) or (isset($val) and $val===0)) {
                 $filtros[$key] = $val;
             }
         }
