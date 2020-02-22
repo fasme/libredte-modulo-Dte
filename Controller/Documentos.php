@@ -828,7 +828,7 @@ class Controller_Documentos extends \Controller_App
      * Función de la API que permite emitir un DTE a partir de un documento
      * temporal, asignando folio, firmando y enviando al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-22
      */
     public function _api_generar_POST()
     {
@@ -879,7 +879,7 @@ class Controller_Documentos extends \Controller_App
         try {
             $DteEmitido = $DteTmp->generar($User->id, null, $retry, $gzip);
         } catch (\Exception $e) {
-            $this->Api->send($e->getMessage(), $e->getCode());
+            $this->Api->send($e->getMessage(), $e->getCode() ? $e->getCode() : 500);
         }
         // enviar por correo el DTE si así se solicitó o está configurado
         if ($email or ($email===false and $Emisor->config_emision_email)) {
@@ -908,7 +908,7 @@ class Controller_Documentos extends \Controller_App
      * Método que genera el XML del DTE temporal con Folio y Firma y lo envía
      * al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2020-02-22
      */
     public function generar($receptor, $dte, $codigo)
     {
@@ -923,7 +923,7 @@ class Controller_Documentos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message(
                 $response['body'], 'error'
             );
-            $this->redirect('/dte/dte_tmps');
+            $this->redirect('/dte/dte_tmps/ver/'.$receptor.'/'.$dte.'/'.$codigo);
         }
         $DteEmitido = (new Model_DteEmitido())->set($response['body']);
         if (!in_array($DteEmitido->dte, [39, 41])) {
