@@ -1450,6 +1450,10 @@ class Model_DteEmitido extends Model_Base_Envio
             'copias_cedibles' => $this->getEmisor()->config_pdf_copias_cedibles ? $this->getEmisor()->config_pdf_copias_cedibles : $this->getEmisor()->config_pdf_dte_cedible,
             'webVerificacion' => \sowerphp\core\Configure::read('dte.web_verificacion'),
             'xml' => base64_encode($this->getXML()),
+            'caratula' => [
+                'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
+                'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
+            ],
             'hash' => \sowerphp\core\Configure::read('api.default.token'),
         ], $config);
         // consultar servicio web de LibreDTE
