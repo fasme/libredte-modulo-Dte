@@ -269,10 +269,39 @@ class Model_DteTmp extends \Model_App
 
     /**
      * Método que crea el DTE real asociado al DTE temporal
+     * Permite usar el facturador local de LibreDTE o el del Portal MIPYME del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-22
      */
     public function generar($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
+    {
+        // facturador local de LibreDTE
+        if (!$this->getEmisor()->config_libredte_facturador) {
+            return $this->generarConFacturadorLocal($user_id, $fecha_emision, $retry, $gzip);
+        }
+        // facturador del Portal MIPYME del SII
+        else if ($this->getEmisor()->config_libredte_facturador == 1) {
+            return $this->generarConFacturadorSii($user_id, $fecha_emision);
+        }
+        // facturador mixto
+        else if ($this->getEmisor()->config_libredte_facturador == 2) {
+            // facturador local de LibreDTE para boletas
+            if (in_array($this->dte, [39, 41])) {
+                return $this->generarConFacturadorLocal($user_id, $fecha_emision, $retry, $gzip);
+            }
+            // facturador del Portal MIPYME del SII para otros documentos
+            else {
+                return $this->generarConFacturadorSii($user_id, $fecha_emision);
+            }
+        }
+    }
+
+    /**
+     * Método que crea el DTE real asociado al DTE temporal usando LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    private function generarConFacturadorLocal($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
     {
         $Emisor = $this->getEmisor();
         if (!$user_id) {
@@ -440,6 +469,16 @@ class Model_DteTmp extends \Model_App
         $this->delete();
         // entregar DTE emitido
         return $DteEmitido;
+    }
+
+    /**
+     * Método que crea el DTE real asociado al DTE temporal usando el SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    private function generarConFacturadorSii($user_id = null, $fecha_emision = null)
+    {
+        throw new \Exception('Facturador del Portal MIPYME del SII aun no disponible');
     }
 
     /**
