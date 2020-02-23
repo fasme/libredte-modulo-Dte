@@ -250,7 +250,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-22
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -292,7 +292,7 @@ class Controller_DteEmitidos extends \Controller_App
             );
             $this->redirect('/dte/dte_emitidos/consultar');
         }
-        // armar datos con archivo XML y flag para indicar si es cedible o no
+        // armar datos con archivo XML
         if ($Emisor->config_pdf_web_verificacion) {
             $webVerificacion = $Emisor->config_pdf_web_verificacion;
         } else {
@@ -311,14 +311,13 @@ class Controller_DteEmitidos extends \Controller_App
         ];
         // generar PDF
         try {
-            $response = $DteEmitido->getPDF($config);
+            $pdf = $DteEmitido->getPDF($config);
+            $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
+            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf';
             $this->response->type('application/pdf');
-            foreach (['Content-Disposition', 'Content-Length'] as $header) {
-                if (isset($response['header'][$header])) {
-                    $this->response->header($header, $response['header'][$header]);
-                }
-            }
-            $this->response->send($response['body']);
+            $this->response->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
+            $this->response->header('Content-Length', strlen($pdf));
+            $this->response->send($pdf);
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
                 $e->getMessage(), 'error'
@@ -418,7 +417,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el código binario ESCPOS del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-02-22
      */
     public function escpos($dte, $folio)
     {
@@ -444,8 +443,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        $this->response->type('application/octet-stream');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
+        foreach (['Content-Type', 'Content-Disposition', 'Content-Length'] as $header) {
             if (isset($response['header'][$header])) {
                 $this->response->header($header, $response['header'][$header]);
             }
@@ -454,9 +452,9 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
-     * Recurso de la API que descarga el código
+     * Recurso de la API que descarga el código ESCPOS del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-22
      */
     public function _api_escpos_GET($dte, $folio, $contribuyente)
     {
@@ -473,19 +471,19 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/escpos')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        // parámetros pasados por GET
-        extract($this->getQuery([
-            'cedible' => false,
-            'compress' => false,
-            'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
-            'copias_cedibles' => $Emisor->config_pdf_copias_cedibles,
-        ]));
         // obtener DTE emitido
         $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el DTE solicitado', 400);
         }
-        // armar datos con archivo XML y flag para indicar si es cedible o no
+        // datos por defecto
+        $config = $this->getQuery([
+            'cedible' => $Emisor->config_pdf_dte_cedible,
+            'compress' => false,
+            'copias_tributarias' => $Emisor->config_pdf_copias_tributarias ? $Emisor->config_pdf_copias_tributarias : 1,
+            'copias_cedibles' => $Emisor->config_pdf_copias_cedibles ? $Emisor->config_pdf_copias_cedibles : $Emisor->config_pdf_dte_cedible,
+            'hash' => $User->hash,
+        ]);
         if ($Emisor->config_pdf_web_verificacion) {
             $webVerificacion = $Emisor->config_pdf_web_verificacion;
         } else {
@@ -494,40 +492,18 @@ class Controller_DteEmitidos extends \Controller_App
                 $webVerificacion = $this->request->url.'/boletas';
             }
         }
-        $data = [
-            'xml' => base64_encode($DteEmitido->getXML()),
-            'cedible' => $cedible,
-            'compress' => $compress,
-            'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
-            'copias_tributarias' => $copias_tributarias,
-            'copias_cedibles' => $cedible ? $copias_cedibles : 0,
-        ];
-        // consultar servicio web de LibreDTE
-        $ApiDteEscPosClient = $Emisor->getApiClient('dte_escpos');
-        if (!$ApiDteEscPosClient) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($User->hash);
-            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_escpos', $data);
+        $config['webVerificacion'] = in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false;
+        // generar código ESCPOS
+        try {
+            $escpos = $DteEmitido->getESCPOS($config);
+            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.escpos';
+            $this->Api->response()->type('application/octet-stream');
+            $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+            $this->Api->response()->header('Content-Length', strlen($escpos));
+            $this->Api->send($escpos);
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
         }
-        // consultar servicio web del contribuyente
-        else {
-            $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $data);
-        }
-        // procesar respuesta
-        if ($response===false) {
-            $this->Api->send(implode('<br/>', $rest->getErrors()), 500);
-        }
-        if ($response['status']['code']!=200) {
-            $this->Api->send($response['body'], 500);
-        }
-        // si dió código 200 se entrega la respuesta del servicio web
-        $this->Api->response()->type('application/octet-stream');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->Api->response()->header($header, $response['header'][$header]);
-            }
-        }
-        $this->Api->send($response['body']);
     }
 
     /**
@@ -1143,7 +1119,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-22
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
@@ -1171,7 +1147,6 @@ class Controller_DteEmitidos extends \Controller_App
             'copias_cedibles' => $Emisor->config_pdf_copias_cedibles ? $Emisor->config_pdf_copias_cedibles : $Emisor->config_pdf_dte_cedible,
             'hash' => $User->hash,
         ]);
-        // armar datos con archivo XML y flag para indicar si es cedible o no
         if ($Emisor->config_pdf_web_verificacion) {
             $webVerificacion = $Emisor->config_pdf_web_verificacion;
         } else {
@@ -1183,14 +1158,13 @@ class Controller_DteEmitidos extends \Controller_App
         $config['webVerificacion'] = in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false;
         // generar PDF
         try {
-            $response = $DteEmitido->getPDF($config);
+            $pdf = $DteEmitido->getPDF($config);
+            $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
+            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf';
             $this->Api->response()->type('application/pdf');
-            foreach (['Content-Disposition', 'Content-Length'] as $header) {
-                if (isset($response['header'][$header])) {
-                    $this->Api->response()->header($header, $response['header'][$header]);
-                }
-            }
-            $this->Api->send($response['body']);
+            $this->Api->response()->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
+            $this->Api->response()->header('Content-Length', strlen($pdf));
+            $this->Api->send($pdf);
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), $e->getCode());
         }

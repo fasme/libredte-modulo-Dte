@@ -692,12 +692,16 @@ echo $f->input([
                 </div>
                 <div class="col-md-6">
 <?php
-$config_pdf_imprimir_options = [''=>'No, se imprimirá bajando el archivo', 'pdf'=>'Imprimir usando el PDF'];
 echo $f->input([
     'type' => 'select',
     'name' => 'config_pdf_imprimir',
     'label' => 'Impresión directa',
-    'options' => $config_pdf_imprimir_options,
+    'options' => [
+        '' => 'No, se imprimirá bajando el archivo',
+        'pdf'=>'Imprimir usando el PDF',
+        'escpos' => 'Imprimir en impresora térmica (usando ESCPOS)',
+        'pdf_escpos' => 'Elegir imprimir usando PDF o ESCPOS',
+    ],
     'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_imprimir : '',
     'help' => '¿Se debe enviar a imprimir directamente a la impresora seleccionada?',
 ]);

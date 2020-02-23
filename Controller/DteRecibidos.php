@@ -311,7 +311,7 @@ class Controller_DteRecibidos extends \Controller_App
             );
             $this->redirect('/dte/dte_recibidos/listar');
         }
-        $file_name = 'DTE_recibido_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.pdf';
+        $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.pdf';
         $this->response->type('application/pdf');
         $this->response->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
         $this->response->header('Content-Length', strlen($pdf));

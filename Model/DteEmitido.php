@@ -1113,7 +1113,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-22
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -1163,18 +1163,12 @@ class Model_DteEmitido extends Model_Base_Envio
             if ($papelContinuo===null) {
                 $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
             }
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($this->getEmisor()->getUsuario()->hash);
-            $response = $rest->get($Request->url.'/api/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/'.$this->emisor, [
-                'cedible' => $cedible,
-                'papelContinuo' => $papelContinuo,
-                'compress' => false,
-            ]);
-            if ($response['status']['code']!=200) {
-                throw new \Exception($response['body']);
-            }
             $email->attach([
-                'data' => $response['body'],
+                'data' => $this->getPDF([
+                    'cedible' => $cedible,
+                    'papelContinuo' => $papelContinuo,
+                    'compress' => false,
+                ]),
                 'name' => 'dte_'.$this->getEmisor()->rut.'-'.$this->getEmisor()->dv.'_T'.$this->dte.'F'.$this->folio.'.pdf',
                 'type' => 'application/pdf',
             ]);
@@ -1478,7 +1472,56 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception($response['body'], $response['status']['code']);
         }
         // si dió código 200 se entrega la respuesta del servicio web
-        return $response;
+        return $response['body'];
+    }
+
+    /**
+     * Método que entrega el código ESCPOS del documento emitido.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getESCPOS(array $config = [])
+    {
+        // si no tiene XML error
+        if (!$this->hasXML()) {
+            throw new \Exception('El DTE no tiene XML asociado para generar el código ESCPOS');
+        }
+        // configuración por defecto para el código ESCPOS
+        $config = array_merge([
+            'cedible' => $this->getEmisor()->config_pdf_dte_cedible,
+            'compress' => false,
+            'copias_tributarias' => $this->getEmisor()->config_pdf_copias_tributarias ? $this->getEmisor()->config_pdf_copias_tributarias : 1,
+            'copias_cedibles' => $this->getEmisor()->config_pdf_copias_cedibles ? $this->getEmisor()->config_pdf_copias_cedibles : $this->getEmisor()->config_pdf_dte_cedible,
+            'webVerificacion' => \sowerphp\core\Configure::read('dte.web_verificacion'),
+            'xml' => base64_encode($this->getXML()),
+            'caratula' => [
+                'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
+                'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
+            ],
+            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+        ], $config);
+        // consultar servicio web de LibreDTE
+        $ApiDteEscPosClient = $this->getEmisor()->getApiClient('dte_escpos');
+        if (!$ApiDteEscPosClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($config['hash']);
+            unset($config['hash']);
+            $Request = new \sowerphp\core\Network_Request();
+            $response = $rest->post($Request->url.'/api/utilidades/documentos/generar_escpos', $config);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $config);
+        }
+        // procesar respuesta
+        if ($response===false) {
+            $this->Api->send(implode('<br/>', $rest->getErrors()), 500);
+        }
+        if ($response['status']['code']!=200) {
+            $this->Api->send($response['body'], 500);
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        return $response['body'];
     }
 
     /**
