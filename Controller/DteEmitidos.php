@@ -478,6 +478,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // datos por defecto
         $config = $this->getQuery([
+            'base64' => false,
             'cedible' => $Emisor->config_pdf_dte_cedible,
             'compress' => false,
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias ? $Emisor->config_pdf_copias_tributarias : 1,
@@ -496,11 +497,14 @@ class Controller_DteEmitidos extends \Controller_App
         // generar código ESCPOS
         try {
             $escpos = $DteEmitido->getESCPOS($config);
-            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.escpos';
-            $this->Api->response()->type('application/octet-stream');
-            $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
-            $this->Api->response()->header('Content-Length', strlen($escpos));
-            $this->Api->send($escpos);
+            if ($config['base64']) {
+                $this->Api->send(base64_encode($escpos));
+            } else {
+                $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.escpos';
+                $this->Api->response()->type('application/octet-stream');
+                $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+                $this->Api->send($escpos);
+            }
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), $e->getCode());
         }
