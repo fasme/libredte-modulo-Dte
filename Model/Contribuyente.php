@@ -1246,7 +1246,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-21
+     * @version 2020-02-25
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1368,7 +1368,7 @@ class Model_Contribuyente extends \Model_App
         ';
         // armar límite consulta
         if (isset($filtros['limit'])) {
-            $query = $this->db->setLimit($query, $filtros['limit'], $filtros['offset']);
+            $query = $this->db->setLimit($query, $filtros['limit'], !empty($filtros['offset']) ? $filtros['offset'] : 0);
         }
         // entregar consulta verdadera (esta si obtiene razón social verdadera en DTE exportación, pero sólo para las filas del límite consultado)
         $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
