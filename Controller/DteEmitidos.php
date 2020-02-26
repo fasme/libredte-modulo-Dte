@@ -1123,7 +1123,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-02-26
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
@@ -1144,6 +1144,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // datos por defecto
         $config = $this->getQuery([
+            'base64' => false,
             'cedible' => $Emisor->config_pdf_dte_cedible,
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
@@ -1163,12 +1164,16 @@ class Controller_DteEmitidos extends \Controller_App
         // generar PDF
         try {
             $pdf = $DteEmitido->getPDF($config);
-            $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
-            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf';
-            $this->Api->response()->type('application/pdf');
-            $this->Api->response()->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
-            $this->Api->response()->header('Content-Length', strlen($pdf));
-            $this->Api->send($pdf);
+            if ($config['base64']) {
+                $this->Api->send(base64_encode($pdf));
+            } else {
+                $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
+                $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf';
+                $this->Api->response()->type('application/pdf');
+                $this->Api->response()->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
+                $this->Api->response()->header('Content-Length', strlen($pdf));
+                $this->Api->send($pdf);
+            }
         } catch (\Exception $e) {
             $this->Api->send($e->getMessage(), $e->getCode());
         }
