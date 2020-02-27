@@ -1478,7 +1478,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega el código ESCPOS del documento emitido.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-02-27
      */
     public function getESCPOS(array $config = [])
     {
@@ -1515,10 +1515,10 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         // procesar respuesta
         if ($response===false) {
-            $this->Api->send(implode('<br/>', $rest->getErrors()), 500);
+            throw new \Exception(implode('<br/>', $rest->getErrors()), 500);
         }
         if ($response['status']['code']!=200) {
-            $this->Api->send($response['body'], 500);
+            throw new \Exception($response['body'], 500);
         }
         // si dió código 200 se entrega la respuesta del servicio web
         return $response['body'];
