@@ -1498,6 +1498,8 @@ class Model_DteEmitido extends Model_Base_Envio
                 'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
                 'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
             ],
+            'papelContinuo' => 80,
+            'profile' => 'default',
             'hash' => \sowerphp\core\Configure::read('api.default.token'),
         ], $config);
         // consultar servicio web de LibreDTE

@@ -454,7 +454,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Recurso de la API que descarga el código ESCPOS del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-02-27
      */
     public function _api_escpos_GET($dte, $folio, $contribuyente)
     {
@@ -483,6 +483,8 @@ class Controller_DteEmitidos extends \Controller_App
             'compress' => false,
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias ? $Emisor->config_pdf_copias_tributarias : 1,
             'copias_cedibles' => $Emisor->config_pdf_copias_cedibles ? $Emisor->config_pdf_copias_cedibles : $Emisor->config_pdf_dte_cedible,
+            'papelContinuo' => 80,
+            'profile' => 'default',
             'hash' => $User->hash,
         ]);
         if ($Emisor->config_pdf_web_verificacion) {
