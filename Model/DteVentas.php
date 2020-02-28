@@ -115,6 +115,83 @@ class Model_DteVentas extends \Model_Plural_App
     }
 
     /**
+     * Método que entrega el resumen de los documentos de ventas
+     * totalizado según ciertos filtros y por tipo de documento.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-28
+     */
+    public function getResumen(array $filtros = [])
+    {
+        $where = ['d.emisor = :emisor', 'd.certificacion = :certificacion'];
+        $vars = [
+            ':emisor' => $this->getContribuyente()->rut,
+            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+        ];
+        // filtrar por tipo de DTE
+        if (!empty($filtros['dte'])) {
+            if (!empty($filtros['dte'])) {
+                if (is_array($filtros['dte'])) {
+                    $i = 0;
+                    $where_dte = [];
+                    foreach ($filtros['dte'] as $filtro_dte) {
+                        $where_dte[] = ':dte'.$i;
+                        $vars[':dte'.$i] = $filtro_dte;
+                        $i++;
+                    }
+                    $where[] = 'd.dte IN ('.implode(', ', $where_dte).')';
+                }
+                else if ($filtros['dte'][0]=='!') {
+                    $where[] = 'd.dte != :dte';
+                    $vars[':dte'] = substr($filtros['dte'],1);
+                }
+                else {
+                    $where[] = 'd.dte = :dte';
+                    $vars[':dte'] = $filtros['dte'];
+                }
+            }
+        } else {
+            $where[] = 't.codigo != 46';
+            $where[] = 't.venta = true';
+        }
+        // otros filtros
+        if (!empty($filtros['fecha_desde'])) {
+            $where[] = 'd.fecha >= :fecha_desde';
+            $vars[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+        if (!empty($filtros['fecha_hasta'])) {
+            $where[] = 'd.fecha <= :fecha_hasta';
+            $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+        if (!empty($filtros['usuario'])) {
+            if (is_numeric($filtros['usuario'])) {
+                $where[] = 'u.id = :usuario';
+            } else {
+                $where[] = 'u.usuario = :usuario';
+            }
+            $vars[':usuario'] = $filtros['usuario'];
+        }
+        // generar consulta
+        return $this->db->getTable('
+            SELECT
+                t.codigo,
+                t.tipo,
+                t.operacion,
+                COUNT(d.dte) AS documentos,
+                SUM(d.exento) AS exento,
+                SUM(d.neto) AS neto,
+                SUM(d.iva) AS iva,
+                SUM(d.total) AS total
+            FROM
+                dte_emitido AS d
+                JOIN usuario AS u ON u.id = d.usuario
+                JOIN dte_tipo AS t ON t.codigo = d.dte
+            WHERE '.implode(' AND ', $where).'
+            GROUP BY t.codigo, t.tipo, t.operacion
+            ORDER BY t.operacion DESC, t.tipo ASC
+        ', $vars);
+    }
+
+    /**
      * Método que sincroniza el libro de ventas local con el registro de ventas del SII
      * - Se agregan documentos "registrados" en el registro de ventas del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

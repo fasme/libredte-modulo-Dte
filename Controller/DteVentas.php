@@ -418,7 +418,24 @@ class Controller_DteVentas extends Controller_Base_Libros
         return $historial_nuevo;
     }
 
-     /**
+    /**
+     * Servicio web que entrega un resumen de ventas por cada tipo de documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-28
+     */
+    public function _api_resumen_POST($emisor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // obtener historial
+        $Emisor = new Model_Contribuyente($emisor);
+        return (new Model_DteVentas())->setContribuyente($Emisor)->getResumen($this->Api->data);
+    }
+
+    /**
      * Acción que permite descargar todo el registro de compras del SII pero
      * eligiendo el tipo de formato, ya sea por defecto en formato RCV o en
      * formato IECV (esto permite importar el archivo en LibreDTE u otra app)
