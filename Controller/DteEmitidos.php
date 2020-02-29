@@ -1083,7 +1083,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener la información de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-02-29
      */
     public function _api_info_GET($dte, $folio, $emisor)
     {
@@ -1106,6 +1106,8 @@ class Controller_DteEmitidos extends \Controller_App
             'getXML' => false,
             'getDetalle' => false,
             'getDatosDte' => false,
+            'getTed' => false,
+            'getResolucion' => false,
         ]));
         if ($getDetalle) {
             $DteEmitido->detalle = $DteEmitido->getDetalle();
@@ -1113,6 +1115,18 @@ class Controller_DteEmitidos extends \Controller_App
         if ($getDatosDte) {
             $DteEmitido->datos_dte = $DteEmitido->getDatos();
             unset($DteEmitido->datos_dte['TED']);
+        }
+        if ($getTed) {
+            $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
+            $EnvioDte->loadXML($DteEmitido->getXML());
+            $ted = $EnvioDte->getDocumentos()[0]->getTED();
+            $DteEmitido->ted = base64_encode($ted);
+        }
+        if ($getResolucion) {
+            $DteEmitido->resolucion = [
+                'fecha' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+                'numero' => $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+            ];
         }
         if (!$getXML) {
             $DteEmitido->xml = false; // olvidar XML
