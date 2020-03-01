@@ -1083,7 +1083,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener la información de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-29
+     * @version 2020-03-01
      */
     public function _api_info_GET($dte, $folio, $emisor)
     {
@@ -1120,7 +1120,14 @@ class Controller_DteEmitidos extends \Controller_App
             $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
             $EnvioDte->loadXML($DteEmitido->getXML());
             $ted = $EnvioDte->getDocumentos()[0]->getTED();
-            $DteEmitido->ted = base64_encode($ted);
+            if ($getTed == 'bitmap') {
+                $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,5');
+                $png = $pdf417->getBarcodePngData(1, 1, [0,0,0]);
+                $im = imagecreatefromstring($png);
+                $DteEmitido->ted = \sowerphp\general\Utility_Image::bitmap($im);
+            } else {
+                $DteEmitido->ted = base64_encode($ted);
+            }
         }
         if ($getResolucion) {
             $DteEmitido->resolucion = [
