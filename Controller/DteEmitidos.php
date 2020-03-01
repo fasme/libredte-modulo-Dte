@@ -1227,18 +1227,14 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el timbre de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-03-01
      */
     public function _api_ted_GET($dte, $folio, $emisor)
     {
-        extract($this->getQuery(['formato'=>'png', 'ecl'=>5]));
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        extract($this->getQuery(['formato'=>'png', 'ecl'=>5, 'size' => 1]));
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
@@ -1259,12 +1255,12 @@ class Controller_DteEmitidos extends \Controller_App
         }
         else if ($formato == 'png') {
             $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
-            $pdf417->getBarcodePNG(4, 4, [0,0,0]);
-            exit; // TODO: enviar usando $this->Api->send() / TCPDF2DBarcode::getBarcodePNG()
+            $this->response->type('image/png');
+            $this->Api->send($pdf417->getBarcodePNGData($size, $size, [0,0,0]));
         }
         else if ($formato == 'bmp') {
             $pdf417 = new \TCPDF2DBarcode($ted, 'PDF417,,'.$ecl);
-            $png = $pdf417->getBarcodePngData(4, 4, [0,0,0]);
+            $png = $pdf417->getBarcodePngData($size, $size, [0,0,0]);
             $im = imagecreatefromstring($png);
             header('Content-Typ: image/x-ms-bmp');
             \imagebmp($im);
