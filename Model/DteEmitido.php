@@ -1364,7 +1364,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Entrega el XML que existe en LibreDTE o bien generado con el Portal
      * MIPYME del SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-03-02
      */
     public function getXML()
     {
@@ -1389,7 +1389,7 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         // si no hay XML en la base de datos, se busca si es un DTE del Portal
         // MIPYME en cuyo casi se obtiene el XML directo desde el SII
-        if ($this->mipyme) {
+        else if ($this->mipyme) {
             $r = libredte_api_consume(
                 sprintf(
                     '/sii/mipyme/emitidos/xml/%s/%d/%d',
