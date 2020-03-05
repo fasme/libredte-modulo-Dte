@@ -162,6 +162,11 @@ class Model_DteCompras extends \Model_Plural_App
             $where[] = 'd.fecha <= :fecha_hasta';
             $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
         }
+        if (!empty($filtros['periodo'])) {
+            $periodo_col = $this->db->date('Ym', 'd.fecha');
+            $where[] = '(d.periodo IS NOT NULL AND d.periodo = :periodo) OR (d.periodo IS NULL AND '. $periodo_col.'::INTEGER = :periodo)';
+            $vars[':periodo'] = $filtros['periodo'];
+        }
         if (!empty($filtros['usuario'])) {
             if (is_numeric($filtros['usuario'])) {
                 $where[] = 'u.id = :usuario';

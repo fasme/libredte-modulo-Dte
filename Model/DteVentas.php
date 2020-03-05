@@ -118,7 +118,7 @@ class Model_DteVentas extends \Model_Plural_App
      * Método que entrega el resumen de los documentos de ventas
      * totalizado según ciertos filtros y por tipo de documento.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-28
+     * @version 2020-03-05
      */
     public function getResumen(array $filtros = [])
     {
@@ -161,6 +161,11 @@ class Model_DteVentas extends \Model_Plural_App
         if (!empty($filtros['fecha_hasta'])) {
             $where[] = 'd.fecha <= :fecha_hasta';
             $vars[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+        if (!empty($filtros['periodo'])) {
+            $periodo_col = $this->db->date('Ym', 'd.fecha');
+            $where[] = $periodo_col.' = :periodo';
+            $vars[':periodo'] = $filtros['periodo'];
         }
         if (!empty($filtros['usuario'])) {
             if (is_numeric($filtros['usuario'])) {
