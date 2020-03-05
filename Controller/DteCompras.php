@@ -520,4 +520,21 @@ class Controller_DteCompras extends Controller_Base_Libros
         }
     }
 
+    /**
+     * Servicio web que entrega un resumen de compras por cada tipo de documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-03-05
+     */
+    public function _api_resumen_POST($emisor)
+    {
+        // verificar usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // obtener resumen
+        $Emisor = new Model_Contribuyente($emisor);
+        return (new Model_DteCompras())->setContribuyente($Emisor)->getResumen($this->Api->data);
+    }
+
 }
