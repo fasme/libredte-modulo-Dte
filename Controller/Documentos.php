@@ -128,7 +128,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-01-30
+     * @version 2020-03-13
      */
     public function _api_emitir_POST()
     {
@@ -147,6 +147,9 @@ class Controller_Documentos extends \Controller_App
         // y si es diferente a JSON se busca un parser para poder cargar los
         // datos a un arreglo de PHP (formato JSON)
         if ($formato!='json') {
+            if (!is_string($this->Api->data)) {
+                $this->Api->send('Debe enviar los datos codificados en base64 en un string JSON', 400);
+            }
             try {
                 $this->Api->data = \sasco\LibreDTE\Sii\Dte\Formatos::toArray(
                     $formato, base64_decode($this->Api->data)
