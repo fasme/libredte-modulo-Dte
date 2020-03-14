@@ -417,7 +417,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el código binario ESCPOS del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-03-14
      */
     public function escpos($dte, $folio)
     {
@@ -429,6 +429,7 @@ class Controller_DteEmitidos extends \Controller_App
             'compress' => false,
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
             'copias_cedibles' => $Emisor->config_pdf_copias_cedibles,
+            'pdf417' => null,
         ];
         extract($this->getQuery($params_default));
         // realizar consulta al servicio web de la API
@@ -454,7 +455,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Recurso de la API que descarga el código ESCPOS del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-27
+     * @version 2020-03-14
      */
     public function _api_escpos_GET($dte, $folio, $contribuyente)
     {
@@ -486,6 +487,7 @@ class Controller_DteEmitidos extends \Controller_App
             'papelContinuo' => 80,
             'profile' => 'default',
             'hash' => $User->hash,
+            'pdf417' => null,
         ]);
         if ($Emisor->config_pdf_web_verificacion) {
             $webVerificacion = $Emisor->config_pdf_web_verificacion;

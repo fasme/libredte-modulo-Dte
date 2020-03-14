@@ -1478,7 +1478,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega el código ESCPOS del documento emitido.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-27
+     * @version 2020-03-14
      */
     public function getESCPOS(array $config = [])
     {
@@ -1501,15 +1501,23 @@ class Model_DteEmitido extends Model_Base_Envio
             'papelContinuo' => 80,
             'profile' => 'default',
             'hash' => \sowerphp\core\Configure::read('api.default.token'),
+            'casa_matriz' => [
+                'direccion' => $this->getEmisor()->direccion,
+                'comuna' => $this->getEmisor()->getComuna()->comuna,
+            ],
+            'pdf417' => null,
         ], $config);
+        if ($this->getEmisor()->config_pdf_logo_continuo) {
+            $logo_file = DIR_STATIC.'/contribuyentes/'.$this->getEmisor()->rut.'/logo.png';
+            if (is_readable($logo_file)) {
+                $config['logo'] = base64_encode(file_get_contents($logo_file));
+            }
+        }
         // consultar servicio web de LibreDTE
         $ApiDteEscPosClient = $this->getEmisor()->getApiClient('dte_escpos');
         if (!$ApiDteEscPosClient) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($config['hash']);
             unset($config['hash']);
-            $Request = new \sowerphp\core\Network_Request();
-            $response = $rest->post($Request->url.'/api/utilidades/documentos/generar_escpos', $config);
+            $response = libredte_api_consume('/libredte/dte/documentos/escpos', $config);
         }
         // consultar servicio web del contribuyente
         else {
