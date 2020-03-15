@@ -99,7 +99,7 @@ class Controller_Itemes extends \Controller_Maintainer
      * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
      * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-26
+     * @version 2020-03-15
      */
     public function _api_info_GET($empresa, $codigo)
     {
@@ -116,10 +116,13 @@ class Controller_Itemes extends \Controller_Maintainer
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
-        // crear contribuyente y verificar que exista y tenga api configurada
+        // crear contribuyente y verificar que exista y el usuario esté autorizado
         $Empresa = new \website\Dte\Model_Contribuyente($empresa);
         if (!$Empresa->exists()) {
             $this->Api->send('Empresa solicitada no existe', 404);
+        }
+        if (!$Empresa->usuarioAutorizado($User, '/dte/documentos/emitir')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // consultar item en servicio web del contribuyente
         $ApiDteItemsClient = $Empresa->getApiClient('dte_items');
@@ -150,7 +153,7 @@ class Controller_Itemes extends \Controller_Maintainer
                 'ValorDR' => $Item->getDescuento($fecha, $bruto, $moneda, $decimales),
                 'TpoValor' => $Item->descuento_tipo,
                 'CodImpAdic' => $Item->impuesto_adicional,
-            ], 200, JSON_PRETTY_PRINT);
+            ], 200);
         }
     }
 
@@ -166,11 +169,15 @@ class Controller_Itemes extends \Controller_Maintainer
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
-        // crear contribuyente y verificar que exista y tenga api configurada
+        // crear contribuyente y verificar que exista y el usuario esté autorizado
         $Empresa = new \website\Dte\Model_Contribuyente($empresa);
         if (!$Empresa->exists()) {
             $this->Api->send('Empresa solicitada no existe', 404);
         }
+        if (!$Empresa->usuarioAutorizado($User, '/dte/documentos/emitir')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // entregar datos
         return (new Model_Itemes())
             ->setWhereStatement(['contribuyente = :contribuyente'], [':contribuyente' => $Empresa->rut])
             ->setOrderByStatement('item')

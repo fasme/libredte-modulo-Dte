@@ -198,11 +198,15 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
         if (is_string($User)) {
             $this->Api->send($User, 401);
         }
-        // crear contribuyente y verificar que exista y tenga api configurada
+        // crear contribuyente y verificar que exista y el usuario esté autorizado
         $Empresa = new \website\Dte\Model_Contribuyente($empresa);
         if (!$Empresa->exists()) {
             $this->Api->send('Empresa solicitada no existe', 404);
         }
+        if (!$Empresa->usuarioAutorizado($User, '/dte/documentos/emitir')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // entregar datos
         return (new Model_ItemClasificaciones())
             ->setWhereStatement(['contribuyente = :contribuyente'], [':contribuyente' => $Empresa->rut])
             ->setOrderByStatement('clasificacion')
