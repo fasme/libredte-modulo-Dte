@@ -186,4 +186,27 @@ class Controller_ItemClasificaciones extends \Controller_Maintainer
         $this->response->sendContent($csv, 'item_clasificaciones_'.$Contribuyente->rut.'.csv');
     }
 
+    /**
+     * Recurso de la API que permite obtener el listado de clasificaciones de items completo, con todos sus datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-03-15
+     */
+    public function _api_raw_GET($empresa)
+    {
+        // obtener usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear contribuyente y verificar que exista y tenga api configurada
+        $Empresa = new \website\Dte\Model_Contribuyente($empresa);
+        if (!$Empresa->exists()) {
+            $this->Api->send('Empresa solicitada no existe', 404);
+        }
+        return (new Model_ItemClasificaciones())
+            ->setWhereStatement(['contribuyente = :contribuyente'], [':contribuyente' => $Empresa->rut])
+            ->setOrderByStatement('clasificacion')
+            ->getTable();
+    }
+
 }

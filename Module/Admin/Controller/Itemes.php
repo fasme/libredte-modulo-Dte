@@ -118,8 +118,9 @@ class Controller_Itemes extends \Controller_Maintainer
         }
         // crear contribuyente y verificar que exista y tenga api configurada
         $Empresa = new \website\Dte\Model_Contribuyente($empresa);
-        if (!$Empresa->exists())
+        if (!$Empresa->exists()) {
             $this->Api->send('Empresa solicitada no existe', 404);
+        }
         // consultar item en servicio web del contribuyente
         $ApiDteItemsClient = $Empresa->getApiClient('dte_items');
         if ($ApiDteItemsClient) {
@@ -151,6 +152,29 @@ class Controller_Itemes extends \Controller_Maintainer
                 'CodImpAdic' => $Item->impuesto_adicional,
             ], 200, JSON_PRETTY_PRINT);
         }
+    }
+
+    /**
+     * Recurso de la API que permite obtener el listado de items completo con, todos sus datos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-03-15
+     */
+    public function _api_raw_GET($empresa)
+    {
+        // obtener usuario autenticado
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear contribuyente y verificar que exista y tenga api configurada
+        $Empresa = new \website\Dte\Model_Contribuyente($empresa);
+        if (!$Empresa->exists()) {
+            $this->Api->send('Empresa solicitada no existe', 404);
+        }
+        return (new Model_Itemes())
+            ->setWhereStatement(['contribuyente = :contribuyente'], [':contribuyente' => $Empresa->rut])
+            ->setOrderByStatement('item')
+            ->getTable();
     }
 
     /**
