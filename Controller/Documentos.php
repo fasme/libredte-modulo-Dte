@@ -291,7 +291,7 @@ class Controller_Documentos extends \Controller_App
             }
         }
         // crear objeto Dte y documento temporal asignando valores
-        $Dte = new \sasco\LibreDTE\Sii\Dte($dte, isset($_GET['normalizar'])?(bool)$_GET['normalizar']:true);
+        $Dte = new \sasco\LibreDTE\Sii\Dte($dte, (bool)$normalizar);
         $datos_dte = $Dte->getDatos();
         $datos_json = json_encode($datos_dte);
         if ($datos_dte === false or $datos_json === false) {
