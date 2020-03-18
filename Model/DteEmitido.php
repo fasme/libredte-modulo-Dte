@@ -356,6 +356,7 @@ class Model_DteEmitido extends Model_Base_Envio
             'DTE-3-101' => 'El folio {folio} ya fue usado para enviar un DTE al SII con otros datos. Debe eliminar el DTE y corregir el folio siguiente si es necesario a uno que no haya sido usado previamente. Finalmente emitir nuevamente el DTE.',
             'REF-3-750' => 'El DTE emitido T{dte}F{folio} hace referencia a un documento que no existe en SII. Normalmente esto ocurre al hacer referencia a un documento rechazado. Los documentos rechazados no se deben referenciar, ya que no son válidos. Ejemplo: no puede crear una nota de crédito para una factura rechazada por el SII.',
             'REF-3-415' => 'Se está generando un DTE que requiere referencias y no se está colocando una referencia válida. Ejemplo: no puede anular una guía de despacho con una nota de crédito, puesto que la guía no genera un débito fiscal.',
+            'HED-3-305' => 'La fecha de emisión del DTE es previa a la fecha de autorización del CAF usado para timbrar el documento.',
         ],
     ]; ///< listado de ayudas disponibles para los tipos de estado del SII
 
