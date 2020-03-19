@@ -99,7 +99,7 @@ class Controller_Itemes extends \Controller_Maintainer
      * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
      * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-15
+     * @version 2020-03-19
      */
     public function _api_info_GET($empresa, $codigo)
     {
@@ -153,6 +153,7 @@ class Controller_Itemes extends \Controller_Maintainer
                 'ValorDR' => $Item->getDescuento($fecha, $bruto, $moneda, $decimales),
                 'TpoValor' => $Item->descuento_tipo,
                 'CodImpAdic' => $Item->impuesto_adicional,
+                'TasaImp' => $Item->impuesto_adicional ? \sasco\LibreDTE\Sii\ImpuestosAdicionales::getTasa($Item->impuesto_adicional) : 0,
             ], 200);
         }
     }
