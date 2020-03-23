@@ -92,7 +92,20 @@ echo $f->end('Generar informe de documentos emitidos');
         </div>
     </div>
 </div>
-<a class="btn btn-primary btn-lg btn-block" href="dte_emitidos/csv/<?=$desde?>/<?=$hasta?>" role="button">Descargar detalle de documentos emitidos en CSV</a>
+<div class="row">
+    <div class="col-md-6">
+        <a class="btn btn-primary btn-lg btn-block" href="dte_emitidos/csv/<?=$desde?>/<?=$hasta?>" role="button">
+            Descargar documentos en CSV<br/>
+            <span class="small">sin detalle de productos y/o servicios</span>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a class="btn btn-primary btn-lg btn-block" href="dte_emitidos/csv/<?=$desde?>/<?=$hasta?>?detalle=1" role="button">
+            Descargar documentos en CSV<br/>
+            <span class="small">con detalle de productos y/o servicios</span>
+        </a>
+    </div>
+</div>
 <script>
 Morris.Line({
     element: 'grafico-por_dia',
