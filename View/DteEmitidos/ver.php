@@ -204,10 +204,25 @@ echo $f->input([
 echo $f->input(['name'=>'copias_tributarias', 'label'=>'Copias tributarias', 'value'=>(int)$Emisor->config_pdf_copias_tributarias, 'check'=>'notempty integer']);
 echo $f->input(['name'=>'copias_cedibles', 'label'=>'Copias cedibles', 'value'=>(int)$Emisor->config_pdf_copias_cedibles, 'check'=>'notempty integer']);
 echo $f->end('Descargar PDF');
+$whatsapp = $DteEmitido->getLinks()['whatsapp'];
 ?>
-    <a class="btn btn-primary btn-lg btn-block" href="<?=$pdf_publico?>" role="button">
-        Enlace público al PDF del DTE
-    </a>
+    <div class="row">
+        <div class="col-md-<?=$whatsapp?6:12?> mb-2">
+            <div class="btn-group w-100" role="group">
+                <a class="btn btn-info btn-lg btn-block" href="<?=$pdf_publico?>" role="button">
+                    Enlace público al PDF
+                </a>
+                <button type="button" class="btn btn-info" onclick="__.copy('<?=$pdf_publico?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
+            </div>
+        </div>
+<?php if($whatsapp) : ?>
+        <div class="col-md-6 mb-2">
+            <a class="btn btn-success btn-lg btn-block" href="<?=$whatsapp?>" role="button">
+                Enviar PDF por WhatsApp
+            </a>
+        </div>
+<?php endif; ?>
+    </div>
 </div>
 <!-- FIN PDF -->
 
@@ -419,13 +434,16 @@ if ($Resultado) {
 <?php if (!$Cobro->pagado) : ?>
         <div class="row">
             <div class="col-sm-6 mb-2">
-                <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
-                    Registrar pago
-                </a>
+                <div class="btn-group w-100" role="group">
+                    <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
+                        Enlace público para pagar
+                    </a>
+                    <button type="button" class="btn btn-info" onclick="__.copy('<?=$enlace_pagar_dte?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
+                </div>
             </div>
             <div class="col-sm-6 mb-2">
-                <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
-                    Enlace público para pagar
+                <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/pagar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+                    Registrar pago
                 </a>
             </div>
         </div>

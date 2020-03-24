@@ -1281,9 +1281,42 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que entrega el teléfono asociado al DTE, ya sea porque existe en el DTE o asociado directamente al receptor
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-03-24
+     */
+    public function getTelefono() {
+        if (!isset($this->_telefono)) {
+            $this->_telefono = null;
+            if (!empty($this->getDatos()['Encabezado']['Receptor']['Contacto']) and $this->getDatos()['Encabezado']['Receptor']['Contacto'][0]=='+') {
+                $this->_telefono = $this->getDatos()['Encabezado']['Receptor']['Contacto'];
+            } else if (!empty($this->getReceptor()->telefono) and $this->getReceptor()->telefono[0]=='+') {
+                $this->_telefono = $this->getReceptor()->telefono;
+            }
+        }
+        return $this->_telefono;
+    }
+
+    /**
+     * Método que entrega el celular asociado al DTE si existe
+     * @warning Sólo detecta como celular un número chileno (+56 9)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-03-24
+     */
+    public function getCelular() {
+        if (!isset($this->_celular)) {
+            $this->_celular = null;
+            if ($this->getTelefono() and strpos($this->getTelefono(), '+56 9')===0) {
+                $this->_celular = $this->getTelefono();
+            }
+        }
+        return $this->_celular;
+    }
+
+    /**
      * Método que entrega los enlaces públicos del documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-16
+     * @version 2020-03-24
      */
     public function getLinks()
     {
@@ -1292,6 +1325,13 @@ class Model_DteEmitido extends Model_Base_Envio
         $links['ver'] = $Request->url.'/dte/dte_emitidos/ver/'.$this->dte.'/'.$this->folio;
         $links['pdf'] = $Request->url.'/dte/dte_emitidos/pdf/'.$this->dte.'/'.$this->folio.'/1/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
         $links['xml'] = $Request->url.'/dte/dte_emitidos/xml/'.$this->dte.'/'.$this->folio.'/'.$this->emisor.'/'.$this->fecha.'/'.$this->total;
+        $links['whatsapp'] = false;
+        if ($this->getCelular()) {
+            $links['whatsapp'] = 'https://wa.me/'.(int)str_replace(['+',' '], '', $this->getCelular()).'?text='.urlencode(
+                '¡Hola! Soy de '.$this->getEmisor()->getNombre().'. '
+                .'Te adjunto el enlace al PDF de la '.$this->getTipo()->tipo.' N° '.$this->folio.': '.$links['pdf']
+            );
+        }
         $links_trigger = \sowerphp\core\Trigger::run('dte_dte_emitido_links', $this, $links);
         return $links_trigger ? $links_trigger : $links;
     }
