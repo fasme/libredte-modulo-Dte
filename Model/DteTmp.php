@@ -299,7 +299,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal usando LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-03-25
      */
     private function generarConFacturadorLocal($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
     {
@@ -310,7 +310,12 @@ class Model_DteTmp extends \Model_App
         // obtener firma electrónica
         $Firma = $Emisor->getFirma($user_id);
         if (!$Firma) {
-            throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE', 506);
+            throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar el DTE', 506);
+        }
+        // no hay fecha de resolución configurada
+        $fecha_resolucion = $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha;
+        if (empty($fecha_resolucion)) {
+            throw new \Exception('No hay fecha de resolución de SII configurada para el ambiente de emisión, debe configurar la fecha antes de generar el DTE', 400);
         }
         // solicitar folio
         $datos_dte = $this->getDatos();
