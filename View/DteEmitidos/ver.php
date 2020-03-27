@@ -204,10 +204,11 @@ echo $f->input([
 echo $f->input(['name'=>'copias_tributarias', 'label'=>'Copias tributarias', 'value'=>(int)$Emisor->config_pdf_copias_tributarias, 'check'=>'notempty integer']);
 echo $f->input(['name'=>'copias_cedibles', 'label'=>'Copias cedibles', 'value'=>(int)$Emisor->config_pdf_copias_cedibles, 'check'=>'notempty integer']);
 echo $f->end('Descargar PDF');
-$whatsapp = $DteEmitido->getLinks()['whatsapp'];
+$share_telephone = $DteEmitido->getCelular();
+$share_message = '¡Hola! Soy de '.$Emisor->getNombre().'. Te adjunto el enlace al PDF de la '.$DteEmitido->getTipo()->tipo.' N° '.$DteEmitido->folio.': '.$pdf_publico;
 ?>
     <div class="row">
-        <div class="col-md-<?=$whatsapp?6:12?> mb-2">
+        <div class="col-md-6 mb-2">
             <div class="btn-group w-100" role="group">
                 <a class="btn btn-info btn-lg btn-block" href="<?=$pdf_publico?>" role="button">
                     Enlace público al PDF
@@ -215,13 +216,11 @@ $whatsapp = $DteEmitido->getLinks()['whatsapp'];
                 <button type="button" class="btn btn-info" onclick="__.copy('<?=$pdf_publico?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
             </div>
         </div>
-<?php if($whatsapp) : ?>
         <div class="col-md-6 mb-2">
-            <a class="btn btn-success btn-lg btn-block" href="<?=$whatsapp?>" role="button">
+            <a class="btn btn-success btn-lg btn-block" href="#" onclick="__.share('<?=$share_telephone?>', '<?=$share_message?>'); return false" role="button">
                 Enviar PDF por WhatsApp
             </a>
         </div>
-<?php endif; ?>
     </div>
 </div>
 <!-- FIN PDF -->
