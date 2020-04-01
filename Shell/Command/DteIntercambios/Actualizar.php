@@ -62,9 +62,15 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
             $resultado = $Contribuyente->actualizarBandejaIntercambio($dias);
             if ($resultado['n_EnvioDTE']) {
                 $msg = $Contribuyente->razon_social.','."\n\n";
-                $msg .= 'Tiene '.$resultado['n_EnvioDTE'].' documento(s) nuevo(s) en su bandeja de intercambio.'."\n\n";
+                if ($resultado['n_EnvioDTE'] == 1) {
+                    $subject = 'Nuevo documento de proveedor recibido';
+                    $msg .= 'Tiene un documento nuevo en su bandeja de intercambio.'."\n\n";
+                } else {
+                    $subject = 'Nuevos documentos de proveedores recibidos';
+                    $msg .= 'Tiene '.num($resultado['n_EnvioDTE']).' documentos nuevos en su bandeja de intercambio.'."\n\n";
+                }
                 $msg .= 'Revisar pendientes en '.(new \sowerphp\core\Network_Request())->url.'/dte/contribuyentes/seleccionar/'.$Contribuyente->rut.'/'.base64_encode('/dte/dte_intercambios/listar');
-                $Contribuyente->notificar('Nuevo(s) documento(s) recibido(s)', $msg);
+                $Contribuyente->notificar($subject, $msg);
             }
         } catch (\Exception $e) {
             if ($this->verbose) {
