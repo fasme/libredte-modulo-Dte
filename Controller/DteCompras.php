@@ -203,8 +203,8 @@ class Controller_DteCompras extends Controller_Base_Libros
             );
         } else {
             $track_id = -1;
-            $revision_estado = 'Libro generado';
-            $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
+            $revision_estado = 'Libro Local Generado';
+            $revision_detalle = 'Este libro fue reemplazado por el Registro de Compras';
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro de compras local del período '.$periodo.' generado, este libro se reemplazó con el Registro de Compras', 'ok'
             );
@@ -219,7 +219,7 @@ class Controller_DteCompras extends Controller_Base_Libros
         $this->redirect(str_replace('enviar_sii', 'ver', $this->request->request));
     }
 
-     /**
+    /**
      * Acción que genera el archivo CSV con el registro de compras
      * En realidad esto descarga los datos que están localmente y no los del RC del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

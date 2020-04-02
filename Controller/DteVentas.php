@@ -192,8 +192,8 @@ class Controller_DteVentas extends Controller_Base_Libros
             }
             // libro generado
             $track_id = -1;
-            $revision_estado = 'Libro generado';
-            $revision_detalle = 'No se envió al SII, ya que se reemplazó por RCV';
+            $revision_estado = 'Libro Local Generado';
+            $revision_detalle = 'Este libro fue reemplazado por el Registro de Ventas';
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro de ventas local del período '.$periodo.' generado, este libro se reemplazó con el Registro de Ventas', 'ok'
             );
