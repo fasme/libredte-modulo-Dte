@@ -92,14 +92,14 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
                 WHERE
                     t.enviar = true
                     AND '.implode(' AND ', $where).'
-                    AND e.fecha >= :desde
+                    AND e.fecha_hora_creacion >= :desde
                     AND e.certificacion = :certificacion
                     AND e.emisor != e.receptor
                     AND e.track_id IS NOT NULL
                     AND e.revision_estado IS NOT NULL
                     AND SUBSTR(e.revision_estado,1,3) NOT IN (\''.implode('\', \'', $estados).'\')
                     AND ir.responde IS NULL
-                ORDER BY e.emisor, e.fecha, e.dte, e.folio
+                ORDER BY e.emisor, e.fecha_hora_creacion, e.dte, e.folio
             ) AS t
         ', $vars);
     }
