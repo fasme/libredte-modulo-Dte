@@ -165,7 +165,7 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método que procesa los datos de los contribuyentes y los actualiza en la base de datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-21
+     * @version 2020-04-13
      */
     private function procesarContribuyentes($contribuyentes)
     {
@@ -208,9 +208,11 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 }
             }
             // asignar correo de intercambio (esto es lo más importante de la actualización)
-            if (strpos($c[4], '@')) {
-                $Contribuyente->__set('config_email_intercambio_user', $c[4]);
-                $modificado = true;
+            if (!$Contribuyente->usuario or !$Contribuyente->config_email_intercambio_user) {
+                if (strpos($c[4], '@')) {
+                    $Contribuyente->__set('config_email_intercambio_user', $c[4]);
+                    $modificado = true;
+                }
             }
             // si el contribuyente está modificado, entonces se guarda
             if ($modificado) {
