@@ -795,20 +795,6 @@ CREATE TABLE boleta_tercero (
 CREATE INDEX boleta_tercero_fecha_idx ON boleta_tercero (receptor, fecha);
 
 --
--- Función que entrega el detalle de los items de un DTE emitido (se pasa la PK del DTE emitido)
---
-DROP FUNCTION IF EXISTS dte_emitido_get_detalle(v_emisor INTEGER, v_dte INTEGER, v_folio INTEGER, v_certificacion BOOLEAN);
-CREATE OR REPLACE FUNCTION dte_emitido_get_detalle(v_emisor INTEGER, v_dte INTEGER, v_folio INTEGER, v_certificacion BOOLEAN)
-RETURNS TABLE (NroLinDet SMALLINT, TpoCodigo VARCHAR(10), VlrCodigo VARCHAR(35), IndExe SMALLINT, NmbItem VARCHAR(80), QtyItem REAL, UnmdItem VARCHAR(4), PrcItem REAL, DescuentoPct REAL, DescuentoMonto REAL, CodImpAdic SMALLINT, MontoItem REAL)
-AS $$
-DECLARE dte_xml TEXT;
-BEGIN
-    SELECT xml INTO dte_xml FROM dte_emitido WHERE emisor = v_emisor AND dte = v_dte AND folio = v_folio AND certificacion = v_certificacion;
-    RETURN QUERY SELECT * FROM dte_get_detalle(dte_xml);
-END
-$$ LANGUAGE plpgsql;
-
---
 -- Función que entrega el detalle de los items de un XML de un DTE cualquiera (se pasa el XML)
 --
 DROP FUNCTION IF EXISTS dte_get_detalle(xml TEXT);
@@ -856,6 +842,20 @@ BEGIN
         MontoItem := NULLIF(fila.MontoItem, '');
         RETURN NEXT;
     END LOOP;
+END
+$$ LANGUAGE plpgsql;
+
+--
+-- Función que entrega el detalle de los items de un DTE emitido (se pasa la PK del DTE emitido)
+--
+DROP FUNCTION IF EXISTS dte_emitido_get_detalle(v_emisor INTEGER, v_dte INTEGER, v_folio INTEGER, v_certificacion BOOLEAN);
+CREATE OR REPLACE FUNCTION dte_emitido_get_detalle(v_emisor INTEGER, v_dte INTEGER, v_folio INTEGER, v_certificacion BOOLEAN)
+RETURNS TABLE (NroLinDet SMALLINT, TpoCodigo VARCHAR(10), VlrCodigo VARCHAR(35), IndExe SMALLINT, NmbItem VARCHAR(80), QtyItem REAL, UnmdItem VARCHAR(4), PrcItem REAL, DescuentoPct REAL, DescuentoMonto REAL, CodImpAdic SMALLINT, MontoItem REAL)
+AS $$
+DECLARE dte_xml TEXT;
+BEGIN
+    SELECT xml INTO dte_xml FROM dte_emitido WHERE emisor = v_emisor AND dte = v_dte AND folio = v_folio AND certificacion = v_certificacion;
+    RETURN QUERY SELECT * FROM dte_get_detalle(dte_xml);
 END
 $$ LANGUAGE plpgsql;
 
