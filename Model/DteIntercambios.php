@@ -230,7 +230,7 @@ class Model_DteIntercambios extends \Model_Plural_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-11
+     * @version 2020-04-17
      */
     public function actualizar($dias = 7)
     {
@@ -273,7 +273,12 @@ class Model_DteIntercambios extends \Model_Plural_App
         // procesar cada mensaje sin leer
         $n_EnvioDTE = $n_acuse = $n_EnvioRecibos = $n_RecepcionEnvio = $n_ResultadoDTE = 0;
         foreach ($uids as &$uid) {
-            $m = $Imap->getMessage($uid, ['subtype'=>['PLAIN', 'HTML', 'XML'], 'extension'=>['xml']]);
+            try {
+                $m = $Imap->getMessage($uid, ['subtype'=>['PLAIN', 'HTML', 'XML'], 'extension'=>['xml']]);
+            } catch (\Exception $e) {
+                // falla silenciosamente cuando no se puede obtener un email
+                continue;
+            }
             if ($m and isset($m['attachments'][0])) {
                 $datos_email = [
                     'fecha_hora_email' => $m['date'],
