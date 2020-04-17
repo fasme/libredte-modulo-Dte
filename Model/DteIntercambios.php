@@ -272,11 +272,12 @@ class Model_DteIntercambios extends \Model_Plural_App
         }
         // procesar cada mensaje sin leer
         $n_EnvioDTE = $n_acuse = $n_EnvioRecibos = $n_RecepcionEnvio = $n_ResultadoDTE = 0;
+        $errores = [];
         foreach ($uids as &$uid) {
             try {
                 $m = $Imap->getMessage($uid, ['subtype'=>['PLAIN', 'HTML', 'XML'], 'extension'=>['xml']]);
             } catch (\Exception $e) {
-                // falla silenciosamente cuando no se puede obtener un email
+                $errores[$uid] = $e->getMessage();
                 continue;
             }
             if ($m and isset($m['attachments'][0])) {
@@ -354,7 +355,7 @@ class Model_DteIntercambios extends \Model_Plural_App
         }
         $n_uids = count($uids);
         $omitidos = $n_uids - $n_EnvioDTE - $n_acuse;
-        return compact('n_uids', 'omitidos', 'n_EnvioDTE', 'n_EnvioRecibos', 'n_RecepcionEnvio', 'n_ResultadoDTE');
+        return compact('n_uids', 'omitidos', 'n_EnvioDTE', 'n_EnvioRecibos', 'n_RecepcionEnvio', 'n_ResultadoDTE', 'errores');
     }
 
     /**

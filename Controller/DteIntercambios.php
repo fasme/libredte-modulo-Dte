@@ -185,7 +185,7 @@ class Controller_DteIntercambios extends \Controller_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-31
+     * @version 2020-04-17
      */
     public function actualizar($dias = 7)
     {
@@ -207,6 +207,11 @@ class Controller_DteIntercambios extends \Controller_App
         \sowerphp\core\Model_Datasource_Session::message(
             $encontrados.': EnvioDTE='.num($n_EnvioDTE).',  EnvioRecibos='.num($n_EnvioRecibos).', RecepcionEnvio='.num($n_RecepcionEnvio).', ResultadoDTE='.num($n_ResultadoDTE).' y Omitidos='.num($omitidos), 'ok'
         );
+        if (!empty($errores)) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Se encontraron algunos problemas al procesar ciertos correos:<br/>- '.implode('<br/>- ',$errores), 'warning'
+            );    
+        }
         $this->redirect('/dte/dte_intercambios/listar');
     }
 
