@@ -833,4 +833,35 @@ class Controller_DteTmps extends \Controller_App
         $this->Api->send($Emisor->getDocumentosTemporales($this->Api->data, true), 200, JSON_PRETTY_PRINT);
     }
 
+    /**
+     * Acción de la API que permite obtener la información de un DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-04-24
+     */
+    public function _api_info_GET($receptor, $dte, $codigo, $emisor)
+    {
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear emisor
+        $Emisor = new \website\Dte\Model_Contribuyente($emisor);
+        if (!$Emisor->usuario) {
+            $this->Api->send('Contribuyente no está registrado en la aplicación', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_tmps/ver')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            $this->Api->send('No existe el DTE temporal solicitado', 404);
+        }
+        extract($this->getQuery([
+            'getDatosDte' => false,
+        ]));
+        $DteTmp->datos = $getDatosDte ? json_decode($DteTmp->datos) : null;
+        $this->Api->send($DteTmp, 200);
+    }
+
 }
