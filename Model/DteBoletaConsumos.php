@@ -74,12 +74,19 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
     /**
      * Método que entrega los RCOF rechazados (opcionalmente en un período de tiempo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-10
+     * @version 2020-04-29
      */
     public function getRechazados($desde = null, $hasta = null)
     {
-        $where = ['emisor = :emisor', 'certificacion = :certificacion', 'revision_estado = \'ERRONEO\''];
-        $vars = [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
+        $where = [
+            'emisor = :emisor',
+            'certificacion = :certificacion',
+            '(revision_estado = \'ERRONEO\' OR SUBSTRING(revision_estado FROM 1 FOR 3) = \'106\')'
+        ];
+        $vars = [
+            ':emisor'=>$this->getContribuyente()->rut,
+            ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion
+        ];
         if ($desde) {
             $where[] = 'dia >= :desde';
             $vars[':desde'] = $desde;
