@@ -41,13 +41,14 @@ class Model_ItemClasificaciones extends \Model_Plural_App
     /**
      * Método que entrega el listado de clasificaciones
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-25
+     * @version 2020-04-29
      */
     public function getList()
     {
-        return \sowerphp\core\Utility_Array::treeToList(
+        $items = \sowerphp\core\Utility_Array::treeToList(
             $this->getArbolItems(), 'clasificacion', 'clasificaciones'
         );
+        return array_map(function($key, $value) { return [$key, $value]; }, array_keys($items), $items);
     }
 
     /**
