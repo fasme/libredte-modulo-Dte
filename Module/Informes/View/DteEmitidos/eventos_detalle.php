@@ -6,5 +6,5 @@ foreach ($documentos as &$d) {
     $d[] = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a>';
     unset($d['dte']);
 }
-array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Detalle estado', 'Intercambio', 'Sucursal', 'Usuario', 'Ver']);
+array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Intercambio', 'Sucursal', 'Usuario', 'Ver']);
 new \sowerphp\general\View_Helper_Table($documentos, 'evento_'.\sowerphp\core\Utility_String::normalize($evento).'_'.$Emisor->rut, true);
