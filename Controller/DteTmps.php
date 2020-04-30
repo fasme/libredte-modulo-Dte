@@ -741,10 +741,10 @@ class Controller_DteTmps extends \Controller_App
             );
             $this->redirect('/dte/dte_tmps');
         }
-        // sólo lo puede editar el equipo de soporte
-        if (!$this->Auth->User->inGroup('soporte')) {
+        // sólo administrador puede editar el JSON
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No está autorizado a editar el JSON del DTE temporal', 'error'
+                'Sólo el administrador de la empresa está autorizado a editar el JSON del DTE temporal', 'error'
             );
             $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request));
         }

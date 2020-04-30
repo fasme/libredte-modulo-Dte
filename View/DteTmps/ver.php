@@ -75,7 +75,7 @@ $(function() {
         <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
 <?php endif; ?>
         <li class="nav-item"><a href="#actualizar_fecha" aria-controls="actualizar_fecha" role="tab" data-toggle="tab" id="actualizar_fecha-tab" class="nav-link">Actualizar fecha</a></li>
-<?php if ($_Auth->User->inGroup('soporte')): ?>
+<?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')): ?>
         <li class="nav-item"><a href="#avanzado" aria-controls="avanzado" role="tab" data-toggle="tab" id="avanzado-tab" class="nav-link">Avanzado</a ></li>
 <?php endif; ?>
     </ul>
@@ -308,7 +308,7 @@ echo $f->end('Actualizar fecha');
 </div>
 <!-- FIN ACTUALIZAR FECHA -->
 
-<?php if ($_Auth->User->inGroup('soporte')): ?>
+<?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')): ?>
 <!-- INICIO AVANZADO -->
 <div role="tabpanel" class="tab-pane" id="avanzado" aria-labelledby="avanzado-tab">
 <?php
