@@ -833,6 +833,10 @@ echo $f->end('Modificar sucursal');
                     <th>Creación en LibreDTE</th>
                     <td><?=\sowerphp\general\Utility_Date::format($DteEmitido->fecha_hora_creacion, 'd/m/Y H:i:s')?></td>
                 </tr>
+                <tr>
+                    <th>Usuario de LibreDTE</th>
+                    <td><?=$DteEmitido->getUsuario()->usuario?></td>
+                </tr>
             </tbody>
         </table>
     </div>

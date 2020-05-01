@@ -158,7 +158,8 @@ class Model_DteTmp extends \Model_App
 
     public static $fkNamespace = array(
         'Model_Contribuyente' => 'website\Dte',
-        'Model_DteTipo' => 'website\Dte'
+        'Model_DteTipo' => 'website\Dte',
+        'Model_Usuario' => '\sowerphp\app\Sistema\Usuarios',
     ); ///< Namespaces que utiliza esta clase
 
     private $Receptor; ///< Caché para el receptor

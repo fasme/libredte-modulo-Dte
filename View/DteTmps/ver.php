@@ -311,8 +311,14 @@ echo $f->end('Actualizar fecha');
 <?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')): ?>
 <!-- INICIO AVANZADO -->
 <div role="tabpanel" class="tab-pane" id="avanzado" aria-labelledby="avanzado-tab">
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="fas fa-file-code"></i>
+        JSON del Documento Temporal
+    </div>
+    <div class="card-body">
 <?php
-$f = new \sowerphp\general\View_Helper_Form();
+$f = new \sowerphp\general\View_Helper_Form(false);
 echo $f->begin([
     'action' => $_base.'/dte/dte_tmps/editar_json/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo,
     'id' => 'editarJsonForm',
@@ -326,8 +332,27 @@ echo $f->input([
     'check' => 'notempty',
     'rows' => 20,
 ]);
-echo $f->end('Guardar JSON');
+echo '<button type="submit" class="btn btn-primary btn-block mt-4">Guardar JSON</button>';
+echo $f->end(false);
 ?>
+    </div>
+</div>
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="fas fa-file-code"></i>
+        Datos del documento
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <th>Usuario de LibreDTE</th>
+                    <td><?=$DteTmp->getUsuario()->usuario?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 </div>
 <!-- FIN AVANZADO -->
 <?php endif; ?>
