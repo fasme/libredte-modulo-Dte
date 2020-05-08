@@ -46,18 +46,19 @@ class Model_DteEmitidos extends \Model_Plural_App
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-09-30
+     * @version 2020-05-08
      */
     public function getDetalle($desde, $hasta, $detalle)
     {
         // datos del xml
-        list($vendedor, $razon_social, $nacionalidad, $moneda, $moneda_total, $fecha_hora) = $this->db->xml('e.xml', [
+        list($vendedor, $razon_social, $nacionalidad, $moneda, $moneda_total, $fecha_hora, $indicador_traslado) = $this->db->xml('e.xml', [
             '/EnvioDTE/SetDTE/DTE/*/Encabezado/Emisor/CdgVendedor',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/Extranjero/Nacionalidad',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Totales/TpoMoneda',
             '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Totales/MntTotal',
             '/*/SetDTE/Caratula/TmstFirmaEnv',
+            '/EnvioDTE/SetDTE/DTE/*/Encabezado/IdDoc/IndTraslado',
         ], 'http://www.sii.cl/SiiDte');
         $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social.' END AS razon_social';
         if ($detalle) {
@@ -89,6 +90,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 e.cesion_track_id,
                 '.$vendedor.' AS vendedor
                 '.$detalle_items.'
+                , '.$indicador_traslado.' AS indicador_traslado
             FROM
                 dte_emitido AS e
                 LEFT JOIN dte_intercambio_resultado_dte AS i

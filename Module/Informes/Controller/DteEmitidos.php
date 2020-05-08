@@ -68,7 +68,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que entrega el informe de ventas en CSV
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-09-30
+     * @version 2020-05-08
      */
     public function csv($desde, $hasta)
     {
@@ -112,6 +112,7 @@ class Controller_DteEmitidos extends \Controller_App
             $cols[] = 'Imp. Adic.';
             $cols[] = 'Subtotal';
         }
+        $cols[] = 'Ind Traslado';
         $aux = (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor)->getDetalle($desde, $hasta, $detalle);
         if ($aux and $detalle) {
             $emitidos = [];
