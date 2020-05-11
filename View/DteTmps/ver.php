@@ -72,7 +72,7 @@ $(function() {
         <li class="nav-item"><a href="#pdf" aria-controls="pdf" role="tab" data-toggle="tab" id="pdf-tab" class="nav-link">PDF</a></li>
         <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link">Enviar por email</a></li>
 <?php if ($DteTmp->getTipo()->permiteCobro()): ?>
-        <li class="nav-item"><a href="#pagar" aria-controls="pagar" role="tab" data-toggle="tab" id="pagar-tab" class="nav-link">Pagar</a></li>
+        <li class="nav-item"><a href="#pagos" aria-controls="pagos" role="tab" data-toggle="tab" id="pagos-tab" class="nav-link">Pagos</a></li>
 <?php endif; ?>
         <li class="nav-item"><a href="#actualizar_fecha" aria-controls="actualizar_fecha" role="tab" data-toggle="tab" id="actualizar_fecha-tab" class="nav-link">Actualizar fecha</a></li>
 <?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')): ?>
@@ -166,10 +166,24 @@ echo $f->input([
 echo $f->end('Descargar PDF');
 $links = $DteTmp->getLinks();
 if ($DteTmp->getTipo()->permiteCobro()) :
+$share_telephone = $DteTmp->getCelular();
+$share_message = '¡Hola! Soy de '.$Emisor->getNombre().'. Te adjunto el enlace al PDF de la cotización N° '.$DteTmp->getFolio().': '.$links['pdf'];
 ?>
-    <a class="btn btn-primary btn-lg btn-block" href="<?=$links['pdf']?>" role="button">
-        Enlace público a la cotización
-    </a>
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <div class="btn-group w-100" role="group">
+                <a class="btn btn-info btn-lg btn-block" href="<?=$links['pdf']?>" role="button">
+                    Enlace público a la cotización
+                </a>
+                <button type="button" class="btn btn-info" onclick="__.copy('<?=$links['pdf']?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <a class="btn btn-success btn-lg btn-block" href="#" onclick="__.share('<?=$share_telephone?>', '<?=$share_message?>'); return false" role="button">
+                Enviar PDF por WhatsApp
+            </a>
+        </div>
+    </div>
 <?php endif; ?>
 </div>
 <!-- FIN PDF -->
@@ -257,26 +271,36 @@ if ($email_enviados) {
 <!-- FIN ENVIAR POR EMAIL -->
 
 <?php if ($DteTmp->getTipo()->permiteCobro()): ?>
-<!-- INICIO PAGAR -->
-<div role="tabpanel" class="tab-pane" id="pagar" aria-labelledby="pagar-tab">
+<!-- INICIO PAGOS -->
+<div role="tabpanel" class="tab-pane" id="pagos" aria-labelledby="pagos-tab">
+<div class="card mb-4">
+    <div class="card-header">
+        Pagos y cobros de LibreDTE
+    </div>
+    <div class="card-body">
 <?php if ($Emisor->config_pagos_habilitado) : ?>
-<div class="row">
-    <div class="col-sm-6 mb-2">
-    <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
-            Registrar pago
-        </a>
-    </div>
-    <div class="col-sm-6 mb-2">
-        <a class="btn btn-info btn-lg btn-block" href="<?=$links['pagar']?>" role="button">
-            Enlace público para pagar
-        </a>
-    </div>
+        <div class="row">
+            <div class="col-sm-6 mb-2">
+                <div class="btn-group w-100" role="group">
+                    <a class="btn btn-info btn-lg btn-block" href="<?=$links['pagar']?>" role="button">
+                        Enlace público para pagar
+                    </a>
+                    <button type="button" class="btn btn-info" onclick="__.copy('<?=$links['pagar']?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
+                </div>
+            </div>
+            <div class="col-sm-6 mb-2">
+                <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/pagar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button">
+                    Registrar pago
+                </a>
+            </div>
 </div>
 <?php else : ?>
-<p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
+        <p>No tiene los pagos en línea habilitados, debe al menos <a href="<?=$_base?>/dte/contribuyentes/modificar/<?=$Emisor->rut?>#pagos">configurar un medio de pago</a> primero.</p>
 <?php endif; ?>
+    </div>
 </div>
-<!-- FIN PAGAR -->
+</div>
+<!-- FIN PAGOS -->
 <?php endif; ?>
 
 <!-- INICIO ACTUALIZAR FECHA -->
