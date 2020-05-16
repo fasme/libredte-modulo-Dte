@@ -1489,7 +1489,7 @@ class Model_DteEmitido extends Model_Base_Envio
                 'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
                 'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
             ],
-            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+            'hash' => $this->getEmisor()->getUsuario()->hash,
         ], $config);
         // consultar servicio web de LibreDTE
         $ApiDtePdfClient = $this->getEmisor()->getApiClient('dte_pdf');
@@ -1519,7 +1519,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega el código ESCPOS del documento emitido.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-14
+     * @version 2020-05-15
      */
     public function getESCPOS(array $config = [])
     {
@@ -1541,7 +1541,7 @@ class Model_DteEmitido extends Model_Base_Envio
             ],
             'papelContinuo' => 80,
             'profile' => 'default',
-            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+            'hash' => $this->getEmisor()->getUsuario()->hash,
             'casa_matriz' => [
                 'direccion' => $this->getEmisor()->direccion,
                 'comuna' => $this->getEmisor()->getComuna()->comuna,

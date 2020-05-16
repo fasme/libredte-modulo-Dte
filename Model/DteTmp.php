@@ -792,7 +792,7 @@ class Model_DteTmp extends \Model_App
             'cedible' => false,
             'papelContinuo' => $this->getEmisor()->config_pdf_dte_papel,
             'compress' => false,
-            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+            'hash' => $this->getEmisor()->getUsuario()->hash,
         ], $config);
         // armar xml a partir de datos del dte temporal
         $xml = $this->getEnvioDte($config['cotizacion'] ? $this->getFolio() : 0)->generar();
@@ -845,7 +845,7 @@ class Model_DteTmp extends \Model_App
             ],
             'papelContinuo' => 80,
             'profile' => 'default',
-            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+            'hash' => $this->getEmisor()->getUsuario()->hash,
             'casa_matriz' => [
                 'direccion' => $this->getEmisor()->direccion,
                 'comuna' => $this->getEmisor()->getComuna()->comuna,
