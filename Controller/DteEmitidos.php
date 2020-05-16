@@ -415,44 +415,6 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
-     * Acción que descarga el código binario ESCPOS del documento emitido
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-14
-     */
-    public function escpos($dte, $folio)
-    {
-        // crear emisor
-        $Emisor = $this->getContribuyente();
-        // armar datos por defecto para parámetros por GET
-        $params_default = [
-            'cedible' => false,
-            'compress' => false,
-            'copias_tributarias' => $Emisor->config_pdf_copias_tributarias,
-            'copias_cedibles' => $Emisor->config_pdf_copias_cedibles,
-            'pdf417' => null,
-        ];
-        extract($this->getQuery($params_default));
-        // realizar consulta al servicio web de la API
-        $response = $this->consume('/api/dte/dte_emitidos/escpos/'.(int)$dte.'/'.(int)$folio.'/'.(int)$Emisor->rut.'?'.http_build_query(compact(array_keys($params_default))));
-        // procesar respuesta
-        if ($response===false) {
-            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
-            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
-        }
-        if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
-        }
-        // si dió código 200 se entrega la respuesta del servicio web
-        foreach (['Content-Type', 'Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->response->header($header, $response['header'][$header]);
-            }
-        }
-        $this->response->send($response['body']);
-    }
-
-    /**
      * Recurso de la API que descarga el código ESCPOS del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-03-14

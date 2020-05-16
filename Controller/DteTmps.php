@@ -270,9 +270,9 @@ class Controller_DteTmps extends \Controller_App
     }
 
     /**
-     * Recurso de la API que genera la previsualización del PDF del DTE
+     * Recurso de la API que genera el PDF del DTE temporal (cotización o previsualización)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-05-15
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
     {
@@ -287,54 +287,98 @@ class Controller_DteTmps extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/xml')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        // obtener datos JSON del DTE
+        // obtener DTE temporal
         $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
         if (!$DteTmp->exists()) {
             $this->Api->send('No existe el DTE temporal solicitado', 404);
         }
         // datos por defecto
-        extract($this->getQuery([
+        $config = $this->getQuery([
             'cotizacion' => 0,
             'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
-        ]));
-        // armar xml a partir de datos del dte temporal
-        $xml = $DteTmp->getEnvioDte($cotizacion ? $DteTmp->getFolio() : 0)->generar();
-        if (!$xml) {
-            $this->Api->send(
-                'No fue posible crear el PDF para previsualización:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 507
-            );
+            'base64' => false,
+            'hash' => $User->hash,
+        ]);
+        // generar PDF
+        try {
+            $pdf = $DteTmp->getPDF($config);
+            if ($config['base64']) {
+                $this->Api->send(base64_encode($pdf));
+            } else {
+                $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
+                $file_name = 'LibreDTE_'.$DteTmp->emisor.'_'.$DteTmp->getFolio().'.pdf';
+                $this->Api->response()->type('application/pdf');
+                $this->Api->response()->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
+                $this->Api->response()->header('Content-Length', strlen($pdf));
+                $this->Api->send($pdf);
+            }
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
         }
-        // armar datos con archivo XML y flag para indicar si es cedible o no
-        $data = [
-            'xml' => base64_encode($xml),
-            'cedible' => false,
-            'papelContinuo' => $papelContinuo,
-            'compress' => $compress,
-        ];
-        // consultar servicio web de LibreDTE
-        $ApiDtePdfClient = $Emisor->getApiClient('dte_pdf');
-        if (!$ApiDtePdfClient) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($User->hash);
-            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $data);
+    }
+
+    /**
+     * Recurso de la API que descarga el código ESCPOS del DTE temporal
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-15
+     */
+    public function _api_escpos_GET($receptor, $dte, $codigo, $emisor)
+    {
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
-        // consultar servicio web del contribuyente
-        else {
-            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $data);
+        // crear emisor y verificar permisos
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->usuario) {
+            $this->Api->send('Contribuyente no está registrado en la aplicación', 404);
         }
-        // procesar respuesta
-        if ($response['status']['code']!=200) {
-            $this->Api->send($response['body'], $response['status']['code']);
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/escpos')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        // si dió código 200 se entrega la respuesta del servicio web
-        $this->Api->response()->type('application/pdf');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->Api->response()->header($header, $response['header'][$header]);
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            $this->Api->send('No existe el DTE temporal solicitado', 404);
+        }
+        // datos por defecto
+        $config = $this->getQuery([
+            'cotizacion' => 0,
+            'base64' => false,
+            'cedible' => $Emisor->config_pdf_dte_cedible,
+            'compress' => false,
+            'copias_tributarias' => 1,
+            'copias_cedibles' => 0,
+            'papelContinuo' => 80,
+            'profile' => 'default',
+            'hash' => $User->hash,
+            'pdf417' => null,
+        ]);
+        if ($Emisor->config_pdf_web_verificacion) {
+            $webVerificacion = $Emisor->config_pdf_web_verificacion;
+        } else {
+            $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
+            if (!$webVerificacion) {
+                $webVerificacion = $this->request->url.'/boletas';
             }
         }
-        $this->Api->send($response['body']);
+        $config['webVerificacion'] = in_array($DteTmp->dte, [39,41]) ? $webVerificacion : false;
+        // generar código ESCPOS
+        try {
+            $escpos = $DteTmp->getESCPOS($config);
+            if ($config['base64']) {
+                $this->Api->send(base64_encode($escpos));
+            } else {
+                $file_name = 'LibreDTE_'.$DteTmp->emisor.'_'.$DteTmp->getFolio().'.escpos';
+                $this->Api->response()->type('application/octet-stream');
+                $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+                $this->Api->send($escpos);
+            }
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
@@ -390,67 +434,6 @@ class Controller_DteTmps extends \Controller_App
         $this->response->header('Content-Length', strlen($json));
         $this->response->header('Content-Disposition', 'attachement; filename="'.$receptor.'_'.$dte.'_'.$codigo.'.json"');
         $this->response->send($json);
-    }
-
-    /**
-     * Acción que descarga el código binario ESCPOS del DTE temporal
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
-     */
-    public function escpos($receptor, $dte, $codigo)
-    {
-        $Emisor = $this->getContribuyente();
-        // obtener datos JSON del DTE
-        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
-        if (!$DteTmp->exists()) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No existe el DTE temporal solicitado', 'error'
-            );
-            $this->redirect('/dte/dte_tmps');
-        }
-        // datos por defecto y recibidos por GET
-        extract($this->getQuery([
-            'cotizacion' => 0,
-            'compress' => false,
-        ]));
-        // armar xml a partir de datos del dte temporal
-        $xml = $DteTmp->getEnvioDte($cotizacion ? $DteTmp->getFolio() : 0)->generar();
-        if (!$xml) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible crear el código ESCPOS para previsualización:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'
-            );
-            $this->redirect('/dte/dte_tmps/ver/'.$receptor.'/'.$dte.'/'.$codigo);
-        }
-        // armar datos con archivo XML y flag para indicar si es cedible o no
-        $data = [
-            'xml' => base64_encode($xml),
-            'cedible' => false,
-            'compress' => $compress,
-        ];
-        // consultar servicio web de LibreDTE
-        $ApiDteEscPosClient = $Emisor->getApiClient('dte_escpos');
-        if (!$ApiDteEscPosClient) {
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($this->Auth->User->hash);
-            $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_escpos', $data);
-        }
-        // consultar servicio web del contribuyente
-        else {
-            $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $data);
-        }
-        // procesar respuesta
-        if ($response['status']['code']!=200) {
-            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
-            $this->redirect('/dte/dte_tmps/ver/'.$receptor.'/'.$dte.'/'.$codigo);
-        }
-        // si dió código 200 se entrega la respuesta del servicio web
-        $this->response->type('application/octet-stream');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->response->header($header, $response['header'][$header]);
-            }
-        }
-        $this->response->send($response['body']);
     }
 
     /**

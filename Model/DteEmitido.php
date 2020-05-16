@@ -1562,6 +1562,7 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         // consultar servicio web del contribuyente
         else {
+            unset($config['hash']);
             $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $config);
         }
         // procesar respuesta

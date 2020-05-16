@@ -1,5 +1,10 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_ventas/registro_ventas" title="Ir al registro de venta del SII" class="nav-link">
+            <i class="fas fa-university"></i> Registro ventas SII
+        </a>
+    </li>
+    <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir" title="Emitir documento temporal" class="nav-link">
             <i class="fa fa-file-invoice"></i> Emitir documento
         </a>
@@ -11,7 +16,7 @@
     </li>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_emitidos/buscar" title="Búsqueda avanzada de documentos emitidos" class="nav-link">
-            <i class="fa fa-search"></i> Buscar
+            <i class="fas fa-search fa-fw"></i> Buscar
         </a>
     </li>
 </ul>
@@ -37,7 +42,7 @@ array_unshift($documentos, [
     '',
     $f->input(['type'=>'select', 'name'=>'sucursal_sii', 'options'=>[''=>'Todas'] + $sucursales, 'value'=>(isset($search['sucursal_sii'])?$search['sucursal_sii']:$sucursal)]),
     $f->input(['type'=>'select', 'name'=>'usuario', 'options'=>[''=>'Todos'] + $usuarios, 'value'=>(isset($search['usuario'])?$search['usuario']:'')]),
-    '<button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>',
+    '<button type="submit" class="btn btn-primary"><i class="fas fa-search fa-fw"></i></button>',
 ]);
 array_unshift($documentos, ['Documento', 'Folio', 'Receptor', 'Fecha', 'Total', 'Estado SII', 'Sucursal', 'Usuario', 'Acciones']);
 

@@ -548,9 +548,9 @@ function dte_imprimir(formato, documento, id) {
             dte_emitido: _url+'/dte/dte_emitidos/pdf/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible
         },
         escpos: {
-            cotizacion: _url+'/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}?compress='+config.compress+'&cotizacion=1',
-            previsualizacion: _url+'/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}?compress='+config.compress+'&cotizacion=0',
-            dte_emitido: _url+'/dte/dte_emitidos/escpos/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible
+            cotizacion: _url+'/api/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}/{emisor}?compress='+config.compress+'&cotizacion=1',
+            previsualizacion: _url+'/api/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}/{emisor}?compress='+config.compress+'&cotizacion=0',
+            dte_emitido: _url+'/api/dte/dte_emitidos/escpos/{dte}/{folio}/{emisor}?compress='+config.compress+'&cedible='+config.cedible
         }
     }
     var url = urls[formato][documento];

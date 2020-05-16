@@ -1,24 +1,24 @@
 <ul class="nav nav-pills float-right">
 <?php if ($Emisor->config_pdf_imprimir and $DteTmp->getTipo()->permiteCotizacion()) : ?>
-<?php if ($Emisor->config_pdf_imprimir == 'pdf_escpos') : ?>
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-print"></i>
             Imprimir
         </a>
         <div class="dropdown-menu">
-            <a href="#" onclick="dte_imprimir('pdf', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" class="dropdown-item">PDF</a>
-            <a href="#" onclick="dte_imprimir('escpos', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" accesskey="P" class="dropdown-item">ESCPOS</a>
+<?php if ($Emisor->config_pdf_imprimir == 'pdf_escpos') : ?>
+            <a href="#" onclick="dte_imprimir('pdf', 'cotizacion', {emisor: <?=$DteTmp->emisor?>, dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" class="dropdown-item">PDF Cotización</a>
+            <a href="#" onclick="dte_imprimir('escpos', 'cotizacion', {emisor: <?=$DteTmp->emisor?>, dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" accesskey="P" class="dropdown-item">ESCPOS Cotización</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" onclick="dte_imprimir('pdf', 'previsualizacion', {emisor: <?=$DteTmp->emisor?>, dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" class="dropdown-item">PDF Previsualización</a>
+            <a href="#" onclick="dte_imprimir('escpos', 'previsualizacion', {emisor: <?=$DteTmp->emisor?>, dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" accesskey="P" class="dropdown-item">ESCPOS Previsualización</a>
+<?php else: ?>
+            <a href="#" onclick="dte_imprimir('<?=$Emisor->config_pdf_imprimir?>', 'cotizacion', {emisor: <?=$DteTmp->emisor?>, dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" accesskey="P" class="dropdown-item"><?=strtoupper($Emisor->config_pdf_imprimir)?> Cotización</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" onclick="dte_imprimir('<?=$Emisor->config_pdf_imprimir?>', 'previsualizacion', {emisor: <?=$DteTmp->emisor?>, dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" accesskey="P" class="dropdown-item"><?=strtoupper($Emisor->config_pdf_imprimir)?> Previsualización</a>
+<?php endif; ?>
         </div>
     </li>
-<?php else: ?>
-    <li class="nav-item">
-        <a href="#" onclick="dte_imprimir('<?=$Emisor->config_pdf_imprimir?>', 'cotizacion', {dte: <?=$DteTmp->dte?>, codigo: '<?=$DteTmp->codigo?>', receptor: <?=$DteTmp->receptor?>}); return false" title="Imprimir el documento (<?=$Emisor->config_pdf_imprimir?>)" accesskey="P" class="nav-link">
-            <i class="fa fa-print"></i>
-            Imprimir
-        </a>
-    </li>
-<?php endif; ?>
 <?php endif; ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/emitir/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>-<?=$DteTmp->receptor?>?copiar" title="Crear DTE con los mismos datos de este" class="nav-link">

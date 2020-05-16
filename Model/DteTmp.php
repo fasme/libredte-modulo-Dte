@@ -777,4 +777,116 @@ class Model_DteTmp extends \Model_App
         return $this->_celular;
     }
 
+    /**
+     * Método que entrega el PDF del documento temporal.
+     * Entrega el PDF que se ha generado con LibreDTE a partir del JSON del DTE
+     * temporal.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-15
+     */
+    public function getPDF(array $config = [])
+    {
+        // configuración por defecto para el PDF
+        $config = array_merge([
+            'cotizacion' => 0,
+            'cedible' => false,
+            'papelContinuo' => $this->getEmisor()->config_pdf_dte_papel,
+            'compress' => false,
+            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+        ], $config);
+        // armar xml a partir de datos del dte temporal
+        $xml = $this->getEnvioDte($config['cotizacion'] ? $this->getFolio() : 0)->generar();
+        if (!$xml) {
+            throw new \Exception(
+                'No fue posible crear el PDF:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 507
+            );
+        }
+        $config['xml'] = base64_encode($xml);
+        // consultar servicio web de LibreDTE
+        $ApiDtePdfClient = $this->getEmisor()->getApiClient('dte_pdf');
+        if (!$ApiDtePdfClient) {
+            $rest = new \sowerphp\core\Network_Http_Rest();
+            $rest->setAuth($config['hash']);
+            unset($config['hash']);
+            $Request = new \sowerphp\core\Network_Request();
+            $response = $rest->post($Request->url.'/api/utilidades/documentos/generar_pdf', $config);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            unset($config['hash']);
+            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $config);
+        }
+        // procesar respuesta
+        if ($response['status']['code']!=200) {
+            throw new \Exception($response['body'], $response['status']['code']);
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        return $response['body'];
+    }
+
+    /**
+     * Método que entrega el código ESCPOS del documento temporal.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-15
+     */
+    public function getESCPOS(array $config = [])
+    {
+        // configuración por defecto para el código ESCPOS
+        $config = array_merge([
+            'cotizacion' => 0,
+            'cedible' => false,
+            'compress' => false,
+            'copias_tributarias' => 1,
+            'copias_cedibles' => 0,
+            'webVerificacion' => \sowerphp\core\Configure::read('dte.web_verificacion'),
+            'caratula' => [
+                'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
+                'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
+            ],
+            'papelContinuo' => 80,
+            'profile' => 'default',
+            'hash' => \sowerphp\core\Configure::read('api.default.token'),
+            'casa_matriz' => [
+                'direccion' => $this->getEmisor()->direccion,
+                'comuna' => $this->getEmisor()->getComuna()->comuna,
+            ],
+            'pdf417' => null,
+        ], $config);
+        // armar xml a partir de datos del dte temporal
+        $xml = $this->getEnvioDte($config['cotizacion'] ? $this->getFolio() : 0)->generar();
+        if (!$xml) {
+            throw new \Exception(
+                'No fue posible crear el ESCPOS:<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 507
+            );
+        }
+        $config['xml'] = base64_encode($xml);
+        // logo
+        if ($this->getEmisor()->config_pdf_logo_continuo) {
+            $logo_file = DIR_STATIC.'/contribuyentes/'.$this->getEmisor()->rut.'/logo.png';
+            if (is_readable($logo_file)) {
+                $config['logo'] = base64_encode(file_get_contents($logo_file));
+            }
+        }
+        // consultar servicio web de LibreDTE
+        $ApiDteEscPosClient = $this->getEmisor()->getApiClient('dte_escpos');
+        if (!$ApiDteEscPosClient) {
+            unset($config['hash']);
+            $response = libredte_api_consume('/libredte/dte/documentos/escpos', $config);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            unset($config['hash']);
+            $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $config);
+        }
+        // procesar respuesta
+        if ($response===false) {
+            throw new \Exception(implode('<br/>', $rest->getErrors()), 500);
+        }
+        if ($response['status']['code']!=200) {
+            throw new \Exception($response['body'], 500);
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        return $response['body'];
+    }
+
 }
