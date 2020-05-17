@@ -1,24 +1,18 @@
 <ul class="nav nav-pills float-right">
-<?php if (isset($DteRecibido) and in_array($DteRecibido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
+<?php if (isset($DteRecibido)) : ?>
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/registro_compras/ingresar_accion/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII" class="nav-link">
-            <i class="fa fa-edit"></i>
-            Recibir / Reclamar
+        <a href="<?=$_base?>/dte/dte_recibidos/ver/<?=$DteRecibido->emisor?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Volver al documento recibido" class="nav-link">
+            Volver al DTE recibido
         </a>
     </li>
-    <li class="nav-item">
-        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$DteRecibido->emisor?>-<?=$DteRecibido->getEmisor()->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>', 750, 550)" title="Ver datos del registro de compra/venta en el SII" class="nav-link">
-            <i class="fa fa-book"></i>
-            Ver RCV
-        </a>
-    </li>
-<?php endif; ?>
+<?php else: ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_recibidos/listar" title="Ir a los documentos recibidos" class="nav-link">
             <i class="fa fa-sign-in-alt"></i>
             Documentos recibidos
         </a>
     </li>
+<?php endif; ?>
 </ul>
 
 <?php if (isset($DteRecibido)) : ?>
@@ -35,7 +29,7 @@ echo '<div class="col-md-6">',"\n";
 echo $f->input([
     'type' => 'hidden',
     'name' => 'receptor',
-    'value' => $Emisor->rut,
+    'value' => $Receptor->rut,
 ]);
 echo $f->input([
     'type' => (isset($DteRecibido) and $DteRecibido->intercambio) ? 'text' : 'date',
@@ -273,11 +267,5 @@ echo $f->input([
     'attr' => 'style="width:100%"',
 ]);
 echo '</div>',"\n";
-
-if (isset($DteRecibido)) : ?>
-<div class="col-md-4">
-    <a class="btn btn-danger btn-block" href="<?=$_base?>/dte/dte_recibidos/eliminar/<?=$DteRecibido->emisor?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" role="button" onclick="return Form.confirm(this, '¿Confirmar la eliminación del documento?')">Eliminar documento</a>
-</div>
-<?php endif;
 echo '</div>',"\n";
 echo $f->end(false);

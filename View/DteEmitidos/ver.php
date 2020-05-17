@@ -26,14 +26,6 @@
             Copiar
         </a>
     </li>
-<?php if (in_array($DteEmitido->dte, array_keys(\sasco\LibreDTE\Sii\RegistroCompraVenta::$dtes))) : ?>
-    <li class="nav-item">
-        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="nav-link">
-            <i class="fa fa-book"></i>
-            Ver RCV
-        </a>
-    </li>
-<?php endif; ?>
 <?php if (\sowerphp\core\Module::loaded('Crm')) : ?>
     <li class="nav-item">
         <a href="<?=$_base?>/crm/clientes/ver/<?=$Receptor->rut?>" title="Ir al CRM de <?=$Receptor->razon_social?>" class="nav-link">
@@ -70,7 +62,7 @@ $(function() {
         <li class="nav-item"><a href="#email" aria-controls="email" role="tab" data-toggle="tab" id="email-tab" class="nav-link">Enviar por email</a></li>
 <?php endif; ?>
 <?php if ($DteEmitido->getTipo()->permiteIntercambio()): ?>
-        <li class="nav-item"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab" id="intercambio-tab" class="nav-link">Resultado intercambio</a></li>
+        <li class="nav-item"><a href="#intercambio" aria-controls="intercambio" role="tab" data-toggle="tab" id="intercambio-tab" class="nav-link">Proceso intercambio</a></li>
 <?php endif; ?>
 <?php if ($DteEmitido->getTipo()->operacion=='S'): ?>
         <li class="nav-item"><a href="#pagos" aria-controls="pagos" role="tab" data-toggle="tab" id="pagos-tab" class="nav-link">Pagos</a></li>
@@ -324,7 +316,7 @@ $color = [
 ?>
 <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/dte_rcv/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-<?=$color?> btn-lg btn-block">
     <?=($DteEmitido->receptor_evento?\sasco\LibreDTE\Sii\RegistroCompraVenta::$eventos[$DteEmitido->receptor_evento]:'Sin evento registrado')?><br/>
-    <small>(ver datos en el registro de compra/venta en el SII)</small>
+    <small>(ver datos en el Registro de Ventas del SII)</small>
 </a>
 <?php if ($DteEmitido->hasLocalXML()) : ?>
 <hr/>
@@ -517,6 +509,11 @@ if ($cobranza) {
 <?php
 // referencias que este documento hace a otros
 if ($referenciados) {
+    foreach($referenciados as &$referenciado) {
+        if (!empty($referenciado['FchRef'])) {
+            $referenciado['FchRef'] = \sowerphp\general\Utility_Date::format($referenciado['FchRef']);
+        }
+    }
     array_unshift($referenciados, ['#', 'DTE', 'Ind. Global', 'Folio', 'RUT otro cont.', 'Fecha', 'Código ref.', 'Razón ref.', 'Vendedor', 'Caja']);
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setShowEmptyCols(false);

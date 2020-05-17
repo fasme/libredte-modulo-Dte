@@ -545,12 +545,14 @@ function dte_imprimir(formato, documento, id) {
         pdf: {
             cotizacion: _url+'/dte/dte_tmps/cotizacion/{receptor}/{dte}/{codigo}?compress='+config.compress,
             previsualizacion: _url+'/dte/dte_tmps/pdf/{receptor}/{dte}/{codigo}?compress='+config.compress,
-            dte_emitido: _url+'/dte/dte_emitidos/pdf/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible
+            dte_emitido: _url+'/dte/dte_emitidos/pdf/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible,
+            dte_recibido: _url+'/dte/dte_recibidos/pdf/{emisor}/{dte}/{folio}?compress='+config.compress+'&cedible='+config.cedible
         },
         escpos: {
             cotizacion: _url+'/api/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}/{emisor}?compress='+config.compress+'&cotizacion=1',
             previsualizacion: _url+'/api/dte/dte_tmps/escpos/{receptor}/{dte}/{codigo}/{emisor}?compress='+config.compress+'&cotizacion=0',
-            dte_emitido: _url+'/api/dte/dte_emitidos/escpos/{dte}/{folio}/{emisor}?compress='+config.compress+'&cedible='+config.cedible
+            dte_emitido: _url+'/api/dte/dte_emitidos/escpos/{dte}/{folio}/{emisor}?compress='+config.compress+'&cedible='+config.cedible,
+            dte_recibido: _url+'/api/dte/dte_recibidos/escpos/{emisor}/{dte}/{folio}/{receptor}?compress='+config.compress+'&cedible='+config.cedible
         }
     }
     var url = urls[formato][documento];

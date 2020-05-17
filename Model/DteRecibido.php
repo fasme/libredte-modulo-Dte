@@ -477,6 +477,7 @@ class Model_DteRecibido extends \Model_App
     ); ///< Namespaces que utiliza esta clase
 
     // cachés
+    private $Dte; ///< Objeto con el DTE
     private $Emisor; ///< Objeto con el Emisor del DTE recibido
     private $DteIntercambio; ///< Objeto con el DTE de intercambio
     public $xml; ///< XML del DTE recibido, ya sea asociado del intercambio o por portal mipyme
@@ -641,6 +642,30 @@ class Model_DteRecibido extends \Model_App
     public function getTipo()
     {
         return (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->get($this->dte);
+    }
+
+    /**
+     * Método que entrega el objeto del Dte
+     * @return \sasco\LibreDTE\Sii\Dte
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function getDte()
+    {
+        if (!$this->Dte) {
+            if ($this->hasLocalXML()) {
+                $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
+                $EnvioDte->loadXML($this->getXML());
+                $Documentos = $EnvioDte->getDocumentos();
+                if (!isset($Documentos[0])) {
+                    throw new \Exception('No se encontró DTE asociado al documento recibido');
+                }
+                $this->Dte = $Documentos[0];
+            } else {
+                $this->Dte = false;
+            }
+        }
+        return $this->Dte;
     }
 
     /**
@@ -817,6 +842,59 @@ class Model_DteRecibido extends \Model_App
     }
 
     /**
+     * Método que entrega las referencias que este DTE hace a otros documentos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-22
+     */
+    public function getReferenciados()
+    {
+        $datos = $this->hasLocalXML() ? $this->getDatos() : [];
+        if (empty($datos['Referencia'])) {
+            return null;
+        }
+        if (!isset($datos['Referencia'][0])) {
+            $datos['Referencia'] = [$datos['Referencia']];
+        }
+        $referenciados = [];
+        foreach ($datos['Referencia'] as $r) {
+            $referenciados[] = array_merge([
+                'NroLinRef' => false,
+                'TpoDocRef' => false,
+                'IndGlobal' => false,
+                'FolioRef' => false,
+                'RUTOtr' => false,
+                'FchRef' => false,
+                'CodRef' => false,
+                'RazonRef' => false,
+                'CodVndor' => false,
+                'CodCaja' => false,
+            ], $r);
+        }
+        return $referenciados;
+    }
+
+    /**
+     * Método que indica si el DTE recibido tiene un XML asociado (LibreDTE o
+     * MIPYME)
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function hasXML()
+    {
+        return $this->hasLocalXML() or $this->mipyme;
+    }
+
+    /**
+     * Método que indica si el DTE recibido tiene un XML en LibreDTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function hasLocalXML()
+    {
+        return (bool)$this->intercambio;
+    }
+
+    /**
      * Método que entrega el XML del documento recibido.
      * Entrega el XML asociado a un intercambio en LibreDTE o bien recibido con
      * el Portal MIPYME del SII.
@@ -875,10 +953,24 @@ class Model_DteRecibido extends \Model_App
      * Entrega el PDF que se ha generado con LibreDTE a partir del XML del DTE
      * recibido o bien el PDF generado con el PortalMIPYME del SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-05-16
      */
-    public function getPDF($cedible = 0)
+    public function getPDF(array $config = [])
     {
+        // configuración por defecto para el PDF
+        $config = array_merge([
+            'cedible' => false,
+            'compress' => false,
+            'copias_tributarias' => 1,
+            'copias_cedibles' => 1,
+            'papelContinuo' => 0,
+            'xml' => base64_encode($this->getXML()),
+            'caratula' => [
+                'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
+                'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
+            ],
+            'hash' => $this->getReceptor()->getUsuario()->hash,
+        ], $config);
         // si es un DTE del portal MIPYME se busca el PDF ahí
         if ($this->mipyme) {
             $r = libredte_api_consume(
@@ -897,31 +989,95 @@ class Model_DteRecibido extends \Model_App
             }
             return $r['body'];
         }
-        // si es un DTE con intercambio se busca en LibreDTE
+        // si es un DTE con intercambio se genera localmente en LibreDTE
         else if ($this->intercambio) {
-            $Request = new \sowerphp\core\Network_Request();
-            $url = sprintf(
-                $Request->url.'/api/dte/dte_intercambios/pdf/%d/%d/%d/%d/%d/%d',
-                $this->intercambio,
-                $this->receptor,
-                (int)$cedible,
-                $this->emisor,
-                $this->dte,
-                $this->folio
-            );
-            $rest = new \sowerphp\core\Network_Http_Rest();
-            $rest->setAuth($this->getReceptor()->getUsuario()->hash);
-            $response = $rest->get($url);
+            // consultar servicio web de LibreDTE
+            $ApiDtePdfClient = $this->getEmisor()->getApiClient('dte_pdf');
+            if (!$ApiDtePdfClient) {
+                $rest = new \sowerphp\core\Network_Http_Rest();
+                $rest->setAuth($config['hash']);
+                unset($config['hash']);
+                $Request = new \sowerphp\core\Network_Request();
+                $response = $rest->post($Request->url.'/api/utilidades/documentos/generar_pdf', $config);
+            }
+            // consultar servicio web del contribuyente
+            else {
+                unset($config['hash']);
+                $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $config);
+            }
+            // procesar respuesta
+            if ($response===false) {
+                throw new \Exception(implode("\n", $rest->getErrors(), 500));
+            }
             if ($response['status']['code']!=200) {
                 throw new \Exception($response['body'], $response['status']['code']);
-
             }
+            // si dió código 200 se entrega la respuesta del servicio web
             return $response['body'];
         }
         // si no es mipyme ni intercambio error
         else {
             throw new \Exception('No es posible obtener el PDF del DTE recibido');
         }
+    }
+
+    /**
+     * Método que entrega el código ESCPOS del documento emitido.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-15
+     */
+    public function getESCPOS(array $config = [])
+    {
+        // si no tiene XML error
+        if (!$this->hasXML()) {
+            throw new \Exception('El DTE no tiene XML asociado para generar el código ESCPOS');
+        }
+        // configuración por defecto para el código ESCPOS
+        $config = array_merge([
+            'cedible' => $this->getEmisor()->config_pdf_dte_cedible,
+            'compress' => false,
+            'copias_tributarias' => $this->getEmisor()->config_pdf_copias_tributarias ? $this->getEmisor()->config_pdf_copias_tributarias : 1,
+            'copias_cedibles' => $this->getEmisor()->config_pdf_copias_cedibles ? $this->getEmisor()->config_pdf_copias_cedibles : $this->getEmisor()->config_pdf_dte_cedible,
+            'xml' => base64_encode($this->getXML()),
+            'caratula' => [
+                'FchResol' => $this->certificacion ? $this->getEmisor()->config_ambiente_certificacion_fecha : $this->getEmisor()->config_ambiente_produccion_fecha,
+                'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
+            ],
+            'papelContinuo' => 80,
+            'profile' => 'default',
+            'hash' => $this->getEmisor()->getUsuario()->hash,
+            'casa_matriz' => [
+                'direccion' => $this->getEmisor()->direccion,
+                'comuna' => $this->getEmisor()->getComuna()->comuna,
+            ],
+            'pdf417' => null,
+        ], $config);
+        if ($this->getEmisor()->config_pdf_logo_continuo) {
+            $logo_file = DIR_STATIC.'/contribuyentes/'.$this->getEmisor()->rut.'/logo.png';
+            if (is_readable($logo_file)) {
+                $config['logo'] = base64_encode(file_get_contents($logo_file));
+            }
+        }
+        // consultar servicio web de LibreDTE
+        $ApiDteEscPosClient = $this->getEmisor()->getApiClient('dte_escpos');
+        if (!$ApiDteEscPosClient) {
+            unset($config['hash']);
+            $response = libredte_api_consume('/libredte/dte/documentos/escpos', $config);
+        }
+        // consultar servicio web del contribuyente
+        else {
+            unset($config['hash']);
+            $response = $ApiDteEscPosClient->post($ApiDteEscPosClient->url, $config);
+        }
+        // procesar respuesta
+        if ($response===false) {
+            throw new \Exception(implode('<br/>', $rest->getErrors()), 500);
+        }
+        if ($response['status']['code']!=200) {
+            throw new \Exception($response['body'], 500);
+        }
+        // si dió código 200 se entrega la respuesta del servicio web
+        return $response['body'];
     }
 
 }

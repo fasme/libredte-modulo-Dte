@@ -35,14 +35,14 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite mostrar los documentos recibidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-06
+     * @version 2020-05-15
      */
     public function listar($pagina = 1)
     {
         if (!is_numeric($pagina)) {
             $this->redirect('/dte/'.$this->request->params['controller'].'/listar');
         }
-        $Emisor = $this->getContribuyente();
+        $Receptor = $this->getContribuyente();
         $filtros = [];
         if (isset($_GET['search'])) {
             foreach (explode(',', $_GET['search']) as $filtro) {
@@ -53,7 +53,7 @@ class Controller_DteRecibidos extends \Controller_App
         $searchUrl = isset($_GET['search'])?('?search='.$_GET['search']):'';
         $paginas = 1;
         try {
-            $documentos_total = $Emisor->countDocumentosRecibidos($filtros);
+            $documentos_total = $Receptor->countDocumentosRecibidos($filtros);
             if (!empty($pagina)) {
                 $filtros['limit'] = \sowerphp\core\Configure::read('app.registers_per_page');
                 $filtros['offset'] = ($pagina-1)*$filtros['limit'];
@@ -62,7 +62,7 @@ class Controller_DteRecibidos extends \Controller_App
                     $this->redirect('/dte/'.$this->request->params['controller'].'/listar'.$searchUrl);
                 }
             }
-            $documentos = $Emisor->getDocumentosRecibidos($filtros);
+            $documentos = $Receptor->getDocumentosRecibidos($filtros);
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Error al recuperar los documentos:<br/>'.$e->getMessage(), 'error'
@@ -71,14 +71,14 @@ class Controller_DteRecibidos extends \Controller_App
             $documentos = [];
         }
         $this->set([
-            'Emisor' => $Emisor,
+            'Receptor' => $Receptor,
             'documentos' => $documentos,
             'documentos_total' => $documentos_total,
             'paginas' => $paginas,
             'pagina' => $pagina,
             'search' => $filtros,
             'tipos_dte' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(true),
-            'usuarios' => $Emisor->getListUsuarios(),
+            'usuarios' => $Receptor->getListUsuarios(),
             'searchUrl' => $searchUrl,
         ]);
     }
@@ -86,27 +86,28 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite agregar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2020-05-15
      */
     public function agregar()
     {
-        $Emisor = $this->getContribuyente();
+        $Receptor = $this->getContribuyente();
         // asignar variables para la vista
         $tipo_transacciones = \sasco\LibreDTE\Sii\RegistroCompraVenta::$tipo_transacciones;
         unset($tipo_transacciones[5], $tipo_transacciones[6]);
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
-            'Emisor' => $Emisor,
+            'Receptor' => $Receptor,
             'tipos_documentos' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(true),
             'iva_no_recuperables' => (new \website\Dte\Admin\Mantenedores\Model_IvaNoRecuperables())->getList(),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getList(),
             'iva_tasa' => \sasco\LibreDTE\Sii::getIVA(),
-            'sucursales' => $Emisor->getSucursales(),
+            'sucursales' => $Receptor->getSucursales(),
             'tipo_transacciones' => $tipo_transacciones,
         ]);
         // procesar formulario si se pasó
-        if (isset($_POST['submit']))
+        if (isset($_POST['submit'])) {
             $this->save();
+        }
         $this->autoRender = false;
         $this->render('DteRecibidos/agregar_modificar');
     }
@@ -114,14 +115,14 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite editar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-02
+     * @version 2020-05-15
      */
     public function modificar($emisor, $dte, $folio)
     {
-        $Emisor = $this->getContribuyente();
+        $Receptor = $this->getContribuyente();
         // obtener dte recibido
-        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteRecibido->exists() or $DteRecibido->receptor!=$Emisor->rut) {
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or $DteRecibido->receptor!=$Receptor->rut) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'DTE recibido solicitado no existe', 'error'
             );
@@ -132,30 +133,58 @@ class Controller_DteRecibidos extends \Controller_App
         unset($tipo_transacciones[5], $tipo_transacciones[6]);
         $this->set([
             '_header_extra' => ['js'=>['/dte/js/dte.js']],
-            'Emisor' => $Emisor,
+            'Receptor' => $Receptor,
             'DteRecibido' => $DteRecibido,
             'tipos_documentos' => (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList(true),
             'iva_no_recuperables' => (new \website\Dte\Admin\Mantenedores\Model_IvaNoRecuperables())->getList(),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getList(),
             'iva_tasa' => \sasco\LibreDTE\Sii::getIVA(),
-            'sucursales' => $Emisor->getSucursales(),
+            'sucursales' => $Receptor->getSucursales(),
             'tipo_transacciones' => $tipo_transacciones,
         ]);
         // procesar formulario si se pasó
-        if (isset($_POST['submit']))
+        if (isset($_POST['submit'])) {
             $this->save();
+        }
         $this->autoRender = false;
         $this->render('DteRecibidos/agregar_modificar');
     }
 
     /**
+     * Acción que permite ver la página de un DTE recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-15
+     */
+    public function ver($emisor, $dte, $folio)
+    {
+        $Receptor = $this->getContribuyente();
+        // obtener dte recibido
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or $DteRecibido->receptor!=$Receptor->rut) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'DTE recibido solicitado no existe', 'error'
+            );
+            $this->redirect('/dte/dte_recibidos/listar');
+        }
+        // agregar variables para la vista
+        $this->set([
+            '_header_extra' => ['js'=>['/dte/js/dte.js']],
+            'Receptor' => $Receptor,
+            'Emisor' => $DteRecibido->getEmisor(),
+            'DteRecibido' => $DteRecibido,
+            'referenciados' => $DteRecibido->getReferenciados(),
+            'DteIntercambio' => $DteRecibido->intercambio ? $DteRecibido->getDteIntercambio() : null,
+        ]);
+    }
+
+    /**
      * Método que agrega o modifica un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-02
+     * @version 2020-05-16
      */
     private function save()
     {
-        $Emisor = $this->getContribuyente();
+        $Receptor = $this->getContribuyente();
         // revisar datos minimos
         foreach(['emisor', 'dte', 'folio', 'fecha', 'tasa'] as $attr) {
             if (!isset($_POST[$attr][0])) {
@@ -167,8 +196,8 @@ class Controller_DteRecibidos extends \Controller_App
         }
         // crear dte recibido
         list($emisor, $dv) = explode('-', str_replace('.', '', $_POST['emisor']));
-        $DteRecibido = new Model_DteRecibido($emisor, $_POST['dte'], (int)$_POST['folio'], (int)$Emisor->config_ambiente_en_certificacion);
-        $DteRecibido->receptor = $Emisor->rut;
+        $DteRecibido = new Model_DteRecibido($emisor, $_POST['dte'], (int)$_POST['folio'], (int)$Receptor->config_ambiente_en_certificacion);
+        $DteRecibido->receptor = $Receptor->rut;
         $DteRecibido->tasa = !empty($_POST['neto']) ? (float)$_POST['tasa'] : 0;
         $DteRecibido->fecha = $_POST['fecha'];
         $DteRecibido->exento = !empty($_POST['exento']) ? $_POST['exento'] : null;
@@ -229,9 +258,9 @@ class Controller_DteRecibidos extends \Controller_App
         // si el DTE es de producción y es electrónico entonces se consultará su
         // estado antes de poder guardar, esto evitará agregar documentos que no
         // han sido recibidos en el SII o sus datos son incorrectos
-        if (!$Emisor->config_ambiente_en_certificacion and $DteRecibido->getTipo()->electronico and !$Emisor->config_recepcion_omitir_verificacion_sii) {
+        if (!$Receptor->config_ambiente_en_certificacion and $DteRecibido->getTipo()->electronico and !$Receptor->config_recepcion_omitir_verificacion_sii) {
             // obtener firma
-            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            $Firma = $Receptor->getFirma($this->Auth->User->id);
             if (!$Firma) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar DTE', 'error'
@@ -258,7 +287,7 @@ class Controller_DteRecibidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message(
                 'DTE recibido guardado', 'ok'
             );
-            $this->redirect('/dte/dte_recibidos/listar');
+            $this->redirect('/dte/dte_recibidos/ver/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio);
         } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No fue posible guardar el DTE: '.$e->getMessage(), 'error'
@@ -269,12 +298,12 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite eliminar un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-11
+     * @version 2020-05-15
      */
     public function eliminar($emisor, $dte, $folio)
     {
-        $Emisor = $this->getContribuyente();
-        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $Receptor = $this->getContribuyente();
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
         if (!$DteRecibido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No fue posible eliminar, el DTE recibido solicitado no existe', 'warning'
@@ -289,22 +318,98 @@ class Controller_DteRecibidos extends \Controller_App
     }
 
     /**
-     * Acción que permite descargar el PDF del documento recibido
+     * Acción que descarga el XML del documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-19
+     * @version 2020-05-16
      */
-    public function pdf($emisor, $dte, $folio)
+    public function xml($emisor, $dte, $folio)
     {
         $Receptor = $this->getContribuyente();
+        // obtener DTE recibido
         $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
-        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+        if (!$DteRecibido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
-                'No fue posible obtener el PDF, el DTE recibido solicitado no existe o bien no tiene intercambio asociado', 'warning'
+                'No existe el DTE recibido solicitado', 'error'
             );
             $this->redirect('/dte/dte_recibidos/listar');
         }
+        // si no tiene XML error
+        if (!$DteRecibido->hasXML()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El DTE no tiene XML asociado', 'error'
+            );
+            $this->redirect('/dte/dte_recibidos/ver/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio);
+        }
+        // entregar XML
+        $file = 'dte_'.$DteRecibido->getEmisor()->rut.'-'.$DteRecibido->getEmisor()->dv.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.xml';
+        $xml = $DteRecibido->getXML();
+        $this->response->type('application/xml', 'ISO-8859-1');
+        $this->response->header('Content-Length', strlen($xml));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($xml);
+    }
+
+    /**
+     * Acción que descarga el JSON del documento recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function json($emisor, $dte, $folio)
+    {
+        $Receptor = $this->getContribuyente();
+        // obtener DTE recibido
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE recibido solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_recibidos/listar');
+        }
+        // si no tiene XML error
+        if (!$DteRecibido->hasXML()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'El DTE no tiene XML asociado, no es posible obtener JSON', 'error'
+            );
+            $this->redirect('/dte/dte_recibidos/ver/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio);
+        }
+        // entregar XML
+        $file = 'dte_'.$DteRecibido->getEmisor()->rut.'-'.$DteRecibido->getEmisor()->dv.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.json';
+        $datos = $DteRecibido->getDatos();
+        unset($datos['@attributes'], $datos['TED'], $datos['TmstFirma']);
+        $json = json_encode($datos, JSON_PRETTY_PRINT);
+        $this->response->type('application/json');
+        $this->response->header('Content-Length', strlen($json));
+        $this->response->header('Content-Disposition', 'attachement; filename="'.$file.'"');
+        $this->response->send($json);
+    }
+
+    /**
+     * Acción que permite descargar el PDF del documento recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function pdf($emisor, $dte, $folio, $cedible = false)
+    {
+        $Receptor = $this->getContribuyente();
+        // datos por defecto y recibidos por GET
+        $config = $this->getQuery([
+            'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
+            'compress' => false,
+            'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : 1,
+            'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : 1,
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : 0 ),
+        ]);
+        // obtener DTE recibido
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible obtener el PDF, el DTE recibido solicitado no existe o bien no tiene intercambio asociado', 'error'
+            );
+            $this->redirect('/dte/dte_recibidos/ver/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio);
+        }
+        // generar PDF
         try {
-            $pdf = $DteRecibido->getPDF();
+            $pdf = $DteRecibido->getPDF($config);
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message(
                 $e->getMessage(), 'error'
@@ -316,6 +421,194 @@ class Controller_DteRecibidos extends \Controller_App
         $this->response->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
         $this->response->header('Content-Length', strlen($pdf));
         $this->response->send($pdf);
+    }
+
+    /**
+     * Acción que permite usar la verificación avanzada de datos del DTE
+     * Permite validar firma con la enviada al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function verificar_datos_avanzado($emisor, $dte, $folio)
+    {
+        $Receptor = $this->getContribuyente();
+        // obtener DTE recibido
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+            die('No fue posible obtener el PDF, el DTE recibido solicitado no existe o bien no tiene intercambio asociado');
+        }
+        $r = $this->consume('/api/dte/dte_recibidos/estado/'.$DteRecibido->emisor.'/'.$dte.'/'.$folio.'/'.$DteRecibido->receptor.'?avanzado=1');
+        if ($r['status']['code']!=200) {
+            die('Error al obtener el estado: '.$r['body']);
+        }
+        $this->layout .= '.min';
+        $this->set([
+            'Emisor' => $DteRecibido->getEmisor(),
+            'Receptor' => $Receptor,
+            'DteTipo' => $DteRecibido->getTipo(),
+            'Documento' => $DteRecibido,
+            'estado' => $r['body'],
+        ]);
+    }
+
+    /**
+     * Acción de la API que permite obtener el PDF de un DTE recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function _api_pdf_GET($emisor, $dte, $folio, $receptor)
+    {
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/pdf')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+            $this->Api->send('No existe el documento recibido solicitado T'.$dte.'F'.$folio.' del emisor '.$emisor.' o no tiene XML asociado', 404);
+        }
+        // datos por defecto
+        $config = $this->getQuery([
+            'base64' => false,
+            'cedible' => false,
+            'papelContinuo' => $DteRecibido->getEmisor()->config_pdf_dte_papel,
+            'compress' => false,
+            'copias_tributarias' => 1,
+            'copias_cedibles' => 0,
+            'hash' => $User->hash,
+        ]);
+        // generar PDF
+        try {
+            $pdf = $DteRecibido->getPDF($config);
+            if ($config['base64']) {
+                $this->Api->send(base64_encode($pdf));
+            } else {
+                $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.pdf';
+                $this->Api->response()->type('application/pdf');
+                $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+                $this->Api->response()->header('Content-Length', strlen($pdf));
+                $this->Api->send($pdf);
+            }
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Recurso de la API que descarga el código ESCPOS del DTE recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-16
+     */
+    public function _api_escpos_GET($emisor, $dte, $folio, $receptor)
+    {
+        // verificar si se pasaron credenciales de un usuario
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        // crear receptor y verificar permisos
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->usuario) {
+            $this->Api->send('Receptor no está registrado en la aplicación', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/escpos')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+            $this->Api->send('No existe el documento recibido solicitado T'.$dte.'F'.$folio.' del emisor '.$emisor, 404);
+        }
+        // datos por defecto
+        $config = $this->getQuery([
+            'base64' => false,
+            'cedible' => false,
+            'compress' => false,
+            'copias_tributarias' => 1,
+            'copias_cedibles' => 0,
+            'papelContinuo' => 80,
+            'profile' => 'default',
+            'hash' => $User->hash,
+            'pdf417' => null,
+        ]);
+        // generar código ESCPOS
+        try {
+            $escpos = $DteRecibido->getESCPOS($config);
+            if ($config['base64']) {
+                $this->Api->send(base64_encode($escpos));
+            } else {
+                $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.escpos';
+                $this->Api->response()->type('application/octet-stream');
+                $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+                $this->Api->send($escpos);
+            }
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Acción de la API que permite obtener el XML de un DTE recibido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-06-16
+     */
+    public function _api_xml_GET($emisor, $dte, $folio, $receptor)
+    {
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/xml')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+            $this->Api->send('No existe el documento recibido solicitado T'.$dte.'F'.$folio.' del emisor '.$emisor.' o no tiene XML asociado', 404);
+        }
+        return base64_encode($DteRecibido->getXML());
+    }
+
+    /**
+     * Acción de la API que permite consultar el estado del envío del DTE al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-02-21
+     */
+    public function _api_estado_GET($emisor, $dte, $folio, $receptor)
+    {
+        extract($this->getQuery(['avanzado'=>false]));
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Receptor = new Model_Contribuyente($receptor);
+        if (!$Receptor->exists()) {
+            $this->Api->send('Receptor no existe', 404);
+        }
+        if (!$Receptor->usuarioAutorizado($User, '/dte/dte_recibidos/xml')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $Firma = $Receptor->getFirma($User->id);
+        if (!$Firma) {
+            $this->Api->send('No existe firma asociada', 506);
+        }
+        $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
+        if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
+            $this->Api->send('No existe el documento recibido solicitado T'.$dte.'F'.$folio.' del emisor '.$emisor, 404);
+        }
+        if (!$DteRecibido->getDte()) {
+            $this->Api->send('El documento T'.$dte.'F'.$folio.' del emisor '.$DteRecibido->getEmisor()->getRUT().' no tiene XML en LibreDTE', 400);
+        }
+        \sasco\LibreDTE\Sii::setAmbiente($Receptor->config_ambiente_en_certificacion);
+        return $avanzado ? $DteRecibido->getDte()->getEstadoAvanzado($Firma) : $DteRecibido->getDte()->getEstado($Firma);
     }
 
     /**

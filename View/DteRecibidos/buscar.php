@@ -1,5 +1,11 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_intercambios/buscar" title="Búsqueda avanzada de los documentos de intercambio" class="nav-link">
+            <i class="fa fa-search"></i>
+            Buscar en intercambios
+        </a>
+    </li>
+    <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_recibidos/listar" title="Ir a los documentos emitidos" class="nav-link">
             <i class="fa fa-sign-in-alt"></i>
             Documentos recibidos
@@ -33,20 +39,19 @@ if (isset($documentos)) {
     foreach ($documentos as &$d) {
         $filename = 'dte_'.$d['emisor'].'-'.$d['intercambio'].'_LibreDTE_T'.$d['dte'].'F'.$d['folio'].'.pdf';
         $total += $d['total'];
-        $acciones = '<a href="'.$_base.'/dte/dte_intercambios/ver/'.$d['intercambio'].'" title="Ver detalles del intercambio" class="btn btn-primary'.(!$d['intercambio']?' disabled':'').'" role="button"><i class="fa fa-search fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-primary'.(!$d['intercambio']?' disabled':'').'" '.($d['intercambio']?('download="'.$filename.'" data-click="pdf"'):'').' role="button"><i class="far fa-file-pdf fa-fw"></i></a>';
-        $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/modificar/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Modificar documento" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a>';
+        $acciones = ' <a href="'.$_base.'/dte/dte_recibidos/ver/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary mb-2"><i class="fas fa-search fa-fw"></i></a>';
+        $acciones .= ' <a href="'.$_base.'/dte/dte_recibidos/pdf/'.$d['emisor'].'/'.$d['dte'].'/'.$d['folio'].'" title="Descargar PDF del documento" class="btn btn-primary mb-2'.((!$d['intercambio']and!$d['mipyme'])?' disabled':'').'" role="button"><i class="far fa-file-pdf fa-fw"></i></a>';
         $d[] = $acciones;
         $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
         $d['total'] = num($d['total']);
-        unset($d['emisor'], $d['dte'], $d['intercambio']);
+        unset($d['emisor'], $d['dte'], $d['intercambio'], $d['mipyme']);
     }
     // agregar resumen
     echo '<div class="card mt-4 mb-4"><div class="card-body lead text-center">Se encontraron '.num(count($documentos)).' documentos por un total de $'.num($total).'.-</div></div>';
     // agregar tabla
     array_unshift($documentos, ['Documento', 'Folio', 'Emisor', 'Fecha', 'Total', 'Usuario', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
-    $t->setColsWidth([null, null, null, null, null, null, 160]);
+    $t->setColsWidth([null, null, null, null, null, null, 110]);
     $t->setId('dte_recibidos_'.$Receptor->rut);
     $t->setExport(true);
     echo $t->generate($documentos);

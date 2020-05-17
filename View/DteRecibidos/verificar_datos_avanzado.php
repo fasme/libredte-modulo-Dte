@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="page-header"><h1>Verificación DTE emitido</h1></div>
+    <div class="page-header"><h1>Verificación DTE recibido</h1></div>
     <div class="card mb-4">
         <div class="card-header">Documento</div>
         <div class="card-body">

@@ -942,7 +942,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción que permite usar la verificación avanzada de datos del DTE
      * Permite validar firma con la enviada al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-04
+     * @version 2020-05-16
      */
     public function verificar_datos_avanzado($dte, $folio)
     {
@@ -952,7 +952,6 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$DteEmitido->exists()) {
             die('No existe el DTE solicitado');
         }
-        $DTE = $DteEmitido->getDte();
         $r = $this->consume('/api/dte/dte_emitidos/estado/'.$dte.'/'.$folio.'/'.$Emisor->rut.'?avanzado=1');
         if ($r['status']['code']!=200) {
             die('Error al obtener el estado: '.$r['body']);

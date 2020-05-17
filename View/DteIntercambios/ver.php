@@ -191,7 +191,7 @@ foreach ($Documentos as $Dte) {
     $accion = '';
     $acciones = '';
     if ($dte_existe) {
-        $acciones .= '<a href="'.$_base.'/dte/dte_recibidos/modificar/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio.'" title="Editar el DTE recibido" class="btn btn-primary"><i class="fa fa-edit fa-fw"></i></a> ';
+        $acciones .= '<a href="'.$_base.'/dte/dte_recibidos/ver/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio.'" title="Ver la página del DTE recibido" class="btn btn-primary"><i class="fa fa-search fa-fw"></i></a> ';
     }
     $acciones .= '<a href="#" onclick="__.popup(\''.$_base.'/dte/sii/verificar_datos/'.$Dte->getReceptor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'/'.$Dte->getFechaEmision().'/'.$Dte->getMontoTotal().'/'.$Dte->getEmisor().'\', 750, 550); return false" title="Verificar datos del documento en la web del SII" class="btn btn-primary"><i class="fa fa-eye fa-fw"></i></a>';
     $acciones .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/dte_rcv/'.$Dte->getEmisor().'/'.$Dte->getTipo().'/'.$Dte->getFolio().'\', 750, 550); return false" title="Ver datos del registro de compra/venta en el SII" class="btn btn-primary"><i class="fa fa-book fa-fw"></i></a>';
