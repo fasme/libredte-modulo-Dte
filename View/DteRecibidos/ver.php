@@ -103,7 +103,7 @@ echo $t->generate([
             <div class="card mb-4 bg-light">
                 <div class="card-header lead text-center">Estado en SII</div>
                 <div class="card-body text-center">
-                        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$Receptor->getRUT()?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>/<?=$DteRecibido->fecha?>/<?=$DteRecibido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">Verificar documento</a><br/>
+                        <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$Receptor->getRUT()?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>/<?=$DteRecibido->fecha?>/<?=$DteRecibido->getTotal()?>/<?=$Emisor->getRUT()?>', 750, 550)" title="Verificar datos del documento en la web del SII">Verificar documento</a><br/>
 <?php if ($DteRecibido->hasLocalXML()) : ?>
                         <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_recibidos/verificar_datos_avanzado/<?=$DteRecibido->emisor?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>', 750, 750)" title="Verificar datos avanzados del documento con el servicio web del SII">Verificación avanzada</a>
 <?php endif; ?>
