@@ -116,7 +116,7 @@ echo $f->input([
     'name' => 'exento',
     'label' => '¿Exento?',
     'options' => ['No', 'Si'],
-    'value' => isset($Obj)?$Obj->exento:0,
+    'value' => isset($Obj)?$Obj->exento:(int)$Contribuyente->config_extra_exenta,
     'check' => 'notempty',
 ]);
 echo $f->input([
