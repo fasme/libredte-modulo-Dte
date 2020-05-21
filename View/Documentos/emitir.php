@@ -130,7 +130,7 @@ $inputs = [
     ['name'=>'VlrCodigo', 'attr'=>'maxlength="35" style="text-align:center;width:5em" onblur="DTE.setItem('.$Emisor->rut.', this)" autocomplete="off"', 'class'=>'typeahead', 'check'=>($Emisor->config_emision_solo_items_codificados?'notempty':false)],
     ['name'=>'NmbItem', 'attr'=>'maxlength="80"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':''), 'growup'=>true],
     ['name'=>'DscItem', 'attr'=>'maxlength="1000"', 'growup'=>true],
-    ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'onblur'=>'DTE.calcular()'],
+    ['name'=>'IndExe', 'type'=>'select', 'options'=>['no', 'si'], 'onblur'=>'DTE.calcular()', 'value'=>(int)$Emisor->config_extra_exenta],
     ['name'=>'QtyItem', 'value'=>1, 'attr'=>'maxlength="19" style="text-align:center;width:4em" onblur="DTE.calcular()"'],
     ['name'=>'UnmdItem', 'attr'=>'maxlength="4" style="width:5em"'],
     ['name'=>'PrcItem', 'attr'=>'maxlength="12" style="text-align:center;width:7em" onblur="DTE.calcular()"'.($Emisor->config_emision_solo_items_codificados?' readonly="readonly"':'')],
