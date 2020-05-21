@@ -348,6 +348,8 @@ class Model_DteEmitido extends Model_Base_Envio
     private $datos_cesion; ///< Arreglo con los datos del XML de cesión del DTE
     private $Emisor = null; /// caché para el receptor
     private $Receptor = null; /// caché para el receptor
+    private $eliminable = null; /// caché para indicar si el DTE es eliminable
+    private $eliminableXML = null; /// caché para indicar si el XML del DTE es eliminable
 
     private static $envio_sii_ayudas = [
         'RCH' => [
@@ -764,26 +766,102 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
-     * Método que elimina el DTE, y si no hay DTE posterior del mismo tipo,
-     * restaura el folio para que se volver a utilizar.
-     * Sólo se pueden eliminar DTE que estén rechazados o no enviados al SII
+     * Método que entrega true si se puede eliminar el DTE o una excepción con la causa si no es posible
+     * Sólo se pueden eliminar DTE que:
+     *   - No sean boletas y cumplan con:
+     *     - Estén rechazados
+     *     - No estén enviados al SII
+     *   - Sean  boletas y cumplan con:
+     *     - Configuración para eliminar (definida según fecha emisión en la config de la empresa)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-20
+     * @version 2020-05-21
      */
-    public function delete()
+    private function canBeDeleted($Usuario)
     {
         if ($this->track_id!=-1) {
+            // no borrar casos con track id y donde el estado es diferente a rechazado
             if ($this->track_id and $this->getEstado()!='R') {
-                throw new \Exception('El DTE no tiene estado rechazado en el sistema');
+                throw new \Exception('El documento no tiene estado rechazado en el sistema, requerido para permitir eliminación');
             }
+            // si es boleta se debe analizar según configuración
             if (in_array($this->dte, [39, 41])) {
-                throw new \Exception('No es posible eliminar boletas');
+                // sólo usuarios administradores pueden eliminar boletas,
+                // si no se pasó usuario o no es administrador entonces error
+                if ($Usuario === null or ($Usuario !== false and !$this->getEmisor()->usuarioAutorizado($Usuario, 'admin'))) {
+                    throw new \Exception('Sólo usuarios administradores pueden eliminar una boleta');
+                }
+                // si la empresa permite eliminar boletas se revisa por períodos de tiempo
+                if ($this->getEmisor()->config_boletas_eliminar) {
+                    $today = date('Y-m-d');
+                    // Sólo las del día actual
+                    if ((int)$this->getEmisor()->config_boletas_eliminar == 1) {
+                        if ($this->fecha != $today) {
+                            throw new \Exception('Sólo se pueden eliminar las boletas del día actual');
+                        }
+                        return true;
+                    }
+                    // Sólo las del mes actual
+                    else if ((int)$this->getEmisor()->config_boletas_eliminar == 2) {
+                        $periodo_boleta = substr(str_replace('-','',$this->fecha),0,6);
+                        $periodo_actual = substr(str_replace('-','',$today),0,6);
+                        if ($periodo_boleta != $periodo_actual) {
+                            throw new \Exception('Sólo se pueden eliminar las boletas del mes actual');
+                        }
+                        return true;
+                    }
+                    // Las del mes actual y mes anterior (no recomendado)
+                    else if ((int)$this->getEmisor()->config_boletas_eliminar == 3) {
+                        $periodo_boleta = substr(str_replace('-','',$this->fecha),0,6);
+                        $periodo_actual = substr(str_replace('-','',$today),0,6);
+                        $periodo_anterior = \sowerphp\general\Utility_Date::previousPeriod($periodo_actual);
+                        if ($periodo_boleta != $periodo_actual and $periodo_boleta != $periodo_anterior) {
+                            throw new \Exception('Sólo se pueden eliminar las boletas del mes actual y mes anterior');
+                        }
+                        return true;
+                    }
+                    // Cualquier boleta (no recomendado)
+                    else if ((int)$this->getEmisor()->config_boletas_eliminar == 4) {
+                        return true;
+                    }
+                }
+                // por defecto no se deja borrar boletas
+                throw new \Exception('No es posible eliminar la boleta');
             }
         }
-        // trigger al eliminar el DTE emitido
-        \sowerphp\core\Trigger::run('dte_dte_emitido_eliminar', $this);
-        // eliminar DTE (se hace en transacción para retroceder el folio si corresponde
+        // por defecto se deja borrar cualquier DTE que no haya cumplido algún estado previo
+        return true;
+    }
+
+    /**
+     * Método que indica si el DTE es o no eliminable
+     * @return =true si se puede eliminar, =false si no es posible eliminar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function eliminable($Usuario = false)
+    {
+        if ($this->eliminable === null) {
+            try {
+                $this->eliminable = $this->canBeDeleted($Usuario);
+            } catch (\Exception $e) {
+                $this->eliminable = false;
+            }
+        }
+        return $this->eliminable;
+    }
+
+    /**
+     * Método que elimina el DTE, y si no hay DTE posterior del mismo tipo,
+     * restaura el folio para que se volver a utilizar.
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function delete($Usuario = null)
+    {
+        $this->canBeDeleted($Usuario);
         $this->db->beginTransaction(true);
+        \sowerphp\core\Trigger::run('dte_dte_emitido_eliminar', $this);
+        // retroceder folio si corresponde hacerlo (sólo cuando este dte es el último emitido)
         $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->emisor, $this->dte, (int)$this->certificacion);
         if ($DteFolio->siguiente == ($this->folio+1)) {
             $DteFolio->siguiente--;
@@ -798,12 +876,92 @@ class Model_DteEmitido extends Model_Base_Envio
                 return false;
             }
         }
+        // eliminar DTE
         if (!parent::delete()) {
             $this->db->rollback();
             return false;
         }
+        // invalidar RCOF enviado si era boleta
+        if (in_array($this->dte, [39, 41])) {
+            $DteBoletaConsumo = new Model_DteBoletaConsumo($this->emisor, $this->fecha, (int)$this->certificacion);
+            if ($DteBoletaConsumo->track_id) {
+                $DteBoletaConsumo->track_id = null;
+                $DteBoletaConsumo->revision_estado = null;
+                $DteBoletaConsumo->revision_detalle = null;
+                $DteBoletaConsumo->save();
+            }
+        }
+        // todo ok con la transacción
         $this->db->commit();
         return true;
+    }
+
+    /**
+     * Método que entrega true si se puede eliminar el XML del DTE o una excepción con la causa si no es posible
+     * Actualmente, sólo se pueden eliminar:
+     *   - Boletas y cumplan con:
+     *     - Configuración de boletas ilimitadas en LibreDTE y límite de custodia configurada
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function canBeDeletedXML()
+    {
+        // si no hay XML error
+        if (!$this->xml) {
+            throw new \Exception('El documento no tiene un XML asociado en LibreDTE');
+        }
+        // si no es boleta no se permite borrar el XML
+        if (!in_array($this->dte, [39, 41])) {
+            throw new \Exception('Sólo es posible eliminar el XML de boletas');
+        }
+        // si es boleta y no hay límite de custodia fijado no se deja borrar el XML (para qué? si no hay límite)
+        $limite = \sowerphp\core\Configure::read('dte.custodia_boletas');
+        if (!$limite) {
+            throw new \Exception('No hay límite de custodia para el XML de boletas, no se permite borrar (no es necesario)');
+        }
+        // si LibreDTE permite borrar el XML de boletas (porque son ilimitadas)
+        // se revisa que a lo menos hayan pasado 3 meses desde la fecha de emisión
+        if ($this->getEmisor()->config_libredte_boletas_ilimitadas) {
+            $meses_custodia_minima = 3; // debe estar 3 meses mínimo en la web para consulta pública
+            $today = date('Y-m-d');
+            $meses_emitido = \sowerphp\general\Utility_Date::countMonths($this->fecha, $today);
+            if ($meses_emitido < $meses_custodia_minima) {
+                throw new \Exception('Deben pasar '.$meses_custodia_minima.' meses antes de poder eliminar el XML de la boleta');
+            }
+            return true;
+        }
+        // por defecto no se deja borrar el XML del DTE
+        throw new \Exception('No es posible borrar el XML del documento');
+    }
+
+    /**
+     * Método que indica si el XML del DTE es o no eliminable
+     * @return =true si se puede eliminar, =false si no es posible eliminar
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function eliminableXML($Usuario = false)
+    {
+        if ($this->eliminableXML === null) {
+            try {
+                $this->eliminableXML = $this->canBeDeletedXML($Usuario);
+            } catch (\Exception $e) {
+                $this->eliminableXML = false;
+            }
+        }
+        return $this->eliminableXML;
+    }
+
+    /**
+     * Método que elimina el XML del DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function deleteXML($Usuario = null)
+    {
+        $this->canBeDeletedXML($Usuario);
+        $this->xml = null;
+        return $this->save();
     }
 
     /**

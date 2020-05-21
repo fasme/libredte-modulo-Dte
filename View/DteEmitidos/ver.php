@@ -154,7 +154,7 @@ echo $t->generate([
                             <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" onclick="return Form.confirm(this, '¿Confirmar el reenvío del DTE al SII?')">reenviar DTE al SII</a>
 <?php endif; ?>
-<?php if ($DteEmitido->getEstado()=='R' or $DteEmitido->track_id == -1) : ?>
+<?php if ($DteEmitido->eliminable()) : ?>
                             <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">eliminar documento</a>
 <?php endif; ?>
@@ -165,8 +165,11 @@ echo $t->generate([
                         <a class="btn btn-primary<?=(!$DteEmitido->hasLocalXML()?' disabled':'')?>" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
                         <br/>
                         <span style="font-size:0.8em">
-                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
+                            <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
+<?php if ($DteEmitido->eliminable()) : ?>
+                            <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">eliminar documento</a>
+<?php endif; ?>
                         </span>
                     </p>
 <?php endif; ?>
@@ -808,7 +811,7 @@ echo $f->end('Modificar sucursal');
 ?>
     </div>
 </div>
-<div class="card mt-4">
+<div class="card mt-4 mb-4">
     <div class="card-header">
         <i class="fas fa-file-code"></i>
         Datos del documento
@@ -838,6 +841,12 @@ echo $f->end('Modificar sucursal');
         </table>
     </div>
 </div>
+<?php if ($DteEmitido->eliminable()) : ?>
+    <a class="btn btn-danger btn-block mb-4" href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">Eliminar documento</a>
+<?php endif; ?>
+<?php if ($DteEmitido->eliminableXML()) : ?>
+    <a class="btn btn-danger btn-block mb-4" href="<?=$_base?>/dte/dte_emitidos/eliminar_xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar XML del documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del XML del DTE?')">Eliminar XML del documento</a>
+<?php endif; ?>
 </div>
 <!-- FIN AVANZADO -->
 

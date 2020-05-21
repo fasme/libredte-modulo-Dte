@@ -128,7 +128,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-13
+     * @version 2020-05-21
      */
     public function _api_emitir_POST()
     {
@@ -297,6 +297,13 @@ class Controller_Documentos extends \Controller_App
         if ($datos_dte === false or $datos_json === false) {
             $this->Api->send('No fue posible recuperar los datos del DTE para guardarlos como JSON en el DTE temporal. '.implode('. ', \sasco\LibreDTE\Log::readAll()), 507);
         }
+        // verificar los datos del DTE con trigger antes de emitir
+        try {
+            \sowerphp\core\Trigger::run('dte_documento_validar_emision', $Emisor, $datos_dte);
+        } catch (\Exception $e) {
+            $this->Api->send($e->getMessage(), $e->getCode() >= 400 ? $e->getCode() : 400);
+        }
+        // crear DTE temporal y preparar para guardar en la base de datos
         $resumen = $Dte->getResumen();
         $DteTmp = new Model_DteTmp();
         $DteTmp->datos = $datos_json;

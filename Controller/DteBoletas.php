@@ -35,14 +35,18 @@ class Controller_DteBoletas extends \Controller_App
     /**
      * Acción principal que lista los períodos con boletas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-07
+     * @version 2020-05-21
      */
     public function index()
     {
         $Emisor = $this->getContribuyente();
+        $custodia_xml = (int)\sowerphp\core\Configure::read('dte.custodia_boletas');
         $this->set([
             'Emisor' => $Emisor,
             'periodos' => $Emisor->getResumenBoletasPeriodos(),
+            'ilimitadas' => $Emisor->config_libredte_boletas_ilimitadas,
+            'custodia_xml' => $custodia_xml,
+            'custodia_obligatoria' => 3,
         ]);
     }
 

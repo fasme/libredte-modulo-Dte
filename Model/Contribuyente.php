@@ -1527,7 +1527,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las boletas por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-07
+     * @version 2020-05-21
      */
     public function getResumenBoletasPeriodos()
     {
@@ -1541,7 +1541,8 @@ class Model_Contribuyente extends \Model_App
                 SUM(exento) AS exento,
                 SUM(neto) AS neto,
                 SUM(iva) AS iva,
-                SUM(total) AS total
+                SUM(total) AS total,
+                COUNT(xml) AS xml
             FROM dte_emitido
             WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39, 41)
             GROUP BY '.$periodo_col.'

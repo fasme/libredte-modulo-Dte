@@ -7,7 +7,11 @@
 </ul>
 <div class="page-header"><h1>Libro de boletas electrónicas</h1></div>
 <?php
+$quitar_xml = true;
 foreach ($periodos as &$p) {
+    if ($p['emitidas'] != $p['xml']) {
+        $quitar_xml = false;
+    }
     $p['desde'] = \sowerphp\general\Utility_Date::format($p['desde']);
     $p['hasta'] = \sowerphp\general\Utility_Date::format($p['hasta']);
     foreach(['exento', 'iva', 'neto', 'total'] as $col) {
@@ -16,9 +20,28 @@ foreach ($periodos as &$p) {
     $p[] = '<a href="dte_boletas/csv/'.$p['periodo'].'" title="Descargar CSV del libro del período" class="btn btn-primary mb-2"><i class="far fa-file-excel fa-fw"></i></a>'
             .' <a href="dte_boletas/xml/'.$p['periodo'].'" title="Descargar XML del libro del período" class="btn btn-primary mb-2"><i class="far fa-file-code fa-fw"></i></a>';
 }
-array_unshift($periodos, ['Período', 'Emitidas', 'Desde', 'Hasta', 'Exento', 'Neto', 'IVA', 'Total', 'Descargar']);
+if ($quitar_xml) {
+    foreach ($periodos as &$p) {
+        unset($p['xml']);
+    }
+    $titles = ['Período', 'Emitidas', 'Desde', 'Hasta', 'Exento', 'Neto', 'IVA', 'Total', 'Descargar'];
+} else {
+    $titles = ['Período', 'Emitidas', 'Desde', 'Hasta', 'Exento', 'Neto', 'IVA', 'Total', 'XML', 'Descargar'];
+}
+array_unshift($periodos, $titles);
 $t = new \sowerphp\general\View_Helper_Table();
+$t->setShowEmptyCols(false);
 $t->setID('boletas_'.$Emisor->rut);
 $t->setExport(true);
-$t->setColsWidth([null, null, null, null, null, null, null, null, 110]);
+$t->setColsWidth([null, null, null, null, null, null, null, null, null, 110]);
 echo $t->generate($periodos);
+?>
+<?php if ($ilimitadas and $custodia_xml) : ?>
+    <div class="card mt-4">
+    <div class="card-header"><i class="fa fa-exclamation-circle text-warning"></i> Importante sobre boletas ilimitadas mensuales</div>
+    <div class="card-body">
+        <p>Su empresa puede emitir boletas sin límite mensual. Sin embargo la <strong>custodia del XML de la boleta es por máximo <?=num($custodia_xml)?> meses</strong>.</p>
+        <p>Para emitir boletas sin problemas deberá ir borrando los XML de las boletas antes de cumplir el tiempo de custodia. Los XML deben estar en LibreDTE por lo menos <?=num($custodia_obligatoria)?> meses.</p>
+    </div>
+</div>
+<?php endif; ?>

@@ -501,6 +501,14 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_emision_forma_pago : 0,
     'help' => '¿Forma de pago por defecto?',
 ]);
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_boletas_eliminar',
+    'label' => 'Eliminar Boletas',
+    'options' => [''=>'No (recomendado)', 1=>'Sólo las del día actual', 2=>'Sólo las del mes actual', 3=>'Las del mes actual y mes anterior (no recomendado)', 4=>'Cualquier boleta (no recomendado)'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_boletas_eliminar : 0,
+    'help' => '¿Administradores pueden eliminar boletas emitidas?',
+]);
 ?>
                 </div>
                 <div class="col-md-6">

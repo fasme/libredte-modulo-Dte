@@ -120,6 +120,29 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite eliminar el XML de un DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function eliminar_xml($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        $rest = new \sowerphp\core\Network_Http_Rest();
+        $rest->setAuth($this->Auth->User->hash);
+        $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/eliminar_xml/'.$dte.'/'.$folio.'/'.$Emisor->rut);
+        if ($response===false) {
+            \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
+        }
+        else if ($response['status']['code']!=200) {
+            \sowerphp\core\Model_Datasource_Session::message($response['body'], 'error');
+        }
+        else {
+            \sowerphp\core\Model_Datasource_Session::message('Se eliminó el XML del DTE', 'ok');
+        }
+        $this->redirect('/dte/dte_emitidos/ver/'.$dte.'/'.$folio);
+    }
+
+    /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-02-22
@@ -1405,44 +1428,69 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
-     * Recurso de la API que permite eliminar un DTE rechazado o no enviado al
-     * SII
+     * Recurso de la API que permite eliminar un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-20
+     * @version 2020-05-21
      */
     public function _api_eliminar_GET($dte, $folio, $emisor)
     {
         // verificar permisos y crear DteEmitido
-        if ($this->Auth->User) {
-            $User = $this->Auth->User;
-        } else {
-            $User = $this->Api->getAuthUser();
-            if (is_string($User)) {
-                $this->Api->send($User, 401);
-            }
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
             $this->Api->send('Emisor no existe', 404);
         }
-        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/eliminar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
-        // si el DTE no está rechazado no se puede eliminar
-        if ($DteEmitido->track_id and $DteEmitido->track_id!=-1 and $DteEmitido->getEstado()!='R') {
-            $this->Api->send('No es posible eliminar el DTE ya que no está rechazado', 400);
-        }
         // eliminar DTE
         try {
-            if (!$DteEmitido->delete()) {
+            if (!$DteEmitido->delete($User)) {
                 $this->Api->send('No fue posible eliminar el DTE', 500);
             }
         } catch (\Exception $e) {
             $this->Api->send('No fue posible eliminar el DTE: '.$e->getMessage(), 500);
+        }
+        return true;
+    }
+
+    /**
+     * Recurso de la API que permite eliminar el XML de un DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function _api_eliminar_xml_GET($dte, $folio, $emisor)
+    {
+        // verificar permisos y crear DteEmitido
+        $User = $this->Api->getAuthUser();
+        if (is_string($User)) {
+            $this->Api->send($User, 401);
+        }
+        $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->exists()) {
+            $this->Api->send('Emisor no existe', 404);
+        }
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/eliminar')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
+        // eliminar XML del DTE
+        try {
+            if (!$DteEmitido->deleteXML($User)) {
+                $this->Api->send('No fue posible eliminar el XML del DTE', 500);
+            }
+        } catch (\Exception $e) {
+            $this->Api->send('No fue posible eliminar el XML del DTE: '.$e->getMessage(), 500);
         }
         return true;
     }

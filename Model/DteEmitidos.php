@@ -428,4 +428,19 @@ class Model_DteEmitidos extends \Model_Plural_App
         ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
+    /**
+     * Método que entrega la boleta más antigua que tiene un XML
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-05-21
+     */
+    public function getBoletaMasAntiguaConXML() {
+        return $this->db->getRow('
+            SELECT dte, folio, fecha, total, fecha_hora_creacion
+            FROM dte_emitido
+            WHERE emisor = :emisor AND dte IN (39, 41) AND certificacion = :certificacion AND xml IS NOT NULL
+            ORDER BY fecha ASC
+            LIMIT 1
+        ', [':emisor' => $this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+    }
+
 }
