@@ -333,7 +333,7 @@ echo $f->input([
 
 <!-- INICIO EMAILS -->
 <div role="tabpanel" class="tab-pane" id="correos" aria-labelledby="correos-tab">
-    <p>Aquí debe configurar las dos casillas de correo para operar con facturación electrónica. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/sowerphp/config/email">documentación de las casillas de correo</a> para obtener detalles de qué opciones debe usar.</p>
+    <p>Aquí debe configurar las dos casillas de correo para operar con facturación electrónica. Puede revisar la <a href="https://soporte.sasco.cl/kb/faq.php?id=45">documentación de las casillas de correo</a> para obtener detalles de qué opciones debe usar.</p>
 <?php if (isset($Contribuyente) and $Contribuyente->getFirma()) : ?>
     <p>Los correos deben coincidir con los registrados en el SII, los debe verificar en <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/contribuyente_datos/<?=$Contribuyente->rut?>-<?=$Contribuyente->dv?>', 750, 550); return false" title="Ver datos del contribuyente en el SII">el sitio del web de impuestos internos</a>.</p>
 <?php endif; ?>
@@ -1006,7 +1006,7 @@ echo $f->input([
             Servicios web del contribuyente
         </div>
         <div class="card-body">
-            <p>LibreDTE puede comunicarse con la aplicación de su empresa u otros sitios a través de servicios web. A continuación puede ingresar las URL para consultas que se podrían hacer a su aplicación. Puede revisar la <a href="http://wiki.libredte.cl/doku.php/sowerphp/integracion">documentación de la integración</a> para obtener detalles de las entradas y salidas esperadas para cada consulta.</p>
+            <p>LibreDTE puede comunicarse con la aplicación de su empresa u otros sitios a través de servicios web. A continuación puede ingresar las URL para consultas que se podrían hacer a su aplicación. Puede revisar la <a href="https://soporte.sasco.cl/kb/faq.php?cid=7">documentación de la integración</a> para obtener detalles de las entradas y salidas esperadas para cada consulta.</p>
 <?php
 $api_servicios_disponibles = (array)\sowerphp\core\Configure::read('api_contribuyentes');
 $api = [];

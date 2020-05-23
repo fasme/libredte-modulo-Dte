@@ -21,7 +21,7 @@
     <li>
         Formato del archivo:
 	<ul>
-	    <li>Considere el formato del archivo descrito en la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/general/libro_compras_ventas#detalle_libro_compra">documentación</a> (ahí mismo tiene ejemplos).</li>
+	    <li>Considere el formato del <a href="'.$_base.'/dte/archivos/libro_compras.csv" download="libro_compras.csv">archivo de ejemplo del libro</a>.</li>
             <li>Los RUTs deben ser cargados con guión más dígito verificador. Ejemplo: 76192083-9 o 76.192.083-9</li>
 	    <li>Las fechas se cargan en formato AAAA-MM-DD. Ejemplo día de hoy: <?=date('Y-m-d')?></li>
             <li>Los montos son números enteros en pesos chilenos y sin separador de miles.</li>
@@ -43,7 +43,7 @@ echo $f->input([
     'type' => 'file',
     'name' => 'archivo',
     'label' => 'Libro CSV',
-    'help' => 'Libro de compras en formato CSV (separado por punto y coma, codificado en UTF-8). Puede consultar un <a href="'.$_base.'/dte/archivos/libro_compras.csv" download="libro_compras.csv">ejemplo del libro</a> o bien revisar la <a href="http://wiki.libredte.cl/doku.php/faq/libredte/general/libro_compras_ventas#detalle_libro_compra">documentación de las columnas</a>.',
+    'help' => 'Libro de compras en formato CSV (separado por punto y coma, codificado en UTF-8). Puede consultar un <a href="'.$_base.'/dte/archivos/libro_compras.csv" download="libro_compras.csv">ejemplo del libro</a>.',
     'check' => 'notempty',
     'attr' => 'accept="csv"',
 ]);
