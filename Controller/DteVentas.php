@@ -432,6 +432,9 @@ class Controller_DteVentas extends Controller_Base_Libros
         }
         // obtener historial
         $Emisor = new Model_Contribuyente($emisor);
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_ventas')) {
+            $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+        }
         return (new Model_DteVentas())->setContribuyente($Emisor)->getResumen($this->Api->data);
     }
 

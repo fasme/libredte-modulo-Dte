@@ -164,7 +164,7 @@ class Model_DteCompras extends \Model_Plural_App
         }
         if (!empty($filtros['periodo'])) {
             $periodo_col = $this->db->date('Ym', 'd.fecha');
-            $where[] = '(d.periodo IS NOT NULL AND d.periodo = :periodo) OR (d.periodo IS NULL AND '. $periodo_col.'::INTEGER = :periodo)';
+            $where[] = '((d.periodo IS NOT NULL AND d.periodo = :periodo) OR (d.periodo IS NULL AND '. $periodo_col.'::INTEGER = :periodo))';
             $vars[':periodo'] = $filtros['periodo'];
         }
         if (!empty($filtros['usuario'])) {
