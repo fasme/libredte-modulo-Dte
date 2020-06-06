@@ -130,7 +130,7 @@ echo $t->generate([
             <a class="btn btn-danger btn-lg btn-block" href="<?=$_base?>/dte/dte_tmps/eliminar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" title="Eliminar documento" onclick="return Form.confirm(this, 'Confirmar la eliminación del documento temporal')">Eliminar documento</a>
         </div>
         <div class="col-md-6 mb-2">
-            <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/documentos/generar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button" onclick="return Form.confirm(this, 'Confirmar la generación del DTE real')">Generar DTE</a>
+            <a class="btn btn-success btn-lg btn-block" href="<?=$_base?>/dte/documentos/generar/<?=$DteTmp->receptor?>/<?=$DteTmp->dte?>/<?=$DteTmp->codigo?>" role="button" onclick="return Form.confirm(this, 'Confirmar la generación del DTE real', 'Generando el DTE...')">Generar DTE</a>
         </div>
     </div>
 </div>

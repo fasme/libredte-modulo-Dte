@@ -42,7 +42,7 @@ $documentos = [['Receptor', 'RUT', 'Documento', 'Folio', 'Fecha', 'Total', 'Acci
 foreach ($dtes as &$dte) {
     $acciones = '<a href="dte_tmps/ver/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Ver el documento temporal" id="dte_'.$dte->getFolio().'" class="btn btn-primary mb-2"><i class="fa fa-search fa-fw"></i></a>';
     $acciones .= ' <a href="dte_tmps/eliminar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Eliminar DTE temporal" onclick="return eliminar(this, \'DteTmp\', \''.$dte->receptor.', '.$dte->dte.', '.$dte->codigo.'\')" class="btn btn-primary mb-2"><i class="fas fa-times fa-fw"></i></a>';
-    $acciones .= ' <a href="documentos/generar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Generar DTE (documento real emitido)" onclick="return Form.confirm(this, \'¿Está seguro de querer generar el DTE?\')" class="btn btn-primary mb-2"><i class="far fa-paper-plane fa-fw"></i></a>';
+    $acciones .= ' <a href="documentos/generar/'.$dte->receptor.'/'.$dte->dte.'/'.$dte->codigo.'" title="Generar DTE (documento real emitido)" onclick="return Form.confirm(this, \'¿Está seguro de querer generar el DTE?\', \'Generando el DTE...\')" class="btn btn-primary mb-2"><i class="far fa-paper-plane fa-fw"></i></a>';
     $documentos[] = [
         $dte->getReceptor()->razon_social,
         $dte->getReceptor()->rut.'-'.$dte->getReceptor()->dv,
