@@ -222,7 +222,11 @@ if (!$email_html) {
     $mensaje .= $Emisor->direccion.', '.$Emisor->getComuna()->comuna."\n";
 } else $mensaje = '';
 $f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['action'=>$_base.'/dte/dte_tmps/enviar_email/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo, 'id'=>'emailForm', 'onsubmit'=>'Form.check(\'emailForm\')']);
+echo $f->begin([
+    'action'=>$_base.'/dte/dte_tmps/enviar_email/'.$DteTmp->receptor.'/'.$DteTmp->dte.'/'.$DteTmp->codigo,
+    'id'=>'emailForm',
+    'onsubmit'=>'Form.check(\'emailForm\') && Form.loading(\'Enviando correo electrónico...\')',
+]);
 if ($emails) {
     $table = [];
     $checked = [];

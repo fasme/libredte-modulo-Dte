@@ -256,7 +256,11 @@ if (!$email_html) {
     }
     $mensaje .= $Emisor->direccion.', '.$Emisor->getComuna()->comuna."\n";
 } else $mensaje = '';
-echo $f->begin(['action'=>$_base.'/dte/dte_emitidos/enviar_email/'.$DteEmitido->dte.'/'.$DteEmitido->folio, 'id'=>'emailForm', 'onsubmit'=>'Form.check(\'emailForm\')']);
+echo $f->begin([
+    'action'=>$_base.'/dte/dte_emitidos/enviar_email/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id'=>'emailForm',
+    'onsubmit'=>'Form.check(\'emailForm\') && Form.loading(\'Enviando correo electrónico...\')',
+]);
 if ($emails) {
     $table = [];
     $checked = [];
