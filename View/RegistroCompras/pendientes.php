@@ -12,7 +12,7 @@
         </a>
     </li>
     <li class="nav-item" class="dropdown">
-        <a href="<?=$_base?>/dte/registro_compras/actualizar" title="Actualizar documentos recibidos pendientes en SII" class="nav-link">
+        <a href="<?=$_base?>/dte/registro_compras/actualizar" title="Actualizar documentos recibidos pendientes en SII" class="nav-link" onclick="return Form.loading('Actualizando...')">
             <i class="fas fa-sync"></i>
             Actualizar
         </a>

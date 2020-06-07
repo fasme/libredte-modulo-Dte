@@ -20,7 +20,7 @@
 <p>Aquí podrá buscar las cesiones que están en el registro de transferencia de créditos (RTC) del SII.</p>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['onsubmit'=>'Form.check()']);
+echo $f->begin(['onsubmit'=>'Form.check() && Form.loading(\'Buscando en el SII...\')']);
 echo $f->input([
     'type' => 'date',
     'name' => 'desde',

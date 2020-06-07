@@ -15,12 +15,12 @@
 <?php
 foreach ($documentos as &$d) {
     $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$d['dte'].'/'.$d['folio'].'" title="Ver documento" class="btn btn-primary mb-2"><i class="fas fa-search fa-fw"></i></a>';
-    $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary mb-2"><i class="far fa-file-pdf fa-fw"></i></a>';
+    $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$d['dte'].'/'.$d['folio'].'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary mb-2'.(!$d['has_xml']?' disabled':'').'"><i class="far fa-file-pdf fa-fw"></i></a>';
     $d[] = $acciones;
     $d['fecha'] = \sowerphp\general\Utility_Date::format($d['fecha']);
     $d['total'] = num($d['total']);
     $d['sucursal_sii'] = $Emisor->getSucursal($d['sucursal_sii'])->sucursal;
-    unset($d['receptor'], $d['dte'], $d['intercambio']);
+    unset($d['receptor'], $d['dte'], $d['intercambio'], $d['has_xml']);
 }
 $f = new \sowerphp\general\View_Helper_Form(false);
 array_unshift($documentos, [

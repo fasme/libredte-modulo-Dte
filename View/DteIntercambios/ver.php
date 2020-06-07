@@ -128,7 +128,10 @@ new \sowerphp\general\View_Helper_Table([
 </div>
 <?php
 $f = new \sowerphp\general\View_Helper_Form();
-echo $f->begin(['action'=>$_base.'/dte/dte_intercambios/responder/'.$DteIntercambio->codigo, 'onsubmit'=>'Form.check() && Form.confirm(this)']);
+echo $f->begin([
+    'action'=>$_base.'/dte/dte_intercambios/responder/'.$DteIntercambio->codigo,
+    'onsubmit'=>'Form.check() && Form.confirm(this, \'¿Está seguro de la respuesta de intercambio?\', \'Enviando respuesta al intercambio...\')',
+]);
 $f->setColsLabel(3);
 echo '<div class="row">',"\n";
 echo '<div class="col-md-6">',"\n";

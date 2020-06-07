@@ -137,10 +137,10 @@ echo $t->generate([
 <?php endif; ?>
 <?php if ($DteEmitido->track_id) : ?>
                     <p>
-                        <a class="btn btn-primary<?=$DteEmitido->track_id < 0 ?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Actualizar estado</a><br/>
+                        <a class="btn btn-primary<?=$DteEmitido->track_id < 0 ?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.loading('Actualizando estado del DTE...')">Actualizar estado</a><br/>
                         <span style="font-size:0.8em">
 <?php if (!$Emisor->config_sii_estado_dte_webservice and $DteEmitido->track_id > 0) : ?>
-                            <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII">solicitar nueva revisión</a>
+                            <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII" onclick="return Form.loading('Solicitando revisión del envío al SII...')">solicitar revisión del envío</a>
                             <br/>
 <?php endif; ?>
 <?php if ($DteEmitido->track_id > 0) : ?>
@@ -622,7 +622,7 @@ else :
 echo $f->begin([
     'action' => $_base.'/dte/dte_emitidos/ceder/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
     'id' => 'cesionForm',
-    'onsubmit' => 'Form.check(\'cesionForm\') && Form.confirm(this, \'¿Está seguro de querer ceder el DTE?\')'
+    'onsubmit' => 'Form.check(\'cesionForm\') && Form.confirm(this, \'¿Está seguro de querer ceder el DTE?\', \'Generando cesión del DTE...\')',
 ]);
 ?>
 <div class="card mb-4">

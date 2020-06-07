@@ -110,9 +110,9 @@ foreach ($Objs as &$obj) {
         }
     }
     $actions = '<a href="'.$_base.$module_url.$controller.'/xml/'.$obj->dia.'" title="Descargar XML" class="btn btn-primary mb-2"><i class="far fa-file-code fa-fw"></i></a>';
-    $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII" class="btn btn-primary mb-2"><i class="fas fa-sync fa-fw"></i></a>';
-    $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII" class="btn btn-primary mb-2"><i class="fab fa-rev fa-fw"></i></a>';
-    $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII" class="btn btn-primary mb-2"><i class="fa fa-eye fa-fw"></i></a>';
+    $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII" class="btn btn-primary mb-2'.(!$obj->track_id?' disabled':'').'" onclick="return Form.loading(\'Actualizando estado del RCOF...\')"><i class="fas fa-sync fa-fw"></i></a>';
+    $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII" class="btn btn-primary mb-2'.(!$obj->track_id?' disabled':'').'" onclick="return Form.loading(\'Solicitando revisión del envío al SII...\')"><i class="fab fa-rev fa-fw"></i></a>';
+    $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII" class="btn btn-primary mb-2'.(!$obj->track_id?' disabled':'').'"><i class="fa fa-eye fa-fw"></i></a>';
     $row[] = $actions;
     $data[] = $row;
 }

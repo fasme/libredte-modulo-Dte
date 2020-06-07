@@ -48,7 +48,7 @@ if (isset($guias)) {
         $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/52/'.$g['folio'].'" class="btn btn-primary"><i class="far fa-file-pdf fa-fw"></i></a>';
         $g[] = $acciones;
     }
-    echo $f->begin(['id'=>'facturarForm', 'onsubmit'=>'Form.check(\'facturarForm\')']);
+    echo $f->begin(['id'=>'facturarForm', 'onsubmit'=>'Form.check(\'facturarForm\') && Form.loading(\'Facturando...\')']);
     echo $f->input([
         'type'=>'tablecheck',
         'name'=>'guias',

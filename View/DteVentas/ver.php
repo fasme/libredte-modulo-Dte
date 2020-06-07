@@ -1,6 +1,6 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_ventas/rcv_resumen/<?=$Libro->periodo?>" class="nav-link">
+        <a href="<?=$_base?>/dte/dte_ventas/rcv_resumen/<?=$Libro->periodo?>" class="nav-link" onclick="return Form.loading('Consultando datos al SII...')">
             <span class="fas fa-university"></span> Ver resumen RV
         </a>
     </li>
@@ -95,24 +95,24 @@ new \sowerphp\general\View_Helper_Table([
 <?php if ($Libro->track_id and $Libro->getEstado()!='LRH') : ?>
                     <p>
 <?php if ($Libro->track_id!=-1) : ?>
-                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/actualizar_estado/<?=$Libro->periodo?>" role="button">Actualizar estado</a><br/>
+                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/actualizar_estado/<?=$Libro->periodo?>" role="button" onclick="return Form.loading('Actualizando estado del envío...')">Actualizar estado</a><br/>
                         <span class="small">
-                            <a href="<?=$_base?>/dte/dte_ventas/solicitar_revision/<?=$Libro->periodo?>" title="Solicitar nueva revisión del libro al SII">solicitar nueva revisión</a><br/>
+                            <a href="<?=$_base?>/dte/dte_ventas/solicitar_revision/<?=$Libro->periodo?>" title="Solicitar revisión del libro al SII" onclick="return Form.loading('Solicitando revisión del envío al SII...')">solicitar revisión del envío</a><br/>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/estado_envio/<?=$Libro->track_id?>', 750, 550)" title="Ver el estado del envío en la web del SII">ver estado envío en SII</a><br/>
                             <a href="<?=$_base?>/dte/dte_ventas/enviar_rectificacion/<?=$Libro->periodo?>" title="Enviar rectificación del libro al SII">enviar rectificación</a>
                         </span>
 <?php else : ?>
                         <span class="small">
-                            <a href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>">Generar nuevo libro</a>
+                            <a href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" onclick="return Form.confirm(this, '¿Confirmar la generación del libro?', 'Generando libro...')">Generar nuevo libro</a>
                         </span>
 <?php endif; ?>
                     </p>
 <?php else: ?>
-<?php if ($Libro->periodo<201708) : ?>
-                    <p><a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.confirm(this, '¿Confirmar el envio del libro al SII?')">Enviar libro al SII</a></p>
-<?php else : ?>
-                    <p><a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.confirm(this, '¿Confirmar el envio del libro al SII?')">Generar libro local</a></p>
-<?php endif; ?>
+                    <p>
+                        <a class="btn btn-primary" href="<?=$_base?>/dte/dte_ventas/enviar_sii/<?=$Libro->periodo?>" role="button" onclick="return Form.confirm(this, '¿Confirmar la generación del libro?', 'Generando libro...')">
+                            <?=$Libro->periodo<201708?'Enviar libro al SII':'Generar libro'?>
+                        </a>
+                    </p>
 <?php endif; ?>
                 </div>
             </div>
