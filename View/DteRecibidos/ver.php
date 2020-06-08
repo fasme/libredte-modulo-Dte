@@ -146,7 +146,7 @@ echo $f->end('Descargar PDF');
             </a>
         </div>
         <div class="col-sm-6">
-            <a href="<?=$_base?>/dte/registro_compras/ingresar_accion/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-primary btn-lg btn-block">
+            <a href="<?=$_base?>/dte/registro_compras/ingresar_accion/<?=$Emisor->rut?>-<?=$Emisor->dv?>/<?=$DteRecibido->dte?>/<?=$DteRecibido->folio?>" title="Ingresar acción del registro de compra/venta en el SII" class="btn btn-primary btn-lg btn-block" onclick="return Form.loading('Conectando al SII para responder...')">
                 <i class="fa fa-edit fa-fw"></i>
                 Recibir / Reclamar
             </a>
