@@ -109,6 +109,14 @@ echo $t->generate([
 <?php endif; ?>
                 </div>
             </div>
+<?php if (!$DteRecibido->hasXML()) : ?>
+        <div class="card mb-4">
+            <div class="card-header"><i class="fa fa-exclamation-circle text-warning"></i> DTE sin XML</div>
+            <div class="card-body">
+                <p>Este documento recibido no tiene un XML de intercambio asociado. Debido a esto, no será posible ver el PDF ni otras opciones que requieren el XML.</p>
+            </div>
+        </div>
+<?php endif; ?>
         </div>
     </div>
 </div>
