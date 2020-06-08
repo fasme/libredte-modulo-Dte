@@ -259,10 +259,18 @@ DTE.setItem = function (contribuyente, codigo) {
     var f = document.getElementById("emitir_dte");
     var cols = codigo.parentNode.parentNode.parentNode.parentNode.childNodes;
     var fecha = document.getElementById("FchVencField").value;
+    var sucursal = document.getElementById("CdgSIISucurField").value;
+    var receptor_rut = document.getElementById("RUTRecepField").value;
+    var receptor_codigo = document.getElementById("CdgIntRecepField").value;
+    var lista = document.getElementById("lista_preciosField").value;
+    var cantidad = cols[4].childNodes[0].childNodes[0].value;
+    var url = _url+'/api/dte/admin/itemes/info/'+contribuyente+'/'+codigo.value
+        +'?fecha='+fecha+'&sucursal='+sucursal+'&receptor_rut='+receptor_rut+'&receptor_codigo='+receptor_codigo+'&lista='+lista+'&cantidad='+cantidad
+    ;
     if (codigo.value) {
         $.ajax({
             type: "GET",
-            url: _url+'/api/dte/admin/itemes/info/'+contribuyente+'/'+codigo.value+'?fecha='+fecha,
+            url: url,
             dataType: "json",
             success: function (item) {
                 // asignar valores del item
@@ -290,6 +298,7 @@ DTE.setItem = function (contribuyente, codigo) {
                 cols[1].childNodes[0].childNodes[0].value = '';
                 cols[2].childNodes[0].childNodes[0].value = '';
                 cols[3].childNodes[0].childNodes[0].value = 0;
+                cols[4].childNodes[0].childNodes[0].value = 1;
                 cols[5].childNodes[0].childNodes[0].value = '';
                 cols[6].childNodes[0].childNodes[0].value = '';
                 cols[7].childNodes[0].childNodes[0].value = 0;
@@ -297,7 +306,22 @@ DTE.setItem = function (contribuyente, codigo) {
                 if (cols.length == 12) {
                     cols[9].childNodes[0].childNodes[0].value = '';
                 }
-                console.log(jqXHR.responseJSON);
+                // no hay stock
+                if (jqXHR.status == 413) {
+                    var bb = bootbox.dialog({
+                        message: '<div class="text-center"><i class="fa fa-info-circle"></i> ' + jqXHR.responseJSON + '</div>',
+                        centerVertical: true,
+                        closeButton: true,
+                        onEscape: true
+                    });
+                    window.setTimeout(function(){
+                        bb.modal('hide');
+                    }, 5000);
+                }
+                // otro error
+                else {
+                    console.log(jqXHR.responseJSON);
+                }
             }
         });
     }

@@ -99,18 +99,24 @@ class Controller_Itemes extends \Controller_Maintainer
      * código (puede ser el código de 'libredte', el que se usa en el mantenedor de productos)
      * o bien puede ser por 'sku', 'upc' o 'ean'
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-19
+     * @version 2020-06-07
      */
     public function _api_info_GET($empresa, $codigo)
     {
-        extract($this->getQuery([
-            'fecha' => date('Y-m-d'),
+        $options = $this->getQuery([
             'tipo' => null,
             'bruto' => false,
             'moneda' => 'CLP',
             'decimales' => null,
-            'campo' => 'libredte'
-        ]));
+            'campo' => 'libredte',
+            'fecha' => date('Y-m-d'),
+            'sucursal' => 0,
+            'receptor_rut' => null,
+            'receptor_codigo' => null,
+            'lista' => null,
+            'cantidad' => 1,
+        ]);
+        extract($options);
         // obtener usuario autenticado
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -135,12 +141,17 @@ class Controller_Itemes extends \Controller_Maintainer
             if ($campo == 'libredte') {
                 $Item = (new Model_Itemes())->get($Empresa->rut, $codigo, $tipo);
             } else {
-                $Item = (new \libredte\oficial\Inventario\Model_InventarioItemes())->setContribuyente($Empresa)->getItem($codigo, $tipo, $campo);
+                $Item = (new \libredte\oficial\Inventario\Model_InventarioItemes())->setContribuyente($Empresa)->getItemFacturacion($codigo, $tipo, $campo);
             }
             if (!$Item or !$Item->exists() or !$Item->activo) {
                 $this->Api->send('Item solicitado no existe o está inactivo', 404);
             }
-            $this->Api->send([
+            try {
+                $datos_trigger = (array)\sowerphp\core\Trigger::run('dte_item_info', $Item, $options);
+            } catch (\Exception $e) {
+                $this->Api->send($e->getMessage(), $e->getCode() ? $e->getCode() : 500);
+            }
+            $this->Api->send(array_merge([
                 'TpoCodigo' => $Item->codigo_tipo,
                 'VlrCodigo' => $Item->codigo,
                 'NmbItem' => $Item->item,
@@ -154,7 +165,7 @@ class Controller_Itemes extends \Controller_Maintainer
                 'TpoValor' => $Item->descuento_tipo,
                 'CodImpAdic' => $Item->impuesto_adicional,
                 'TasaImp' => $Item->impuesto_adicional ? \sasco\LibreDTE\Sii\ImpuestosAdicionales::getTasa($Item->impuesto_adicional) : 0,
-            ], 200);
+            ], $datos_trigger), 200);
         }
     }
 

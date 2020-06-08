@@ -234,6 +234,10 @@ class Model_Item extends \Model_App
         'Model_ImpuestoAdicional' => 'website\Dte\Admin\Mantenedores'
     ); ///< Namespaces que utiliza esta clase
 
+    // cachés
+    private $ItemInventario;
+    private $ItemTienda;
+
     /**
      * Método que guarda el item de facturación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -361,6 +365,34 @@ class Model_Item extends \Model_App
         }
         $neto = $this->getDescuento($fecha, false, $moneda, $decimales);
         return !$this->exento ? $neto*1.19 : $neto;
+    }
+
+    /**
+     * Método que entrega el objeto del Item del módulo de Inventario
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-06-07
+     */
+    public function getItemInventario()
+    {
+        if (!isset($this->ItemInventario)) {
+            $this->ItemInventario = (new \libredte\oficial\Inventario\Model_InventarioItemes())
+                ->setContribuyente($this->getContribuyente())->getByFacturacion($this->codigo, $this->codigo_tipo);
+        }
+        return $this->ItemInventario;
+    }
+
+    /**
+     * Método que entrega el objeto del Item del módulo de Tienda Electrónica
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-06-07
+     */
+    public function getItemTienda($tienda = null)
+    {
+        if (!isset($this->ItemTienda)) {
+            $this->ItemTienda = (new \libredte\oficial\Tienda\Admin\Model_TiendaItemes())
+                ->setContribuyente($this->getContribuyente())->getByFacturacion($tienda, $this->codigo, $this->codigo_tipo);
+        }
+        return $this->ItemTienda;
     }
 
 }
