@@ -1461,13 +1461,47 @@ class Model_Contribuyente extends \Model_App
     }
 
     /**
+     * Método que crea el objeto para enviar correo
+     * El método se llama getEmailSmtp() por compatibilidad hacia atrás,
+     * pero no necesariamente entrega un objeto que enviará el correo por SMTP
+     * @param email Email que se quiere obteber: intercambio o sii
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-06-12
+     */
+    public function getEmailSmtp($email = 'intercambio', $debug = false)
+    {
+        $Sender = \sowerphp\core\Trigger::run('dte_contribuyente_email_sender', $this, $email, ['debug'=>$debug]);
+        if ($Sender) {
+            return $Sender;
+        }
+        return $this->getEmailSmtpEstandar($email, $debug);
+    }
+
+    /**
+     * Método que crea el objeto para recibir correo
+     * El método se llama getEmailImap() por compatibilidad hacia atrás,
+     * pero no necesariamente entrega un objeto que recibirá el correo por IMAP
+     * @param email Email que se quiere obteber: intercambio o sii
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-06-12
+     */
+    public function getEmailImap($email = 'intercambio')
+    {
+        $Receiver = \sowerphp\core\Trigger::run('dte_contribuyente_email_receiver', $this, $email);
+        if ($Receiver) {
+            return $Receiver;
+        }
+        return $this->getEmailImapEstandar($email);
+    }
+
+    /**
      * Método que crea el objeto email para enviar por SMTP y lo entrega
      * @param email Email que se quiere obteber: intercambio o sii
      * @return \sowerphp\core\Network_Email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-09
+     * @version 2020-06-12
      */
-    public function getEmailSmtp($email = 'intercambio', $debug = false)
+    private function getEmailSmtpEstandar($email = 'intercambio', $debug = false)
     {
         $user = $this->{'config_email_'.$email.'_user'};
         $pass = $this->{'config_email_'.$email.'_pass'};
@@ -1498,9 +1532,9 @@ class Model_Contribuyente extends \Model_App
      * @param email Email que se quiere obteber: intercambio o sii
      * @return \sowerphp\core\Network_Email_Imap
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-07
+     * @version 2020-06-12
      */
-    public function getEmailImap($email = 'intercambio')
+    private function getEmailImapEstandar($email = 'intercambio')
     {
         $user = $this->{'config_email_'.$email.'_user'};
         $pass = $this->{'config_email_'.$email.'_pass'};
