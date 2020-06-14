@@ -3436,7 +3436,7 @@ class Model_Contribuyente extends \Model_App
                     $fecha_pago,
                     $medio_pago,
                     !$mostrar_pagar ? 'none' : '',
-                    $this->rut,
+                    $Documento->getReceptor()->rut,
                 ],
                 $html
             );
