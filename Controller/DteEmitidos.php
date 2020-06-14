@@ -273,7 +273,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-06-14
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -336,8 +336,9 @@ class Controller_DteEmitidos extends \Controller_App
         try {
             $pdf = $DteEmitido->getPDF($config);
             $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
-            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf';
-            $this->response->type('application/pdf');
+            $ext = $compress ? 'zip' : 'pdf';
+            $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.'.$ext;
+            $this->response->type('application/'.$ext);
             $this->response->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
             $this->response->header('Content-Length', strlen($pdf));
             $this->response->send($pdf);
@@ -440,7 +441,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Recurso de la API que descarga el código ESCPOS del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-14
+     * @version 2020-06-14
      */
     public function _api_escpos_GET($dte, $folio, $contribuyente)
     {
@@ -489,8 +490,10 @@ class Controller_DteEmitidos extends \Controller_App
             if ($config['base64']) {
                 $this->Api->send(base64_encode($escpos));
             } else {
-                $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.escpos';
-                $this->Api->response()->type('application/octet-stream');
+                $ext = $config['compress'] ? 'zip' : 'bin';
+                $mimetype = $config['compress'] ? 'zip' : 'octet-stream';
+                $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.'.$ext;
+                $this->Api->response()->type('application/'.$mimetype);
                 $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
                 $this->Api->send($escpos);
             }
@@ -1132,7 +1135,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-26
+     * @version 2020-06-14
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
     {
@@ -1177,8 +1180,9 @@ class Controller_DteEmitidos extends \Controller_App
                 $this->Api->send(base64_encode($pdf));
             } else {
                 $disposition = $Emisor->config_pdf_disposition ? 'inline' : 'attachement';
-                $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.pdf';
-                $this->Api->response()->type('application/pdf');
+                $ext = $config['compress'] ? 'zip' : 'pdf';
+                $file_name = 'LibreDTE_'.$DteEmitido->emisor.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.'.$ext;
+                $this->Api->response()->type('application/'.$ext);
                 $this->Api->response()->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
                 $this->Api->response()->header('Content-Length', strlen($pdf));
                 $this->Api->send($pdf);

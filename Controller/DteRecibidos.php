@@ -386,7 +386,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite descargar el PDF del documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-16
+     * @version 2020-06-14
      */
     public function pdf($emisor, $dte, $folio, $cedible = false)
     {
@@ -416,8 +416,9 @@ class Controller_DteRecibidos extends \Controller_App
             );
             $this->redirect('/dte/dte_recibidos/listar');
         }
-        $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.pdf';
-        $this->response->type('application/pdf');
+        $ext = $config['compress'] ? 'zip' : 'pdf';
+        $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.'.$ext;
+        $this->response->type('application/'.$ext);
         $this->response->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
         $this->response->header('Content-Length', strlen($pdf));
         $this->response->send($pdf);
@@ -489,8 +490,9 @@ class Controller_DteRecibidos extends \Controller_App
             if ($config['base64']) {
                 $this->Api->send(base64_encode($pdf));
             } else {
-                $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.pdf';
-                $this->Api->response()->type('application/pdf');
+                $ext = $config['compress'] ? 'zip' : 'pdf';
+                $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.'.$ext;
+                $this->Api->response()->type('application/'.$ext);
                 $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
                 $this->Api->response()->header('Content-Length', strlen($pdf));
                 $this->Api->send($pdf);
@@ -503,7 +505,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Recurso de la API que descarga el código ESCPOS del DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-16
+     * @version 2020-06-14
      */
     public function _api_escpos_GET($emisor, $dte, $folio, $receptor)
     {
@@ -542,8 +544,10 @@ class Controller_DteRecibidos extends \Controller_App
             if ($config['base64']) {
                 $this->Api->send(base64_encode($escpos));
             } else {
-                $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.escpos';
-                $this->Api->response()->type('application/octet-stream');
+                $ext = $config['compress'] ? 'zip' : 'bin';
+                $mimetype = $config['compress'] ? 'zip' : 'octet-stream';
+                $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.'.$ext;
+                $this->Api->response()->type('application/'.$mimetype);
                 $this->Api->response()->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
                 $this->Api->send($escpos);
             }
