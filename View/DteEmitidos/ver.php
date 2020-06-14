@@ -233,9 +233,10 @@ if (!$email_html) {
             $mensaje .= 'Enlace pago en línea: '.$enlace_pagar_dte."\n\n";
         } else {
             $mensaje .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->getNombre()."\n\n";
+            $mensaje .= 'Puede descargar el documento en: '.$pdf_publico."\n\n";
         }
     } else {
-        $mensaje .= 'Enlace directo: '.$pdf_publico."\n\n";
+        $mensaje .= 'Puede descargar el documento en: '.$pdf_publico."\n\n";
     }
     $mensaje .= 'Saluda atentamente,'."\n\n";
     $mensaje .= '-- '."\n";

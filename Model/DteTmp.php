@@ -580,7 +580,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que envía el DTE temporal por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-09
+     * @version 2020-06-14
      */
     public function email($to = null, $subject = null, $msg = null, $cotizacion = true)
     {
@@ -605,6 +605,8 @@ class Model_DteTmp extends \Model_App
             $links = $this->getLinks();
             if (!empty($links['pagar'])) {
                 $msg .= 'Enlace pago en línea: '.$links['pagar']."\n\n";
+            } else if (!empty($links['pdf'])) {
+                $msg .= 'Puede descargar el documento en: '.$links['pdf']."\n\n";
             }
         }
         if ($msg_html) {
@@ -613,10 +615,15 @@ class Model_DteTmp extends \Model_App
         // crear email
         $email = $this->getEmisor()->getEmailSmtp();
         $email->to($to);
-        if ($this->getEmisor()->config_pagos_email or $this->getEmisor()->email) {
-            $email->replyTo($this->getEmisor()->config_pagos_email ? $this->getEmisor()->config_pagos_email : $this->getEmisor()->email);
-        }
         $email->subject($subject);
+        // agregar reply to si corresponde
+        if (!empty($this->getEmisor()->config_email_intercambio_sender->reply_to)) {
+            $email->replyTo($this->getEmisor()->config_email_intercambio_sender->reply_to);
+        } else if ($this->getEmisor()->config_pagos_email) {
+            $email->replyTo($this->getEmisor()->config_pagos_email);
+        } else if ($this->getEmisor()->email) {
+            $email->replyTo($this->getEmisor()->email);
+        }
         // adjuntar PDF
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->getEmisor()->getUsuario()->hash);

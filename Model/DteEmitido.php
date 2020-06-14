@@ -1272,7 +1272,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-06-14
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
@@ -1304,7 +1304,10 @@ class Model_DteEmitido extends Model_Base_Envio
                     $msg .= 'Enlace pago en línea: '.$links['pagar']."\n\n";
                 } else {
                     $msg .= 'El documento se encuentra pagado con fecha '.\sowerphp\general\Utility_Date::format($Cobro->pagado).' usando el medio de pago '.$Cobro->getMedioPago()->getNombre()."\n\n";
+                    $msg .= 'Puede descargar el documento en: '.$links['pdf']."\n\n";
                 }
+            } else {
+                $msg .= 'Puede descargar el documento en: '.$links['pdf']."\n\n";
             }
         }
         if ($msg_html) {
@@ -1312,11 +1315,16 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         // crear email
         $email = $this->getEmisor()->getEmailSmtp();
-        if ($this->getEmisor()->config_pagos_email or $this->getEmisor()->email) {
-            $email->replyTo($this->getEmisor()->config_pagos_email ? $this->getEmisor()->config_pagos_email : $this->getEmisor()->email);
-        }
         $email->to($to);
         $email->subject($subject);
+        // agregar reply to si corresponde
+        if (!empty($this->getEmisor()->config_email_intercambio_sender->reply_to)) {
+            $email->replyTo($this->getEmisor()->config_email_intercambio_sender->reply_to);
+        } else if ($this->getEmisor()->config_pagos_email) {
+            $email->replyTo($this->getEmisor()->config_pagos_email);
+        } else if ($this->getEmisor()->email) {
+            $email->replyTo($this->getEmisor()->email);
+        }
         // adjuntar PDF
         if ($pdf) {
             if ($papelContinuo===null) {

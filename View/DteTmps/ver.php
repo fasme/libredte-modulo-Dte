@@ -197,6 +197,8 @@ if (!$email_html) {
     $mensaje .= 'Se adjunta documento N° '.$DteTmp->getFolio().' del día '.\sowerphp\general\Utility_Date::format($DteTmp->fecha).' por un monto total de $'.num($DteTmp->total).'.-'."\n\n";
     if (!empty($links['pagar'])) {
         $mensaje .= 'Enlace pago en línea: '.$links['pagar']."\n\n";
+    } else if (!empty($links['pdf'])) {
+        $mensaje .= 'Puede descargar el documento en: '.$links['pdf']."\n\n";
     }
     $mensaje .= 'Saluda atentamente,'."\n\n";
     $mensaje .= '-- '."\n";
