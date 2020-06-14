@@ -3350,7 +3350,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la plantilla de un correo ya armada con los datos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-17
+     * @version 2020-06-14
      */
     public function getEmailFromTemplate($template, $params = null)
     {
@@ -3419,6 +3419,7 @@ class Model_Contribuyente extends \Model_App
                     '{fecha_pago}',
                     '{medio_pago}',
                     '{mostrar_pagar}',
+                    '{rut}',
                 ],
                 [
                     $dte_cotizacion,
@@ -3435,6 +3436,7 @@ class Model_Contribuyente extends \Model_App
                     $fecha_pago,
                     $medio_pago,
                     !$mostrar_pagar ? 'none' : '',
+                    $this->rut,
                 ],
                 $html
             );
