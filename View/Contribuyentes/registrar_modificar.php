@@ -351,7 +351,7 @@ echo $f->input([
     'name' => 'config_email_sii_user',
     'label' => 'Correo',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_user : null,
-    'attr' => 'maxlength="50" onblur="config_email_set(this, \'sii\')"',
+    'attr' => 'maxlength="50" onblur="config_email_set(this, \'config_email_sii\')"',
     'check' => 'notempty email',
 ]);
 echo $f->input([
@@ -393,7 +393,7 @@ echo $f->input([
     'name' => 'config_email_intercambio_user',
     'label' => 'Correo',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_user : null,
-    'attr' => 'maxlength="50" onblur="config_email_set(this, \'intercambio\')"',
+    'attr' => 'maxlength="50" onblur="config_email_set(this, \'config_email_intercambio\')"',
     'check' => 'notempty email',
 ]);
 echo $f->input([
