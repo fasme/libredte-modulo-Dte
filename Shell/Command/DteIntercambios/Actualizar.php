@@ -103,36 +103,27 @@ class Shell_Command_DteIntercambios_Actualizar extends \Shell_App
             return [$grupo];
         }
         $db = \sowerphp\core\Model_Datasource_Database::get();
+        $where = ['(cc1.valor IS NOT NULL OR cc2.valor IS NOT NULL)'];
+        $vars = [];
         if ($grupo) {
-            return $db->getCol('
-                SELECT c.rut
-                FROM
-                    contribuyente AS c
-                    JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
-                    JOIN usuario AS u ON c.usuario = u.id
-                    JOIN usuario_grupo AS ug ON ug.usuario = u.id
-                    JOIN grupo AS g ON ug.grupo = g.id
-                WHERE
-                    g.grupo = :grupo
-                    AND cc.configuracion = \'email\'
-                    AND cc.variable = \'intercambio_pass\'
-                    AND cc.valor IS NOT NULL
-                ORDER BY c.razon_social
-            ', [':grupo' => $grupo]);
+            $where[] = 'g.grupo = :grupo';
+            $vars[':grupo'] = $grupo;
         } else {
-            return $db->getCol('
-                SELECT c.rut
-                FROM
-                    contribuyente AS c
-                    JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
-                WHERE
-                    c.usuario IS NOT NULL
-                    AND cc.configuracion = \'email\'
-                    AND cc.variable = \'intercambio_pass\'
-                    AND cc.valor IS NOT NULL
-                ORDER BY c.razon_social
-            ');
+            $where[] = 'c.usuario IS NOT NULL';
         }
+        return $db->getCol('
+            SELECT c.rut
+            FROM
+                contribuyente AS c
+                JOIN usuario AS u ON c.usuario = u.id
+                JOIN usuario_grupo AS ug ON ug.usuario = u.id
+                JOIN grupo AS g ON ug.grupo = g.id
+                LEFT JOIN contribuyente_config AS cc1 ON cc1.contribuyente = c.rut AND cc1.configuracion = \'email\' AND cc1.variable = \'intercambio_sender\'
+                LEFT JOIN contribuyente_config AS cc2 ON cc2.contribuyente = c.rut AND cc2.configuracion = \'email\' AND cc2.variable = \'intercambio_pass\'
+            WHERE
+                '.implode(' AND ', $where).'
+            ORDER BY c.razon_social
+        ', $vars);
     }
 
 }

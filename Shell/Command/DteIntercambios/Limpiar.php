@@ -33,7 +33,6 @@ namespace website\Dte;
  *  - Intercambios no procesados recibidos hace más de 12 meses
  *  - Intercambios marcados como rechazados/reclamados mayores a 3 meses
  *  - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
- *  - Intercambios duplicados que no estén asociados a ningún DTE recibido (TODO)
  * Sólo se eliminan intercambios que NO estén asociados a un DTE recibido,
  * esto se asegura con una restricción en la base de datos, en la tabla dte_recibido
  * debe estar la regla de llave foránea con RESTRICT para los DELETE. Así:
@@ -73,14 +72,8 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
                 $this->out($name.': '.num($rows));
             }
         }
-        // eliminar casos duplicados que no estén asociados a ningún DTE recibido
-        $rows = $this->eliminarDuplicados();
-        $total += $rows;
-        if ($this->verbose) {
-            $this->out('Duplicados no asociados a DTE recibidos: '.num($rows));
-        }
         // guardar transacción sólo si se pidió explícitamente
-        if ($commit) {
+        if (!empty($commit)) {
             $this->db->commit();
         } else {
             $this->db->rollback();
@@ -107,26 +100,6 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
             }
             return 0;
         }
-    }
-
-    /**
-     * Método que elimina intercambios duplicados que no están asociados a ningún
-     * DTE recibido
-     * Nota: este método es deseable, pero no es "obligatorio" considerar que
-     * según las reglas ya definidas este tipo de XML podría ser eliminado en el
-     * futuro por cualquiera de las reglas existentes, especialmente:
-     *  - Intercambios no procesados recibidos hace más de 12 meses
-     *  - Intercambios marcados como rechazados/reclamados mayores a 3 meses
-     *  - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
-     * Por lo anterior, si bien este métood podría ser necesario para limpiar la
-     * base de datos HOY con las reglas definidas, en el peor caso, la base de
-     * datos quedará limpia en un año.
-     * @todo Programar método si hay interés en resolver esto HOY
-     * @return int filas de registros que fueron eliminadas
-     */
-    private function eliminarDuplicados()
-    {
-        return 0;
     }
 
 }
