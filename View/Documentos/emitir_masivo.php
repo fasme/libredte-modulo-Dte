@@ -1,4 +1,12 @@
 <ul class="nav nav-pills float-right">
+<?php if (class_exists('\libredte\oficial\Dte\Utility_DocumentosMasivos')) : ?>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/documentos_masivos" title="Crear archivo para emisión masiva" class="nav-link">
+            <i class="fa fa-upload"></i>
+            Crear archivo
+        </a>
+    </li>
+<?php endif; ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/documentos/buscar_masivo" title="Buscar documentos masivamente" class="nav-link">
             <i class="fa fa-search"></i>
@@ -14,11 +22,6 @@
 </ul>
 <div class="page-header"><h1>Emitir documentos masivos</h1></div>
 <p>Aquí podrá solicitar la emisión masiva de DTE a partir de un archivo CSV (separado por punto y coma, codificado en UTF-8). El archivo debe tener el <a href="<?=$_base?>/dte/archivos/emision_masiva.csv" download="emision_masiva.csv">siguiente formato</a>:</p>
-
-<div class="alert alert-danger lead">
-    El descuento por item en porcentaje ha cambiado. Antes para indicar 50% de descuento se usaba "0.5" ahora se debe usar "50%"
-</div>
-
 <ul>
     <li>Tipo DTE: código del tipo de documento (ej: 33 para factura o 39 para boletas) (obligatorio)</li>
     <li>Folio: número que identifica de manera única dentro del CSV al DTE. Este folio sólo se usará para la emisión si así está configurado (obligatorio)</li>
