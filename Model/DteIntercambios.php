@@ -55,7 +55,7 @@ class Model_DteIntercambios extends \Model_Plural_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-09
+     * @version 2020-06-19
      */
     public function buscar(array $filter = [])
     {
@@ -123,12 +123,12 @@ class Model_DteIntercambios extends \Model_Plural_App
         // si se debe hacer búsqueda dentro de los XML
         if (!empty($filter['dte'])) {
             $dte_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE', 'http://www.sii.cl/SiiDte');
-            $where[] = $dte_where.' LIKE :dte';
+            $where[] = $dte_where.'::INTEGER = :dte';
             $vars['dte'] = (int)$filter['dte'];
         }
         if (!empty($filter['folio'])) {
             $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
-            $where[] = $folio_where.' LIKE :folio';
+            $where[] = $folio_where.'::INTEGER = :folio';
             $vars['folio'] = (int)$filter['folio'];
         }
         if (!empty($filter['item'])) {
@@ -212,7 +212,7 @@ class Model_DteIntercambios extends \Model_Plural_App
                     $aux = explode(',', $d);
                     if (isset($aux[1])) {
                         list($tipo, $folio) = $aux;
-                        $d = 'T'.$tipo.'F'.$folio;
+                        $d = 'T'.$tipo.'F'.(int)$folio;
                     }
                 }
                 $i['documentos'] = $documentos;
