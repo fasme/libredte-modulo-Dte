@@ -123,13 +123,15 @@ class Model_DteIntercambios extends \Model_Plural_App
         // si se debe hacer búsqueda dentro de los XML
         if (!empty($filter['dte'])) {
             $dte_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE', 'http://www.sii.cl/SiiDte');
-            $where[] = $dte_where.'::INTEGER = :dte';
-            $vars['dte'] = (int)$filter['dte'];
+            $where[] = '((is_numeric('.$dte_where.') = true AND '.$dte_where.'::INTEGER = :dte_n) OR (is_numeric('.$dte_where.') = false AND '.$dte_where.' LIKE :dte_s))';
+            $vars[':dte_n'] = (int)$filter['dte'];
+            $vars[':dte_s'] = '%'.(int)$filter['dte'].'%';
         }
         if (!empty($filter['folio'])) {
             $folio_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
-            $where[] = $folio_where.'::INTEGER = :folio';
-            $vars['folio'] = (int)$filter['folio'];
+            $where[] = '((is_numeric('.$folio_where.') = true AND '.$folio_where.'::INTEGER = :folio_n) OR (is_numeric('.$folio_where.') = false AND '.$folio_where.' LIKE :folio_s))';
+            $vars[':folio_n'] = (int)$filter['folio'];
+            $vars[':folio_s'] = '%'.(int)$filter['folio'].'%';
         }
         if (!empty($filter['item'])) {
             $item_where = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Detalle/NmbItem', 'http://www.sii.cl/SiiDte');
