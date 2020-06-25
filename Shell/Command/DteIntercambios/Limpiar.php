@@ -80,10 +80,10 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
         }
         // estadísticas
         $this->out();
-        if ($commit) {
+        if (!empty($commit)) {
             $this->out('Total registros eliminados: '.num($total),2);
         } else {
-            $this->out('Total registros simulados para eliminar: '.num($total),2);
+            $this->out('Total registros simulados: '.num($total),2);
         }
         $this->showStats();
         return 0;
