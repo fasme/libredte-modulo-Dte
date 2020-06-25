@@ -30,8 +30,8 @@ namespace website\Dte;
  *  - Guías recibidas que fueron emitidas por el mismo contribuyente que las recibe
  *  - Intercambios de certificación mayores a 1 mes
  *  - Intercambios donde el emisor es igual al receptor
- *  - Intercambios no procesados recibidos hace más de 6 meses
- *  - Intercambios marcados como rechazados/reclamados mayores a 3 meses
+ *  - Intercambios no procesados recibidos hace más de 4 meses
+ *  - Intercambios marcados como rechazados/reclamados mayores a 2 meses
  *  - Intercambios aceptados pero que no tienen asociado un DTE recibido (aceptaron otro posteriormente y se actualizó al nuevo intercambio)
  * Sólo se eliminan intercambios que NO estén asociados a un DTE recibido,
  * esto se asegura con una restricción en la base de datos, en la tabla dte_recibido
@@ -52,8 +52,8 @@ class Shell_Command_DteIntercambios_Limpiar extends \Shell_App
         'Guías recibidas con receptor igual al emisor' => 'DELETE FROM dte_recibido WHERE emisor = receptor and dte = 52',
         'Intercambios certificación >1 mes' => 'DELETE FROM dte_intercambio WHERE certificacion = true AND fecha_hora_email < (NOW() - INTERVAL \'1 MONTH\')',
         'Receptor igual al emisor en intercambio' => 'DELETE FROM dte_intercambio WHERE emisor = receptor',
-        'Intercambios sin estado >6 meses' => 'DELETE FROM dte_intercambio WHERE estado IS NULL AND fecha_hora_email < (NOW() - INTERVAL \'6 MONTH\')',
-        'Intercambios rechazados >3 meses' => 'DELETE FROM dte_intercambio WHERE estado IS NOT NULL AND estado != 0 AND fecha_hora_email < (NOW() - INTERVAL \'3 MONTH\')',
+        'Intercambios sin estado >4 meses' => 'DELETE FROM dte_intercambio WHERE estado IS NULL AND fecha_hora_email < (NOW() - INTERVAL \'4 MONTH\')',
+        'Intercambios rechazados >2 meses' => 'DELETE FROM dte_intercambio WHERE estado IS NOT NULL AND estado != 0 AND fecha_hora_email < (NOW() - INTERVAL \'2 MONTH\')',
         'Intercambios aceptados sin DTE recibido asociado' => 'DELETE FROM dte_intercambio WHERE (receptor, emisor, certificacion, codigo) NOT IN (SELECT receptor, emisor, certificacion, intercambio FROM dte_recibido WHERE intercambio IS NOT NULL) AND estado = 0',
     ];
 
