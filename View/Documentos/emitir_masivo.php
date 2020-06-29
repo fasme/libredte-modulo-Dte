@@ -22,7 +22,7 @@
 </ul>
 <div class="page-header"><h1>Emitir documentos masivos</h1></div>
 <p>Aquí podrá solicitar la emisión masiva de DTE a partir de un archivo CSV (separado por punto y coma, codificado en UTF-8). El archivo debe tener el <a href="<?=$_base?>/dte/archivos/emision_masiva.csv" download="emision_masiva.csv">siguiente formato</a>:</p>
-<ul>
+<ol>
     <li>Tipo DTE: código del tipo de documento (ej: 33 para factura o 39 para boletas) (obligatorio)</li>
     <li>Folio: número que identifica de manera única dentro del CSV al DTE. Este folio sólo se usará para la emisión si así está configurado (obligatorio)</li>
     <li>Fecha emisión: en formato AAAA-MM-DD (opcional)</li>
@@ -59,7 +59,8 @@
     <li>Moneda para documentos de exportación: USD, EUR o CLP (opcional, por defecto: USD)</li>
     <li>ID extranjero (opcional)</li>
     <li>Descuento global: puede ser 50% para indicar descuento global en porcentaje o un monto como 1000 para indicar descuento global en cantidad (opcional)</li>
-</ul>
+    <li>Nombre del PDF: permite especificar el nombre del PDF a descargar (opcional). Se pueden usar las variables: <code>{rut}</code>, <code>{dv}</code>, <code>{dte}</code> y <code>{folio}</code>.</li>
+</ol>
 <p>Si el documento tiene más de un item, se agrega una nueva fila donde sólo van las columnas correspondientes al item y las demás vacías.</p>
 <p>El archivo subido se procesará de manera asíncrona y se notificará vía correo electrónico a <?=$_Auth->User->email?> cuando el proceso esté completo. El correo incluirá el mismo archivo CSV que se subió a la plataforma con 2 columnas nuevas que incluirán el código del resultado de la operación para ese documento y la glosa asociada a dicho estado. El significado macro de cada código de estado es:</p>
 <?php

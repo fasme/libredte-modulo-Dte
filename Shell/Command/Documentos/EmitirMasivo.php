@@ -26,7 +26,7 @@ namespace website\Dte;
 /**
  * Comando que permite emitir masivamente DTE a partir de un archivo CSV
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-07-26
+ * @version 2020-06-28
  */
 class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
 {
@@ -150,6 +150,11 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             }
             // agregar RUT emisor
             $dte['Encabezado']['Emisor']['RUTEmisor'] = $Emisor->rut.'-'.$Emisor->dv;
+            // extraer configuración adicional del DTE si viene en el arreglo
+            if (!empty($dte['LibreDTE'])) {
+                $dte_config = $dte['LibreDTE'];
+                unset($dte['LibreDTE']);
+            }
             // emitir DTE temporal
             $response = $rest->post($Request->url.'/api/dte/documentos/emitir', $dte);
             if ($response['status']['code']!=200) {
@@ -168,7 +173,12 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 if ($pdf) {
                     $response_pdf = $rest->get($Request->url.'/api/dte/dte_tmps/pdf/'.$response['body']['receptor'].'/'.$response['body']['dte'].'/'.$response['body']['codigo'].'/'.$response['body']['emisor'].'?cotizacion=1');
                     if ($response_pdf['status']['code']==200) {
-                        $file_pdf = $dir.'/dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$response['body']['dte'].'F'.$response['body']['dte'].'-'.strtoupper(substr($response['body']['codigo'],0,7)).'.pdf';
+                        $filename = !empty($dte_config['pdf']['nombre']) ? $dte_config['pdf']['nombre'] : 'LibreDTE_{rut}_{folio}';
+                        $file_pdf = $dir.'/'.str_replace(
+                            ['{rut}', '{dv}', '{dte}', '{folio}'],
+                            [$Emisor->rut, $Emisor->dv, $response['body']['dte'], $response['body']['dte'].'-'.strtoupper(substr($response['body']['codigo'],0,7))],
+                            $filename
+                        ).'.pdf';
                         file_put_contents($file_pdf, $response_pdf['body']);
                     }
                 }
@@ -219,7 +229,12 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 if ($pdf===true) {
                     $response_pdf = $rest->get($Request->url.'/api/dte/dte_emitidos/pdf/'.$response['body']['dte'].'/'.$response['body']['folio'].'/'.$response['body']['emisor']);
                     if ($response_pdf['status']['code']==200) {
-                        $file_pdf = $dir.'/dte_'.$Emisor->rut.'-'.$Emisor->dv.'_LibreDTE_T'.$response['body']['dte'].'F'.$response['body']['folio'].'.pdf';
+                        $filename = !empty($dte_config['pdf']['nombre']) ? $dte_config['pdf']['nombre'] : 'LibreDTE_{rut}_T{dte}F{folio}';
+                        $file_pdf = $dir.'/'.str_replace(
+                            ['{rut}', '{dv}', '{dte}', '{folio}'],
+                            [$Emisor->rut, $Emisor->dv, $response['body']['dte'], $response['body']['folio']],
+                            $filename
+                        ).'.pdf';
                         file_put_contents($file_pdf, $response_pdf['body']);
                     }
                 }
@@ -385,6 +400,9 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 'ValorDR' => $ValorDR_global,
                 'IndExeDR' => 1,
             ];
+        }
+        if (!empty($datos[36])) {
+            $documento['LibreDTE']['pdf']['nombre'] = $datos[36];
         }
         $this->agregarItem($documento, array_slice($datos, 11, 8));
         $this->agregarTransporte($documento, array_slice($datos, 22, 6));
