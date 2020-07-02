@@ -159,7 +159,7 @@ if (isset($datos)) {
     $detalle = [];
     foreach ($Detalle as $d) {
         if ($datos['Encabezado']['IdDoc']['TipoDTE']==39 and (!isset($d['IndExe']) or !$d['IndExe'])) {
-            $d['PrcItem'] = round($d['PrcItem']/(1+(\sasco\LibreDTE\Sii::getIVA())/100));
+            $d['PrcItem'] = round($d['PrcItem']/(1+(\sasco\LibreDTE\Sii::getIVA())/100), (int)$Emisor->config_items_decimales);
             if (!empty($d['DescuentoMonto'])) {
                 $d['DescuentoMonto'] = round($d['DescuentoMonto']/(1+(\sasco\LibreDTE\Sii::getIVA())/100));
             }

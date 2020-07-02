@@ -701,7 +701,7 @@ class Controller_Documentos extends \Controller_App
             // si es boleta y el item no es exento se le agrega el IVA al precio y el impuesto adicional si existe
             if ($dte['Encabezado']['IdDoc']['TipoDTE']==39 and (!isset($detalle['IndExe']) or !$detalle['IndExe'])) {
                 // IVA
-                $iva = round($detalle['PrcItem'] * (\sasco\LibreDTE\Sii::getIVA()/100));
+                $iva = round($detalle['PrcItem'] * (\sasco\LibreDTE\Sii::getIVA()/100), (int)$Emisor->config_items_decimales);
                 // impuesto adicional TODO: no se permiten impuestos adicionales en boletas por el momento
                 if (!empty($detalle['CodImpAdic'])) {
                     \sowerphp\core\Model_Datasource_Session::message(

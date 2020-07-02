@@ -277,7 +277,7 @@ class Model_Item extends \Model_App
      * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el precio
      * @todo Calcular monto neto/bruto cuando hay impuestos específicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-31
+     * @version 2020-07-02
      */
     public function getPrecio($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = null)
     {
@@ -290,7 +290,8 @@ class Model_Item extends \Model_App
                 return round($precio, $decimales);
             }
         } else {
-            $precio = $this->bruto ? round($this->precio/1.19, $this->moneda!='CLP'?3:0) : $this->precio;
+            $d = $decimales ? (int)$decimales : ($this->moneda!='CLP' ? 3 : 0);
+            $precio = $this->bruto ? round($this->precio/1.19, $d) : $this->precio;
         }
         if ($moneda == $this->moneda) {
             return $precio;
@@ -323,7 +324,7 @@ class Model_Item extends \Model_App
      * @param moneda Tipo de moneda en la que se desea obtener el descuento del item
      * @param decimales Cantidad de decimales para la moneda que se está solicitando obtener el descuento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-10-29
+     * @version 2020-07-02
      */
     public function getDescuento($fecha = null, $bruto = false, $moneda = 'CLP', $decimales = null)
     {
@@ -342,7 +343,8 @@ class Model_Item extends \Model_App
                 return round($descuento, $decimales);
             }
         } else {
-            $descuento = $this->bruto ? round($this->descuento/1.19, $this->moneda!='CLP'?3:0) : $this->descuento;
+            $d = $decimales ? (int)$decimales : ($this->moneda!='CLP' ? 3 : 0);
+            $descuento = $this->bruto ? round($this->descuento/1.19, $d) : $this->descuento;
         }
         if ($moneda == $this->moneda) {
             return $descuento;

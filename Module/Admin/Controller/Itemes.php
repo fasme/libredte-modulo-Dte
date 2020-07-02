@@ -151,6 +151,9 @@ class Controller_Itemes extends \Controller_Maintainer
             } catch (\Exception $e) {
                 $this->Api->send($e->getMessage(), $e->getCode() ? $e->getCode() : 500);
             }
+            if ($decimales === null) {
+                $decimales = (int)$Empresa->config_items_decimales;
+            }
             $this->Api->send(array_merge([
                 'TpoCodigo' => $Item->codigo_tipo,
                 'VlrCodigo' => $Item->codigo,

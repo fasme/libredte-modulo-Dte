@@ -460,11 +460,11 @@ echo $f->input([
 ]);
 echo $f->input([
     'type' => 'select',
-    'name' => 'config_extra_exenta',
-    'label' => 'Empresa exenta',
-    'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_exenta : 0,
-    'help' => '¿El contribuyente es exento de IVA en todas sus actividades económicas?',
+    'name' => 'config_items_decimales',
+    'label' => 'Decimales en items',
+    'options' => [0=>'0 para CLP y 3 para otras monedas', 1=>1, 2=>2, 3=>3, 4=>4, 5=>5, 6=>6],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_items_decimales : '',
+    'help' => '¿Cuántos decimales se deben usar si se requiere aproximar al obtener el precio de un ítem?',
 ]);
 $IndServicio = [
     1 => 'Factura o boleta de servicios períodicos domiciliarios', // boleta es periodico no domiciliario (se ajusta)
@@ -513,6 +513,14 @@ echo $f->input([
                 </div>
                 <div class="col-md-6">
 <?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_extra_exenta',
+    'label' => 'Empresa exenta',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_extra_exenta : 0,
+    'help' => '¿El contribuyente es exento de IVA en todas sus actividades económicas?',
+]);
 echo $f->input([
     'type' => 'select',
     'name' => 'config_extra_constructora',
