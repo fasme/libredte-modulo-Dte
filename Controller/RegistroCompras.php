@@ -190,12 +190,11 @@ class Controller_RegistroCompras extends \Controller_App
      * Acción para actualizar el listado de documentos del registro de compras
      * del SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-13
+     * @version 2020-07-02
      */
-    public function actualizar()
+    public function actualizar($meses = 2)
     {
         $estado = 'PENDIENTE'; // forzar estado PENDIENTE
-        $meses = 2;
         $Receptor = $this->getContribuyente();
         try {
             (new Model_RegistroCompras())->setContribuyente($Receptor)->sincronizar($estado, $meses);
