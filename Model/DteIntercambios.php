@@ -232,7 +232,7 @@ class Model_DteIntercambios extends \Model_Plural_App
      * recibidos por intercambio y guarda los acuses de recibos de DTEs
      * enviados por otros contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-04-17
+     * @version 2020-07-03
      */
     public function actualizar($dias = 7)
     {
@@ -303,7 +303,11 @@ class Model_DteIntercambios extends \Model_Plural_App
                         continue;
                     }
                     // tratar de procesar como EnvioDTE
-                    $procesarEnvioDTE = $this->procesarEnvioDTE($datos_email, $file);
+                    try {
+                        $procesarEnvioDTE = $this->procesarEnvioDTE($file, $datos_email);
+                    } catch (\Exception $e) {
+                        $procesarEnvioDTE = false;
+                    }
                     if ($procesarEnvioDTE!==null) {
                         if ($procesarEnvioDTE) {
                             $n_EnvioDTE++;
@@ -312,7 +316,11 @@ class Model_DteIntercambios extends \Model_Plural_App
                         continue;
                     }
                     // tratar de procesar como Recibo
-                    $procesarRecibo = (new Model_DteIntercambioRecibo())->saveXML($this->getContribuyente(), $file['data']);
+                    try {
+                        $procesarRecibo = (new Model_DteIntercambioRecibo())->saveXML($this->getContribuyente(), $file['data']);
+                    } catch (\Exception $e) {
+                        $procesarRecibo = false;
+                    }
                     if ($procesarRecibo!==null) {
                         if ($procesarRecibo) {
                             $n_EnvioRecibos++;
@@ -325,7 +333,11 @@ class Model_DteIntercambios extends \Model_Plural_App
                         continue;
                     }
                     // tratar de procesar como Recepción
-                    $procesarRecepcion = (new Model_DteIntercambioRecepcion())->saveXML($this->getContribuyente(), $file['data']);
+                    try {
+                        $procesarRecepcion = (new Model_DteIntercambioRecepcion())->saveXML($this->getContribuyente(), $file['data']);
+                    } catch (\Exception $e) {
+                        $procesarRecepcion = false;
+                    }
                     if ($procesarRecepcion!==null) {
                         if ($procesarRecepcion) {
                             $n_RecepcionEnvio++;
@@ -337,7 +349,12 @@ class Model_DteIntercambios extends \Model_Plural_App
                         $procesados++;
                         continue;
                     }
-                    $procesarResultado = (new Model_DteIntercambioResultado())->saveXML($this->getContribuyente(), $file['data']);
+                    // tratar de procesar como Resultado
+                    try {
+                        $procesarResultado = (new Model_DteIntercambioResultado())->saveXML($this->getContribuyente(), $file['data']);
+                    } catch (\Exception $e) {
+                        $procesarResultado = false;
+                    }
                     if ($procesarResultado!==null) {
                         if ($procesarResultado) {
                             $n_ResultadoDTE++;
@@ -347,6 +364,7 @@ class Model_DteIntercambios extends \Model_Plural_App
                             }
                         }
                         $procesados++;
+                        continue;
                     }
                 }
                 // marcar email como leído si fueron procesados todos los archivos adjuntos
@@ -366,9 +384,9 @@ class Model_DteIntercambios extends \Model_Plural_App
      * @param datos_email Arreglo con los índices: fecha_hora_email, asunto, de, mensaje, mensaje_html
      * @param file Arreglo con los índices: name, data, size y type
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-21
+     * @version 2020-07-03
      */
-    private function procesarEnvioDTE(array $datos_email, array $file)
+    public function procesarEnvioDTE(array $file, array $datos_email = [])
     {
         // preparar datos
         $EnvioDte = new \sasco\LibreDTE\Sii\EnvioDte();
@@ -376,14 +394,14 @@ class Model_DteIntercambios extends \Model_Plural_App
             return null; // no es un EnvioDTE, no se procesa
         }
         if ($EnvioDte->esBoleta()) {
-            return false;
+            throw new \Exception('El XML es de boleta, no se procesa');
         }
         $caratula = $EnvioDte->getCaratula();
         if (((int)(bool)!$caratula['NroResol'])!=(int)$this->getContribuyente()->config_ambiente_en_certificacion) {
             return null; // se deja sin procesar ya que no es del ambiente correcto
         }
         if (substr($caratula['RutReceptor'], 0, -2) != $this->getContribuyente()->rut) {
-            return false;
+            throw new \Exception('El RUT del receptor no es válido');
         }
         if (!isset($caratula['SubTotDTE'][0])) {
             $caratula['SubTotDTE'] = [$caratula['SubTotDTE']];
@@ -393,7 +411,11 @@ class Model_DteIntercambios extends \Model_Plural_App
             $documentos += $SubTotDTE['NroDTE'];
         }
         if (!$documentos) {
-            return false;
+            throw new \Exception('El intercambio no tiene DTE');
+        }
+        // si no hay datos de correo no se debe guardar y sólo se está probando el XML
+        if (empty($datos_email)) {
+            throw new \Exception('Envio ok. No guardado. Sin datos de correo para guardar el XML.');
         }
         // preparar datos que se guardarán
         if (empty($file['name'])) {
@@ -412,15 +434,15 @@ class Model_DteIntercambios extends \Model_Plural_App
         $DteIntercambio = new Model_DteIntercambio();
         $DteIntercambio->set($datos_email + $datos_enviodte);
         $DteIntercambio->receptor = $this->getContribuyente()->rut;
-        // si el documento ya existe en la bandeja de intercambio se omite y se entrega true (para marcar como procesado)
+        // si el documento ya existe en la bandeja de intercambio se omite
         if ($DteIntercambio->recibidoPreviamente()) {
-            return false;
+            throw new \Exception('El intercambio ya había sido recibido previamente');
         }
         // guardar envío de intercambio
         if (!$DteIntercambio->save()) {
-            return false;
+            throw new \Exception('No fue posible guardar el intercambio');
         }
-        // si no se procesó el intercambio de manera automática se marca como DTE agregado para ser reportado
+        // si no se procesó el intercambio de manera automática se marca como DTE agregado (=true) para ser reportado
         return !$DteIntercambio->procesarRespuestaAutomatica() ? true : false;
     }
 

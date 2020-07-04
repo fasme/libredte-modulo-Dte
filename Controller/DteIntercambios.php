@@ -210,7 +210,7 @@ class Controller_DteIntercambios extends \Controller_App
         if (!empty($errores)) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Se encontraron algunos problemas al procesar ciertos correos:<br/>- '.implode('<br/>- ',$errores), 'warning'
-            );    
+            );
         }
         $this->redirect('/dte/dte_intercambios/listar');
     }
@@ -617,6 +617,96 @@ class Controller_DteIntercambios extends \Controller_App
             $this->Api->send('No se encontraron documentos de intercambio', 404);
         }
         $this->Api->send($intercambios, 200, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Acción que permite cargar la respuesta recibida de un intercambio
+     * Esta acción principalmente sirve para procesar y validar una respuesta
+     * que no ha sido procesada de manera automática por la actualización
+     * de la bandeja de intercambio
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-07-03
+     */
+    public function cargar_xml()
+    {
+        $Emisor = $this->getContribuyente();
+        $this->set('Emisor', $Emisor);
+        if (!empty($_FILES['archivo'])) {
+            $n_archivos = count($_FILES['archivo']['name']);
+            $archivos = [];
+            for ($i = 0; $i<$n_archivos; $i++) {
+                $file = [
+                    'name' => $_FILES['archivo']['name'][$i],
+                    'tmp_name' => $_FILES['archivo']['tmp_name'][$i],
+                    'error' => $_FILES['archivo']['error'][$i],
+                    'size' => $_FILES['archivo']['size'][$i],
+                    'type' => $_FILES['archivo']['type'][$i],
+                    'data' => file_get_contents($_FILES['archivo']['tmp_name'][$i]),
+                ];
+                if ($file['error'] or !$file['size'] or $file['type'] != 'text/xml') {
+                    continue;
+                }
+                $archivo = [
+                    'name' => $_FILES['archivo']['name'][$i],
+                ];
+                // tratar de procesar como EnvioDTE
+                try {
+                    $procesarEnvioDTE = (new Model_DteIntercambios())->setContribuyente($Emisor)->procesarEnvioDTE($file);
+                    if ($procesarEnvioDTE!==null) {
+                        $archivo['estado'] = 'EnvioDTE: procesado y guardado';
+                        $archivos[] = $archivo;
+                        continue;
+                    }
+                } catch (\Exception $e) {
+                    $archivo['estado'] = 'EnvioDTE: '.$e->getMessage();
+                    $archivos[] = $archivo;
+                    continue;
+                }
+                // tratar de procesar como Recibo
+                try {
+                    $procesarRecibo = (new Model_DteIntercambioRecibo())->saveXML($this->getContribuyente(), $file['data']);
+                    if ($procesarRecibo!==null) {
+                        $archivo['estado'] = 'Recibo: procesado y guardado';
+                        $archivos[] = $archivo;
+                        continue;
+                    }
+                } catch (\Exception $e) {
+                    $archivo['estado'] = 'Recibo: '.$e->getMessage();
+                    $archivos[] = $archivo;
+                    continue;
+                }
+                // tratar de procesar como Recepción
+                try {
+                    $procesarRecepcion = (new Model_DteIntercambioRecepcion())->saveXML($this->getContribuyente(), $file['data']);
+                    if ($procesarRecepcion!==null) {
+                        $archivo['estado'] = 'Recepción: procesado y guardado';
+                        $archivos[] = $archivo;
+                        continue;
+                    }
+                } catch (\Exception $e) {
+                    $archivo['estado'] = 'Recepción: '.$e->getMessage();
+                    $archivos[] = $archivo;
+                    continue;
+                }
+                // tratar de procesar como Resultado
+                try {
+                    $procesarResultado = (new Model_DteIntercambioResultado())->saveXML($this->getContribuyente(), $file['data']);
+                    if ($procesarResultado!==null) {
+                        $archivo['estado'] = 'Resultado: procesado y guardado';
+                        $archivos[] = $archivo;
+                        continue;
+                    }
+                } catch (\Exception $e) {
+                    $archivo['estado'] = 'Resultado: '.$e->getMessage();
+                    $archivos[] = $archivo;
+                    continue;
+                }
+                // no se procesó
+                $archivo['estado'] = 'No procesado. Es probable que no sea del ambiente actual o bien no sea un XML de los 4 casos esperados: EnvioDTE, Recibo, Recepción o Resultado.';
+                $archivos[] = $archivo;
+            }
+            $this->set('archivos', $archivos);
+        }
     }
 
 }

@@ -151,7 +151,7 @@ class Model_DteIntercambioRecibo extends \Model_App
     /**
      * Método que guarda el XML del Recibo de un intercambio
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2020-07-03
      */
     public function saveXML($Emisor, $xml) {
         // crear recibo
@@ -160,12 +160,14 @@ class Model_DteIntercambioRecibo extends \Model_App
         if (!$EnvioRecibos->getID()) {
             return null; // no es SetRecibos se debe procesar otro archivo
         }
+        // no cumple con esquema XML del SII (no se procesa)
         if (!$EnvioRecibos->schemaValidate()) {
-            return false; // no cumple con esquema XML del SII (no se procesa)
+            throw new \Exception('Falló la validación del esquema del XML: '.implode(' / ', \sasco\LibreDTE\Log::readAll()));
         }
+        // el RUT no es válido
         $Caratula = $EnvioRecibos->toArray()['EnvioRecibos']['SetRecibos']['Caratula'];
         if (explode('-', $Caratula['RutRecibe'])[0] != $Emisor->rut or empty($Caratula['TmstFirmaEnv'])) {
-            return false;
+            throw new \Exception('El RUT del receptor no es válido');
         }
         // guardar recibo
         $this->db->beginTransaction();
@@ -179,7 +181,7 @@ class Model_DteIntercambioRecibo extends \Model_App
         $this->xml = base64_encode($xml);
         if (!$this->save()) {
             $this->db->rollback();
-            return false;
+            throw new \Exception('No fue posible guardar el recibo del intercambio');
         }
         // procesar cada recibo
         foreach ($EnvioRecibos->getRecibos() as $Recibo) {
@@ -187,7 +189,7 @@ class Model_DteIntercambioRecibo extends \Model_App
             // acuse no es para este
             if (explode('-', $Recibo['DocumentoRecibo']['RUTEmisor'])[0] != $Emisor->rut) {
                 $this->db->rollback();
-                return false;
+                throw new \Exception('El RUT del emisor del DTE informado no corresponde');
             }
             // buscar DTE emitido en el ambiente del emisor
             $DteEmitido = new Model_DteEmitido(
@@ -199,7 +201,7 @@ class Model_DteIntercambioRecibo extends \Model_App
             // si no existe o si los datos del DTE emitido no corresponden error
             if (!$DteEmitido->exists() or explode('-', $Recibo['DocumentoRecibo']['RUTRecep'])[0]!=$DteEmitido->receptor or $Recibo['DocumentoRecibo']['FchEmis']!=$DteEmitido->fecha or $Recibo['DocumentoRecibo']['MntTotal']!=$DteEmitido->total) {
                 $this->db->rollback();
-                return false;
+                throw new \Exception('DTE informado no existe o sus datos no corresponden');
             }
             // guardar recibo para el DTE
             $DteIntercambioReciboDte = new Model_DteIntercambioReciboDte(
@@ -220,7 +222,7 @@ class Model_DteIntercambioRecibo extends \Model_App
             }
             if (!$DteIntercambioReciboDte->save()) {
                 $this->db->rollback();
-                return false;
+                throw new \Exception('No fue posible guardar el DTE del recibo del intercambio');
             }
         }
         // aceptar transacción

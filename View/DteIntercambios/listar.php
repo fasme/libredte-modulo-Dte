@@ -1,8 +1,14 @@
 <ul class="nav nav-pills float-right">
     <li class="nav-item">
-        <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al registro de compra del SII" class="nav-link">
+        <a href="<?=$_base?>/dte/dte_intercambios/cargar_xml" title="Cargar manualmente un XML a la bandeja de intercambio" class="nav-link">
+            <i class="fa fa-upload"></i>
+            Cargar
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_compras/registro_compras" title="Ir al Registro de Compras del SII" class="nav-link">
             <i class="fa fa-university"></i>
-            Registro compras SII
+            RC SII
         </a>
     </li>
 <?php if ($soloPendientes) : ?>
