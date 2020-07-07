@@ -752,7 +752,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Acción que permite probar la configuración de los correos electrónicos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-09
+     * @version 2020-07-06
      */
     public function config_email_test($rut, $email, $protocol = 'smtp')
     {
@@ -783,20 +783,28 @@ class Controller_Contribuyentes extends \Controller_App
             }
             $Email->to($this->Auth->User->email);
             $Email->subject('[LibreDTE] Mensaje de prueba '.date('YmdHis'));
-            $status = $Email->send('Esto es un mensaje de prueba desde LibreDTE');
+            try {
+                $status = $Email->send('Esto es un mensaje de prueba desde LibreDTE');
+            } catch (\Exception $e) {
+                $this->response->send($e->getMessage());
+            }
             if ($status === true) {
-                $this->response->send('Mensaje enviado mediante SMTP.');
+                $this->response->send('Mensaje enviado.');
             } else {
                 $this->response->send($status['message']);
             }
         }
         // hacer test IMAP
         else if ($protocol == 'imap') {
-            $Email = $Contribuyente->getEmailImap($email);
-            if (!$Email) {
-                $this->response->send('No se logró la conexión mediante IMAP.');
+            try {
+                $Email = $Contribuyente->getEmailImap($email);
+            } catch (\Exception $e) {
+                $this->response->send($e->getMessage());
             }
-            $this->response->send('La casilla IMAP tiene en total '.num($Email->countMessages()).' mensajes.');
+            if (!$Email) {
+                $this->response->send('No se logró la conexión al proveedor de entrada.');
+            }
+            $this->response->send('La casilla tiene en total '.num($Email->countMessages()).' mensajes.');
         }
     }
 
