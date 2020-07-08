@@ -8,6 +8,9 @@ var email_config = {
 function config_email_set(email, uso) {
     var dominio, status;
     status = Form.check_email(email);
+    if (email.value.indexOf('@')<0) {
+        return true;
+    }
     if (status !== true) {
         if (!__.empty(email.value)) {
             Form.alert(status.replace('%s', 'Email'), email);
