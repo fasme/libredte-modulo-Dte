@@ -40,7 +40,7 @@ class Controller_Contribuyentes extends \Controller_Maintainer
     /**
      * Acción que permite cargar los datos de contribuyentes
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]delaf.cl)
-     * @version 2017-04-14
+     * @version 2020-07-10
      */
     public function importar()
     {
@@ -103,10 +103,10 @@ class Controller_Contribuyentes extends \Controller_Maintainer
                     } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                     }
                 }
-                \sowerphp\core\Model_Datasource_Session::message(
-                    'Se actualizaron '.num($actualizados).' contribuyentes', 'ok'
-                );
             }
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Se actualizaron '.num($actualizados).' contribuyentes', 'ok'
+            );
         }
     }
 
