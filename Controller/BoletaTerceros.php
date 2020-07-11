@@ -302,7 +302,7 @@ class Controller_BoletaTerceros extends \Controller_App
     /**
      * API para emitir una boleta de terceros electrónica
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-16
+     * @version 2020-07-11
      */
     public function _api_emitir_POST()
     {
@@ -313,6 +313,9 @@ class Controller_BoletaTerceros extends \Controller_App
         }
         // verificar que venga RUTEmisor
         $boleta = $this->Api->data;
+        if (is_string($boleta)) {
+            $this->Api->send('Se recibieron los datos de la boleta como un string (problema al codificar JSON)', 400);
+        }
         if (empty($boleta['Encabezado']['Emisor']['RUTEmisor'])) {
             $this->Api->send('Debe indicar RUT del emisor de la BTE', 400);
         }
