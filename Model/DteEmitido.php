@@ -1449,12 +1449,12 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega el teléfono asociado al DTE, ya sea porque existe en el DTE o asociado directamente al receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-24
+     * @version 2020-07-11
      */
     public function getTelefono() {
         if (!isset($this->_telefono)) {
             $this->_telefono = null;
-            if (!empty($this->getDatos()['Encabezado']['Receptor']['Contacto']) and $this->getDatos()['Encabezado']['Receptor']['Contacto'][0]=='+') {
+            if ($this->hasLocalXML() and !empty($this->getDatos()['Encabezado']['Receptor']['Contacto']) and $this->getDatos()['Encabezado']['Receptor']['Contacto'][0]=='+') {
                 $this->_telefono = $this->getDatos()['Encabezado']['Receptor']['Contacto'];
             } else if (!empty($this->getReceptor()->telefono) and $this->getReceptor()->telefono[0]=='+') {
                 $this->_telefono = $this->getReceptor()->telefono;
