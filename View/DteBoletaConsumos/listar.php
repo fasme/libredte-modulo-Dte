@@ -46,29 +46,8 @@ $row = array();
 $form = new \sowerphp\general\View_Helper_Form(false);
 $optionsBoolean = array(array('', 'Seleccione una opción'), array('1', 'Si'), array('0', 'No'));
 foreach ($columns as $column => &$info) {
-    // si es un archivo
-    if ($info['type']=='file') {
-        $row[] = '';
-    }
-    // si es de tipo boolean se muestra lista desplegable
-    else if ($info['type']=='boolean' || $info['type']=='tinyint') {
-        $row[] = $form->input(array('type'=>'select', 'name'=>$column, 'options' => $optionsBoolean, 'value' => (isset($search[$column])?$search[$column]:'')));
-    }
-    // si es llave foránea
-    else if ($info['fk']) {
-        $class = 'Model_'.\sowerphp\core\Utility_Inflector::camelize(
-            $info['fk']['table']
-        );
-        $classs = $fkNamespace[$class].'\Model_'.\sowerphp\core\Utility_Inflector::camelize(
-            \sowerphp\core\Utility_Inflector::pluralize($info['fk']['table'])
-        );
-        $objs = new $classs();
-        $options = $objs->getList();
-        array_unshift($options, array('', 'Seleccione una opción'));
-        $row[] = $form->input(array('type'=>'select', 'name'=>$column, 'options' => $options, 'value' => (isset($search[$column])?$search[$column]:'')));
-    }
     // si es un tipo de dato de fecha o fecha con hora se muestra un input para fecha
-    else if (in_array($info['type'], ['date', 'timestamp', 'timestamp without time zone'])) {
+    if (in_array($info['type'], ['date', 'timestamp', 'timestamp without time zone'])) {
         $row[] = $form->input(array('type'=>'date', 'name'=>$column, 'value'=>(isset($search[$column])?$search[$column]:'')));
     }
     // si es cualquier otro tipo de datos
@@ -83,36 +62,29 @@ $data[] = $row;
 foreach ($Objs as &$obj) {
     $row = array();
     foreach ($columns as $column => &$info) {
-        // si es un archivo
-        if ($info['type']=='file') {
-            if ($obj->{$column.'_size'})
-                $row[] = '<a href="'.$_base.$module_url.$controller.'/d/'.$column.'/'.urlencode($obj->id).'"><i class="fa fa-download"></i></a>';
-            else
-                $row[] = '';
-        }
-        // si es boolean se usa Si o No según corresponda
-        else if ($info['type']=='boolean' || $info['type']=='tinyint') {
-            $row[] = $obj->{$column}=='t' || $obj->{$column}=='1' ? 'Si' : 'No';
-        }
-        // si es llave foránea
-        else if ($info['fk']['table']) {
-            // si no es vacía la columna
-            if (!empty($obj->{$column})) {
-                $method = 'get'.\sowerphp\core\Utility_Inflector::camelize($info['fk']['table']);
-                $row[] = $obj->$method($obj->$column)->{$info['fk']['table']};
-            } else {
-                $row[] = '';
-            }
+        if (in_array($info['type'], ['date', 'timestamp', 'timestamp without time zone'])) {
+            $row[] = \sowerphp\general\Utility_Date::format($obj->{$column});
         }
         // si es cualquier otro tipo de datos
         else {
             $row[] = $obj->{$column};
         }
     }
-    $actions = '<a href="'.$_base.$module_url.$controller.'/xml/'.$obj->dia.'" title="Descargar XML" class="btn btn-primary mb-2"><i class="far fa-file-code fa-fw"></i></a>';
-    $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII" class="btn btn-primary mb-2'.(!$obj->track_id?' disabled':'').'" onclick="return Form.loading(\'Actualizando estado del RCOF...\')"><i class="fas fa-sync fa-fw"></i></a>';
-    $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII" class="btn btn-primary mb-2'.(!$obj->track_id?' disabled':'').'" onclick="return Form.loading(\'Solicitando revisión del envío al SII...\')"><i class="fab fa-rev fa-fw"></i></a>';
-    $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII" class="btn btn-primary mb-2'.(!$obj->track_id?' disabled':'').'"><i class="fa fa-eye fa-fw"></i></a>';
+    $actions = '<div class="btn-group">';
+    $actions .= '<a href="'.$_base.$module_url.$controller.'/xml/'.$obj->dia.'" title="Descargar XML" class="btn btn-primary"><i class="far fa-file-code fa-fw"></i> XML</a>';
+    $actions .= '<button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr-only">Toggle Dropdown</span></button>';
+    $actions .= '<div class="dropdown-menu dropdown-menu-right">';
+    if ($obj->track_id) {
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/actualizar_estado/'.$obj->dia.$listarFilterUrl.'" title="Actualizar estado del envio al SII" class="dropdown-item" onclick="return Form.loading(\'Actualizando estado del RCOF...\')"><i class="fas fa-sync fa-fw mr-2"></i> Actualizar estado</a>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/solicitar_revision/'.$obj->dia.$listarFilterUrl.'" title="Solicitar revisión del envio al SII" class="dropdown-item" onclick="return Form.loading(\'Solicitando revisión del envío al SII...\')"><i class="fab fa-rev fa-fw mr-2"></i> Solicitar revisión</a>';
+        $actions .= ' <a href="#" onclick="__.popup(\''.$_base.'/dte/sii/estado_envio/'.$obj->track_id.'\', 750, 550); return false" title="Ver el estado del envío en la web del SII" class="dropdown-item"><i class="fa fa-eye fa-fw mr-2"></i> Ver estado en SII</a>';
+    }
+    if ($is_admin) {
+        $actions .= '<div class="dropdown-divider"></div>';
+        $actions .= ' <a href="'.$_base.$module_url.$controller.'/eliminar/'.$obj->dia.$listarFilterUrl.'" title="Eliminar el RCOF" class="dropdown-item" onclick="return Form.confirm(this, \'¿Desea eliminar el RCOF del día '.\sowerphp\general\Utility_Date::format($obj->dia).'?<br/><br/><strong>Importante</strong>: Esto no lo eliminará del SII si fue aceptado\')"><i class="fas fa-times fa-fw mr-2"></i> Eliminar RCOF</a>';
+    }
+    $actions .= '</div>';
+    $actions .= '</div>';
     $row[] = $actions;
     $data[] = $row;
 }

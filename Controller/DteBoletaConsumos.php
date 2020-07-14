@@ -37,16 +37,19 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         'listar'=>['dia', 'secuencia', 'glosa', 'track_id', 'revision_estado', 'revision_detalle']
     ]; ///< Columnas que se deben mostrar en las vistas
     protected $deleteRecord = false; ///< Indica si se permite o no borrar registros
-    protected $actionsColsWidth = 200; ///< Ancho de columna para acciones en vista listar
+    protected $actionsColsWidth = 130; ///< Ancho de columna para acciones en vista listar
 
     /**
      * Acción principal que lista los períodos con boletas
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2020-07-14
      */
     public function listar($page = 1, $orderby = null, $order = 'A')
     {
         $Emisor = $this->getContribuyente();
+        $this->set([
+            'is_admin' => $Emisor->usuarioAutorizado($this->Auth->User, 'admin'),
+        ]);
         $this->forceSearch(['emisor'=>$Emisor->rut, 'certificacion'=>(int)$Emisor->config_ambiente_en_certificacion]);
         parent::listar($page, $orderby, $order);
     }
@@ -201,6 +204,40 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
             $DteBoletaConsumo->solicitarRevision($this->Auth->User->id);
             \sowerphp\core\Model_Datasource_Session::message(
                 'Se solicitó revisión del consumo de folios', 'ok'
+            );
+        } catch (\Exception $e) {
+            \sowerphp\core\Model_Datasource_Session::message($e->getMessage, 'error');
+        }
+        // redireccionar
+        $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
+    }
+
+    /**
+     * Acción que permite eliminar un RCOF
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-07-14
+     */
+    public function eliminar($dia)
+    {
+        $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
+        $Emisor = $this->getContribuyente();
+        // sólo administrador pueden borrar el rcof
+        if (!$Emisor->usuarioAutorizado($this->Auth->User, 'admin')) {
+            \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede eliminar el RCOF', 'error');
+            $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
+        }
+        // obtener reporte enviado
+        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteBoletaConsumo->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el reporte de consumo de folios solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
+        }
+        try {
+            $DteBoletaConsumo->delete();
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Se eliminó el RCOF del día '.\sowerphp\general\Utility_Date::format($dia), 'ok'
             );
         } catch (\Exception $e) {
             \sowerphp\core\Model_Datasource_Session::message($e->getMessage, 'error');
