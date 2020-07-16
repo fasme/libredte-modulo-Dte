@@ -8,16 +8,16 @@ Aquí podrás encontrar el código fuente del módulo Dte para el framework
 [SowerPHP](http://sowerphp.org).
 
 Si deseas una aplicación ya construída puedes revisar el
-[sitio web oficial de LibreDTE](http://libredte.cl) donde podrás registrarte
-gratuitamente y usar la plataforma web de facturación. Si deseas acceder al
-código fuente de la aplicación web puedes hacerlo
+[sitio web oficial de LibreDTE](http://libredte.cl) donde podrás usar la versión
+oficial, y más completa, de la plataforma web de facturación. Si deseas acceder
+al código fuente de la aplicación web versión comunidad puedes hacerlo
 [aquí](https://github.com/LibreDTE/libredte-webapp).
 
 Términos y condiciones de uso
 -----------------------------
 
 Al utilizar este proyecto, total o parcialmente, automáticamente se acepta
-cumplir con los [términos y condiciones de uso](https://wiki.libredte.cl/doku.php/terminos)
+cumplir con los [términos y condiciones de uso](https://legal.libredte.cl)
 que rigen a LibreDTE. La [Licencia Pública General Affero de GNU (AGPL)](https://raw.githubusercontent.com/LibreDTE/libredte-lib/master/COPYING)
 sólo aplica para quienes respeten los términos y condiciones de uso. No existe
 una licencia comercial de LibreDTE, por lo cual no es posible usar el proyecto
@@ -36,7 +36,7 @@ permiten utilizar el proyecto, son los siguientes:
   cambios al código.
 
 Es obligación de quienes quieran usar el proyecto leer y aceptar por completo
-los [términos y condiciones de uso](https://wiki.libredte.cl/doku.php/terminos).
+los [términos y condiciones de uso](https://legal.libredte.cl).
 
 Contribuir al proyecto
 ----------------------
@@ -57,9 +57,8 @@ y [PSR-2](http://www.php-fig.org/psr/psr-2).
 Contacto y redes sociales
 -------------------------
 
-- Sitio web: <http://libredte.cl>
-- Twitter: <https://twitter.com/LibreDTE>
+- Sitio web: <https://libredte.cl>
 - Facebook: <https://www.facebook.com/LibreDTE>
-- Google+: <https://plus.google.com/u/0/101078963971350176990/about>
-- Linkedin: <https://www.linkedin.com/grp/home?gid=8403251>
-- Youtube: <https://www.youtube.com/channel/UCnh5duQUXmo4l8AD28PakiQ>
+- Youtube: <https://www.youtube.com/libredtecl>
+- Twitter: <https://twitter.com/LibreDTE>
+- Linkedin: <https://www.linkedin.com/groups/8403251>
