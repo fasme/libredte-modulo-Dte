@@ -2174,13 +2174,15 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras por períodos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-10-12
+     * @version 2020-07-21
      */
     public function getResumenComprasPeriodos()
     {
-        if ($this->db->config['type']!='PostgreSQL')
+        if ($this->db->config['type']!='PostgreSQL') {
             return $this->getResumenComprasPeriodosMySQL();
+        }
         $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
+        $periodo_col_46 = $this->db->date('Ym', 'r.fecha_hora_creacion', 'INTEGER'); ///< se asume como período el de la creación de la FC
         return $this->db->getTable('
             (
                 SELECT
@@ -2215,16 +2217,22 @@ class Model_Contribuyente extends \Model_App
                                 ELSE
                                     '.$periodo_col.'
                                 END AS periodo
-                            FROM dte_tipo AS t, dte_recibido AS r
-                            WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion
+                            FROM
+                                dte_recibido AS r
+                                JOIN dte_tipo AS t ON t.codigo = r.dte
+                            WHERE
+                                t.compra = true
+                                AND r.receptor = :rut
+                                AND r.dte != 46 -- se quitan FC para evitar duplicidad con las que están en dte_emitidos
+                                AND r.certificacion = :certificacion
                         ) AS t
                         GROUP BY periodo
                     ) AS r
                     FULL JOIN (
-                        SELECT '.$periodo_col.' AS periodo, COUNT(*) AS facturas_compra
+                        SELECT '.$periodo_col_46.' AS periodo, COUNT(*) AS facturas_compra
                         FROM dte_emitido AS r
                         WHERE r.emisor = :rut AND r.certificacion = :certificacion AND r.dte = 46
-                        GROUP BY '.$periodo_col.'
+                        GROUP BY '.$periodo_col_46.'
                     ) AS f ON r.periodo = f.periodo
                     LEFT JOIN dte_compra AS c ON c.receptor = :rut AND c.certificacion = :certificacion AND c.periodo IN (r.periodo, f.periodo)
             ) UNION (
@@ -2264,11 +2272,12 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el total de las compras de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-17
+     * @version 2020-07-21
      */
     public function countCompras($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
+        $periodo_col_46 = $this->db->date('Ym', 'r.fecha_hora_creacion', 'INTEGER'); ///< se asume como período el de la creación de la FC
         $compras = $this->db->getCol('
             (
                 SELECT COUNT(*)
@@ -2277,6 +2286,7 @@ class Model_Contribuyente extends \Model_App
                     t.compra = true
                     AND r.receptor = :rut
                     AND r.certificacion = :certificacion
+                    AND r.dte != 46 -- se quitan FC para evitar duplicidad con las que están en dte_emitidos
                     AND ((r.periodo IS NULL AND '.$periodo_col.' = :periodo) OR (r.periodo IS NOT NULL AND r.periodo = :periodo))
             ) UNION (
                 SELECT COUNT(*)
@@ -2284,7 +2294,7 @@ class Model_Contribuyente extends \Model_App
                 WHERE
                     r.emisor = :rut
                     AND r.certificacion = :certificacion
-                    AND '.$periodo_col.' = :periodo
+                    AND '.$periodo_col_46.' = :periodo
                     AND (
                         r.dte = 46
                         OR (r.emisor, r.dte, r.folio, r.certificacion) IN (
@@ -2292,7 +2302,7 @@ class Model_Contribuyente extends \Model_App
                             FROM
                                 dte_emitido AS r
                                 JOIN dte_referencia AS re ON re.emisor = r.emisor AND re.dte = r.dte AND re.folio = r.folio AND re.certificacion = r.certificacion
-                                WHERE '.$periodo_col.' = :periodo AND re.referencia_dte = 46
+                                WHERE '.$periodo_col_46.' = :periodo AND re.referencia_dte = 46
                         )
                     )
             )
@@ -2303,11 +2313,12 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-03
+     * @version 2020-07-21
      */
     public function getCompras($periodo, $tipo_dte = null)
     {
         $periodo_col = $this->db->date('Ym', 'r.fecha', 'INTEGER');
+        $periodo_col_46 = $this->db->date('Ym', 'r.fecha_hora_creacion', 'INTEGER'); ///< se asume como período el de la creación de la FC
         list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('r.xml', [
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TipoImp',
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TasaImp',
@@ -2359,14 +2370,16 @@ class Model_Contribuyente extends \Model_App
                     r.emisor_nc_nd_fc,
                     r.total,
                     r.tipo_transaccion
-                FROM dte_tipo AS t, dte_recibido AS r, contribuyente AS e
+                FROM
+                    dte_recibido AS r
+                    JOIN dte_tipo AS t ON t.codigo = r.dte
+                    JOIN contribuyente AS e ON e.rut = r.emisor
                 WHERE
-                    t.codigo = r.dte
+                    r.receptor = :rut
                     '.$where_tipo_dte.'
-                    AND t.compra = true
-                    AND r.emisor = e.rut
-                    AND r.receptor = :rut
                     AND r.certificacion = :certificacion
+                    AND t.compra = true
+                    AND r.dte != 46 -- se quitan FC para evitar duplicidad con las que están en dte_emitidos
                     AND ((r.periodo IS NULL AND '.$periodo_col.' = :periodo) OR (r.periodo IS NOT NULL AND r.periodo = :periodo))
             ) UNION (
                 SELECT
@@ -2402,14 +2415,15 @@ class Model_Contribuyente extends \Model_App
                     CASE WHEN r.dte IN (56, 61) THEN 1 ELSE NULL END AS emisor_nc_nd_fc,
                     r.total,
                     NULL AS tipo_transaccion
-                FROM dte_tipo AS t, dte_emitido AS r, contribuyente AS e
+                FROM
+                    dte_emitido AS r
+                    JOIN dte_tipo AS t ON t.codigo = r.dte
+                    JOIN contribuyente AS e ON e.rut = r.receptor
                 WHERE
-                    t.codigo = r.dte
+                    r.emisor = :rut
                     '.$where_tipo_dte.'
-                    AND r.receptor = e.rut
-                    AND r.emisor = :rut
                     AND r.certificacion = :certificacion
-                    AND '.$periodo_col.' = :periodo
+                    AND '.$periodo_col_46.' = :periodo
                     AND (
                         r.dte = 46
                         OR (r.emisor, r.dte, r.folio, r.certificacion) IN (
@@ -2417,7 +2431,7 @@ class Model_Contribuyente extends \Model_App
                             FROM
                                 dte_emitido AS r
                                 JOIN dte_referencia AS re ON re.emisor = r.emisor AND re.dte = r.dte AND re.folio = r.folio AND re.certificacion = r.certificacion
-                                WHERE '.$periodo_col.' = :periodo AND re.referencia_dte = 46
+                                WHERE '.$periodo_col_46.' = :periodo AND re.referencia_dte = 46
                         )
                     )
             )
@@ -2505,14 +2519,17 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el resumen de las compras diarias de un período
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2020-07-21
      */
     public function getComprasDiarias($periodo)
     {
-        if ($this->db->config['type']!='PostgreSQL')
+        if ($this->db->config['type']!='PostgreSQL') {
             return $this->getComprasDiariasMySQL($periodo);
+        }
         $periodo_col = $this->db->date('Ym', 'r.fecha');
         $dia_col = $this->db->date('d', 'r.fecha');
+        $periodo_col_46 = $this->db->date('Ym', 'r.fecha_hora_creacion'); ///< se asume como período el de la creación de la FC
+        $dia_col_46 = $this->db->date('d', 'r.fecha_hora_creacion'); ///< se asume como período el de la creación de la FC
         return $this->db->getTable('
             SELECT
                 CASE WHEN r.dia IS NOT NULL THEN
@@ -2536,16 +2553,23 @@ class Model_Contribuyente extends \Model_App
             FROM
                 (
                     SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
-                    FROM dte_tipo AS t, dte_recibido AS r
-                    WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
+                    FROM
+                        dte_recibido AS r
+                        JOIN dte_tipo AS t ON t.codigo = r.dte
+                    WHERE
+                        t.compra = true
+                        AND r.receptor = :rut
+                        AND r.dte != 46 -- se quitan FC para evitar duplicidad con las que están en dte_emitidos
+                        AND r.certificacion = :certificacion
+                        AND '.$periodo_col.' = :periodo
                     GROUP BY r.fecha
                 ) AS r
                 FULL JOIN
                 (
-                    SELECT '.$dia_col.' AS dia, COUNT(*) AS documentos
+                    SELECT '.$dia_col_46.' AS dia, COUNT(*) AS documentos
                     FROM dte_emitido AS r
-                    WHERE r.emisor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND r.dte = 46
-                    GROUP BY r.fecha
+                    WHERE r.emisor = :rut AND r.certificacion = :certificacion AND '.$periodo_col_46.' = :periodo AND r.dte = 46
+                    GROUP BY r.fecha_hora_creacion
                 ) AS f ON r.dia = f.dia
             ORDER BY dia
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
@@ -2575,21 +2599,29 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el resumen de compras por tipo de un período
      * @return Arreglo asociativo con las compras
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-09-11
+     * @version 2020-07-21
      */
     public function getComprasPorTipo($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'r.fecha');
+        $periodo_col_46 = $this->db->date('Ym', 'r.fecha_hora_creacion'); ///< se asume como período el de la creación de la FC
         return $this->db->getTable('
             (
                 SELECT t.tipo, COUNT(*) AS documentos
-                FROM dte_tipo AS t, dte_recibido AS r
-                WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
+                FROM
+                    dte_recibido AS r
+                    JOIN dte_tipo AS t ON t.codigo = r.dte
+                WHERE
+                    t.compra = true
+                    AND r.receptor = :rut
+                    AND r.dte != 46 -- se quitan FC para evitar duplicidad con las que están en dte_emitidos
+                    AND r.certificacion = :certificacion
+                    AND '.$periodo_col.' = :periodo
                 GROUP BY t.tipo
             ) UNION (
                 SELECT t.tipo, COUNT(*) AS facturas_compra
-                FROM dte_tipo AS t, dte_emitido AS r
-                WHERE t.codigo = r.dte AND r.emisor = :rut AND r.certificacion = :certificacion AND r.dte = 46 AND '.$periodo_col.' = :periodo
+                FROM dte_emitido AS r JOIN dte_tipo AS t ON t.codigo = r.dte
+                WHERE  r.emisor = :rut AND r.certificacion = :certificacion AND r.dte = 46 AND '.$periodo_col_46.' = :periodo
                 GROUP BY t.tipo
             )
         ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);

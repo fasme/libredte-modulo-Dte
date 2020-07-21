@@ -186,7 +186,7 @@ foreach ($resumen as &$r) {
             }
             $r[$c] = $valor;
         }
-        if ($operaciones[$r['TpoDoc']]=='S') {
+        if ($operaciones[$r['TpoDoc']]=='S' or $r['TpoDoc'] == 46) {
             $total[$c] += $r[$c];
         } else if ($operaciones[$r['TpoDoc']]=='R') {
             $total[$c] -= $r[$c];

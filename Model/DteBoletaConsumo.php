@@ -293,7 +293,11 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
             $glosa = null;
         }
         $this->revision_estado = $glosa ? ($estado.' - '.$glosa) : $estado;
-        $this->revision_detalle = trim(explode('( ', (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/NUM_ATENCION')[0])[1],')');
+        if (!empty($estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/NUM_ATENCION')[0])) {
+            $this->revision_detalle = trim(explode('( ', (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/NUM_ATENCION')[0])[1],')');
+        } else {
+            $this->revision_detalle = null;
+        }
         if ($estado=='EPR') {
             $this->revision_estado = 'CORRECTO';
         }
