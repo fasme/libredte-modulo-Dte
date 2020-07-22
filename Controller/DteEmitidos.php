@@ -576,7 +576,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite ceder el documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-03-11
+     * @version 2020-07-22
      */
     public function ceder($dte, $folio)
     {
@@ -622,7 +622,8 @@ class Controller_DteEmitidos extends \Controller_App
         $DteCedido = new \sasco\LibreDTE\Sii\Factoring\DteCedido($DteEmitido->getDte());
         $DteCedido->firmar($Firma);
         // crear declaración de cesión
-        $Cesion = new \sasco\LibreDTE\Sii\Factoring\Cesion($DteCedido);
+        $SeqCesion = !empty($_POST['SeqCesion']) ? (int)$_POST['SeqCesion'] : 1;
+        $Cesion = new \sasco\LibreDTE\Sii\Factoring\Cesion($DteCedido, $SeqCesion);
         $Cesion->setCesionario([
             'RUT' => str_replace('.', '', $_POST['cesionario_rut']),
             'RazonSocial' => $_POST['cesionario_razon_social'],
