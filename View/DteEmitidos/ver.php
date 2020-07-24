@@ -671,20 +671,6 @@ echo $f->input([
 ?>
     </div>
 </div>
-<div class="card mb-4">
-    <div class="card-header">Otros datos de la cesión</div>
-    <div class="card-body">
-<?php
-echo $f->input([
-    'name' => 'SeqCesion',
-    'label' => 'Número de cesión',
-    'value' => 1,
-    'check' => 'notempty integer',
-    'help' => 'Número de secuencia de la cesión. La primera vez que se cede es 1. Se debe usar al receder el DTE.',
-]);
-?>
-    </div>
-</div>
 <?php
 echo $f->end('Generar archivo cesión y enviar al SII');
 endif;
