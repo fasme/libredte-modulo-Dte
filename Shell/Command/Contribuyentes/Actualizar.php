@@ -319,7 +319,6 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                     OR actividad_economica IS NULL
                     OR REPLACE(razon_social, \'.\', \'\') = '.$db->concat('rut', '-', 'dv').'
                     OR direccion IS NULL
-                    OR comuna IS NULL
                     OR telefono IS NULL
                 )
         ');
@@ -362,16 +361,15 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 }
                 if (!$Contribuyente->direccion and !empty($info['direcciones'][0]['direccion'])) {
                     $Contribuyente->direccion = mb_substr($info['direcciones'][0]['direccion'], 0, 70);
-                    $cambios = true;
-                }
-                if (!$Contribuyente->comuna and !empty($info['direcciones'][0]['comuna'])) {
-                    $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName(
-                        $info['direcciones'][0]['comuna']
-                    );
-                    if ($comuna) {
-                        $Contribuyente->comuna = $comuna;
-                        $cambios = true;
+                    if (!empty($info['direcciones'][0]['comuna'])) {
+                        $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName(
+                            $info['direcciones'][0]['comuna']
+                        );
+                        if ($comuna) {
+                            $Contribuyente->comuna = $comuna;
+                        }
                     }
+                    $cambios = true;
                 }
                 if (!$Contribuyente->telefono and !empty($info['direcciones'][0]['telefono'])) {
                     $Contribuyente->telefono = mb_substr($info['direcciones'][0]['telefono'], 0, 20);
