@@ -284,14 +284,110 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
                 }
                 if ($cambios) {
                     try {
-                        if ($Contribuyente->save())
+                        if ($Contribuyente->save()) {
                             $actualizados++;
+                        }
                     } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                     }
                 }
             }
         }
         $this->out('Se actualizaron '.num($actualizados).' contribuyentes de un total de '.$registros);
+    }
+
+    /**
+     * Método que corrige los datos de los contribuyentes existentes usando el Portal MIPYME del SII, cargando:
+     *  - razon social
+     *  - giro
+     *  - actividad económica
+     *  - dirección
+     *  - comuna
+     *  - telefono
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-07-23
+     */
+    private function mipyme()
+    {
+        $db = &\sowerphp\core\Model_Datasource_Database::get();
+        $contribuyentes = $db->getCol('
+            SELECT rut
+            FROM contribuyente
+            WHERE
+                usuario IS NULL
+                AND (
+                    giro IS NULL
+                    OR actividad_economica IS NULL
+                    OR REPLACE(razon_social, \'.\', \'\') = '.$db->concat('rut', '-', 'dv').'
+                    OR direccion IS NULL
+                    OR comuna IS NULL
+                    OR telefono IS NULL
+                )
+        ');
+        $registros = num(count($contribuyentes));
+        $procesados = 0;
+        $actualizados = 0;
+        $mipyme = \sowerphp\core\Configure::read('proveedores.api.libredte.mipyme');
+        if (empty($mipyme['rut']) or empty($mipyme['clave']) or empty($mipyme['contribuyente']) or empty($mipyme['dte'])) {
+            $this->out('Configuración de MIPYME para acceder a datos de contribuyentes está incompleta');
+            return;
+        }
+        foreach ($contribuyentes as $rut) {
+            $Contribuyente = new Model_Contribuyente($rut);
+            $response = libredte_api_consume('/sii/mipyme/contribuyentes/info/'.$Contribuyente->getRUT().'/'.$mipyme['contribuyente'].'/'.$mipyme['dte'], [
+                'auth' => [
+                    'pass' => [
+                        'rut' => $mipyme['rut'],
+                        'clave' => $mipyme['clave'],
+                    ],
+                ],
+            ]);
+            if ($response['status']['code']==200) {
+                $info = $response['body'];
+                $procesados++;
+                if ($this->verbose) {
+                    $this->out('Procesando '.num($procesados).'/'.$registros.': contribuyente '.$Contribuyente->rut.'-'.$Contribuyente->dv);
+                }
+                $cambios = false;
+                if ($Contribuyente->razon_social==\sowerphp\app\Utility_Rut::addDV($Contribuyente->rut) and !empty($info['razon_social'])) {
+                    $Contribuyente->razon_social = mb_substr($info['razon_social'], 0, 100);
+                    $cambios = true;
+                }
+                if (!$Contribuyente->actividad_economica and !empty($info['actividades'][0]['codigo'])) {
+                    $Contribuyente->actividad_economica = $info['actividades'][0]['codigo'];
+                    $cambios = true;
+                }
+                if (!$Contribuyente->giro and !empty($info['actividades'][0]['glosa'])) {
+                    $Contribuyente->giro = mb_substr($info['actividades'][0]['glosa'], 0, 80);
+                    $cambios = true;
+                }
+                if (!$Contribuyente->direccion and !empty($info['direcciones'][0]['direccion'])) {
+                    $Contribuyente->direccion = mb_substr($info['direcciones'][0]['direccion'], 0, 70);
+                    $cambios = true;
+                }
+                if (!$Contribuyente->comuna and !empty($info['direcciones'][0]['comuna'])) {
+                    $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName(
+                        $info['direcciones'][0]['comuna']
+                    );
+                    if ($comuna) {
+                        $Contribuyente->comuna = $comuna;
+                        $cambios = true;
+                    }
+                }
+                if (!$Contribuyente->telefono and !empty($info['direcciones'][0]['telefono'])) {
+                    $Contribuyente->telefono = mb_substr($info['direcciones'][0]['telefono'], 0, 20);
+                    $cambios = true;
+                }
+                if ($cambios) {
+                    try {
+                        if ($Contribuyente->save()) {
+                            $actualizados++;
+                        }
+                    } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
+                    }
+                }
+            }
+        }
+        $this->out('Se actualizaron '.num($actualizados).' contribuyentes de un total de '.$registros.' usando el Portal MIPYME');
     }
 
 }
