@@ -29,12 +29,12 @@ namespace website\Dte;
  * se puede usar el archivo CSV descargado directamente desde el SII
  *
  * Ejemplos ejecución:
- *  1) Actualizar usando el servicio web de LibreDTE (es la opción por defecto)
+ *  1) Actualizar usando LibreDTE API (es la opción por defecto)
  *     $ ./shell.php Dte.Contribuyentes_Actualizar
  *     $ ./shell.php Dte.Contribuyentes_Actualizar libredte
  *  2) Actualizar cargando un archivo CSV descargado desde SII
  *     $ ./shell.php Dte.Contribuyentes_Actualizar csv archivo.csv
- *  3) Corregir los datos de contribuyentes con servicio web de LibreDTE
+ *  3) Corregir los datos de contribuyentes con LibreDTE API
  *     Esta opción es "peligrosa" si se deja programada, ya que puede tomar
  *     varios días en actualizar toda la base de datos cuando nunca se ha
  *     realizado. Se recomienda ejecutar este proceso manualmente o bien hacerlo
@@ -42,9 +42,14 @@ namespace website\Dte;
  *     corroborar que el proceso se demore poco (porque ya tenga casi todo
  *     actualizado).
  *     $ ./shell.php Dte.Contribuyentes_Actualizar corregir
+ *  4) Actualizar y cargar datos de nuevos contribuyentes usando LibreDTE API
+ *     Esta opción es igual de peligrosa que la 3) porque por cada contribuyente
+ *     nuevo se hará una consulta a LibreDTE API y eso tendrá los mismos problemas
+ *     Sin embargo, es la mejor opción para tener los datos lo más completos posible
+ *     $ ./shell.php Dte.Contribuyentes_Actualizar libredte 0 0 1
  *
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2020-01-03
+ * @version 2020-07-23
  */
 class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
 {
@@ -52,11 +57,14 @@ class Shell_Command_Contribuyentes_Actualizar extends \Shell_App
     /**
      * Método principal del comando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-01-03
+     * @version 2020-07-23
      */
-    public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null)
+    public function main($opcion = 'all', $ambiente = \sasco\LibreDTE\Sii::PRODUCCION, $dia = null, $autocompletar = false)
     {
         ini_set('memory_limit', '1024M');
+        if (!$autocompletar) {
+            Model_Contribuyente::noAutocompletarNuevosContribuyentes();
+        }
         if ($opcion != 'all') {
             if (method_exists($this, $opcion)) {
                 $this->$opcion($ambiente, $dia);

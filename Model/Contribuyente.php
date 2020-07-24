@@ -201,6 +201,8 @@ class Model_Contribuyente extends \Model_App
         88888888,
     ]; ///< RUTs que están reservados y no serán modificados al guardar el contribuyente
 
+    private static $autocompletar = true; ///< Indica si se deben autocompletar los datos de contribuyentes nuevos
+
     public $contribuyente; ///< Copia de razon_social
     private $config = null; ///< Caché para configuraciones
     private $firmas = []; ///< Caché de las firmas del contribuyente
@@ -208,7 +210,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Constructor del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-01-26
+     * @version 2020-07-23
      */
     public function __construct($rut = null)
     {
@@ -221,33 +223,35 @@ class Model_Contribuyente extends \Model_App
         parent::__construct((int)$rut);
         if ($this->rut and !$this->exists()) {
             $this->dv = \sowerphp\app\Utility_Rut::dv($this->rut);
-            try {
-                $response = libredte_api_consume('/sii/contribuyentes/situacion_tributaria/tercero/'.$this->rut.'-'.$this->dv);
-                if ($response['status']['code']==200) {
-                    $info = $response['body'];
-                    if (!empty($info['razon_social'])) {
-                        $this->razon_social = mb_substr($info['razon_social'], 0, 100);
+            if (self::$autocompletar) {
+                try {
+                    $response = libredte_api_consume('/sii/contribuyentes/situacion_tributaria/tercero/'.$this->rut.'-'.$this->dv);
+                    if ($response['status']['code']==200) {
+                        $info = $response['body'];
+                        if (!empty($info['razon_social'])) {
+                            $this->razon_social = mb_substr($info['razon_social'], 0, 100);
+                        }
+                        if (!empty($info['actividades'][0]['codigo'])) {
+                            $ActividadEconomica = new \website\Sistema\General\Model_ActividadEconomica($info['actividades'][0]['codigo']);
+                            if ($ActividadEconomica->actividad_economica) {
+                                $this->actividad_economica = $info['actividades'][0]['codigo'];
+                            }
+                        }
+                        if (!empty($info['actividades'][0]['glosa'])) {
+                            $this->giro = mb_substr($info['actividades'][0]['glosa'], 0, 80);
+                        }
+                        $this->save();
                     }
-                    if (!empty($info['actividades'][0]['codigo'])) {
-                        $ActividadEconomica = new \website\Sistema\General\Model_ActividadEconomica($info['actividades'][0]['codigo']);
-                        if ($ActividadEconomica->actividad_economica) {
-                            $this->actividad_economica = $info['actividades'][0]['codigo'];
+                    foreach (['telefono', 'email', 'direccion'] as $attr) {
+                        if (!$this->$attr) {
+                            $this->$attr = null;
                         }
                     }
-                    if (!empty($info['actividades'][0]['glosa'])) {
-                        $this->giro = mb_substr($info['actividades'][0]['glosa'], 0, 80);
-                    }
-                    $this->save();
                 }
-                foreach (['telefono', 'email', 'direccion'] as $attr) {
-                    if (!$this->$attr) {
-                        $this->$attr = null;
-                    }
+                catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                 }
-            }
-            catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
-            }
-            catch (\Exception $e) {
+                catch (\Exception $e) {
+                }
             }
         }
         $this->contribuyente = &$this->razon_social;
@@ -352,6 +356,17 @@ class Model_Contribuyente extends \Model_App
                 $this->__set($name, $value);
             }
         }
+    }
+
+    /**
+     * Método permite desactivar la autocompletación de datos de los contribuyentes
+     * nuevos que se instanciarán
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-07-23
+     */
+    public static function noAutocompletarNuevosContribuyentes()
+    {
+        self::$autocompletar = false;
     }
 
     /**
