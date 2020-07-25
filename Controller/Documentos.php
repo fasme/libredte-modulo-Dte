@@ -160,7 +160,7 @@ class Controller_Documentos extends \Controller_App
         }
         // verificar datos del DTE pasados
         if (!is_array($this->Api->data)) {
-            $this->Api->send('Debe enviar el DTE como un objeto JSON', 400);
+            $this->Api->send('Debe enviar el DTE en formato: '.$formato, 400);
         }
         // buscar emisor del DTE y verificar que usuario tenga permisos para
         // trabajar con el emisor
