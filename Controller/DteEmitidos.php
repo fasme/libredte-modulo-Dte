@@ -658,6 +658,57 @@ class Controller_DteEmitidos extends \Controller_App
     }
 
     /**
+     * Acción que permite enviar el XML de la cesión por correo elecrtrónico
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-07-27
+     */
+    public function cesion_email($dte, $folio)
+    {
+        if (!isset($_POST['submit']) or empty($_POST['emails'])) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Debe enviar el formulario para poder realizar en envío del a cesión', 'error'
+            );
+            $this->redirect(str_replace('cesion_email', 'ver', $this->request->request).'#cesion');
+        }
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // verificar que esté cedido (enviado al SII)
+        if (!$DteEmitido->cesion_track_id) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Documento no ha sido enviado al SII para cesión', 'error'
+            );
+            $this->redirect(str_replace('cesion_email', 'ver', $this->request->request).'#cesion');
+        }
+        // enviar correo con el XML de la cesión
+        $Email = $Emisor->getEmailSmtp('intercambio');
+        $Email->to(array_map('trim', explode(',', $_POST['emails'])));
+        $Email->attach([
+            'data' => base64_decode($DteEmitido->cesion_xml),
+            'name' => 'cesion_'.$Emisor->rut.'-'.$Emisor->dv.'_T'.$DteEmitido->dte.'F'.$DteEmitido->folio.'.xml',
+            'type' => 'application/xml',
+        ]);
+        $Email->subject('Archivo de Cesión Electrónica de '.$Emisor->getRUT().' por DTE T'.$DteEmitido->dte.'F'.$DteEmitido->folio);
+        $msg = 'Se adjunta archivo XML de Cesión Electrónica del emisor '.$Emisor->getRUT().' por el DTE T'.$DteEmitido->dte.'F'.$DteEmitido->folio;
+        if ($Email->send($msg) === true) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Correo electrónico con el archivo XML de la cesión enviado a: '.$_POST['emails'], 'ok'
+            );
+        } else {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No fue posible enviar el correo electrónico', 'error'
+            );
+        }
+        $this->redirect(str_replace('cesion_email', 'ver', $this->request->request).'#cesion');
+    }
+
+    /**
      * Acción que descarga el XML de la cesión del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-07-17

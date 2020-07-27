@@ -588,11 +588,12 @@ new \sowerphp\general\View_Helper_Table([
         \sowerphp\general\Utility_Date::format($DteEmitido->getDatosCesion()['TmstCesion']),
     ],
 ]);
+$Cesionario = (new \website\Dte\Model_Contribuyentes())->get($DteEmitido->getDatosCesion()['Cesionario']['RUT']);
 ?>
         <div class="card mb-4">
             <div class="card-body"><?=$DteEmitido->getDatosCesion()['Cedente']['DeclaracionJurada']?></div>
         </div>
-        <a class="btn btn-primary btn-lg btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+        <a class="btn btn-primary btn-lg btn-block mb-4" href="<?=$_base?>/dte/dte_emitidos/cesion_xml/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
             <span class="far fa-file-code"></span>
             Descargar Archivo Electrónico de Cesión (AEC)
         </a>
@@ -607,8 +608,23 @@ new \sowerphp\general\View_Helper_Table([
             </div>
         </div>
         <div class="card mb-4">
-            <div class="card-body lead text-center">
-                <a href="http://www.sii.cl/preguntas_frecuentes/catastro/001_012_6407.htm" target="_blank">¿Cómo puedo anular una cesión?</a>
+            <div class="card-body text-center">
+<?php
+$f->setStyle(false);
+echo $f->begin([
+    'action' => $_base.'/dte/dte_emitidos/cesion_email/'.$DteEmitido->dte.'/'.$DteEmitido->folio,
+    'id' => 'cesionEmailForm',
+    'onsubmit'=>'Form.check(\'cesionEmailForm\')',
+]);
+echo $f->input([
+    'name' => 'emails',
+    'placeholder' => 'Correo electrónico',
+    'value' => ($Cesionario->config_email_intercambio_user ? ($Cesionario->config_email_intercambio_user.', ') : '').$DteEmitido->getDatosCesion()['Cesionario']['eMail'],
+    'check' => 'notempty emails',
+]),'<br/>';
+echo $f->end('Enviar XML de Cesión');
+$f->setStyle('horizontal');
+?>
             </div>
         </div>
 <?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')) : ?>
