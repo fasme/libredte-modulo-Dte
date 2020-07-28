@@ -558,7 +558,12 @@ class Model_DteEmitido extends Model_Base_Envio
             }
             $xml = new \sasco\LibreDTE\XML();
             $xml->loadXML(base64_decode($this->cesion_xml));
-            $this->datos_cesion = $xml->toArray()['AEC']['DocumentoAEC']['Cesiones']['Cesion']['DocumentoCesion'];
+            $Cesion = $xml->toArray()['AEC']['DocumentoAEC']['Cesiones']['Cesion'];
+            if (!isset($Cesion[0])) {
+                $Cesion = [$Cesion];
+            }
+            $n_cesiones = count($Cesion);
+            $this->datos_cesion = $Cesion[$n_cesiones-1]['DocumentoCesion'];
         }
         return $this->datos_cesion;
     }
