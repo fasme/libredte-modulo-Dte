@@ -627,7 +627,11 @@ $f->setStyle('horizontal');
 ?>
             </div>
         </div>
+        <a class="btn btn-primary btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/receder/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+            Receder DTE
+        </a>
 <?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')) : ?>
+        <br/>
         <a class="btn btn-danger btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.confirm(this, '¿Está seguro de eliminar la cesión de LibreDTE?\nSi continúa ¡perderá el archivo AEC!')">
             Eliminar cesión
         </a>

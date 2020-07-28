@@ -622,7 +622,7 @@ class Controller_DteEmitidos extends \Controller_App
         $DteCedido = new \sasco\LibreDTE\Sii\Factoring\DteCedido($DteEmitido->getDte());
         $DteCedido->firmar($Firma);
         // crear declaración de cesión
-        $SeqCesion = !empty($_POST['SeqCesion']) ? (int)$_POST['SeqCesion'] : 1;
+        $SeqCesion = 1;
         $Cesion = new \sasco\LibreDTE\Sii\Factoring\Cesion($DteCedido, $SeqCesion);
         $Cesion->setCesionario([
             'RUT' => str_replace('.', '', $_POST['cesionario_rut']),
@@ -655,6 +655,94 @@ class Controller_DteEmitidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error');
         }
         $this->redirect(str_replace('ceder', 'ver', $this->request->request).'#cesion');
+    }
+
+    /**
+     * Acción que permite receder el DTE emitido
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-07-27
+     */
+    public function receder($dte, $folio)
+    {
+        $Emisor = $this->getContribuyente();
+        // obtener DTE emitido
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        if (!$DteEmitido->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'No existe el DTE solicitado', 'error'
+            );
+            $this->redirect('/dte/dte_emitidos/listar');
+        }
+        // verificar que sea documento cedible
+        if (!$DteEmitido->getTipo()->cedible) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Documento no es cedible', 'error'
+            );
+            $this->redirect(str_replace('receder', 'ver', $this->request->request));
+        }
+        // variables para la vista
+        $this->set([
+            'Emisor' => $Emisor,
+            'DteEmitido' => $DteEmitido,
+        ]);
+        // procesar formulario
+        if (isset($_POST['submit']) and !empty($_FILES['cesion_xml']) and !$_FILES['cesion_xml']['error']) {
+            // verificar que no se esté cediendo al mismo rut del emisor del DTE
+            if ($DteEmitido->getEmisor()->getRUT() == $_POST['cesionario_rut']) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'No puede ceder el DTE a la empresa emisora', 'error'
+                );
+                $this->redirect(str_replace('receder', 'ver', $this->request->request).'#cesion');
+            }
+            // cargar AEC con las cesiones previas
+            $xml_original = file_get_contents($_FILES['cesion_xml']['tmp_name']);
+            $AECOriginal = new \sasco\LibreDTE\Sii\Factoring\Aec();
+            $AECOriginal->loadXML($xml_original);
+            $cesiones = $AECOriginal->getCesiones();
+            $n_cesiones = count($cesiones);
+            // objeto de firma electrónica
+            $Firma = $Emisor->getFirma($this->Auth->User->id);
+            // armar el DTE cedido
+            $DteCedido = new \sasco\LibreDTE\Sii\Factoring\DteCedido($DteEmitido->getDte());
+            $DteCedido->firmar($Firma);
+            // crear declaración de cesión
+            $SeqCesion = $n_cesiones + 1;
+            $Cesion = new \sasco\LibreDTE\Sii\Factoring\Cesion($DteCedido, $SeqCesion);
+            $Cesion->setCesionario([
+                'RUT' => str_replace('.', '', $_POST['cesionario_rut']),
+                'RazonSocial' => $_POST['cesionario_razon_social'],
+                'Direccion' => $_POST['cesionario_direccion'],
+                'eMail' => $_POST['cesionario_email'],
+            ]);
+            $Cesion->setCedente([
+                'eMail' => $_POST['cedente_email'],
+                'RUTAutorizado' => [
+                    'RUT' => $Firma->getID(),
+                    'Nombre' => $Firma->getName(),
+                ],
+            ]);
+            $Cesion->firmar($Firma);
+            // crear AEC
+            $AEC = new \sasco\LibreDTE\Sii\Factoring\Aec();
+            $AEC->setFirma($Firma);
+            $AEC->agregarDteCedido($DteCedido);
+            foreach ($cesiones as $CesionPrevia) {
+                $AEC->agregarCesion($CesionPrevia);
+            }
+            $AEC->agregarCesion($Cesion);
+            // enviar el XML de la cesión al SII
+            $xml = $AEC->generar();
+            $track_id = $AEC->enviar();
+            if ($track_id) {
+                $DteEmitido->cesion_xml = base64_encode($xml);
+                $DteEmitido->cesion_track_id = $track_id;
+                $DteEmitido->save();
+                \sowerphp\core\Model_Datasource_Session::message('Archivo de cesión enviado al SII con track id '.$track_id, 'ok');
+            } else {
+                \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error');
+            }
+            $this->redirect(str_replace('receder', 'ver', $this->request->request).'#cesion');
+        }
     }
 
     /**
