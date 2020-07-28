@@ -660,7 +660,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite receder el DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-07-27
+     * @version 2020-07-28
      */
     public function receder($dte, $folio)
     {
@@ -680,6 +680,13 @@ class Controller_DteEmitidos extends \Controller_App
             );
             $this->redirect(str_replace('receder', 'ver', $this->request->request));
         }
+        // verificar que no esté cargada una cesión
+        /*if ($DteEmitido->cesion_track_id) {
+            \sowerphp\core\Model_Datasource_Session::message(
+                'Debe respaldar el XML del AEC actual y eliminar de LibreDTE antes de receder el DTE', 'error'
+            );
+            $this->redirect(str_replace('receder', 'ver', $this->request->request).'#cesion');
+        }*/
         // variables para la vista
         $this->set([
             'Emisor' => $Emisor,
@@ -724,6 +731,12 @@ class Controller_DteEmitidos extends \Controller_App
             $Cesion->firmar($Firma);
             // crear AEC
             $AEC = new \sasco\LibreDTE\Sii\Factoring\Aec();
+            $AEC->setCaratula([
+                'RutCedente' => $Emisor->rut.'-'.$Emisor->dv,
+                'RutCesionario' => str_replace('.', '', $_POST['cesionario_rut']),
+                'NmbContacto' => $Firma->getName(),
+                'MailContacto' => $_POST['cedente_email'],
+            ]);
             $AEC->setFirma($Firma);
             $AEC->agregarDteCedido($DteCedido);
             foreach ($cesiones as $CesionPrevia) {
