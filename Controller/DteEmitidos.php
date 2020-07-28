@@ -681,12 +681,12 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect(str_replace('receder', 'ver', $this->request->request));
         }
         // verificar que no esté cargada una cesión
-        /*if ($DteEmitido->cesion_track_id) {
+        if ($DteEmitido->cesion_track_id) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Debe respaldar el XML del AEC actual y eliminar de LibreDTE antes de receder el DTE', 'error'
             );
             $this->redirect(str_replace('receder', 'ver', $this->request->request).'#cesion');
-        }*/
+        }
         // variables para la vista
         $this->set([
             'Emisor' => $Emisor,

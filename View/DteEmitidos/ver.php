@@ -695,6 +695,11 @@ echo $f->input([
 echo $f->end('Generar archivo cesión y enviar al SII');
 endif;
 ?>
+<?php if (!$DteEmitido->cesion_track_id) : ?>
+    <a class="btn btn-primary btn-sm btn-block mt-4" href="<?=$_base?>/dte/dte_emitidos/receder/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+        ¿Desea receder este DTE?
+    </a>
+<?php endif; ?>
 </div>
 <!-- FIN CESIÓN -->
 <?php endif; ?>
