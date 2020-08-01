@@ -57,7 +57,7 @@ class Model_Respaldo
         ],
         'dte_emitido' => [
             'rut' => 'emisor',
-            'archivos' => ['xml'],
+            'archivos' => ['xml', 'cesion_xml'],
         ],
         'dte_folio' => [
             'rut' => 'emisor',
