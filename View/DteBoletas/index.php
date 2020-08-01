@@ -1,4 +1,16 @@
 <ul class="nav nav-pills float-right">
+<?php if ($ilimitadas and $custodia_xml) : ?>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/dte_boletas/eliminar_xml" title="Eliminar por período el XML de las boletas electrónicas" class="nav-link">
+            <i class="fa fa-times"></i> Eliminar XML
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="<?=$_base?>/dte/admin/respaldos/boletas" title="Respaldar por período los XML de las boletas electrónicas" class="nav-link">
+            <i class="fa fa-download"></i> Respaldar
+        </a>
+    </li>
+<?php endif; ?>
     <li class="nav-item">
         <a href="<?=$_base?>/dte/dte_boleta_consumos/listar/1/dia/D" class="nav-link">
             <i class="fa fa-archive"></i> Consumo de folios

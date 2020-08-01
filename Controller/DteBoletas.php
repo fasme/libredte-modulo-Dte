@@ -134,4 +134,35 @@ class Controller_DteBoletas extends \Controller_App
         $this->response->sendContent($csv, $file.'.csv');
     }
 
+    /**
+     * Acción para eliminar el XML de las boletas de un período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-01
+     */
+    public function eliminar_xml()
+    {
+        if (isset($_POST['submit'])) {
+            if (empty($_POST['periodo'])) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Debe indicar un período a eliminar', 'error'
+                );
+                return;
+            }
+            if (empty($_POST['respaldo'])) {
+                \sowerphp\core\Model_Datasource_Session::message(
+                    'Debe confirmar que ya realizó el respaldo de los XML', 'error'
+                );
+                return;
+            }
+            $Emisor = $this->getContribuyente();
+            $DteEmitidos = (new Model_DteEmitidos())->setContribuyente($Emisor);
+            try {
+                $borrados = $DteEmitidos->eliminarBoletasXML((int)$_POST['periodo']);
+                \sowerphp\core\Model_Datasource_Session::message('Se eliminaron '.num($borrados).' XML de boletas', 'ok');
+            } catch (\Exception $e) {
+                \sowerphp\core\Model_Datasource_Session::message($e->getMessage(), 'error');
+            }
+        }
+    }
+
 }

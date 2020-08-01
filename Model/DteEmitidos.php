@@ -443,4 +443,31 @@ class Model_DteEmitidos extends \Model_Plural_App
         ', [':emisor' => $this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
     }
 
+    /**
+     * Método que elimina los XML de las boletas de cierto período
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-01
+     */
+    public function eliminarBoletasXML(int $periodo)
+    {
+        $periodo_desde_permitido = \sowerphp\general\Utility_Date::previousPeriod(date('Ym'), 3);
+        if ($periodo > $periodo_desde_permitido) {
+            throw new \Exception('El período debe ser menor o igual a '.$periodo_desde_permitido);
+        }
+        return $this->db->query('
+            UPDATE dte_emitido
+            SET xml = NULL
+            WHERE
+                emisor = :emisor
+                AND dte IN (39, 41)
+                AND certificacion = :certificacion
+                AND '.$this->db->date('Ym', 'fecha').' = :periodo
+                AND xml IS NOT NULL
+        ', [
+            ':emisor' => $this->getContribuyente()->rut,
+            ':certificacion' => $this->getContribuyente()->enCertificacion(),
+            ':periodo' => $periodo,
+        ])->rowCount();
+    }
+
 }
