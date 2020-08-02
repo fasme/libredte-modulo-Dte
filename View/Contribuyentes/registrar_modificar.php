@@ -267,11 +267,10 @@ echo $f->input([
         <div class="card-body">
 <?php
 echo $f->input([
-    'type' => 'text',
+    'type' => 'textpass',
     'name' => 'config_sii_pass',
     'label' => 'Contraseña SII',
     'value' => isset($Contribuyente) ? $Contribuyente->config_sii_pass : null,
-    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
     'help' => 'Permite acceder a ciertas funcionalidades que se conectan al SII',
 ]);
 ?>
@@ -355,11 +354,11 @@ echo $f->input([
     'check' => 'notempty email',
 ]);
 echo $f->input([
+    'type' => 'textpass',
     'name' => 'config_email_sii_pass',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_sii_pass : null,
     'label' => 'Contraseña',
     'check' => 'notempty',
-    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
 ]);
 echo $f->input([
     'name' => 'config_email_sii_smtp',
@@ -397,11 +396,11 @@ echo $f->input([
     'check' => 'notempty email',
 ]);
 echo $f->input([
+    'type' => 'textpass',
     'name' => 'config_email_intercambio_pass',
     'value' => isset($Contribuyente) ? $Contribuyente->config_email_intercambio_pass : null,
     'label' => 'Contraseña',
     'check' => 'notempty',
-    'attr' => 'onmouseover="this.type=\'text\'" onmouseout="this.type=\'password\'"',
 ]);
 echo $f->input([
     'name' => 'config_email_intercambio_smtp',
@@ -1167,10 +1166,5 @@ echo $f->input([
 echo $f->end($boton);
 ?>
 <script>
-$(function() {
-    $('#config_sii_passField').attr('type', 'password');
-    $('#config_email_sii_passField').attr('type', 'password');
-    $('#config_email_intercambio_passField').attr('type', 'password');
-    $('input[name="config_api_credenciales[]"]').attr('type', 'password');
-});
+$('input[name="config_api_credenciales[]"]').attr('type', 'password');
 </script>
