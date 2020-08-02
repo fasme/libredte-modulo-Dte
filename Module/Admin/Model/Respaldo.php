@@ -57,7 +57,7 @@ class Model_Respaldo
         ],
         'dte_emitido' => [
             'rut' => 'emisor',
-            'archivos' => ['xml', 'cesion_xml'],
+            'archivos' => ['xml', 'cesion_xml', 'extra'=>['ext'=>'json','base64'=>false]],
         ],
         'dte_folio' => [
             'rut' => 'emisor',
@@ -93,7 +93,7 @@ class Model_Respaldo
         ],
         'dte_tmp' => [
             'rut' => 'emisor',
-            'archivos' => ['datos'=>['ext'=>'json','base64'=>false]],
+            'archivos' => ['datos'=>['ext'=>'json','base64'=>false], 'extra'=>['ext'=>'json','base64'=>false]],
         ],
         'dte_recibido' => [
             'rut' => 'receptor',

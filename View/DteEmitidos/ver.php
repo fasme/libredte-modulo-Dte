@@ -869,6 +869,9 @@ echo $f->end('Modificar sucursal');
                 </tr>
             </tbody>
         </table>
+<?php if (!empty($DteEmitido->extra)): ?>
+        <pre class="text-monospace mt-4 ml-2 mr-2 bg-light border border-secondary rounded p-4"><?=json_encode($DteEmitido->getExtra(), JSON_PRETTY_PRINT)?></pre>
+<?php endif; ?>
     </div>
 </div>
 <?php if ($DteEmitido->eliminable()) : ?>

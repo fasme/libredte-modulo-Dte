@@ -63,6 +63,7 @@ class Model_DteEmitido extends Model_Base_Envio
     public $receptor_evento; ///< char(1) NULL DEFAULT ''
     public $fecha_hora_creacion; ///< timestamp without time zone() NOT NULL DEFAULT ''
     public $mipyme; ///< bigint(64) NULL DEFAULT ''
+    public $extra; ///< text() NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -330,6 +331,17 @@ class Model_DteEmitido extends Model_Base_Envio
             'pk'        => false,
             'fk'        => null
         ),
+        'extra' => array(
+            'name'      => 'Extra',
+            'comment'   => '',
+            'type'      => 'text',
+            'length'    => null,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
+        ),
 
     );
 
@@ -380,7 +392,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que realiza verificaciones a campos antes de guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-16
+     * @version 2020-08-01
      */
     public function save()
     {
@@ -397,6 +409,10 @@ class Model_DteEmitido extends Model_Base_Envio
             } else if (substr($this->xml,0,5) == '<?xml') {
                 $this->xml = base64_encode($this->xml);
             }
+        }
+        // si los datos extras existen y son un arreglo se convierte antes de guardar
+        if (!empty($this->extra) and is_array($this->extra)) {
+            $this->extra = json_encode($this->extra);
         }
         // guardar DTE emitido
         return parent::save();
@@ -1635,11 +1651,27 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que entrega los datos extras del documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-01
+     */
+    public function getExtra()
+    {
+        if (empty($this->extra)) {
+            return null;
+        }
+        if (is_string($this->extra)) {
+            $this->extra = json_decode($this->extra, true);
+        }
+        return $this->extra;
+    }
+
+    /**
      * Método que entrega el PDF del documento emitido.
      * Entrega el PDF que se ha generado con LibreDTE a partir del XML del DTE
      * emitido o bien el PDF generado con el PortalMIPYME del SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-08-01
      */
     public function getPDF(array $config = [])
     {
@@ -1648,7 +1680,7 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('El DTE no tiene XML asociado para generar el PDF');
         }
         // configuración por defecto para el PDF
-        $config = array_merge([
+        $default_config = [
             'cedible' => $this->getEmisor()->config_pdf_dte_cedible,
             'papelContinuo' => $this->getEmisor()->config_pdf_dte_papel,
             'compress' => false,
@@ -1661,7 +1693,9 @@ class Model_DteEmitido extends Model_Base_Envio
                 'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
             ],
             'hash' => $this->getEmisor()->getUsuario()->hash,
-        ], $config);
+            'extra' => $this->getExtra(),
+        ];
+        $config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default_config, $config);
         // consultar servicio web de LibreDTE
         $ApiDtePdfClient = $this->getEmisor()->getApiClient('dte_pdf');
         if (!$ApiDtePdfClient) {
@@ -1690,7 +1724,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega el código ESCPOS del documento emitido.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-15
+     * @version 2020-08-01
      */
     public function getESCPOS(array $config = [])
     {
@@ -1699,7 +1733,7 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('El DTE no tiene XML asociado para generar el código ESCPOS');
         }
         // configuración por defecto para el código ESCPOS
-        $config = array_merge([
+        $default_config = [
             'cedible' => $this->getEmisor()->config_pdf_dte_cedible,
             'compress' => false,
             'copias_tributarias' => $this->getEmisor()->config_pdf_copias_tributarias ? $this->getEmisor()->config_pdf_copias_tributarias : 1,
@@ -1718,7 +1752,9 @@ class Model_DteEmitido extends Model_Base_Envio
                 'comuna' => $this->getEmisor()->getComuna()->comuna,
             ],
             'pdf417' => null,
-        ], $config);
+            'extra' => $this->getExtra(),
+        ];
+        $config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default_config, $config);
         if ($this->getEmisor()->config_pdf_logo_continuo) {
             $logo_file = DIR_STATIC.'/contribuyentes/'.$this->getEmisor()->rut.'/logo.png';
             if (is_readable($logo_file)) {

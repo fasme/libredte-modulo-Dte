@@ -48,6 +48,7 @@ class Model_DteTmp extends \Model_App
     public $datos; ///< text() NOT NULL DEFAULT ''
     public $sucursal_sii; ///< integer(32) NULL DEFAULT ''
     public $usuario; ///< integer(32) NULL DEFAULT ''
+    public $extra; ///< text() NULL DEFAULT ''
 
     // Información de las columnas de la tabla en la base de datos
     public static $columnsInfo = array(
@@ -149,6 +150,17 @@ class Model_DteTmp extends \Model_App
             'auto'      => false,
             'pk'        => false,
             'fk'        => array('table' => 'usuario', 'column' => 'id')
+        ),
+        'extra' => array(
+            'name'      => 'Extra',
+            'comment'   => '',
+            'type'      => 'text',
+            'length'    => null,
+            'null'      => true,
+            'default'   => '',
+            'auto'      => false,
+            'pk'        => false,
+            'fk'        => null
         ),
 
     );
@@ -300,7 +312,7 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que crea el DTE real asociado al DTE temporal usando LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-25
+     * @version 2020-08-01
      */
     private function generarConFacturadorLocal($user_id = null, $fecha_emision = null, $retry = null, $gzip = null)
     {
@@ -386,6 +398,9 @@ class Model_DteTmp extends \Model_App
         }
         $DteEmitido->anulado = 0;
         $DteEmitido->iva_fuera_plazo = 0;
+        if (!empty($this->extra)) {
+            $DteEmitido->extra = $this->extra;
+        }
         $DteEmitido->save();
         // guardar referencias si existen
         $datos = json_decode($this->datos, true);
@@ -490,12 +505,16 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que realiza verificaciones a campos antes de guardar
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-16
+     * @version 2020-08-01
      */
     public function save()
     {
         // trigger al guardar el DTE temporal
         \sowerphp\core\Trigger::run('dte_dte_tmp_guardar', $this);
+        // si los datos extras existen y son un arreglo se convierte antes de guardar
+        if (!empty($this->extra) and is_array($this->extra)) {
+            $this->extra = json_encode($this->extra);
+        }
         // guardar DTE temporal
         return parent::save();
     }
@@ -756,7 +775,8 @@ class Model_DteTmp extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-03-24
      */
-    public function getTelefono() {
+    public function getTelefono()
+    {
         if (!isset($this->_telefono)) {
             $this->_telefono = null;
             if (!empty($this->getDatos()['Encabezado']['Receptor']['Contacto']) and $this->getDatos()['Encabezado']['Receptor']['Contacto'][0]=='+') {
@@ -774,7 +794,8 @@ class Model_DteTmp extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-03-24
      */
-    public function getCelular() {
+    public function getCelular()
+    {
         if (!isset($this->_celular)) {
             $this->_celular = null;
             if ($this->getTelefono() and strpos($this->getTelefono(), '+56 9')===0) {
@@ -785,22 +806,40 @@ class Model_DteTmp extends \Model_App
     }
 
     /**
+     * Método que entrega los datos extras del documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-01
+     */
+    public function getExtra()
+    {
+        if (empty($this->extra)) {
+            return null;
+        }
+        if (is_string($this->extra)) {
+            $this->extra = json_decode($this->extra, true);
+        }
+        return $this->extra;
+    }
+
+    /**
      * Método que entrega el PDF del documento temporal.
      * Entrega el PDF que se ha generado con LibreDTE a partir del JSON del DTE
      * temporal.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-15
+     * @version 2020-08-01
      */
     public function getPDF(array $config = [])
     {
         // configuración por defecto para el PDF
-        $config = array_merge([
+        $default_config = [
             'cotizacion' => 0,
             'cedible' => false,
             'papelContinuo' => $this->getEmisor()->config_pdf_dte_papel,
             'compress' => false,
             'hash' => $this->getEmisor()->getUsuario()->hash,
-        ], $config);
+            'extra' => $this->getExtra(),
+        ];
+        $config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default_config, $config);
         // armar xml a partir de datos del dte temporal
         $xml = $this->getEnvioDte($config['cotizacion'] ? $this->getFolio() : 0)->generar();
         if (!$xml) {
@@ -834,12 +873,12 @@ class Model_DteTmp extends \Model_App
     /**
      * Método que entrega el código ESCPOS del documento temporal.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-15
+     * @version 2020-08-01
      */
     public function getESCPOS(array $config = [])
     {
         // configuración por defecto para el código ESCPOS
-        $config = array_merge([
+        $default_config = [
             'cotizacion' => 0,
             'cedible' => false,
             'compress' => false,
@@ -858,7 +897,9 @@ class Model_DteTmp extends \Model_App
                 'comuna' => $this->getEmisor()->getComuna()->comuna,
             ],
             'pdf417' => null,
-        ], $config);
+            'extra' => $this->getExtra(),
+        ];
+        $config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default_config, $config);
         // armar xml a partir de datos del dte temporal
         $xml = $this->getEnvioDte($config['cotizacion'] ? $this->getFolio() : 0)->generar();
         if (!$xml) {

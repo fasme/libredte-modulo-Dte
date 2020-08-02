@@ -272,9 +272,20 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Recurso de la API que genera el PDF del DTE temporal (cotización o previsualización)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-15
+     * @version 2020-08-01
      */
     public function _api_pdf_GET($receptor, $dte, $codigo, $emisor)
+    {
+        return $this->_api_pdf_POST($receptor, $dte, $codigo, $emisor);
+    }
+
+    /**
+     * Recurso de la API que genera el PDF del DTE temporal (cotización o previsualización)
+     * Permite pasar datos extras al PDF por POST
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-01
+     */
+    public function _api_pdf_POST($receptor, $dte, $codigo, $emisor)
     {
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -282,7 +293,7 @@ class Controller_DteTmps extends \Controller_App
         }
         $Emisor = new Model_Contribuyente($emisor);
         if (!$Emisor->exists()) {
-                $this->Api->send('Emisor no existe', 404);
+            $this->Api->send('Emisor no existe', 404);
         }
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/xml')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
@@ -300,6 +311,9 @@ class Controller_DteTmps extends \Controller_App
             'base64' => false,
             'hash' => $User->hash,
         ]);
+        if (!empty($this->Api->data)) {
+            $config = array_merge($config, $this->Api->data);
+        }
         // generar PDF
         try {
             $pdf = $DteTmp->getPDF($config);
@@ -711,7 +725,7 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Acción que permite editar el JSON del DTE temporal
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-03-31
+     * @version 2020-08-01
      */
     public function editar_json($receptor, $dte, $codigo)
     {
@@ -741,6 +755,8 @@ class Controller_DteTmps extends \Controller_App
         }
         // guardar JSON
         $DteTmp->datos = json_encode($datos);
+        $extra = json_decode($_POST['extra']);
+        $DteTmp->extra = $extra ? json_encode($extra) : null;
         if ($DteTmp->save()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'JSON guardado', 'ok'
@@ -750,7 +766,7 @@ class Controller_DteTmps extends \Controller_App
                 'No fue posible guardar el nuevo JSON', 'error'
             );
         }
-        $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request));
+        $this->redirect(str_replace('/editar_json/', '/ver/', $this->request->request).'#avanzado');
     }
 
     /**

@@ -291,6 +291,23 @@ class Controller_Documentos extends \Controller_App
                 }
             }
         }
+        // extraer datos que no son del DTE y se guardan en los datos extras
+        $datos_extra = [];
+        if (in_array($dte['Encabezado']['IdDoc']['TipoDTE'], [39, 41])) {
+            if (!empty($dte['Encabezado']['IdDoc']['TermPagoGlosa'])) {
+                $datos_extra['dte']['Encabezado']['IdDoc']['TermPagoGlosa'] = $dte['Encabezado']['IdDoc']['TermPagoGlosa'];
+                $dte['Encabezado']['IdDoc']['TermPagoGlosa'] = false;
+            }
+        }
+        if (!empty($dte['LibreDTE'])) {
+            if (!empty($dte['LibreDTE']['extra'])) {
+                $datos_extra = \sasco\LibreDTE\Arreglo::mergeRecursiveDistinct(
+                    $datos_extra,
+                    $dte['LibreDTE']['extra']
+                );
+            }
+            unset($dte['LibreDTE']);
+        }
         // crear objeto Dte y documento temporal asignando valores
         $Dte = new \sasco\LibreDTE\Sii\Dte($dte, (bool)$normalizar);
         $datos_dte = $Dte->getDatos();
@@ -317,6 +334,9 @@ class Controller_Documentos extends \Controller_App
             $DteTmp->sucursal_sii = $dte['Encabezado']['Emisor']['CdgSIISucur'];
         }
         $DteTmp->usuario = $User->id;
+        if (!empty($datos_extra)) {
+            $DteTmp->extra = $datos_extra;
+        }
         // si no es DTE exportación, se saca el total en pesos del MntTotal
         if (!$Dte->esExportacion()) {
             $DteTmp->total = $resumen['MntTotal'];

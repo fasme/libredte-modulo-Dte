@@ -344,7 +344,7 @@ echo $f->end('Actualizar fecha');
 <div class="card mt-4">
     <div class="card-header">
         <i class="fas fa-file-code"></i>
-        JSON del Documento Temporal
+        Datos del Documento Temporal
     </div>
     <div class="card-body">
 <?php
@@ -357,10 +357,18 @@ echo $f->begin([
 echo $f->input([
     'type' => 'textarea',
     'name' => 'datos',
-    'label' => 'JSON',
+    'label' => 'Datos',
     'value' => json_encode(json_decode($DteTmp->datos), JSON_PRETTY_PRINT),
     'check' => 'notempty',
     'rows' => 20,
+]),'<br/>';
+echo $f->input([
+    'type' => 'textarea',
+    'name' => 'extra',
+    'label' => 'Extra',
+    'placeholder' => 'Datos extras del Documento Temporal (opcional)',
+    'value' => $DteTmp->extra ? json_encode($DteTmp->getExtra(), JSON_PRETTY_PRINT) : null,
+    'rows' => 10,
 ]);
 echo '<button type="submit" class="btn btn-primary btn-block mt-4">Guardar JSON</button>';
 echo $f->end(false);

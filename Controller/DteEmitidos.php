@@ -1288,9 +1288,20 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-06-14
+     * @version 2020-08-01
      */
     public function _api_pdf_GET($dte, $folio, $emisor)
+    {
+        return $this->_api_pdf_POST($dte, $folio, $emisor);
+    }
+
+    /**
+     * Acción de la API que permite obtener el PDF de un DTE emitido
+     * Permite pasar datos extras al PDF por POST
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-01
+     */
+    public function _api_pdf_POST($dte, $folio, $emisor)
     {
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -1326,6 +1337,9 @@ class Controller_DteEmitidos extends \Controller_App
             }
         }
         $config['webVerificacion'] = in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false;
+        if (!empty($this->Api->data)) {
+            $config = array_merge($config, $this->Api->data);
+        }
         // generar PDF
         try {
             $pdf = $DteEmitido->getPDF($config);
