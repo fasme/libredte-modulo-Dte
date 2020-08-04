@@ -69,12 +69,12 @@ class Shell_Command_Migraciones_MigrarConfigPDF extends \Shell_App
                         'fuente' => $Contribuyente->config_pdf_detalle_fuente,
                         'posicion' => $Contribuyente->config_pdf_item_detalle_posicion,
                         'ancho' => [
-                            'CdgItem' => $Contribuyente->config_pdf_detalle_ancho->CdgItem,
-                            'QtyItem' => $Contribuyente->config_pdf_detalle_ancho->QtyItem,
-                            'PrcItem' => $Contribuyente->config_pdf_detalle_ancho->PrcItem,
-                            'DescuentoMonto' => $Contribuyente->config_pdf_detalle_ancho->DescuentoMonto,
-                            'RecargoMonto' => $Contribuyente->config_pdf_detalle_ancho->RecargoMonto,
-                            'MontoItem' => $Contribuyente->config_pdf_detalle_ancho->MontoItem,
+                            'CdgItem' => !empty($Contribuyente->config_pdf_detalle_ancho) ? $Contribuyente->config_pdf_detalle_ancho->CdgItem : null,
+                            'QtyItem' => !empty($Contribuyente->config_pdf_detalle_ancho) ? $Contribuyente->config_pdf_detalle_ancho->QtyItem : null,
+                            'PrcItem' => !empty($Contribuyente->config_pdf_detalle_ancho) ? $Contribuyente->config_pdf_detalle_ancho->PrcItem : null,
+                            'DescuentoMonto' => !empty($Contribuyente->config_pdf_detalle_ancho) ? $Contribuyente->config_pdf_detalle_ancho->DescuentoMonto : null,
+                            'RecargoMonto' => !empty($Contribuyente->config_pdf_detalle_ancho) ? $Contribuyente->config_pdf_detalle_ancho->RecargoMonto : null,
+                            'MontoItem' => !empty($Contribuyente->config_pdf_detalle_ancho) ? $Contribuyente->config_pdf_detalle_ancho->MontoItem : null,
                         ],
                     ],
                     'timbre' => [
