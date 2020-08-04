@@ -128,7 +128,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-07-17
+     * @version 2020-08-02
      */
     public function _api_emitir_POST()
     {
@@ -297,6 +297,10 @@ class Controller_Documentos extends \Controller_App
             if (!empty($dte['Encabezado']['IdDoc']['TermPagoGlosa'])) {
                 $datos_extra['dte']['Encabezado']['IdDoc']['TermPagoGlosa'] = $dte['Encabezado']['IdDoc']['TermPagoGlosa'];
                 $dte['Encabezado']['IdDoc']['TermPagoGlosa'] = false;
+            }
+            if (!empty($dte['Encabezado']['Emisor']['Acteco'])) {
+                $datos_extra['dte']['Encabezado']['Emisor']['Acteco'] = $dte['Encabezado']['Emisor']['Acteco'];
+                $dte['Encabezado']['Emisor']['Acteco'] = false;
             }
         }
         if (!empty($dte['LibreDTE'])) {

@@ -188,12 +188,30 @@ $links = $DteEmitido->getLinks();
 $pdf_publico = $links['pdf'];
 $f = new \sowerphp\general\View_Helper_Form();
 echo $f->begin(['action'=>$_base.'/dte/dte_emitidos/pdf/'.$DteEmitido->dte.'/'.$DteEmitido->folio, 'id'=>'pdfForm', 'onsubmit'=>'Form.check(\'pdfForm\')']);
+$formatoPDF = $Emisor->getConfigPDF($DteEmitido);
+$formatos_pdf = (new \website\Dte\Pdf\Utility_Formatos())->setContribuyente($Emisor)->getFormatos();
+if (!empty($formatos_pdf)) {
+    echo $f->input([
+        'type' => 'select',
+        'name' => 'formato',
+        'label' => 'Formato PDF',
+        'options' => $formatos_pdf,
+        'value' => $formatoPDF['formato'],
+        'check' => 'notempty',
+    ]);
+} else {
+    echo $f->input([
+        'type' => 'hidden',
+        'name' => 'formato',
+        'value' => 'estandar',
+    ]);
+}
 echo $f->input([
     'type' => 'select',
     'name' => 'papelContinuo',
-    'label' => 'Tipo papel',
+    'label' => 'Tipo de papel',
     'options' => \sasco\LibreDTE\Sii\Dte\PDF\Dte::$papel,
-    'value' => $Emisor->config_pdf_dte_papel,
+    'value' => $formatoPDF['papelContinuo'],
     'check' => 'notempty',
 ]);
 echo $f->input(['name'=>'copias_tributarias', 'label'=>'Copias tributarias', 'value'=>(int)$Emisor->config_pdf_copias_tributarias, 'check'=>'notempty integer']);

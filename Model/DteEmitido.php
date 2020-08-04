@@ -532,7 +532,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que entrega el arreglo con los datos que se usaron para generar el
      * XML del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-08-02
      */
     public function getDatos()
     {
@@ -540,6 +540,12 @@ class Model_DteEmitido extends Model_Base_Envio
             // xml local
             if ($this->hasLocalXML()) {
                 $this->datos = $this->getDte()->getDatos();
+                $extra = (array)$this->getExtra();
+                if (!empty($extra['dte'])) {
+                    $this->datos = \sowerphp\core\Utility_Array::mergeRecursiveDistinct(
+                        $this->datos, $extra['dte']
+                    );
+                }
             }
             // xml mipyme
             else if ($this->mipyme) {
@@ -1293,11 +1299,10 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-06-14
+     * @version 2020-08-02
      */
     public function email($to = null, $subject = null, $msg = null, $pdf = false, $cedible = false, $papelContinuo = null)
     {
-        $Request = new \sowerphp\core\Network_Request();
         // variables por defecto
         if (!$to) {
             $to = $this->getReceptor()->config_email_intercambio_user;
@@ -1348,15 +1353,12 @@ class Model_DteEmitido extends Model_Base_Envio
         }
         // adjuntar PDF
         if ($pdf) {
-            if ($papelContinuo===null) {
-                $papelContinuo = $this->getEmisor()->config_pdf_dte_papel;
+            $pdf_config = ['cedible' => $cedible, 'compress' => false];
+            if ($papelContinuo !== null) {
+                $pdf_config['papelContinuo'] = $papelContinuo;
             }
             $email->attach([
-                'data' => $this->getPDF([
-                    'cedible' => $cedible,
-                    'papelContinuo' => $papelContinuo,
-                    'compress' => false,
-                ]),
+                'data' => $this->getPDF($pdf_config),
                 'name' => 'dte_'.$this->getEmisor()->rut.'-'.$this->getEmisor()->dv.'_T'.$this->dte.'F'.$this->folio.'.pdf',
                 'type' => 'application/pdf',
             ]);
@@ -1667,11 +1669,22 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que entrega la actividad económica asociada al documento
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-04
+     */
+    public function getActividad($default = null)
+    {
+        $datos = $this->getDatos();
+        return !empty($datos['Encabezado']['Emisor']['Acteco']) ? $datos['Encabezado']['Emisor']['Acteco'] : $default;
+    }
+
+    /**
      * Método que entrega el PDF del documento emitido.
      * Entrega el PDF que se ha generado con LibreDTE a partir del XML del DTE
      * emitido o bien el PDF generado con el PortalMIPYME del SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-01
+     * @version 2020-08-04
      */
     public function getPDF(array $config = [])
     {
@@ -1680,9 +1693,9 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('El DTE no tiene XML asociado para generar el PDF');
         }
         // configuración por defecto para el PDF
+        $config_emisor = $this->getEmisor()->getConfigPDF($this);
         $default_config = [
             'cedible' => $this->getEmisor()->config_pdf_dte_cedible,
-            'papelContinuo' => $this->getEmisor()->config_pdf_dte_papel,
             'compress' => false,
             'copias_tributarias' => $this->getEmisor()->config_pdf_copias_tributarias ? $this->getEmisor()->config_pdf_copias_tributarias : 1,
             'copias_cedibles' => $this->getEmisor()->config_pdf_copias_cedibles ? $this->getEmisor()->config_pdf_copias_cedibles : $this->getEmisor()->config_pdf_dte_cedible,
@@ -1693,27 +1706,36 @@ class Model_DteEmitido extends Model_Base_Envio
                 'NroResol' => $this->certificacion ? 0 : $this->getEmisor()->config_ambiente_produccion_numero,
             ],
             'hash' => $this->getEmisor()->getUsuario()->hash,
-            'extra' => $this->getExtra(),
+            'extra' => (array)$this->getExtra(),
         ];
+        $default_config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($config_emisor, $default_config);
         $config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default_config, $config);
-        // consultar servicio web de LibreDTE
+        // consultar servicio web del contribuyente
         $ApiDtePdfClient = $this->getEmisor()->getApiClient('dte_pdf');
-        if (!$ApiDtePdfClient) {
+        if ($ApiDtePdfClient) {
+            unset($config['hash']);
+            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $config);
+        }
+        // crear a partir de formato de PDF no estándar
+        else if ($config['formato'] != 'estandar') {
+            $apps = $this->getEmisor()->getApps('dtepdfs');
+            if (empty($apps[$config['formato']]) or empty($apps[$config['formato']]->getConfig()->disponible)) {
+                throw new \Exception('Formato de PDF '.$config['formato'].' no se encuentra disponible', 400);
+            }
+            $response = $apps[$config['formato']]->generar($config);
+        }
+        // consultar servicio web local de LibreDTE
+        else {
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($config['hash']);
             unset($config['hash']);
             $Request = new \sowerphp\core\Network_Request();
             $response = $rest->post($Request->url.'/api/utilidades/documentos/generar_pdf', $config);
-        }
-        // consultar servicio web del contribuyente
-        else {
-            unset($config['hash']);
-            $response = $ApiDtePdfClient->post($ApiDtePdfClient->url, $config);
+            if ($response===false) {
+                throw new \Exception(implode("\n", $rest->getErrors()), 500);
+            }
         }
         // procesar respuesta
-        if ($response===false) {
-            throw new \Exception(implode("\n", $rest->getErrors(), 500));
-        }
         if ($response['status']['code']!=200) {
             throw new \Exception($response['body'], $response['status']['code']);
         }
@@ -1724,7 +1746,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que entrega el código ESCPOS del documento emitido.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-01
+     * @version 2020-08-04
      */
     public function getESCPOS(array $config = [])
     {
@@ -1752,10 +1774,11 @@ class Model_DteEmitido extends Model_Base_Envio
                 'comuna' => $this->getEmisor()->getComuna()->comuna,
             ],
             'pdf417' => null,
-            'extra' => $this->getExtra(),
+            'extra' => (array)$this->getExtra(),
         ];
         $config = \sowerphp\core\Utility_Array::mergeRecursiveDistinct($default_config, $config);
-        if ($this->getEmisor()->config_pdf_logo_continuo) {
+        $formatoEstandar = $this->getEmisor()->getApp('dtepdfs.estandar');
+        if (!empty($formatoEstandar) and !empty($formatoEstandar->getConfig()->continuo->logo->posicion)) {
             $logo_file = DIR_STATIC.'/contribuyentes/'.$this->getEmisor()->rut.'/logo.png';
             if (is_readable($logo_file)) {
                 $config['logo'] = base64_encode(file_get_contents($logo_file));

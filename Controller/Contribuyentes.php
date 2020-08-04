@@ -227,7 +227,7 @@ class Controller_Contribuyentes extends \Controller_App
     /**
      * Método que permite modificar contribuyente previamente registrado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-18
+     * @version 2020-08-02
      */
     public function modificar($rut)
     {
@@ -263,6 +263,7 @@ class Controller_Contribuyentes extends \Controller_App
             'boton' => 'Modificar empresa',
             'tipos_dte' => $Contribuyente->getDocumentosAutorizados(),
             'apps' => $Contribuyente->getApps('apps'),
+            'dtepdfs' => $Contribuyente->getApps('dtepdfs'),
         ]);
         // editar contribuyente
         if (isset($_POST['submit'])) {
@@ -296,7 +297,7 @@ class Controller_Contribuyentes extends \Controller_App
      * Método que prepara los datos de configuraciones del contribuyente para
      * ser guardados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-12-28
+     * @version 2020-08-03
      */
     protected function prepararDatosContribuyente(&$Contribuyente)
     {
@@ -396,16 +397,28 @@ class Controller_Contribuyentes extends \Controller_App
         } else {
             $_POST['config_extra_impuestos_sin_credito'] = null;
         }
-        // crear arreglo con anchos de columnas del detalle del PDF
-        $config_pdf_detalle_ancho = [];
-        foreach ($_POST as $key => $val) {
-            if (substr($key, 0, 25)=='config_pdf_detalle_ancho_') {
-                $config_pdf_detalle_ancho[substr($key, 25)] = $val;
-                unset($_POST[$key]);
+        // crear arreglo de mapa de formatos de PDF
+        if (!empty($_POST['config_pdf_mapeo_documento'])) {
+            $_POST['config_pdf_mapeo'] = [];
+            $n_codigos = count($_POST['config_pdf_mapeo_documento']);
+            for ($i=0; $i<$n_codigos; $i++) {
+                if (!empty($_POST['config_pdf_mapeo_documento'][$i]) and !empty($_POST['config_pdf_mapeo_actividad'][$i]) and !empty($_POST['config_pdf_mapeo_formato'][$i])) {
+                    $_POST['config_pdf_mapeo'][] = [
+                        'documento' => $_POST['config_pdf_mapeo_documento'][$i],
+                        'actividad' => $_POST['config_pdf_mapeo_actividad'][$i],
+                        'sucursal' => !empty($_POST['config_pdf_mapeo_sucursal'][$i]) ? $_POST['config_pdf_mapeo_sucursal'][$i] : 0,
+                        'formato' => $_POST['config_pdf_mapeo_formato'][$i],
+                        'papel' => !empty($_POST['config_pdf_mapeo_papel'][$i]) ? $_POST['config_pdf_mapeo_papel'][$i] : 0,
+                    ];
+                }
             }
-        }
-        if ($config_pdf_detalle_ancho) {
-            $_POST['config_pdf_detalle_ancho'] = $config_pdf_detalle_ancho;
+            unset($_POST['config_pdf_mapeo_documento']);
+            unset($_POST['config_pdf_mapeo_actividad']);
+            unset($_POST['config_pdf_mapeo_sucursal']);
+            unset($_POST['config_pdf_mapeo_formato']);
+            unset($_POST['config_pdf_mapeo_papel']);
+        } else {
+            $_POST['config_pdf_mapeo'] = null;
         }
         // subir archivo de plantilla de correo de envío de dte
         if (!empty($_FILES['template_email_dte']) and !$_FILES['template_email_dte']['error']) {
@@ -485,6 +498,16 @@ class Controller_Contribuyentes extends \Controller_App
             unset($_POST['config_extra_links_enlace']);
         } else {
             $_POST['config_extra_links'] = null;
+        }
+        // procesar configuración de apps
+        $apps = $Contribuyente->getApps('apps');
+        foreach ($apps as $App) {
+            $App->setConfigPOST();
+        }
+        // procesar configuración de apps
+        $apps = $Contribuyente->getApps('dtepdfs');
+        foreach ($apps as $App) {
+            $App->setConfigPOST();
         }
         // poner valores por defecto
         foreach (Model_Contribuyente::$defaultConfig as $key => $value) {

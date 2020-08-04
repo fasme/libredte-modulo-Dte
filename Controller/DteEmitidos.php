@@ -273,7 +273,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que descarga el PDF del documento emitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-06-14
+     * @version 2020-08-04
      */
     public function pdf($dte, $folio, $cedible = false, $emisor = null, $fecha = null, $total = null)
     {
@@ -324,12 +324,14 @@ class Controller_DteEmitidos extends \Controller_App
                 $webVerificacion = $this->request->url.'/boletas';
             }
         }
+        $formatoPDF = $Emisor->getConfigPDF($DteEmitido);
         $config = [
             'cedible' => $cedible,
             'compress' => $compress,
             'copias_tributarias' => $copias_tributarias,
             'copias_cedibles' => $copias_cedibles,
-            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $Emisor->config_pdf_dte_papel ),
+            'formato' => isset($_POST['formato']) ? $_POST['formato'] : ( isset($_GET['formato']) ? $_GET['formato'] : $formatoPDF['formato'] ),
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $formatoPDF['papelContinuo'] ),
             'webVerificacion' => in_array($DteEmitido->dte, [39,41]) ? $webVerificacion : false,
         ];
         // generar PDF
@@ -530,7 +532,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que envía por email el PDF y el XML del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-25
+     * @version 2020-08-04
      */
     public function enviar_email($dte, $folio)
     {
@@ -555,7 +557,6 @@ class Controller_DteEmitidos extends \Controller_App
                     'mensaje' => $_POST['mensaje'],
                     'pdf' => 1,
                     'cedible' => (int)isset($_POST['cedible']),
-                    'papelContinuo' => $Emisor->config_pdf_dte_papel,
                 ]
             );
             if ($response===false) {
@@ -1299,7 +1300,7 @@ class Controller_DteEmitidos extends \Controller_App
      * Acción de la API que permite obtener el PDF de un DTE emitido
      * Permite pasar datos extras al PDF por POST
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-01
+     * @version 2020-08-04
      */
     public function _api_pdf_POST($dte, $folio, $emisor)
     {
@@ -1319,10 +1320,12 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         // datos por defecto
+        $formatoPDF = $Emisor->getConfigPDF($DteEmitido);
         $config = $this->getQuery([
+            'formato' => $formatoPDF['formato'],
+            'papelContinuo' => $formatoPDF['papelContinuo'],
             'base64' => false,
             'cedible' => $Emisor->config_pdf_dte_cedible,
-            'papelContinuo' => $Emisor->config_pdf_dte_papel,
             'compress' => false,
             'copias_tributarias' => $Emisor->config_pdf_copias_tributarias ? $Emisor->config_pdf_copias_tributarias : 1,
             'copias_cedibles' => $Emisor->config_pdf_copias_cedibles ? $Emisor->config_pdf_copias_cedibles : $Emisor->config_pdf_dte_cedible,
@@ -1557,7 +1560,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite enviar el DTE emitido por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-10-05
+     * @version 2020-08-04
      */
     public function _api_enviar_email_POST($dte, $folio, $emisor)
     {
@@ -1578,16 +1581,18 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
-        if (!$DteEmitido->exists())
+        if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
         // parametros por defecto
+        $formatoPDF = $Emisor->getConfigPDF($DteEmitido);
         $data = array_merge([
             'emails' => $DteEmitido->getReceptor()->config_email_intercambio_user,
             'asunto' => null,
             'mensaje' => null,
             'pdf' => false,
             'cedible' => false,
-            'papelContinuo' => $Emisor->config_pdf_dte_papel,
+            'papelContinuo' => $formatoPDF['papelContinuo'],
         ], $this->Api->data);
         // enviar por correo
         try {

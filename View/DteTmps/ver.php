@@ -155,12 +155,30 @@ echo $f->input([
     'check' => 'notempty',
     'onblur' => 'pdf_set_action(this.value)',
 ]);
+$formatoPDF = $Emisor->getConfigPDF($DteTmp);
+$formatos_pdf = (new \website\Dte\Pdf\Utility_Formatos())->setContribuyente($Emisor)->getFormatos();
+if (!empty($formatos_pdf)) {
+    echo $f->input([
+        'type' => 'select',
+        'name' => 'formato',
+        'label' => 'Formato PDF',
+        'options' => $formatos_pdf,
+        'value' => $formatoPDF['formato'],
+        'check' => 'notempty',
+    ]);
+} else {
+    echo $f->input([
+        'type' => 'hidden',
+        'name' => 'formato',
+        'value' => 'estandar',
+    ]);
+}
 echo $f->input([
     'type' => 'select',
     'name' => 'papelContinuo',
-    'label' => 'Tipo papel',
+    'label' => 'Tipo de papel',
     'options' => \sasco\LibreDTE\Sii\Dte\PDF\Dte::$papel,
-    'value' => $Emisor->config_pdf_dte_papel,
+    'value' => $formatoPDF['papelContinuo'],
     'check' => 'notempty',
 ]);
 echo $f->end('Descargar PDF');

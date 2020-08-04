@@ -27,7 +27,7 @@ namespace website\Dte;
 /**
  * Clase para mapear la tabla contribuyente de la base de datos
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2019-02-18
+ * @version 2020-08-02
  */
 class Model_Contribuyente extends \Model_App
 {
@@ -3704,6 +3704,99 @@ class Model_Contribuyente extends \Model_App
             return (int)(bool)$_GET['_contribuyente_ambiente'];
         }
         return (int)(bool)$this->config_ambiente_en_certificacion;
+    }
+
+    /**
+     * Método que entrega la configuración para el PDF de los DTE
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-04
+     */
+    public function getConfigPDF($options)
+    {
+        if (is_object($options)) {
+            $options = [
+                'documento' => $options->dte,
+                'actividad' => $options->getActividad('*'),
+                'sucursal' => $options->sucursal_sii,
+            ];
+        }
+        foreach (['documento', 'actividad', 'sucursal'] as $col) {
+            if (!isset($options[$col])) {
+                $options[$col] = '*';
+            }
+        }
+        $config = $this->_getConfigPDF($options);
+        // agregar configuración del formato encontrado como datos "extra"
+        $formatoPDF = $this->getApp('dtepdfs.'.$config['formato']);
+        if (!empty($formatoPDF)) {
+            $config['extra'] = json_decode(json_encode($formatoPDF->getConfig()), true);
+            unset($config['extra']['disponible']);
+        }
+        // agregar siempre que se pueda la dirección de la casa matriz como dato "extra"
+        if (!empty($this->direccion) and !empty($this->comuna)) {
+            $config['extra']['casa_matriz'] = $this->direccion.', '.$this->getComuna()->comuna;
+        }
+        // entregar configuración
+        return $config;
+    }
+
+    /**
+     * Método que entrega la configuración de formato y papel para los PDF
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-04
+     */
+    private function _getConfigPDF($options, $firstQuery = true)
+    {
+        // buscar si existe configuración creada según los filtros
+        foreach ((array)$this->config_pdf_mapeo as $m) {
+            if ($options['documento'] == $m->documento and $options['actividad'] == $m->actividad and $options['sucursal'] == $m->sucursal) {
+                return ['formato' => $m->formato, 'papelContinuo' => $m->papel];
+            }
+        }
+        // no se encontró la configuración buscada y la buscada no es la por defecto
+        if ($options['documento'] == '*' and $options['actividad'] == '*' and $options['sucursal'] == '*') {
+            return ['formato' => 'estandar', 'papelContinuo' => 0];
+        }
+        // buscar con permutaciones
+        if ($firstQuery) {
+            // documento por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['documento' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+            // actividad por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['actividad' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+            // sucursal por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['sucursal' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+            // documento y actividad por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['documento' => '*', 'actividad' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+            // documento y sucursal por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['documento' => '*', 'sucursal' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+            // actividad y sucursal por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['actividad' => '*', 'sucursal' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+            // todo por defecto
+            $config = $this->_getConfigPDF(array_merge($options, ['documento' => '*', 'actividad' => '*', 'sucursal' => '*']), false);
+            if ($config) {
+                return $config;
+            }
+        }
+        // no se encontró, se debe buscar en otra permutación
+        return false;
     }
 
 }

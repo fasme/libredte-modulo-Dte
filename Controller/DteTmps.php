@@ -90,20 +90,28 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la cotización en PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-10-07
+     * @version 2020-08-04
      */
     public function cotizacion($receptor, $dte, $codigo, $emisor = null)
     {
         $Emisor = $emisor===null ? $this->getContribuyente() : new Model_Contribuyente($emisor);
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message('No existe el DTE temporal solicitado', 'error');
+            $this->redirect('/dte/dte_tmps');
+        }
         // datos por defecto
+        $formatoPDF = $Emisor->getConfigPDF($DteTmp);
         extract($this->getQuery([
-            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+            'formato' => isset($_POST['formato']) ? $_POST['formato']: $formatoPDF['formato'],
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo']: $formatoPDF['papelContinuo'],
             'compress' => false,
         ]));
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($Emisor->getUsuario()->hash);
-        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?cotizacion=1&papelContinuo='.$papelContinuo.'&compress='.$compress);
+        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?cotizacion=1&formato='.$formato.'&papelContinuo='.$papelContinuo.'&compress='.$compress);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_tmps');
@@ -125,20 +133,28 @@ class Controller_DteTmps extends \Controller_App
     /**
      * Método que genera la previsualización del PDF del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-10-07
+     * @version 2020-08-04
      */
     public function pdf($receptor, $dte, $codigo, $disposition = 'attachment')
     {
         $Emisor = $this->getContribuyente();
+        // obtener DTE temporal
+        $DteTmp = new Model_DteTmp($Emisor->rut, $receptor, $dte, $codigo);
+        if (!$DteTmp->exists()) {
+            \sowerphp\core\Model_Datasource_Session::message('No existe el DTE temporal solicitado', 'error');
+            $this->redirect('/dte/dte_tmps');
+        }
         // datos por defecto
+        $formatoPDF = $Emisor->getConfigPDF($DteTmp);
         extract($this->getQuery([
-            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo']: $Emisor->config_pdf_dte_papel,
+            'formato' => isset($_POST['formato']) ? $_POST['formato']: $formatoPDF['formato'],
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo']: $formatoPDF['papelContinuo'],
             'compress' => false,
         ]));
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
-        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?papelContinuo='.$papelContinuo.'&compress='.$compress);
+        $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?formato='.$formato.'&papelContinuo='.$papelContinuo.'&compress='.$compress);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
             $this->redirect('/dte/dte_tmps');
@@ -283,7 +299,7 @@ class Controller_DteTmps extends \Controller_App
      * Recurso de la API que genera el PDF del DTE temporal (cotización o previsualización)
      * Permite pasar datos extras al PDF por POST
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-01
+     * @version 2020-08-04
      */
     public function _api_pdf_POST($receptor, $dte, $codigo, $emisor)
     {
@@ -304,9 +320,11 @@ class Controller_DteTmps extends \Controller_App
             $this->Api->send('No existe el DTE temporal solicitado', 404);
         }
         // datos por defecto
+        $formatoPDF = $Emisor->getConfigPDF($DteTmp);
         $config = $this->getQuery([
             'cotizacion' => 0,
-            'papelContinuo' => $Emisor->config_pdf_dte_papel,
+            'formato' => $formatoPDF['formato'],
+            'papelContinuo' => $formatoPDF['papelContinuo'],
             'compress' => false,
             'base64' => false,
             'hash' => $User->hash,

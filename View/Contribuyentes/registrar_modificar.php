@@ -432,7 +432,7 @@ $f->setColsLabel();
     <div class="card mb-4">
         <div class="card-header">
             <i class="far fa-paper-plane"></i>
-            Emisión documentos
+            Emisión de documentos
         </div>
         <div class="card-body">
             <div class="row">
@@ -656,260 +656,8 @@ echo $f->input([
     </div>
     <div class="card mb-4">
         <div class="card-header">
-            <i class="far fa-file-pdf"></i>
-            Versión impresa del DTE
-        </div>
-        <div class="card-body">
-<?php
-echo $f->input([
-    'name' => 'config_pdf_web_verificacion',
-    'label' => 'Web verificación boletas electrónicas',
-    'placeholder' => 'libredte.cl/boletas',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_web_verificacion : '',
-    'help' => 'Enlace que se incluirá en las boletas para que el cliente pueda realizar la verificación',
-]);
-?>
-<?php $f->setColsLabel(4); ?>
-            <div class="row">
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'name' => 'config_pdf_copias_tributarias',
-    'label' => 'Copias tributarias',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_copias_tributarias : 1,
-    'help' => '¿Copias tributarias que se generarán por defecto?',
-    'check' => 'notempty integer',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'name' => 'config_pdf_copias_cedibles',
-    'label' => 'Copias cedibles',
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_copias_cedibles : 1,
-    'help' => '¿Copias cedibles que se generarán por defecto?',
-    'check' => 'notempty integer',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_dte_cedible',
-    'label' => 'Incluir cedible',
-    'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_dte_cedible : 0,
-    'help' => '¿Se debe incluir la copia cedible por defecto?',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_imprimir',
-    'label' => 'Impresión directa',
-    'options' => [
-        '' => 'No, se imprimirá bajando el archivo',
-        'pdf'=>'Imprimir usando el PDF',
-        'escpos' => 'Imprimir en impresora térmica (usando ESCPOS)',
-        'pdf_escpos' => 'Elegir imprimir usando PDF o ESCPOS',
-    ],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_imprimir : '',
-    'help' => '¿Se debe enviar a imprimir directamente a la impresora seleccionada?',
-]);
-?>
-                </div>
-<div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_emision_previsualizacion_automatica',
-    'label' => 'Previsualización PDF',
-    'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_previsualizacion_automatica : 0,
-    'help' => '¿Se debe mostrar automáticamente la previsualización del PDF en la pantalla de previsualización?',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_disposition',
-    'label' => 'Descargar PDF',
-    'options' => ['Si, descargar PDF', 'No, mostrar PDF en el navegador'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_disposition : 0,
-    'help' => '¿El PDF generado se debe descargar al equipo o se debe mostrar en el navegador?',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_dte_papel',
-    'label' => 'Formato PDF',
-    'options' => \sasco\LibreDTE\Sii\Dte\PDF\Dte::$papel,
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_dte_papel : 0,
-    'help' => 'Permite indicar si se usará hoja carta en las versiones en PDF del DTE o bien papel contínuo',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_logo_continuo',
-    'label' => 'Logo en papel contínuo',
-    'options' => ['No', 'Si'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_logo_continuo : 0,
-    'help' => '¿Se debe agregar el logo al formato de papel contínuo?',
-]);
-?>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="far fa-file-pdf"></i>
-            Opciones para PDF formato hoja carta
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_logo_posicion',
-    'label' => 'Posición logo en PDF',
-    'options' => ['Izquierda', 'Arriba', 'Reemplaza datos del emisor'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_logo_posicion : 0,
-    'help' => '¿El logo va a la izquierda o arriba de los datos del contribuyente?',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_detalle_fuente',
-    'label' => 'Fuente detalle PDF',
-    'options' => [11=>11, 10=>10, 9=>9, 8=>8],
-    'value' => (isset($Contribuyente) and $Contribuyente->config_pdf_detalle_fuente)? $Contribuyente->config_pdf_detalle_fuente : 10,
-    'help' => 'Tamaño de la fuente a utilizar en el detalle del PDF ',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_item_detalle_posicion',
-    'label' => 'Posición detalle PDF',
-    'options' => ['Abajo', 'Derecha'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_item_detalle_posicion : 0,
-    'help' => '¿El detalle del item va a abajo o a la derecha del nombre del item?',
-]);
-?>
-                </div>
-                <div class="col-md-6">
-<?php
-echo $f->input([
-    'type' => 'select',
-    'name' => 'config_pdf_timbre_posicion',
-    'label' => 'Posición timbre PDF',
-    'options' => ['Al pie de la página', 'Inmediatamente bajo el detalle'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_timbre_posicion : 0,
-    'help' => '¿Dónde debe ir el timbre, acuse y totales?',
-]);
-?>
-                </div>
-            </div>
-<?php
-$f->setColsLabel();
-$f->setStyle(false);
-?>
-            <div class="form-group row required">
-                <label class="col-sm-2 control-label">Ancho columnas PDF</label>
-                <div class="col-sm-10">
-                <?php new \sowerphp\general\View_Helper_Table([
-                    ['Código', 'Cantidad', 'Precio', 'Descuento', 'Recargo', 'Subtotal'],
-                    [
-                        $f->input([
-                            'name'=>'config_pdf_detalle_ancho_CdgItem',
-                            'placeholder' => 20,
-                            'value'=>((isset($Contribuyente) and $Contribuyente->config_pdf_detalle_ancho)? $Contribuyente->config_pdf_detalle_ancho->CdgItem : 20),
-                            'check'=>'notempty integer',
-                        ]),
-                        $f->input([
-                            'name'=>'config_pdf_detalle_ancho_QtyItem',
-                            'placeholder' => 15,
-                            'value'=>((isset($Contribuyente) and $Contribuyente->config_pdf_detalle_ancho)? $Contribuyente->config_pdf_detalle_ancho->QtyItem : 15),
-                            'check'=>'notempty integer',
-                        ]),
-                        $f->input([
-                            'name'=>'config_pdf_detalle_ancho_PrcItem',
-                            'placeholder' => 22,
-                            'value'=>((isset($Contribuyente) and $Contribuyente->config_pdf_detalle_ancho)? $Contribuyente->config_pdf_detalle_ancho->PrcItem : 22),
-                            'check'=>'notempty integer',
-                        ]),
-                        $f->input([
-                            'name'=>'config_pdf_detalle_ancho_DescuentoMonto',
-                            'placeholder' => 22,
-                            'value'=>((isset($Contribuyente) and $Contribuyente->config_pdf_detalle_ancho)? $Contribuyente->config_pdf_detalle_ancho->DescuentoMonto : 22),
-                            'check'=>'notempty integer',
-                        ]),
-                        $f->input([
-                            'name'=>'config_pdf_detalle_ancho_RecargoMonto',
-                            'placeholder' => 22,
-                            'value'=>((isset($Contribuyente) and $Contribuyente->config_pdf_detalle_ancho)? $Contribuyente->config_pdf_detalle_ancho->RecargoMonto : 22),
-                            'check'=>'notempty integer',
-                        ]),
-                        $f->input([
-                            'name'=>'config_pdf_detalle_ancho_MontoItem',
-                            'placeholder' => 22,
-                            'value'=>((isset($Contribuyente) and $Contribuyente->config_pdf_detalle_ancho)? $Contribuyente->config_pdf_detalle_ancho->MontoItem : 22),
-                            'check'=>'notempty integer',
-                        ]),
-                    ]
-                ]); ?>
-                <p class="help-block">Ancho de las columnas del detalle del PDF en hoja carta</p>
-                </div>
-            </div>
-<?php $f->setStyle('horizontal'); ?>
-        </div>
-    </div>
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="far fa-paper-plane"></i>
-            Correo electrónico
-        </div>
-        <div class="card-body">
-<?php
-$template_email_dte = '';
-if (isset($Contribuyente)) {
-    if ($Contribuyente->getEmailFromTemplate('dte')) {
-        $template_email_dte_url = \sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$Contribuyente->rut.'/email/dte.html';
-        $template_email_dte = '. <a href="'.$template_email_dte_url.'" target="_blank">Plantilla vigente</a>';
-    }
-}
-echo $f->input([
-    'type' => 'file',
-    'name' => 'template_email_dte',
-    'label' => 'Plantilla envío DTE',
-    'help' => 'Archivo HTML con la plantilla para el correo electrónico de envío de DTE'.$template_email_dte,
-]);
-?>
-        </div>
-    </div>
-    <div class="card mb-4">
-        <div class="card-header">
             <i class="far fa-file"></i>
-            Recepción documentos
+            Recepción de documentos
         </div>
         <div class="card-body">
 <?php
@@ -1000,6 +748,175 @@ echo $f->input([
 ?>
         </div>
     </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="far fa-paper-plane"></i>
+            Correo electrónico
+        </div>
+        <div class="card-body">
+<?php
+$template_email_dte = '';
+if (isset($Contribuyente)) {
+    if ($Contribuyente->getEmailFromTemplate('dte')) {
+        $template_email_dte_url = \sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$Contribuyente->rut.'/email/dte.html';
+        $template_email_dte = '. <a href="'.$template_email_dte_url.'" target="_blank">Plantilla vigente</a>';
+    }
+}
+echo $f->input([
+    'type' => 'file',
+    'name' => 'template_email_dte',
+    'label' => 'Plantilla envío DTE',
+    'help' => 'Archivo HTML con la plantilla para el correo electrónico de envío de DTE'.$template_email_dte,
+]);
+?>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="far fa-file-pdf"></i>
+            Versión impresa del DTE
+        </div>
+        <div class="card-body">
+<?php
+echo $f->input([
+    'name' => 'config_pdf_web_verificacion',
+    'label' => 'Web verificación boletas electrónicas',
+    'placeholder' => 'libredte.cl/boletas',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_web_verificacion : '',
+    'help' => 'Enlace que se incluirá en las boletas para que el cliente pueda realizar la verificación',
+]);
+?>
+<?php $f->setColsLabel(4); ?>
+            <div class="row">
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'name' => 'config_pdf_copias_tributarias',
+    'label' => 'Copias tributarias',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_copias_tributarias : 1,
+    'help' => '¿Copias tributarias que se generarán por defecto?',
+    'check' => 'notempty integer',
+]);
+?>
+                </div>
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'name' => 'config_pdf_copias_cedibles',
+    'label' => 'Copias cedibles',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_copias_cedibles : 1,
+    'help' => '¿Copias cedibles que se generarán por defecto?',
+    'check' => 'notempty integer',
+]);
+?>
+                </div>
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pdf_dte_cedible',
+    'label' => 'Incluir cedible',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_dte_cedible : 0,
+    'help' => '¿Se debe incluir la copia cedible por defecto?',
+]);
+?>
+                </div>
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pdf_imprimir',
+    'label' => 'Impresión directa',
+    'options' => [
+        '' => 'No, se imprimirá bajando el archivo',
+        'pdf'=>'Imprimir usando el PDF',
+        'escpos' => 'Imprimir en impresora térmica (usando ESCPOS)',
+        'pdf_escpos' => 'Elegir imprimir usando PDF o ESCPOS',
+    ],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_imprimir : '',
+    'help' => '¿Se debe enviar a imprimir directamente a la impresora seleccionada?',
+]);
+?>
+                </div>
+<div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_emision_previsualizacion_automatica',
+    'label' => 'Previsualización PDF',
+    'options' => ['No', 'Si'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_emision_previsualizacion_automatica : 0,
+    'help' => '¿Se debe mostrar automáticamente la previsualización del PDF en la pantalla de previsualización?',
+]);
+?>
+                </div>
+                <div class="col-md-6">
+<?php
+echo $f->input([
+    'type' => 'select',
+    'name' => 'config_pdf_disposition',
+    'label' => 'Descargar PDF',
+    'options' => ['Si, descargar PDF', 'No, mostrar PDF en el navegador'],
+    'value' => isset($Contribuyente) ? $Contribuyente->config_pdf_disposition : 0,
+    'help' => '¿El PDF generado se debe descargar al equipo o se debe mostrar en el navegador?',
+]);
+?>
+                </div>
+            </div>
+<?php $f->setColsLabel(2); ?>
+<?php
+$formatos_pdf = (new \website\Dte\Pdf\Utility_Formatos())->setContribuyente($Contribuyente)->getFormatos();
+if ($formatos_pdf) {
+    $config_pdf_mapeo = [];
+    foreach ((array)$Contribuyente->config_pdf_mapeo as $m) {
+        $config_pdf_mapeo[] = [
+            'config_pdf_mapeo_documento' => $m->documento,
+            'config_pdf_mapeo_actividad' => $m->actividad,
+            'config_pdf_mapeo_sucursal' => $m->sucursal,
+            'config_pdf_mapeo_formato' => $m->formato,
+            'config_pdf_mapeo_papel' => $m->papel,
+        ];
+    }
+    $f->setStyle(false);
+    echo $f->input([
+        'type' => 'js',
+        'id' => 'config_pdf_mapeo',
+        'label' => 'Mapeo PDF',
+        'titles' => ['Documento', 'Actividad Económica', 'Sucursal', 'Formato', 'Papel'],
+        'inputs' => [
+            ['type'=>'select', 'name' => 'config_pdf_mapeo_documento', 'options' => ['*'=>'*'] + $tipos_dte],
+            ['type'=>'select', 'name' => 'config_pdf_mapeo_actividad', 'options' => ['*'=>'*'] + (array)$Contribuyente->getListActividades(), 'attr'=>'style="width:12em"'],
+            ['type'=>'select', 'name' => 'config_pdf_mapeo_sucursal', 'options' => ['*'=>'*'] + (array)$Contribuyente->getSucursales()],
+            ['type'=>'select', 'name' => 'config_pdf_mapeo_formato', 'options' => $formatos_pdf],
+            ['type'=>'select', 'name' => 'config_pdf_mapeo_papel', 'options' => \sasco\LibreDTE\Sii\Dte\PDF\Dte::$papel],
+        ],
+        'values' => $config_pdf_mapeo,
+    ]);
+    $f->setStyle('horizontal');
+}
+?>
+        </div>
+    </div>
+    <!-- INICIO DTEPDF -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="far fa-file-pdf"></i>
+            Formatos de PDF para los documentos
+        </div>
+        <div class="card-body">
+<?php
+$AppsConfigHelper = new \sowerphp\app\View_Helper_AppsConfig('dte_pdf', $f);
+foreach($dtepdfs as $App) {
+    $App->setVars([
+        'url' => $_url,
+    ]);
+    echo $AppsConfigHelper->generate($App);
+}
+?>
+        </div>
+    </div>
+    <!-- FIN DTEPDF -->
 </div>
 <!-- FIN CONFIGURACIÓN FACTURACIÓN -->
 

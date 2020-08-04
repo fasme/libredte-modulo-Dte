@@ -386,19 +386,11 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite descargar el PDF del documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-06-14
+     * @version 2020-08-04
      */
     public function pdf($emisor, $dte, $folio, $cedible = false)
     {
         $Receptor = $this->getContribuyente();
-        // datos por defecto y recibidos por GET
-        $config = $this->getQuery([
-            'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
-            'compress' => false,
-            'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : 1,
-            'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : 1,
-            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : 0 ),
-        ]);
         // obtener DTE recibido
         $DteRecibido = new Model_DteRecibido($emisor, $dte, $folio, (int)$Receptor->config_ambiente_en_certificacion);
         if (!$DteRecibido->exists() or (!$DteRecibido->intercambio and !$DteRecibido->mipyme)) {
@@ -407,6 +399,16 @@ class Controller_DteRecibidos extends \Controller_App
             );
             $this->redirect('/dte/dte_recibidos/ver/'.$DteRecibido->emisor.'/'.$DteRecibido->dte.'/'.$DteRecibido->folio);
         }
+        // datos por defecto y recibidos por GET
+        $formatoPDF = $DteRecibido->getEmisor()->getConfigPDF($DteRecibido);
+        $config = $this->getQuery([
+            'cedible' => isset($_POST['copias_cedibles']) ? (int)(bool)$_POST['copias_cedibles'] : $cedible,
+            'compress' => false,
+            'copias_tributarias' => isset($_POST['copias_tributarias']) ? (int)$_POST['copias_tributarias'] : 1,
+            'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : 1,
+            'formato' => isset($_POST['formato']) ? $_POST['formato'] : ( isset($_GET['formato']) ? $_GET['formato'] : $formatoPDF['formato'] ),
+            'papelContinuo' => isset($_POST['papelContinuo']) ? $_POST['papelContinuo'] : ( isset($_GET['papelContinuo']) ? $_GET['papelContinuo'] : $formatoPDF['papelContinuo'] ),
+        ]);
         // generar PDF
         try {
             $pdf = $DteRecibido->getPDF($config);
@@ -455,7 +457,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción de la API que permite obtener el PDF de un DTE recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-05-16
+     * @version 2020-08-04
      */
     public function _api_pdf_GET($emisor, $dte, $folio, $receptor)
     {
@@ -475,10 +477,12 @@ class Controller_DteRecibidos extends \Controller_App
             $this->Api->send('No existe el documento recibido solicitado T'.$dte.'F'.$folio.' del emisor '.$emisor.' o no tiene XML asociado', 404);
         }
         // datos por defecto
+        $formatoPDF = $DteRecibido->getEmisor()->getConfigPDF($DteRecibido);
         $config = $this->getQuery([
+            'formato' => $formatoPDF['formato'],
+            'papelContinuo' => $formatoPDF['papelContinuo'],
             'base64' => false,
             'cedible' => false,
-            'papelContinuo' => $DteRecibido->getEmisor()->config_pdf_dte_papel,
             'compress' => false,
             'copias_tributarias' => 1,
             'copias_cedibles' => 0,
