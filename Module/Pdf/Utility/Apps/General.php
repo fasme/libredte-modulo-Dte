@@ -45,6 +45,7 @@ class Utility_Apps_General extends Utility_Apps_Base_Formato
     public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form)
     {
         $buffer = '';
+        $buffer .= '<p class="mb-4">Este formato sólo genera PDF en tamaño hoja carta.</p>';
         $buffer .= parent::getConfigPageHTML($form);
         $buffer .= '<div class="page-header">&raquo; Datos del emisor</div>';
         $buffer .= $form->input([
