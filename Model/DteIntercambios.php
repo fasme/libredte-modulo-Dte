@@ -55,7 +55,7 @@ class Model_DteIntercambios extends \Model_Plural_App
     /**
      * Método que entrega la tabla con los casos de intercambio del contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-06-19
+     * @version 2020-08-06
      */
     public function buscar(array $filter = [])
     {
@@ -63,8 +63,8 @@ class Model_DteIntercambios extends \Model_Plural_App
             'soloPendientes' => true,
             'p' => 0, // página de intercambios
         ], $filter);
-        $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/Documento/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
-        $totales = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/Documento/Encabezado/Totales/MntTotal', 'http://www.sii.cl/SiiDte');
+        $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/*/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/*/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
+        $totales = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/*/Encabezado/Totales/MntTotal', 'http://www.sii.cl/SiiDte');
         $where = [];
         $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
         if (!empty($filter['recibido_desde'])) {
