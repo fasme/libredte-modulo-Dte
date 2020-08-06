@@ -40,6 +40,17 @@ class Controller_DteVentas extends Controller_Base_Libros
     ]; ///< Configuración para las acciones del controlador
 
     /**
+     * Método para permitir acciones sin estar autenticado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-06
+     */
+    public function beforeFilter()
+    {
+        $this->Auth->allow('_api_historial_GET');
+        parent::beforeFilter();
+    }
+
+    /**
      * Acción que envía el archivo XML del libro de ventas al SII
      * Si no hay documentos en el período se enviará sin movimientos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
@@ -395,9 +406,9 @@ class Controller_DteVentas extends Controller_Base_Libros
     /**
      * Servicio web que entrega el historial de montos agrupados por mes de un receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-05
+     * @version 2020-08-06
      */
-    public function _api_historial_GET($receptor, $fecha, $emisor)
+    public function _api_historial_GET($receptor, $fecha, $emisor, $dte = null, $folio = null, $total = null)
     {
         extract($this->getQuery([
             'formato' => 'json',
@@ -405,18 +416,32 @@ class Controller_DteVentas extends Controller_Base_Libros
             'periodos' => 12,
         ]));
         // verificar usuario autenticado
+        $Emisor = new Model_Contribuyente((int)$emisor);
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
-            $this->Api->send($User, 401);
+            if ($dte === null or $folio === null or $total === null) {
+                $this->Api->send($User, 401);
+            }
+            $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->enCertificacion());
+            if (!$DteEmitido->exists()) {
+                $this->Api->send($User, 401);
+            }
+            if ($DteEmitido->fecha != $fecha or $DteEmitido->total != $total or $DteEmitido->receptor != $receptor) {
+                $this->Api->send($User, 401);
+            }
+        }
+        if ($dte === null or $folio === null or $total === null) {
+            if (!$Emisor->usuarioAutorizado($User, '/dte/dte_ventas/ver')) {
+                $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
+            }
         }
         // obtener historial
-        $Emisor = new Model_Contribuyente($emisor);
         $historial = $Emisor->getHistorialVentas($receptor, $fecha, $periodos);
         if ($periodo_glosa) {
             $historial_nuevo = [];
-            foreach ($historial as $periodo => $total) {
+            foreach ($historial as $periodo => $monto) {
                 $mes = substr(\sowerphp\general\Utility_Date::$meses[((int)substr($periodo,4))-1],0,3);
-                $historial_nuevo[$mes] = $total;
+                $historial_nuevo[$mes] = $monto;
             }
             $historial = $historial_nuevo;
         }
