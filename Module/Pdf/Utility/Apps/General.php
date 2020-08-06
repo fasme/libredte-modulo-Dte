@@ -95,7 +95,7 @@ class Utility_Apps_General extends Utility_Apps_Base_Formato
             'name' => 'dtepdf_'.$this->getCodigo().'_img_historial',
             'label' => 'Historial',
             'value' => !empty($this->getConfig()->img->historial) ? $this->getConfig()->img->historial : null,
-            'help' => 'URL con la imagen del historial en tamaño 250x195 pixeles. Se pueden usar las variables <code>{emisor}</code>, <code>{receptor}</code> y <code>{fecha}</code>.',
+            'help' => 'URL con la imagen del historial en tamaño 250x195 pixeles. Se pueden usar las variables <code>{emisor}</code>, <code>{receptor}</code>, <code>{fecha}</code>, <code>{dte}</code>, <code>{folio}</code> y <code>{total}</code>.<br/><a href="#" onclick="document.getElementById(\'dtepdf_'.$this->getCodigo().'_img_historialField\').value = \''.$this->vars['url'].'/api/dte/dte_ventas/historial/{receptor}/{fecha}/{emisor}/{dte}/{folio}/{total}?formato=png\'; return false;" class="small">Usar URL del historial de ventas de LibreDTE</a>',
         ]);
         $buffer .= $form->input([
             'name' => 'dtepdf_'.$this->getCodigo().'_img_pie',

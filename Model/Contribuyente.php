@@ -3709,15 +3709,16 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la configuración para el PDF de los DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-04
+     * @version 2020-08-05
      */
     public function getConfigPDF($options)
     {
         if (is_object($options)) {
+            $Documento = $options;
             $options = [
-                'documento' => $options->dte,
-                'actividad' => $options->getActividad('*'),
-                'sucursal' => $options->sucursal_sii,
+                'documento' => $Documento->dte,
+                'actividad' => $Documento->getActividad('*'),
+                'sucursal' => $Documento->sucursal_sii,
             ];
         }
         foreach (['documento', 'actividad', 'sucursal'] as $col) {
@@ -3735,6 +3736,17 @@ class Model_Contribuyente extends \Model_App
         // agregar siempre que se pueda la dirección de la casa matriz como dato "extra"
         if (!empty($this->direccion) and !empty($this->comuna)) {
             $config['extra']['casa_matriz'] = $this->direccion.', '.$this->getComuna()->comuna;
+        }
+        // agregar opciones del documento si se indicó
+        if (!empty($Documento)) {
+            $config['extra']['documento'] = [
+                'emisor' => $Documento->emisor,
+                'receptor' => $Documento->receptor,
+                'dte' => $Documento->dte,
+                'folio' => !empty($Documento->folio) ? $Documento->folio : $Documento->codigo,
+                'fecha' => $Documento->fecha,
+                'total' => $Documento->total,
+            ];
         }
         // entregar configuración
         return $config;

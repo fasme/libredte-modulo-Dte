@@ -422,11 +422,15 @@ class Controller_DteVentas extends Controller_Base_Libros
             if ($dte === null or $folio === null or $total === null) {
                 $this->Api->send($User, 401);
             }
-            $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->enCertificacion());
-            if (!$DteEmitido->exists()) {
+            if (is_numeric($folio)) {
+                $Documento = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->enCertificacion());
+            } else {
+                $Documento = new Model_DteTmp($Emisor->rut, $receptor, $dte, $folio);
+            }
+            if (!$Documento->exists()) {
                 $this->Api->send($User, 401);
             }
-            if ($DteEmitido->fecha != $fecha or $DteEmitido->total != $total or $DteEmitido->receptor != $receptor) {
+            if ($Documento->fecha != $fecha or $Documento->total != $total or $Documento->receptor != $receptor) {
                 $this->Api->send($User, 401);
             }
         }
@@ -475,9 +479,12 @@ class Controller_DteVentas extends Controller_Base_Libros
                 new \Libchart\View\Color\Color(100, 100, 100)
             ]);
             $chart->getConfig()->setShowPointCaption(false);
-            header('Content-type: image/png');
+            ob_clean();
             $chart->render();
-            exit;
+            $grafico = ob_get_contents();
+            ob_clean();
+            $this->Api->response()->type('image/png');
+            $this->Api->send($grafico);
         }
         // entregar historial como JSON
         else {
