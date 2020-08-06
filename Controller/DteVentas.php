@@ -395,10 +395,15 @@ class Controller_DteVentas extends Controller_Base_Libros
     /**
      * Servicio web que entrega el historial de montos agrupados por mes de un receptor
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-14
+     * @version 2020-08-05
      */
-    public function _api_historial_GET($receptor, $fecha, $periodos, $emisor)
+    public function _api_historial_GET($receptor, $fecha, $emisor)
     {
+        extract($this->getQuery([
+            'formato' => 'json',
+            'periodo_glosa' => true,
+            'periodos' => 12,
+        ]));
         // verificar usuario autenticado
         $User = $this->Api->getAuthUser();
         if (is_string($User)) {
@@ -407,15 +412,52 @@ class Controller_DteVentas extends Controller_Base_Libros
         // obtener historial
         $Emisor = new Model_Contribuyente($emisor);
         $historial = $Emisor->getHistorialVentas($receptor, $fecha, $periodos);
-        if (empty($_GET['periodo_glosa'])) {
+        if ($periodo_glosa) {
+            $historial_nuevo = [];
+            foreach ($historial as $periodo => $total) {
+                $mes = substr(\sowerphp\general\Utility_Date::$meses[((int)substr($periodo,4))-1],0,3);
+                $historial_nuevo[$mes] = $total;
+            }
+            $historial = $historial_nuevo;
+        }
+        // entregar historial como un gráfico PNG
+        if ($formato == 'png') {
+            $n_historial = count($historial);
+            $title = $n_historial > 1 ? ('Historial últimos '.$n_historial.' meses') : 'Historial último mes';
+            $chart = new \Libchart\View\Chart\VerticalBarChart(250,195);
+            $dataSet = new \Libchart\Model\XYDataSet();
+            foreach ($historial as $periodo => $valor) {
+                $dataSet->addPoint(new \Libchart\Model\Point($periodo, $valor));
+            }
+            $chart->setDataSet($dataSet);
+            $chart->setTitle($title);
+            $chart->getPlot()->setLogoFileName(false);
+            $chart->getPlot()->setOuterPadding(new \Libchart\View\Primitive\Padding(0, 0, 0, 0));
+            $chart->getPlot()->setTitlePadding(new \Libchart\View\Primitive\Padding(0, 0, 0, 0));
+            $chart->getPlot()->setGraphPadding(new \Libchart\View\Primitive\Padding(0, 15, 25, 57));
+            $chart->getPlot()->setCaptionPadding(new \Libchart\View\Primitive\Padding(0, 0, 0, 0));
+            $chart->getPlot()->getPalette()->setBackgroundColor([
+                new \Libchart\View\Color\Color(255, 255, 255),
+                new \Libchart\View\Color\Color(255, 255, 255),
+                new \Libchart\View\Color\Color(255, 255, 255),
+                new \Libchart\View\Color\Color(255, 255, 255)
+            ]);
+            $chart->getPlot()->getPalette()->setAxisColor([
+                new \Libchart\View\Color\Color(0, 0, 0),
+                new \Libchart\View\Color\Color(0, 0, 0)
+            ]);
+            $chart->getPlot()->getPalette()->setBarColor([
+                new \Libchart\View\Color\Color(100, 100, 100)
+            ]);
+            $chart->getConfig()->setShowPointCaption(false);
+            header('Content-type: image/png');
+            $chart->render();
+            exit;
+        }
+        // entregar historial como JSON
+        else {
             return $historial;
         }
-        $historial_nuevo = [];
-        foreach ($historial as $periodo => $total) {
-            $mes = substr(\sowerphp\general\Utility_Date::$meses[((int)substr($periodo,4))-1],0,3);
-            $historial_nuevo[$mes] = $total;
-        }
-        return $historial_nuevo;
     }
 
     /**
