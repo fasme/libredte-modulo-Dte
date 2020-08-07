@@ -128,7 +128,7 @@ class Controller_Documentos extends \Controller_App
      * enviado al SII. Luego se debe usar la función generar de la API para
      * generar el DTE final y enviarlo al SII.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-02
+     * @version 2020-08-07
      */
     public function _api_emitir_POST()
     {
@@ -146,14 +146,25 @@ class Controller_Documentos extends \Controller_App
         // definir formato de los datos que se están usando como entrada
         // y si es diferente a JSON se busca un parser para poder cargar los
         // datos a un arreglo de PHP (formato JSON)
-        if ($formato!='json') {
-            if (!is_string($this->Api->data)) {
+        if ($formato != 'json') {
+            if (is_string($this->Api->data)) {
+                $this->Api->data = ['datos' => $this->Api->data];
+            }
+            if (empty($this->Api->data['datos']) or !is_string($this->Api->data['datos'])) {
                 $this->Api->send('Debe enviar los datos codificados en base64 en un string JSON', 400);
             }
             try {
-                $this->Api->data = \sasco\LibreDTE\Sii\Dte\Formatos::toArray(
-                    $formato, base64_decode($this->Api->data)
+                $datos = \sasco\LibreDTE\Sii\Dte\Formatos::toArray(
+                    $formato, base64_decode($this->Api->data['datos'])
                 );
+                if (!empty($this->Api->data['extra'])) {
+                    if (is_string($this->Api->data['extra'])) {
+                        $this->Api->data['extra'] = base64_decode($this->Api->data['extra']);
+                    }
+                    $datos['LibreDTE']['extra'] = $this->Api->data['extra'];
+                }
+                $this->Api->data = $datos;
+                unset($datos);
             } catch (\Exception $e) {
                 $this->Api->send($e->getMessage(), 400);
             }
