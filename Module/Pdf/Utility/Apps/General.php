@@ -83,7 +83,7 @@ class Utility_Apps_General extends Utility_Apps_Base_Formato
             'name' => 'dtepdf_'.$this->getCodigo().'_img_logo',
             'label' => 'Logo',
             'value' => !empty($this->getConfig()->img->logo) ? $this->getConfig()->img->logo : null,
-            'help' => 'URL con el logo en tamaño 450x100 pixeles',
+            'help' => 'URL con el logo en tamaño 450x100 pixeles.<br/><a href="#" onclick="document.getElementById(\'dtepdf_'.$this->getCodigo().'_img_logoField\').value = \''.\sowerphp\core\Configure::read('app.url_static').'/contribuyentes/'.$this->vars['Contribuyente']->rut.'/logo.png\'; return false;" class="small">Usar logo cargado en LibreDTE</a>',
         ]);
         $buffer .= $form->input([
             'name' => 'dtepdf_'.$this->getCodigo().'_img_cotizacion',
