@@ -557,7 +557,7 @@ class Model_DteIntercambio extends \Model_App
      * @param accion =true recibir todo el intercambio, =false reclama todo el intercambio, =array procesa los documentos indicados, debe tener índice recibir y/o reclamar o bien indíce númerico y se asume es el listado de documentos
      * @param config Configuración global para la respuesta con índices: user_id, NmbContacto, MailContacto, sucursal, Recinto, responder_a, periodo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-21
+     * @version 2020-08-06
      */
     public function responder($accion, array $config = [])
     {
@@ -680,12 +680,16 @@ class Model_DteIntercambio extends \Model_App
         // enviar respuesta al SII
         $resultado_rc = $this->enviarRespuestaSII($documentos, $Firma);
         // guardar estado del intercambio y usuario que lo procesó
-        $RecepcionDte = new \sasco\LibreDTE\XML();
-        $RecepcionDte->loadXML($xmlRecepcionDte);
-        $this->estado = $RecepcionDte->toArray()['RespuestaDTE']['Resultado']['RecepcionEnvio']['EstadoRecepEnv'];
-        $this->recepcion_xml = base64_encode($xmlRecepcionDte);
+        if ($xmlRecepcionDte !== false) {
+            $RecepcionDte = new \sasco\LibreDTE\XML();
+            $RecepcionDte->loadXML($xmlRecepcionDte);
+            $this->estado = $RecepcionDte->toArray()['RespuestaDTE']['Resultado']['RecepcionEnvio']['EstadoRecepEnv'];
+            $this->recepcion_xml = base64_encode($xmlRecepcionDte);
+        } else {
+            $this->estado = 0; // estado "mentiroso" podría ser rechazo de un DTE 43 y quedar ok (=> se borra el intercambio)
+        }
         $this->recibos_xml = $xmlEnvioRecibos ? base64_encode($xmlEnvioRecibos) : null;
-        $this->resultado_xml = base64_encode($xmlResultadoDte);
+        $this->resultado_xml = $xmlResultadoDte ? base64_encode($xmlResultadoDte) : null;
         $this->fecha_hora_respuesta = date('Y-m-d H:i:s');
         $this->usuario = $config['user_id'];
         $this->save();
@@ -700,13 +704,16 @@ class Model_DteIntercambio extends \Model_App
     /**
      * Método que crea el XML RecepcionDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2020-08-06
      */
     private function crearXmlRecepcionDte($documentos, $config, $Firma)
     {
         $RecepcionDTE = [];
         $EstadoRecepEnv = 99;
         foreach ($documentos as $dte) {
+            if ($dte['TipoDTE'] == 43) {
+                return false;
+            }
             if (in_array($dte['EstadoRecepDTE'], ['ACD', 'ERM'])) {
                 $EstadoRecepDTE = 0;
                 $EstadoRecepEnv = 0;
@@ -761,7 +768,7 @@ class Model_DteIntercambio extends \Model_App
     /**
      * Método que crea el XML EnvioRecibos
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2020-08-06
      */
     private function crearXmlEnvioRecibos($documentos, $config, $Firma)
     {
@@ -776,6 +783,9 @@ class Model_DteIntercambio extends \Model_App
         // procesar cada DTE
         $EnvioRecibos_r = [];
         foreach ($documentos as $dte) {
+            if ($dte['TipoDTE'] == 43) {
+                return false;
+            }
             if ($dte['acuse']) {
                 $EnvioRecibos->agregar([
                     'TipoDoc' => $dte['TipoDTE'],
@@ -805,7 +815,7 @@ class Model_DteIntercambio extends \Model_App
     /**
      * Método que crea el XML ResultadoDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2020-08-06
      */
     private function crearXmlResultadoDte($documentos, $config, $Firma)
     {
@@ -814,6 +824,9 @@ class Model_DteIntercambio extends \Model_App
         // procesar cada DTE
         $i = 1;
         foreach ($documentos as $dte) {
+            if ($dte['TipoDTE'] == 43) {
+                return false;
+            }
             $estado = in_array($dte['EstadoRecepDTE'], ['ACD', 'ERM']) ? 0 : 2;
             $RespuestaEnvio->agregarRespuestaDocumento([
                 'TipoDTE' => $dte['TipoDTE'],
