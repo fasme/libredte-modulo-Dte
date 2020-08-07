@@ -1693,7 +1693,7 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('El DTE no tiene XML asociado para generar el PDF');
         }
         // configuración por defecto para el PDF
-        $config_emisor = $this->getEmisor()->getConfigPDF($this);
+        $config_emisor = $this->getEmisor()->getConfigPDF($this, $config);
         $default_config = [
             'cedible' => $this->getEmisor()->config_pdf_dte_cedible,
             'compress' => false,

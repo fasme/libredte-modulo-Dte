@@ -843,12 +843,12 @@ class Model_DteTmp extends \Model_App
      * Entrega el PDF que se ha generado con LibreDTE a partir del JSON del DTE
      * temporal.
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-04
+     * @version 2020-08-07
      */
     public function getPDF(array $config = [])
     {
         // configuración por defecto para el PDF
-        $config_emisor = $this->getEmisor()->getConfigPDF($this);
+        $config_emisor = $this->getEmisor()->getConfigPDF($this, $config);
         $default_config = [
             'cotizacion' => 0,
             'cedible' => false,

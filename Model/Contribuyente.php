@@ -3709,9 +3709,9 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega la configuración para el PDF de los DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-05
+     * @version 2020-08-07
      */
-    public function getConfigPDF($options)
+    public function getConfigPDF($options, $default_config = [])
     {
         if (is_object($options)) {
             $Documento = $options;
@@ -3721,12 +3721,16 @@ class Model_Contribuyente extends \Model_App
                 'sucursal' => $Documento->sucursal_sii,
             ];
         }
-        foreach (['documento', 'actividad', 'sucursal'] as $col) {
-            if (!isset($options[$col])) {
-                $options[$col] = '*';
+        if (empty($default_config['formato']) or !isset($default_config['papelContinuo'])) {
+            foreach (['documento', 'actividad', 'sucursal'] as $col) {
+                if (!isset($options[$col])) {
+                    $options[$col] = '*';
+                }
             }
+            $config = $this->_getConfigPDF($options);
+        } else {
+            $config = ['formato' => $default_config['formato'], 'papelContinuo' => $default_config['papelContinuo']];
         }
-        $config = $this->_getConfigPDF($options);
         // agregar configuración del formato encontrado como datos "extra"
         $formatoPDF = $this->getApp('dtepdfs.'.$config['formato']);
         if (!empty($formatoPDF)) {
