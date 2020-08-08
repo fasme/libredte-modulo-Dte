@@ -22,6 +22,23 @@ $(function() {
 <?php
 $f = new \sowerphp\general\View_Helper_Form(false);
 echo $f->begin(['id'=>'emitir_dte', 'action'=>$_base.'/dte/documentos/previsualizacion', 'onsubmit'=>'DTE.check(this)']);
+if (!empty($reemplazar_receptor) and !empty($reemplazar_dte) and !empty($reemplazar_codigo)) {
+    echo $f->input([
+        'type' => 'hidden',
+        'name' => 'reemplazar_receptor',
+        'value' => $reemplazar_receptor,
+    ]);
+    echo $f->input([
+        'type' => 'hidden',
+        'name' => 'reemplazar_dte',
+        'value' => $reemplazar_dte,
+    ]);
+    echo $f->input([
+        'type' => 'hidden',
+        'name' => 'reemplazar_codigo',
+        'value' => $reemplazar_codigo,
+    ]);
+}
 ?>
     <!-- DATOS DEL DOCUMENTO -->
 <?php if ($Emisor->puedeAsignarFolio($_Auth->User)) : ?>

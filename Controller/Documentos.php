@@ -419,7 +419,7 @@ class Controller_Documentos extends \Controller_App
     /**
      * Acción para mostrar página de emisión de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-21
+     * @version 2020-08-08
      */
     public function emitir($referencia_dte = null, $referencia_folio = null, $dte_defecto = null, $referencia_codigo = '', $referencia_razon = '')
     {
@@ -459,7 +459,12 @@ class Controller_Documentos extends \Controller_App
                     $this->redirect('/dte/dte_tmps');
                 }
                 if (isset($_GET['reemplazar'])) {
-                    $DocumentoOriginal->delete();
+                    $this->set([
+                        'reemplazar_receptor' => $DocumentoOriginal->receptor,
+                        'reemplazar_dte' => $DocumentoOriginal->dte,
+                        'reemplazar_codigo' => $DocumentoOriginal->codigo,
+
+                    ]);
                     $_GET['copiar'] = 1;
                 }
             }
@@ -561,6 +566,11 @@ class Controller_Documentos extends \Controller_App
                 );
                 $this->redirect('/dte/documentos/emitir');
             }
+        }
+        // eliminar el documento temporal del que viene este si es reemplazo
+        if (!empty($_POST['reemplazar_receptor']) and !empty($_POST['reemplazar_dte']) and !empty($_POST['reemplazar_codigo'])) {
+            $DocumentoOriginal = new Model_DteTmp($Emisor->rut, (int)$_POST['reemplazar_receptor'], (int)$_POST['reemplazar_dte'], $_POST['reemplazar_codigo']);
+            $DocumentoOriginal->delete();
         }
         // crear receptor
         list($rut, $dv) = explode('-', str_replace('.', '', $_POST['RUTRecep']));
