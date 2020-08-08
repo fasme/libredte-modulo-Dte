@@ -159,9 +159,11 @@ class Controller_Documentos extends \Controller_App
                 );
                 if (!empty($this->Api->data['extra'])) {
                     if (is_string($this->Api->data['extra'])) {
-                        $this->Api->data['extra'] = base64_decode($this->Api->data['extra']);
+                        $this->Api->data['extra'] = json_decode(base64_decode($this->Api->data['extra']), true);
                     }
-                    $datos['LibreDTE']['extra'] = $this->Api->data['extra'];
+                    if (!empty($this->Api->data['extra'])) {
+                        $datos['LibreDTE']['extra'] = $this->Api->data['extra'];
+                    }
                 }
                 $this->Api->data = $datos;
                 unset($datos);
