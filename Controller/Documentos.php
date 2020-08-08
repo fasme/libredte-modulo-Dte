@@ -315,6 +315,10 @@ class Controller_Documentos extends \Controller_App
                 $datos_extra['dte']['Encabezado']['Emisor']['Acteco'] = $dte['Encabezado']['Emisor']['Acteco'];
                 $dte['Encabezado']['Emisor']['Acteco'] = false;
             }
+            if (!empty($dte['Encabezado']['Emisor']['CdgVendedor'])) {
+                $datos_extra['dte']['Encabezado']['Emisor']['CdgVendedor'] = $dte['Encabezado']['Emisor']['CdgVendedor'];
+                $dte['Encabezado']['Emisor']['CdgVendedor'] = false;
+            }
         }
         if (!empty($dte['LibreDTE'])) {
             if (!empty($dte['LibreDTE']['extra'])) {
