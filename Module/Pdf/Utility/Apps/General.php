@@ -27,7 +27,7 @@ namespace website\Dte\Pdf;
 /**
  * Utilidad para trabajar con el formato de PDF General de SASCO SpA
  * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
- * @version 2020-08-02
+ * @version 2020-08-10
  */
 class Utility_Apps_General extends Utility_Apps_Base_Formato
 {
@@ -36,6 +36,10 @@ class Utility_Apps_General extends Utility_Apps_Base_Formato
     protected $nombre = 'PDF de Propósito General';
     protected $descripcion = 'Es el formato oficial de SASCO SpA, que ha sido compartido con LibreDTE. Permite agregar imágenes, mejor diseño, código de barras y gráfico con historial.';
     protected $logo = 'https://i.imgur.com/J8tVevj.png';
+
+    protected $config_flags = [
+        'historial_mostrar_valor' => 'Mostrar valor en el gráfico del historial (sólo cuando se pasan datos en vez de URL)',
+    ];
 
     /**
      * Método que entrega el código HTML de la página de configuración de la aplicación

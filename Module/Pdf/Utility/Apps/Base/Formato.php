@@ -35,7 +35,7 @@ abstract class Utility_Apps_Base_Formato extends \sowerphp\app\Utility_Apps_Base
     /**
      * Método que entrega el código HTML de la página de configuración de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-02
+     * @version 2020-08-10
      */
     public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form)
     {
@@ -48,6 +48,20 @@ abstract class Utility_Apps_Base_Formato extends \sowerphp\app\Utility_Apps_Base
             'value' => (int)(!empty($this->getConfig()->disponible)),
             'help' => '¿Está disponible este formato de PDF?',
         ]);
+        // configuración para flags del formato
+        if (!empty($this->config_flags)) {
+            $flags = '';
+            foreach ($this->config_flags as $codigo => $descripcion) {
+                $flags .= '<div class="form-check"><input type="checkbox" name="dtepdf_'.$this->getCodigo().'_flag_'.$codigo.'" value="'.$codigo.'" class="form-check-input" '.($this->getConfigFlags($codigo)?'checked="checked"':'').' id="dtepdf_'.$this->getCodigo().'_flag_'.$codigo.'"><label class="form-check-label" for="dtepdf_'.$this->getCodigo().'_flag_'.$codigo.'">'.$descripcion.'</label></div>';
+            }
+            $buffer .= $form->input([
+                'type' => 'div',
+                'label' => 'Flags',
+                'value' => $flags,
+                'help' => 'Flags que permiten activar o desactivar opciones en el formato del PDF',
+            ]);
+        }
+        // entregar buffer
         return $buffer;
     }
 
@@ -74,11 +88,21 @@ abstract class Utility_Apps_Base_Formato extends \sowerphp\app\Utility_Apps_Base
     /**
      * Método que crea la configuración de manera automágica :)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-02
+     * @version 2020-08-10
      */
     private function createConfig(string $id): array
     {
         $config = [];
+        // asignar flags
+        if (!empty($this->config_flags)) {
+            $flags = [];
+            foreach ($this->config_flags as $codigo => $descripcion) {
+                $flags[$codigo] = !empty($_POST[$id.'_flag_'.$codigo]);
+                unset($_POST[$id.'_flag_'.$codigo]);
+            }
+            $config['flags'] = $flags;
+        }
+        // asignar otras variables
         foreach ($_POST as $key => $value) {
             if (strpos($key, $id.'_') === 0) {
                 $name = str_replace($id.'_', '', $key);
@@ -101,6 +125,21 @@ abstract class Utility_Apps_Base_Formato extends \sowerphp\app\Utility_Apps_Base
             }
         }
         return $config;
+    }
+
+    /**
+     * Método que entrega la configuración de los flags del formato que
+     * permiten activar o desactivar opciones (de un flag o de todos)
+     * @param flag Flag que se quiere obtener o null para obtenerlos todos
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-10
+     */
+    public function getConfigFlags($flag = null)
+    {
+        if ($flag) {
+            return !empty($this->getConfig()->flags->$flag);
+        }
+        return !empty($this->getConfig()->flags) ? $this->getConfig()->flags : [];
     }
 
     /**
