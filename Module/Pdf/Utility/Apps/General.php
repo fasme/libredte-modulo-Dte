@@ -44,7 +44,7 @@ class Utility_Apps_General extends Utility_Apps_Base_Formato
     /**
      * Método que entrega el código HTML de la página de configuración de la aplicación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-02
+     * @version 2020-08-11
      */
     public function getConfigPageHTML(\sowerphp\general\View_Helper_Form $form)
     {
@@ -169,6 +169,13 @@ class Utility_Apps_General extends Utility_Apps_Base_Formato
         ]);
         $buffer .= '<p class="help-block text-muted">Ancho de las columnas del detalle</p>';
         $form->setStyle('horizontal');
+        $buffer .= '<div class="page-header">&raquo; Etiquetas con nombres de campos del PDF</div>';
+        $buffer .= $form->input([
+            'name' => 'dtepdf_'.$this->getCodigo().'_etiquetas_CdgVendedor',
+            'label' => 'Vendedor',
+            'value' => !empty($this->getConfig()->etiquetas->CdgVendedor) ? $this->getConfig()->etiquetas->CdgVendedor : null,
+            'placeholder' => 'Vendedor',
+        ]);
         // entregar buffer
         return $buffer;
     }
