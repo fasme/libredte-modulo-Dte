@@ -3698,7 +3698,7 @@ class Model_Contribuyente extends \Model_App
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-08-17
      */
-    public function enCertificacion()
+    public function enCertificacion(): int
     {
         if (isset($_GET['_contribuyente_certificacion'])) {
             return (int)(bool)$_GET['_contribuyente_certificacion'];
