@@ -3696,12 +3696,12 @@ class Model_Contribuyente extends \Model_App
      * Método que indica si el contribuyente está o no en ambiente de certificación
      * @return =0 ambiente de producción, =1 ambiente de certificación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-01
+     * @version 2020-08-17
      */
     public function enCertificacion()
     {
-        if (isset($_GET['_contribuyente_ambiente'])) {
-            return (int)(bool)$_GET['_contribuyente_ambiente'];
+        if (isset($_GET['_contribuyente_certificacion'])) {
+            return (int)(bool)$_GET['_contribuyente_certificacion'];
         }
         return (int)(bool)$this->config_ambiente_en_certificacion;
     }
