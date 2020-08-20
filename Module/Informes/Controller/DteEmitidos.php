@@ -113,6 +113,7 @@ class Controller_DteEmitidos extends \Controller_App
             $cols[] = 'Subtotal';
         }
         $cols[] = 'Ind Traslado';
+        $cols[] = 'Cód. Interno';
         $aux = (new \website\Dte\Model_DteEmitidos())->setContribuyente($Emisor)->getDetalle($desde, $hasta, $detalle);
         if ($aux and $detalle) {
             $emitidos = [];
