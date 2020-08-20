@@ -645,11 +645,15 @@ $f->setStyle('horizontal');
 ?>
             </div>
         </div>
-        <a class="btn btn-primary btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/receder/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+        <div class="card mb-4">
+            <div class="card-body lead text-center">
+                <a href="http://www.sii.cl/preguntas_frecuentes/catastro/001_012_6407.htm" target="_blank">¿Cómo puedo anular una cesión?</a>
+            </div>
+        </div>
+        <!--<a class="btn btn-primary btn-sm btn-block mb-4" href="<?=$_base?>/dte/dte_emitidos/receder/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
             Receder DTE
-        </a>
+        </a>-->
 <?php if ($Emisor->usuarioAutorizado($_Auth->User, 'admin')) : ?>
-        <br/>
         <a class="btn btn-danger btn-sm btn-block" href="<?=$_base?>/dte/dte_emitidos/cesion_eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.confirm(this, '¿Está seguro de eliminar la cesión de LibreDTE?\nSi continúa ¡perderá el archivo AEC!')">
             Eliminar cesión
         </a>
@@ -714,9 +718,9 @@ echo $f->end('Generar archivo cesión y enviar al SII');
 endif;
 ?>
 <?php if (!$DteEmitido->cesion_track_id) : ?>
-    <a class="btn btn-primary btn-sm btn-block mt-4" href="<?=$_base?>/dte/dte_emitidos/receder/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
+    <!--<a class="btn btn-primary btn-sm btn-block mt-4" href="<?=$_base?>/dte/dte_emitidos/receder/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">
         ¿Desea receder este DTE?
-    </a>
+    </a>-->
 <?php endif; ?>
 </div>
 <!-- FIN CESIÓN -->
