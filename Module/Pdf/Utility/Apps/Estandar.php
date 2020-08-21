@@ -135,6 +135,14 @@ class Utility_Apps_Estandar extends Utility_Apps_Base_Formato
             'value' => !empty($this->getConfig()->continuo->logo->posicion) ? $this->getConfig()->continuo->logo->posicion : 0,
             'help' => '¿Se debe agregar el logo al formato de papel contínuo?',
         ]);
+        $buffer .= $form->input([
+            'type' => 'select',
+            'name' => 'dtepdf_'.$this->getCodigo().'_continuo_item_detalle',
+            'label' => '¿Detalle de item?',
+            'options' => ['No', 'Si'],
+            'value' => !empty($this->getConfig()->continuo->item->detalle) ? $this->getConfig()->continuo->item->detalle : 0,
+            'help' => '¿Se debe mostrar el detalle del item?',
+        ]);
         // entregar buffer
         return $buffer;
     }
