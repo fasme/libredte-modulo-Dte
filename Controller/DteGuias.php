@@ -48,7 +48,7 @@ class Controller_DteGuias extends Controller_Base_Libros
     public function enviar_sii($periodo)
     {
         $Emisor = $this->getContribuyente();
-        $DteGuia = new Model_DteGuia($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteGuia = new Model_DteGuia($Emisor->rut, $periodo, $Emisor->enCertificacion());
         // si el periodo es mayor o igual al actual no se puede enviar
         if ($periodo >= date('Ym')) {
             \sowerphp\core\Model_Datasource_Session::message(
@@ -86,8 +86,8 @@ class Controller_DteGuias extends Controller_Base_Libros
         $Libro->setCaratula([
             'RutEmisorLibro' => $Emisor->rut.'-'.$Emisor->dv,
             'PeriodoTributario' => substr($periodo, 0, 4).'-'.substr($periodo, 4),
-            'FchResol' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
-            'NroResol' =>  $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+            'FchResol' => $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+            'NroResol' =>  $Emisor->enCertificacion() ? 0 : $Emisor->config_ambiente_produccion_numero,
             'TipoLibro' => 'ESPECIAL',
             'TipoEnvio' => 'TOTAL',
             'FolioNotificacion' => $DteGuia->getFolioNotificacion() + 1,

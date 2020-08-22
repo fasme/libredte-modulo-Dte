@@ -293,7 +293,7 @@ echo $f->input([
     'name' => 'config_ambiente_en_certificacion',
     'label' => 'Ambiente',
     'options' => ['Producción (documentos válidos)', 'Certificación / Pruebas (documentos no válidos)'],
-    'value' => isset($Contribuyente) ? $Contribuyente->config_ambiente_en_certificacion : 1,
+    'value' => isset($Contribuyente) ? $Contribuyente->config_ambiente_en_certificacion : 0,
     'help' => 'Permite elegir entre un ambiente de pruebas o uno real para la emisión de los DTE',
     'check' => 'notempty',
     'attr' => 'onchange="ambiente_set(this.value)"',

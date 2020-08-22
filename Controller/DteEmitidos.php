@@ -151,7 +151,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -214,7 +214,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -300,7 +300,7 @@ class Controller_DteEmitidos extends \Controller_App
             'copias_cedibles' => isset($_POST['copias_cedibles']) ? (int)$_POST['copias_cedibles'] : $Emisor->config_pdf_copias_cedibles,
         ]));
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -375,7 +375,7 @@ class Controller_DteEmitidos extends \Controller_App
             }
         }
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -415,7 +415,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -461,7 +461,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el DTE solicitado', 400);
         }
@@ -513,7 +513,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -589,7 +589,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -667,7 +667,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -774,7 +774,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -819,7 +819,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -851,7 +851,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -890,7 +890,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -950,7 +950,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // obtener DTE
         $Emisor = new Model_Contribuyente($emisor);
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el DTE solicitado', 404);
         }
@@ -1001,7 +1001,7 @@ class Controller_DteEmitidos extends \Controller_App
         }
         // obtener DTE
         $Emisor = new Model_Contribuyente($emisor);
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el DTE solicitado', 404);
         }
@@ -1025,7 +1025,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -1067,7 +1067,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -1097,7 +1097,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el DTE solicitado', 'error'
@@ -1128,7 +1128,7 @@ class Controller_DteEmitidos extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE emitido
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             die('No existe el DTE solicitado');
         }
@@ -1241,7 +1241,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1274,8 +1274,8 @@ class Controller_DteEmitidos extends \Controller_App
         }
         if ($getResolucion) {
             $DteEmitido->resolucion = [
-                'fecha' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
-                'numero' => $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+                'fecha' => $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+                'numero' => $Emisor->enCertificacion() ? 0 : $Emisor->config_ambiente_produccion_numero,
             ];
         }
         if (!$getXML) {
@@ -1315,7 +1315,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/pdf')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1384,7 +1384,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/xml')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1410,7 +1410,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1466,14 +1466,14 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Firma) {
             $this->Api->send('No existe firma asociada', 506);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
         if (!$DteEmitido->getDte()) {
             $this->Api->send('El documento T'.$dte.'F'.$folio.' no tiene XML en LibreDTE', 400);
         }
-        \sasco\LibreDTE\Sii::setAmbiente($Emisor->config_ambiente_en_certificacion);
+        \sasco\LibreDTE\Sii::setAmbiente($Emisor->enCertificacion());
         return $avanzado ? $DteEmitido->getDte()->getEstadoAvanzado($Firma) : $DteEmitido->getDte()->getEstado($Firma);
     }
 
@@ -1504,7 +1504,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (in_array($dte, [39,41])) {
             $this->Api->send('Boletas no se envían al SII, no puede consultar estado de envío', 400);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1540,7 +1540,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/enviar_sii')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1580,7 +1580,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1622,7 +1622,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/eliminar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1656,7 +1656,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/eliminar')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1690,7 +1690,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
@@ -1918,7 +1918,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->Api->send('Emisor no está registrado en la aplicación', 404);
         }
         // buscar si existe el DTE en el ambiente que el emisor esté usando
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $this->Api->data['dte'], $this->Api->data['folio'], (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $this->Api->data['dte'], $this->Api->data['folio'], $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send($Emisor->razon_social.' no tiene emitido el DTE solicitado en el ambiente de '.$Emisor->getAmbiente(), 404);
         }

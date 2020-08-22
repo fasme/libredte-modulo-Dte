@@ -55,7 +55,7 @@ abstract class Controller_Base_Libros extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new $class($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         $n_detalles = $Emisor->{'count'.$this->config['model']['plural']}($periodo);
         if (!$n_detalles and !$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
@@ -121,7 +121,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         $Emisor = $this->getContribuyente();
         // crear objeto del libro
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new $class($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         if (!$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Aun no se ha generado el XML del período '.$periodo, 'error'
@@ -160,7 +160,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         $Emisor = $this->getContribuyente();
         // crear objeto del libro
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new $class($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         if (!$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Aun no se ha generado el XML del período '.$periodo, 'error'
@@ -195,7 +195,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         $Emisor = $this->getContribuyente();
         // crear objeto del libro
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new $class($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         if (!$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No ha enviado el libro del período '.$periodo.' SII, no puede rectificar', 'error'
@@ -241,7 +241,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         $Emisor = $this->getContribuyente();
         // obtener libro envíado
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new $class($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         if (!$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Aun no se ha generado el libro del período '.$periodo, 'error'
@@ -277,7 +277,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         $Emisor = $this->getContribuyente();
         // obtener libro envíado
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new $class($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         if (!$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Aun no se ha generado el libro del período '.$periodo, 'error'
@@ -357,7 +357,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         }
         // crear libro
         $class = __NAMESPACE__.'\Model_Dte'.$this->config['model']['singular'];
-        $Libro = new $class($Contribuyente->rut, $periodo, (int)$Contribuyente->config_ambiente_en_certificacion);
+        $Libro = new $class($Contribuyente->rut, $periodo, $Contribuyente->enCertificacion());
         if (!$Libro->track_id) {
             $this->Api->send('Libro no tiene Track ID', 500);
         }
@@ -366,7 +366,7 @@ abstract class Controller_Base_Libros extends \Controller_App
         $datos = $Libro->getDatos();
         $operacion = $datos['LibroCompraVenta']['EnvioLibro']['Caratula']['TipoOperacion'];
         $tipo_libro = $datos['LibroCompraVenta']['EnvioLibro']['Caratula']['TipoLibro'];
-        $url = '/sii/dte/iecv/codigo_reemplazo/'.$Contribuyente->getRUT().'/'.$periodo.'/'.$operacion.'/'.$tipo_libro.'/'.$Libro->track_id.'?certificacion='.(int)$Contribuyente->config_ambiente_en_certificacion;
+        $url = '/sii/dte/iecv/codigo_reemplazo/'.$Contribuyente->getRUT().'/'.$periodo.'/'.$operacion.'/'.$tipo_libro.'/'.$Libro->track_id.'?certificacion='.$Contribuyente->enCertificacion();
         $response = libredte_api_consume($url, [
             'auth' => [
                 'cert' => [

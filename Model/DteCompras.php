@@ -49,7 +49,7 @@ class Model_DteCompras extends \Model_Plural_App
             SELECT COUNT(*)
             FROM dte_compra
             WHERE receptor = :receptor AND periodo = :periodo AND certificacion = :certificacion AND track_id IS NOT NULL
-        ', [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
     }
 
     /**
@@ -68,7 +68,7 @@ class Model_DteCompras extends \Model_Plural_App
             }
             $totales_mensuales[$periodo] = array_merge(
                 ['periodo'=>$periodo],
-                (new Model_DteCompra($this->getContribuyente()->rut, $periodo, $this->getContribuyente()->config_ambiente_en_certificacion))->getTotales()
+                (new Model_DteCompra($this->getContribuyente()->rut, $periodo, $this->getContribuyente()->enCertificacion()))->getTotales()
             );
             $periodo = \sowerphp\general\Utility_Date::nextPeriod($periodo);
         }
@@ -85,7 +85,7 @@ class Model_DteCompras extends \Model_Plural_App
         $libros = [];
         foreach (range(1,12) as $mes) {
             $mes = $mes < 10 ? '0'.$mes : $mes;
-            $DteCompra = new Model_DteCompra($this->getContribuyente()->rut, (int)($anio.$mes), (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $DteCompra = new Model_DteCompra($this->getContribuyente()->rut, (int)($anio.$mes), $this->getContribuyente()->enCertificacion());
             $resumen = $DteCompra->getResumen();
             if ($resumen) {
                 $libros[$anio][$mes] = $resumen;
@@ -126,7 +126,7 @@ class Model_DteCompras extends \Model_Plural_App
         $where = ['d.receptor = :receptor', 'd.certificacion = :certificacion'];
         $vars = [
             ':receptor' => $this->getContribuyente()->rut,
-            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+            ':certificacion' => $this->getContribuyente()->enCertificacion(),
         ];
         // filtrar por tipo de DTE
         if (!empty($filtros['dte'])) {
@@ -273,7 +273,7 @@ class Model_DteCompras extends \Model_Plural_App
             }
             // agregar el documento recibido si no existe
             $Emisor = $Emisores->get(substr($doc['rut'],0,-2));
-            $DteRecibido = new Model_DteRecibido($Emisor->rut, $doc['dte'], $doc['folio'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $DteRecibido = new Model_DteRecibido($Emisor->rut, $doc['dte'], $doc['folio'], $this->getContribuyente()->enCertificacion());
             if (!$DteRecibido->usuario or $DteRecibido->mipyme) {
                 $DteRecibido->tasa = (float)$doc['tasa'];
                 $DteRecibido->fecha = $doc['fecha'];
@@ -333,7 +333,7 @@ class Model_DteCompras extends \Model_Plural_App
             $DteRecibido->emisor = substr($doc['rut'],0,-2);
             $DteRecibido->dte = $doc['dte'];
             $DteRecibido->folio = $doc['folio'];
-            $DteRecibido->certificacion = (int)$this->getContribuyente()->config_ambiente_en_certificacion;
+            $DteRecibido->certificacion = $this->getContribuyente()->enCertificacion();
             $DteRecibido->delete();
             // eliminar intercambio
             $intercambios = $DteIntercambios->buscarIntercambiosDte(substr($doc['rut'],0,-2), $doc['dte'], $doc['folio']);

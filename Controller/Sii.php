@@ -47,7 +47,7 @@ class Controller_Sii extends \Controller_App
                 $this->redirect('/dte/contribuyentes/seleccionar');
             }
             $Firma = $Emisor->getFirma($this->Auth->User->id);
-            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $certificacion = $Emisor->enCertificacion();
             $response = libredte_api_consume(
                 '/sii/dte/contribuyentes/datos/'.$Emisor->getRUT().'?formato=html&certificacion='.$certificacion,
                 [
@@ -85,7 +85,7 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $certificacion = $Emisor->enCertificacion();
             $response = libredte_api_consume(
                 '/sii/dte/contribuyentes/usuarios/'.$Emisor->getRUT().'?formato=html&certificacion='.$certificacion,
                 [
@@ -162,7 +162,7 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $certificacion = $Emisor->enCertificacion();
             $response = libredte_api_consume(
                 '/sii/dte/emitidos/estado_envio/'.$Emisor->getRUT().'/'.$track_id.'?certificacion='.$certificacion.'&formato=html',
                 [
@@ -288,7 +288,7 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $certificacion = $Emisor->enCertificacion();
             $response = libredte_api_consume(
                 '/sii/rtc/cesiones/estado_envio/'.$track_id.'?certificacion='.$certificacion.'&formato=html',
                 [
@@ -322,7 +322,7 @@ class Controller_Sii extends \Controller_App
             if (!$Firma) {
                 die('No hay firma electrónica asociada al usuario');
             }
-            $certificacion = (int)$Emisor->config_ambiente_en_certificacion;
+            $certificacion = $Emisor->enCertificacion();
             $response = libredte_api_consume(
                 '/sii/rtc/cesiones/certificado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'/'.$fecha.'?certificacion='.$certificacion,
                 [

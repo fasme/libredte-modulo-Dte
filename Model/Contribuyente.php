@@ -391,10 +391,6 @@ class Model_Contribuyente extends \Model_App
                     throw new \Exception('Debe especificar: '.$attr);
                 }
             }
-            // verificar que si se está en producción se haya pasado la fecha y número de resolución
-            /*if (!$this->config_ambiente_en_certificacion and (empty($this->config_ambiente_produccion_fecha) or empty($this->config_ambiente_produccion_numero))) {
-                throw new \Exception('Para usar la empresa en producción debe indicar la fecha y número de resolución que la autoriza');
-            }*/
             // si se pasó un logo se guarda
             if (isset($_FILES['logo']) and !$_FILES['logo']['error']) {
                 if (\sowerphp\general\Utility_File::mimetype($_FILES['logo']['tmp_name'])!='image/png') {
@@ -560,7 +556,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getAmbiente()
     {
-        return $this->config_ambiente_en_certificacion ? 'certificación' : 'producción';
+        return $this->enCertificacion() ? 'certificación' : 'producción';
     }
 
     /**
@@ -1010,7 +1006,7 @@ class Model_Contribuyente extends \Model_App
             FROM dte_folio AS f, dte_tipo AS t
             WHERE f.dte = t.codigo AND emisor = :rut AND f.certificacion = :certificacion
             ORDER BY f.dte
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -1021,13 +1017,14 @@ class Model_Contribuyente extends \Model_App
      */
     public function getFolio($dte, $folio_manual = 0)
     {
-        if (!$this->db->beginTransaction(true))
+        if (!$this->db->beginTransaction(true)) {
             return false;
-        $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->rut, $dte, (int)$this->config_ambiente_en_certificacion);
+        }
+        $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->rut, $dte, $this->enCertificacion());
         if (!$DteFolio->disponibles and $this->config_sii_timbraje_automatico) {
             try {
                 $DteFolio->timbrar($DteFolio->alerta*$this->config_sii_timbraje_multiplicador);
-                $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->rut, $dte, (int)$this->config_ambiente_en_certificacion); // actualiza info del mantenedor de folios
+                $DteFolio = new \website\Dte\Admin\Model_DteFolio($this->rut, $dte, $this->enCertificacion()); // actualiza info del mantenedor de folios
             } catch (\Exception $e) {
                 //file_put_contents(TMP.'/contribuyentes.log', $this->rut.' TIMBRAJE '.$e->getMessage()."\n", FILE_APPEND);
             }
@@ -1089,14 +1086,15 @@ class Model_Contribuyente extends \Model_App
         ', [
             ':rut' => $this->rut,
             ':dte' => $dte,
-            ':certificacion' => (int)$this->config_ambiente_en_certificacion,
+            ':certificacion' => $this->enCertificacion(),
             ':folio' => $folio,
         ]);
         if (!$caf)
             return false;
         $caf = Utility_Data::decrypt($caf);
-        if (!$caf)
+        if (!$caf) {
             return false;
+        }
         $Caf = new \sasco\LibreDTE\Sii\Folios($caf);
         return $Caf->getTipo() ? $Caf : false;
     }
@@ -1267,7 +1265,7 @@ class Model_Contribuyente extends \Model_App
     {
         // armar filtros
         $where = ['d.emisor = :rut', 'd.certificacion = :certificacion'];
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()];
         foreach (['folio', 'fecha', 'total', 'usuario'] as $c) {
             if (!empty($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
@@ -1416,7 +1414,7 @@ class Model_Contribuyente extends \Model_App
     public function countDocumentosEmitidos($filtros = [])
     {
         $where = ['d.emisor = :rut', 'd.certificacion = :certificacion'];
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()];
         foreach (['folio', 'total', 'fecha', 'usuario'] as $c) {
             if (isset($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
@@ -1596,7 +1594,7 @@ class Model_Contribuyente extends \Model_App
             WHERE emisor = :rut AND certificacion = :certificacion AND dte IN (39, 41)
             GROUP BY '.$periodo_col.'
             ORDER BY '.$periodo_col.' DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -1637,7 +1635,7 @@ class Model_Contribuyente extends \Model_App
             ORDER BY e.fecha, e.dte, e.folio
         ', [
             ':rut' => $this->rut,
-            ':certificacion' => (int)$this->config_ambiente_en_certificacion,
+            ':certificacion' => $this->enCertificacion(),
             ':periodo' => $periodo,
         ]);
     }
@@ -1697,7 +1695,7 @@ class Model_Contribuyente extends \Model_App
             ORDER BY fecha, dte, folio
         ', [
             ':rut' => $this->rut,
-            ':certificacion' => (int)$this->config_ambiente_en_certificacion,
+            ':certificacion' => $this->enCertificacion(),
             ':desde' => $desde,
             ':hasta' => $hasta,
         ]);
@@ -1723,7 +1721,7 @@ class Model_Contribuyente extends \Model_App
                 WHERE emisor = :rut AND certificacion = :certificacion
             )
             ORDER BY periodo DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -1746,7 +1744,7 @@ class Model_Contribuyente extends \Model_App
                         JOIN dte_referencia AS r ON r.emisor = e.emisor AND r.dte = e.dte AND r.folio = e.folio AND r.certificacion = e.certificacion
                         WHERE '.$periodo_col.' = :periodo AND r.referencia_dte = 46
                 )
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -1835,7 +1833,7 @@ class Model_Contribuyente extends \Model_App
                         WHERE '.$periodo_col.' = :periodo AND r.referencia_dte = 46
                 )
             ORDER BY e.fecha, e.dte, e.folio
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -1871,7 +1869,7 @@ class Model_Contribuyente extends \Model_App
                 AND e.receptor = :receptor
             GROUP BY periodo, t.operacion
             ORDER BY periodo
-        ', [':emisor'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':receptor'=>$receptor, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':receptor'=>$receptor, ':desde'=>$desde, ':hasta'=>$hasta]);
         if (!$montos) {
             return [];
         }
@@ -1947,7 +1945,7 @@ class Model_Contribuyente extends \Model_App
             WHERE t.codigo = e.dte AND t.venta = true AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
             GROUP BY e.fecha
             ORDER BY e.fecha
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -1964,7 +1962,7 @@ class Model_Contribuyente extends \Model_App
             FROM dte_tipo AS t, dte_emitido AS e
             WHERE t.codigo = e.dte AND t.venta = true AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
             GROUP BY t.tipo
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -1987,7 +1985,7 @@ class Model_Contribuyente extends \Model_App
                 WHERE emisor = :rut AND certificacion = :certificacion
             )
             ORDER BY periodo DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -2006,7 +2004,7 @@ class Model_Contribuyente extends \Model_App
                 LEFT JOIN dte_referencia AS ref ON e.emisor = ref.emisor AND e.dte = ref.referencia_dte AND e.folio = ref.referencia_folio AND e.certificacion = ref.certificacion
                 LEFT JOIN dte_emitido AS re ON re.emisor = ref.emisor AND re.dte = ref.dte AND re.folio = ref.folio AND re.certificacion = ref.certificacion
             WHERE e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte = 52
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -2043,7 +2041,7 @@ class Model_Contribuyente extends \Model_App
                 contribuyente AS r
             WHERE e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte = 52
             ORDER BY e.fecha, e.folio
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -2061,7 +2059,7 @@ class Model_Contribuyente extends \Model_App
             WHERE emisor = :rut AND certificacion = :certificacion AND '.$periodo_col.' = :periodo AND dte = 52
             GROUP BY fecha
             ORDER BY fecha
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -2093,7 +2091,7 @@ class Model_Contribuyente extends \Model_App
     {
         // armar filtros
         $where = ['d.receptor = :rut', 'd.certificacion = :certificacion'];
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()];
         foreach (['folio', 'fecha', 'total', 'intercambio', 'usuario'] as $c) {
             if (isset($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
@@ -2173,7 +2171,7 @@ class Model_Contribuyente extends \Model_App
     public function countDocumentosRecibidos($filtros = [])
     {
         $where = ['d.receptor = :rut', 'd.certificacion = :certificacion'];
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()];
         foreach (['dte', 'folio', 'emisor', 'fecha', 'total', 'usuario'] as $c) {
             if (isset($filtros[$c])) {
                 $where[] = 'd.'.$c.' = :'.$c;
@@ -2256,7 +2254,7 @@ class Model_Contribuyente extends \Model_App
                 WHERE receptor = :rut AND certificacion = :certificacion
             )
             ORDER BY periodo DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -2281,7 +2279,7 @@ class Model_Contribuyente extends \Model_App
                 WHERE receptor = :rut AND certificacion = :certificacion
             )
             ORDER BY periodo DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -2321,7 +2319,7 @@ class Model_Contribuyente extends \Model_App
                         )
                     )
             )
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
         return array_sum($compras);
     }
 
@@ -2339,7 +2337,7 @@ class Model_Contribuyente extends \Model_App
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/TasaImp',
             '/EnvioDTE/SetDTE/DTE/Documento/Encabezado/Totales/ImptoReten/MontoImp',
         ], 'http://www.sii.cl/SiiDte');
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo];
         if ($tipo_dte !== null) {
             if (is_array($tipo_dte)) {
                 $where_tipo_dte = 'AND t.codigo IN ('.implode(', ', array_map('intval', $tipo_dte)).')';
@@ -2587,7 +2585,7 @@ class Model_Contribuyente extends \Model_App
                     GROUP BY r.fecha_hora_creacion
                 ) AS f ON r.dia = f.dia
             ORDER BY dia
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -2607,7 +2605,7 @@ class Model_Contribuyente extends \Model_App
             WHERE t.codigo = r.dte AND t.compra = true AND r.receptor = :rut AND r.certificacion = :certificacion AND '.$periodo_col.' = :periodo
             GROUP BY r.fecha
             ORDER BY r.fecha
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -2639,7 +2637,7 @@ class Model_Contribuyente extends \Model_App
                 WHERE  r.emisor = :rut AND r.certificacion = :certificacion AND r.dte = 46 AND '.$periodo_col_46.' = :periodo
                 GROUP BY t.tipo
             )
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':periodo'=>$periodo]);
     }
 
     /**
@@ -2650,7 +2648,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getDteEmitidosSinEnviar($certificacion = null)
     {
-        $certificacion = (int)($certificacion !== null ? $certificacion : $this->config_ambiente_en_certificacion);
+        $certificacion = (int)($certificacion !== null ? $certificacion : $this->enCertificacion());
         return $this->db->getTable('
             SELECT dte, folio
             FROM dte_emitido
@@ -2670,7 +2668,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getDteEmitidosSinEstado($certificacion = null)
     {
-        $certificacion = (int)($certificacion !== null ? $certificacion : $this->config_ambiente_en_certificacion);
+        $certificacion = (int)($certificacion !== null ? $certificacion : $this->enCertificacion());
         return $this->db->getTable('
             SELECT dte, folio
             FROM dte_emitido
@@ -2806,7 +2804,7 @@ class Model_Contribuyente extends \Model_App
      */
     public function getDocumentosUsados($periodo = null)
     {
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()];
         // columnas de periodos
         $periodo_col = $this->db->date('Ym', 'fecha_hora_creacion');
         $intercambio_periodo_col = $this->db->date('Ym', 'fecha_hora_email');
@@ -2949,7 +2947,7 @@ class Model_Contribuyente extends \Model_App
             WHERE emisor = :rut AND certificacion = :certificacion AND fecha BETWEEN :desde AND :hasta AND track_id > 0
             GROUP BY revision_estado
             ORDER BY total DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -2961,7 +2959,7 @@ class Model_Contribuyente extends \Model_App
     public function getDocumentosEmitidosEstado($desde, $hasta, $estado = null)
     {
         // filtros
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta];
         if ($estado) {
             $vars[':estado'] = $estado;
             $estado = 'd.revision_estado = :estado';
@@ -3017,7 +3015,7 @@ class Model_Contribuyente extends \Model_App
             WHERE emisor = :rut AND certificacion = :certificacion AND fecha BETWEEN :desde AND :hasta AND dte IN (33, 34, 43)
             GROUP BY receptor_evento
             ORDER BY total DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -3029,7 +3027,7 @@ class Model_Contribuyente extends \Model_App
     public function getDocumentosEmitidosEvento($desde, $hasta, $evento = null)
     {
         // filtros
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta];
         if ($evento) {
             $vars[':evento'] = $evento;
             $evento = 'd.receptor_evento = :evento';
@@ -3112,7 +3110,7 @@ class Model_Contribuyente extends \Model_App
                 AND d.xml IS NOT NULL
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
 
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
     }
 
     /**
@@ -3141,7 +3139,7 @@ class Model_Contribuyente extends \Model_App
                 AND  e.revision_estado IS NOT NULL
             GROUP BY recibo, recepcion, resultado
             ORDER BY total DESC
-        ', [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -3152,7 +3150,7 @@ class Model_Contribuyente extends \Model_App
     public function getDocumentosEmitidosEstadoIntercambio($desde, $hasta, $recibo, $recepcion, $resultado)
     {
         // filtros
-        $vars = [':rut'=>$this->rut, ':certificacion'=>(int)$this->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta];
+        $vars = [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta];
         $where = [$recibo ? 'recibo.responde IS NOT NULL' : 'recibo.responde IS NULL'];
         if ($recepcion!==null and $recepcion!=-1) {
             $where[] = 'recepcion.estado = :recepcion';
@@ -3266,12 +3264,12 @@ class Model_Contribuyente extends \Model_App
             if ($filtros['operacion']=='COMPRA') {
                 $url = sprintf(
                     '/sii/rcv/compras/resumen/%d-%s/%d/%s?formato=json&certificacion=%d',
-                    $this->rut, $this->dv, $filtros['periodo'], $filtros['estado'], (int)$this->config_ambiente_en_certificacion
+                    $this->rut, $this->dv, $filtros['periodo'], $filtros['estado'], $this->enCertificacion()
                 );
             } else {
                 $url = sprintf(
                     '/sii/rcv/ventas/resumen/%d-%s/%d?formato=json&certificacion=%d',
-                    $this->rut, $this->dv, $filtros['periodo'], (int)$this->config_ambiente_en_certificacion
+                    $this->rut, $this->dv, $filtros['periodo'], $this->enCertificacion()
                 );
             }
             $r = libredte_api_consume($url, ['auth'=>$auth]);
@@ -3294,12 +3292,12 @@ class Model_Contribuyente extends \Model_App
                 if ($filtros['operacion']=='COMPRA') {
                     $url = sprintf(
                         '/sii/rcv/compras/detalle/%d-%s/%d/%d/%s?formato='.$filtros['formato'].'&certificacion=%d&tipo=%s',
-                        $this->rut, $this->dv, $filtros['periodo'], $dte, $filtros['estado'], (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
+                        $this->rut, $this->dv, $filtros['periodo'], $dte, $filtros['estado'], $this->enCertificacion(), $filtros['tipo']
                     );
                 } else {
                     $url = sprintf(
                         '/sii/rcv/ventas/detalle/%d-%s/%d/%d?formato='.$filtros['formato'].'&certificacion=%d&tipo=%s',
-                        $this->rut, $this->dv, $filtros['periodo'], $dte, (int)$this->config_ambiente_en_certificacion, $filtros['tipo']
+                        $this->rut, $this->dv, $filtros['periodo'], $dte, $this->enCertificacion(), $filtros['tipo']
                     );
                 }
                 $r = libredte_api_consume($url, ['auth'=>$auth]);

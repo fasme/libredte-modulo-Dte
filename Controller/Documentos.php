@@ -434,7 +434,7 @@ class Controller_Documentos extends \Controller_App
         if ($referencia_dte and $referencia_folio) {
             // si el folio de referencia es un número se busca un DTE emitido
             if (is_numeric($referencia_folio)) {
-                $DocumentoOriginal = new Model_DteEmitido($Emisor->rut, $referencia_dte, $referencia_folio, (int)$Emisor->config_ambiente_en_certificacion);
+                $DocumentoOriginal = new Model_DteEmitido($Emisor->rut, $referencia_dte, $referencia_folio, $Emisor->enCertificacion());
                 if (!$DocumentoOriginal->exists()) {
                     \sowerphp\core\Model_Datasource_Session::message(
                         'Documento T'.$referencia_dte.'F'.$referencia_folio.' no existe, no se puede referenciar', 'error'
@@ -1161,7 +1161,7 @@ class Controller_Documentos extends \Controller_App
             $DteEmitidos = new Model_DteEmitidos();
             $DteEmitidos->setWhereStatement(
                 ['emisor = :emisor', 'certificacion = :certificacion', 'folio = :folio'],
-                [':emisor'=>$Emisor->rut, ':certificacion'=>(int)$Emisor->config_ambiente_en_certificacion, ':folio'=>$q]
+                [':emisor'=>$Emisor->rut, ':certificacion'=>$Emisor->enCertificacion(), ':folio'=>$q]
             );
             $documentos = $DteEmitidos->getObjects();
             if (isset($documentos[0])) {
@@ -1181,7 +1181,7 @@ class Controller_Documentos extends \Controller_App
             if (count($aux)==2) {
                 $dte = (int)substr($aux[0], 1);
                 $folio = (int)$aux[1];
-                $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, (int)$Emisor->config_ambiente_en_certificacion);
+                $DteEmitido = new Model_DteEmitido($Emisor->rut, $dte, $folio, $Emisor->enCertificacion());
                 if ($DteEmitido->exists()) {
                     $this->redirect($DteEmitido->getLinks()['ver']);
                 }

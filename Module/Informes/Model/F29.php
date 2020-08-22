@@ -46,7 +46,7 @@ class Model_F29
         // si hay libro de ventas se sacan de ahí las boletas y pagos electrónicos
         $boletas = ['cantidad'=>0, 'exento'=>0, 'neto'=>0, 'iva'=>0];
         $pagos_electronicos = ['cantidad'=>0, 'exento'=>0, 'neto'=>0, 'iva'=>0];
-        $DteVenta = new \website\Dte\Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteVenta = new \website\Dte\Model_DteVenta($Emisor->rut, $periodo, $Emisor->enCertificacion());
         if ($DteVenta->exists()) {
             $Libro = new \sasco\LibreDTE\Sii\LibroCompraVenta();
             $Libro->loadXML(base64_decode($DteVenta->xml));

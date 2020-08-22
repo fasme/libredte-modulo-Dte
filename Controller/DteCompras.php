@@ -68,7 +68,7 @@ class Controller_DteCompras extends Controller_Base_Libros
                 $datos = array_combine($keys, $d);
                 $emisor = explode('-', str_replace('.', '', $datos['rut']))[0];
                 try {
-                    $DteRecibido = new Model_DteRecibido($emisor, $datos['dte'], $datos['folio'], $Receptor->config_ambiente_en_certificacion);
+                    $DteRecibido = new Model_DteRecibido($emisor, $datos['dte'], $datos['folio'], $Receptor->enCertificacion());
                 } catch (\sowerphp\core\Exception_Model_Datasource_Database $e) {
                     $noGuardado[] = 'Problema con fila '.$linea.': verificar código del documento en columna A y/o el número de folio en columna B';
                     continue;
@@ -138,7 +138,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     {
         $Emisor = $this->getContribuyente();
         // si el libro fue enviado y no es rectifica error
-        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, $Emisor->enCertificacion());
         if ($DteCompra->track_id and empty($_POST['CodAutRec']) and $DteCompra->getEstado()!='LRH' and $DteCompra->track_id!=-1) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro del período '.$periodo.' ya fue enviado, ahora sólo puede  hacer rectificaciones', 'error'
@@ -166,8 +166,8 @@ class Controller_DteCompras extends Controller_Base_Libros
             'RutEmisorLibro' => $Emisor->rut.'-'.$Emisor->dv,
             'RutEnvia' => $Firma->getID(),
             'PeriodoTributario' => substr($periodo, 0, 4).'-'.substr($periodo, 4),
-            'FchResol' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
-            'NroResol' =>  $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+            'FchResol' => $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+            'NroResol' =>  $Emisor->enCertificacion() ? 0 : $Emisor->config_ambiente_produccion_numero,
             'TipoOperacion' => 'COMPRA',
             'TipoLibro' => 'MENSUAL',
             'TipoEnvio' => 'TOTAL',
@@ -254,7 +254,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     public function descargar_tipo_transacciones($periodo)
     {
         $Emisor = $this->getContribuyente();
-        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, $Emisor->enCertificacion());
         $datos = $DteCompra->getTiposTransacciones();
         if (!$datos) {
             \sowerphp\core\Model_Datasource_Session::message(
@@ -395,7 +395,7 @@ class Controller_DteCompras extends Controller_Base_Libros
     {
         // obtener tipos de transacciones
         $Emisor = $this->getContribuyente();
-        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteCompra = new Model_DteCompra($Emisor->rut, $periodo, $Emisor->enCertificacion());
         $datos = $DteCompra->getTiposTransacciones();
         if (!$datos) {
             \sowerphp\core\Model_Datasource_Session::message(
@@ -404,7 +404,7 @@ class Controller_DteCompras extends Controller_Base_Libros
             $this->redirect(str_replace('rcv_sincronizar_tipo_transacciones', 'ver', $this->request->request));
         }
         // enviar al SII
-        $r = libredte_api_consume('/sii/rcv/compras/set_tipo_transaccion/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+        $r = libredte_api_consume('/sii/rcv/compras/set_tipo_transaccion/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.$Emisor->enCertificacion(), [
             'auth' => [
                 'pass' => [
                     'rut' => $Emisor->rut.'-'.$Emisor->dv,

@@ -51,7 +51,7 @@ class Shell_Command_DteFolios_Estados extends \Shell_App
         $documentos = explode(',', $documentos);
         foreach ($documentos as $dte) {
             // crear mantenedor del folio
-            $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+            $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
             if (!$DteFolio->exists()) {
                 continue;
             }

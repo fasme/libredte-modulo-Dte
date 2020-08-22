@@ -49,7 +49,7 @@ class Model_DteIntercambios extends \Model_Plural_App
             SELECT COUNT(*)
             FROM dte_intercambio
             WHERE receptor = :receptor AND certificacion = :certificacion AND usuario IS NULL
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
     }
 
     /**
@@ -66,7 +66,7 @@ class Model_DteIntercambios extends \Model_Plural_App
         $documentos = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/*/Encabezado/IdDoc/TipoDTE|/*/SetDTE/DTE/*/Encabezado/IdDoc/Folio', 'http://www.sii.cl/SiiDte');
         $totales = $this->db->xml('i.archivo_xml', '/*/SetDTE/DTE/*/Encabezado/Totales/MntTotal', 'http://www.sii.cl/SiiDte');
         $where = [];
-        $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
+        $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()];
         if (!empty($filter['recibido_desde'])) {
             $where[] = 'i.fecha_hora_email >= :recibido_desde';
             $vars[':recibido_desde'] = $filter['recibido_desde'];
@@ -397,7 +397,7 @@ class Model_DteIntercambios extends \Model_Plural_App
             throw new \Exception('El XML es de boleta, no se procesa');
         }
         $caratula = $EnvioDte->getCaratula();
-        if (((int)(bool)!$caratula['NroResol'])!=(int)$this->getContribuyente()->config_ambiente_en_certificacion) {
+        if (((int)(bool)!$caratula['NroResol']) != $this->getContribuyente()->enCertificacion()) {
             return null; // se deja sin procesar ya que no es del ambiente correcto
         }
         if (substr($caratula['RutReceptor'], 0, -2) != $this->getContribuyente()->rut) {
@@ -488,7 +488,7 @@ class Model_DteIntercambios extends \Model_Plural_App
             ],
             [
                 ':receptor' => $this->getContribuyente()->rut,
-                ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+                ':certificacion' => $this->getContribuyente()->enCertificacion(),
                 ':emisor' => $emisor,
                 ':dte' => '%'.$dte.'%',
                 ':folio' => '%'.$folio.'%',

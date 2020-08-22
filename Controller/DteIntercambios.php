@@ -54,7 +54,7 @@ class Controller_DteIntercambios extends \Controller_App
             $n_intercambios = count($intercambios);
         } else {
             $intercambios = $Emisor->getIntercambios($filter);
-            $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->config_ambiente_en_certificacion])->count();
+            $n_intercambios = (new Model_DteIntercambios())->setWhereStatement(['receptor = :receptor', 'certificacion = :certificacion'], [':receptor'=>$Emisor->rut, ':certificacion'=>$Emisor->enCertificacion()])->count();
         }
         $this->set([
             'Emisor' => $Emisor,
@@ -103,7 +103,7 @@ class Controller_DteIntercambios extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE intercambiado
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, $Emisor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el intercambio solicitado', 'error'
@@ -137,7 +137,7 @@ class Controller_DteIntercambios extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // obtener DTE intercambiado
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, $Emisor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el intercambio solicitado', 'error'
@@ -167,7 +167,7 @@ class Controller_DteIntercambios extends \Controller_App
     public function html($codigo)
     {
         $Emisor = $this->getContribuyente();
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, $Emisor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el intercambio solicitado', 'error'
@@ -233,7 +233,7 @@ class Controller_DteIntercambios extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // obtener DTE intercambiado
-        $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, (int)$Receptor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, $Receptor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             $this->Api->send('No existe el intercambio solicitado', 404);
         }
@@ -320,7 +320,7 @@ class Controller_DteIntercambios extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // obtener DTE intercambio
-        $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, (int)$Receptor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Receptor->rut, $codigo, $Receptor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             $this->Api->send('No existe el intercambio solicitado', 404);
         }
@@ -375,7 +375,7 @@ class Controller_DteIntercambios extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // obtener DTE intercambio
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, $Emisor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             $this->Api->send('No existe el intercambio solicitado', 404);
         }
@@ -449,7 +449,7 @@ class Controller_DteIntercambios extends \Controller_App
             $this->redirect(str_replace('responder', 'ver', $this->request->request));
         }
         // obtener objeto de intercambio
-        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteIntercambio = new Model_DteIntercambio($Emisor->rut, $codigo, $Emisor->enCertificacion());
         if (!$DteIntercambio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el intercambio solicitado', 'error'

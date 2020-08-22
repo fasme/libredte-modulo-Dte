@@ -52,7 +52,7 @@ class Model_DteRecibidos extends \Model_Plural_App
         $where = ['r.fecha BETWEEN :desde AND :hasta'];
         $vars = [
                 ':receptor' => $this->getContribuyente()->rut,
-                ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+                ':certificacion' => $this->getContribuyente()->enCertificacion(),
                 ':desde' => $filtros['desde'],
                 ':hasta' => $filtros['hasta'],
         ];
@@ -208,7 +208,7 @@ class Model_DteRecibidos extends \Model_Plural_App
                 AND r.certificacion = :certificacion
                 AND r.fecha BETWEEN :desde AND :hasta
             ORDER BY r.fecha, r.dte, r.folio
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
         foreach ($datos as &$dato) {
             $dato['id'] = 'T'.$dato['id'].'F'.$dato['folio'];
         }
@@ -255,7 +255,7 @@ class Model_DteRecibidos extends \Model_Plural_App
                 AND r.fecha BETWEEN :desde AND :hasta
             GROUP BY t.tipo
             ORDER BY total DESC
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -274,7 +274,7 @@ class Model_DteRecibidos extends \Model_Plural_App
                 AND fecha BETWEEN :desde AND :hasta
             GROUP BY fecha
             ORDER BY fecha
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -293,7 +293,7 @@ class Model_DteRecibidos extends \Model_Plural_App
                 AND fecha BETWEEN :desde AND :hasta
             GROUP BY sucursal
             ORDER BY total DESC
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
         foreach($datos as &$d) {
             $d['sucursal'] = $this->getContribuyente()->getSucursal($d['sucursal'])->sucursal;
         }
@@ -316,7 +316,7 @@ class Model_DteRecibidos extends \Model_Plural_App
                 AND r.fecha BETWEEN :desde AND :hasta
             GROUP BY u.usuario
             ORDER BY total DESC
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
 }

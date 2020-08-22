@@ -236,8 +236,8 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
         }
         $ConsumoFolio->setCaratula([
             'RutEmisor' => $Emisor->rut.'-'.$Emisor->dv,
-            'FchResol' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
-            'NroResol' =>  $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+            'FchResol' => $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+            'NroResol' => $Emisor->enCertificacion() ? 0 : $Emisor->config_ambiente_produccion_numero,
             'FchInicio' => $this->dia,
             'FchFinal' => $this->dia,
             'SecEnvio' => $this->secuencia + 1,

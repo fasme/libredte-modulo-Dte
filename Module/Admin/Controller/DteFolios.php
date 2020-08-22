@@ -72,7 +72,7 @@ class Controller_DteFolios extends \Controller_App
                 return;
             }
             // crear mantenedor del folio
-            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], (int)$Emisor->config_ambiente_en_certificacion);
+            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], $Emisor->enCertificacion());
             if (!$DteFolio->exists()) {
                 $DteFolio->siguiente = 0;
                 $DteFolio->disponibles = 0;
@@ -156,7 +156,7 @@ class Controller_DteFolios extends \Controller_App
     public function ver($dte)
     {
         $Emisor = $this->getContribuyente();
-        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
         if (!$DteFolio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el mantenedor de folios solicitado', 'error'
@@ -177,7 +177,7 @@ class Controller_DteFolios extends \Controller_App
     public function modificar($dte)
     {
         $Emisor = $this->getContribuyente();
-        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
         if (!$DteFolio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el mantenedor de folios solicitado', 'error'
@@ -234,7 +234,7 @@ class Controller_DteFolios extends \Controller_App
             );
             $this->redirect('/dte/admin/dte_folios/ver/'.$dte);
         }
-        $DteCaf = new Model_DteCaf($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion, $desde);
+        $DteCaf = new Model_DteCaf($Emisor->rut, $dte, $Emisor->enCertificacion(), $desde);
         if (!$DteCaf->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el archivo CAF solicitado', 'error'
@@ -266,7 +266,7 @@ class Controller_DteFolios extends \Controller_App
         // procesar solicitud de folios
         if (isset($_POST['submit'])) {
             // buscar el mantenedor de folios del CAF
-            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], (int)$Emisor->config_ambiente_en_certificacion);
+            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], $Emisor->enCertificacion());
             if (!$DteFolio->exists()) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'Primero debe crear el mantenedor de los folios de tipo '.$_POST['dte'], 'error'
@@ -283,7 +283,7 @@ class Controller_DteFolios extends \Controller_App
             }
             // consultar listado de solicitudes
             $r = libredte_api_consume(
-                '/sii/dte/caf/solicitudes/'.$Emisor->getRUT().'/'.$DteFolio->dte.'?formato=json&certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+                '/sii/dte/caf/solicitudes/'.$Emisor->getRUT().'/'.$DteFolio->dte.'?formato=json&certificacion='.$Emisor->enCertificacion(),
                 [
                     'auth' => [
                         'cert' => [
@@ -309,7 +309,7 @@ class Controller_DteFolios extends \Controller_App
             // armar listado de solicitudes de folios que no están en LibreDTE
             $solicitudes = [];
             foreach ($r['body'] as $s) {
-                $DteCaf = new Model_DteCaf($Emisor->rut, $DteFolio->dte, (int)$Emisor->config_ambiente_en_certificacion, $s['inicial']);
+                $DteCaf = new Model_DteCaf($Emisor->rut, $DteFolio->dte, $Emisor->enCertificacion(), $s['inicial']);
                 if (!$DteCaf->hasta) {
                     $solicitudes[] = $s;
                 }
@@ -339,7 +339,7 @@ class Controller_DteFolios extends \Controller_App
     {
         $Emisor = $this->getContribuyente();
         // buscar el mantenedor de folios del CAF
-        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
         if (!$DteFolio->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Primero debe crear el mantenedor de los folios de tipo '.$dte, 'error'
@@ -347,7 +347,7 @@ class Controller_DteFolios extends \Controller_App
             $this->redirect('/dte/admin/dte_folios');
         }
         // si ya existe un caf no se vuelve a cargar
-        $DteCaf = new Model_DteCaf($Emisor->rut, $DteFolio->dte, (int)$Emisor->config_ambiente_en_certificacion, $folio_inicial);
+        $DteCaf = new Model_DteCaf($Emisor->rut, $DteFolio->dte, $Emisor->enCertificacion(), $folio_inicial);
         if ($DteCaf->hasta) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'El CAF solicitado ya se encontraba cargado', 'ok'
@@ -364,7 +364,7 @@ class Controller_DteFolios extends \Controller_App
         }
         // consultar listado de solicitudes
         $r = libredte_api_consume(
-            '/sii/dte/caf/xml/'.$Emisor->getRUT().'/'.$DteFolio->dte.'/'.$folio_inicial.'/'.$folio_final.'/'.$fecha_autorizacion.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+            '/sii/dte/caf/xml/'.$Emisor->getRUT().'/'.$DteFolio->dte.'/'.$folio_inicial.'/'.$folio_final.'/'.$fecha_autorizacion.'?certificacion='.$Emisor->enCertificacion(),
             [
                 'auth' => [
                     'cert' => [
@@ -412,7 +412,7 @@ class Controller_DteFolios extends \Controller_App
         // procesar solicitud de folios
         if (isset($_POST['submit'])) {
             // buscar el mantenedor de folios del CAF
-            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], (int)$Emisor->config_ambiente_en_certificacion);
+            $DteFolio = new Model_DteFolio($Emisor->rut, $_POST['dte'], $Emisor->enCertificacion());
             if (!$DteFolio->exists()) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'Primero debe crear el mantenedor de los folios de tipo '.$_POST['dte'], 'error'
@@ -483,7 +483,7 @@ class Controller_DteFolios extends \Controller_App
     public function descargar($dte, $folio, $estado = 'recibidos')
     {
         $Emisor = $this->getContribuyente();
-        $DteCaf = new Model_DteCaf($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion, $folio);
+        $DteCaf = new Model_DteCaf($Emisor->rut, $dte, $Emisor->enCertificacion(), $folio);
         if (!$DteCaf->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el CAF solicitado', 'error'
@@ -566,7 +566,7 @@ class Controller_DteFolios extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/admin/dte_folios/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
         if (!$DteFolio->exists()) {
             $this->Api->send('No existe el mantenedor de folios para el tipo de DTE '.$dte, 404);
         }
@@ -596,7 +596,7 @@ class Controller_DteFolios extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/ver')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
         if (!$DteFolio->exists()) {
             $this->Api->send('No existe el mantenedor de folios para el tipo de DTE '.$dte, 404);
         }
@@ -637,7 +637,7 @@ class Controller_DteFolios extends \Controller_App
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         // verificar que exista un mantenedor de folios
-        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteFolio = new Model_DteFolio($Emisor->rut, $dte, $Emisor->enCertificacion());
         if (!$DteFolio->exists()) {
             $this->Api->send('Primero debe crear el mantenedor de los folios de tipo '.$dte, 500);
         }
@@ -680,7 +680,7 @@ class Controller_DteFolios extends \Controller_App
         }
         // consultar estado del folio
         $r = libredte_api_consume(
-            '/sii/dte/caf/estado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?formato='.$formato.'&certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+            '/sii/dte/caf/estado/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?formato='.$formato.'&certificacion='.$Emisor->enCertificacion(),
             [
                 'auth' => [
                     'cert' => [
@@ -728,7 +728,7 @@ class Controller_DteFolios extends \Controller_App
         }
         // anular folio
         $r = libredte_api_consume(
-            '/sii/dte/caf/anular/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?formato='.$formato.'&certificacion='.(int)$Emisor->config_ambiente_en_certificacion,
+            '/sii/dte/caf/anular/'.$Emisor->getRUT().'/'.$dte.'/'.$folio.'?formato='.$formato.'&certificacion='.$Emisor->enCertificacion(),
             [
                 'auth' => [
                     'cert' => [

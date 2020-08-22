@@ -237,7 +237,7 @@ class Controller_RegistroCompras extends \Controller_App
                     \sowerphp\core\Model_Datasource_Session::message($r['glosa'], in_array($r['codigo'], [0,7])?'ok':'error');
                     if (in_array($r['codigo'], [0,7])) {
                         try {
-                            $RegistroCompra = new Model_RegistroCompra((int)$Contribuyente->config_ambiente_en_certificacion, $dte, $emisor_rut, $folio);
+                            $RegistroCompra = new Model_RegistroCompra($Contribuyente->enCertificacion(), $dte, $emisor_rut, $folio);
                             if ($RegistroCompra->estado == 0 and $RegistroCompra->receptor == $Contribuyente->rut) {
                                 $RegistroCompra->delete();
                             }

@@ -196,7 +196,7 @@ class Model_DteIntercambioResultado extends \Model_App
                 $Emisor->rut,
                 $Resultado['TipoDTE'],
                 $Resultado['Folio'],
-                $Emisor->config_ambiente_en_certificacion
+                $Emisor->enCertificacion()
             );
             // si no existe o si los datos del DTE emitido no corresponden error
             if (!$DteEmitido->exists() or explode('-', $Resultado['RUTRecep'])[0]!=$DteEmitido->receptor or $Resultado['FchEmis']!=$DteEmitido->fecha or $Resultado['MntTotal']!=$DteEmitido->total) {

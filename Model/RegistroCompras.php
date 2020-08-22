@@ -68,14 +68,14 @@ class Model_RegistroCompras extends \Model_Plural_App
             $this->db->beginTransaction();
             $this->db->query(
                 'DELETE FROM registro_compra WHERE receptor = :receptor AND periodo = :periodo AND certificacion = :certificacion AND estado = :estado',
-                [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':estado'=>$estado_codigo]
+                [':receptor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':estado'=>$estado_codigo]
             );
             foreach ($pendientes as $pendiente) {
                 $RegistroCompra = new Model_RegistroCompra();
                 $RegistroCompra->receptor = $this->getContribuyente()->rut;
                 $RegistroCompra->periodo = $periodo;
                 $RegistroCompra->estado = $estado_codigo;
-                $RegistroCompra->certificacion = (int)$this->getContribuyente()->config_ambiente_en_certificacion;
+                $RegistroCompra->certificacion = $this->getContribuyente()->enCertificacion();
                 $RegistroCompra->set($this->normalizar($pendiente));
                 $RegistroCompra->save();
             }
@@ -131,7 +131,7 @@ class Model_RegistroCompras extends \Model_Plural_App
     public function buscar(array $filtros = [], $detalle = false)
     {
         $where = ['rc.receptor = :receptor', 'rc.certificacion = :certificacion', ];
-        $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion];
+        $vars = [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()];
         if (isset($filtros['estado'])) {
             $where[] = 'rc.estado = :estado';
             $vars[':estado'] = $filtros['estado'];
@@ -248,7 +248,7 @@ class Model_RegistroCompras extends \Model_Plural_App
                 AND estado = 0
             GROUP BY rc.dettipodoc, t.tipo
             ORDER BY fecha_recepcion_sii_inicial
-        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':receptor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
     }
 
     /**
@@ -286,14 +286,14 @@ class Model_RegistroCompras extends \Model_Plural_App
             ORDER BY fecha_recepcion_sii ASC
         ', [
             ':receptor' => $this->getContribuyente()->rut,
-            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+            ':certificacion' => $this->getContribuyente()->enCertificacion(),
             ':dias' => $dias,
         ]);
     }
 
     /**
      * Método que entrega la cantidad de pendientes agrupados por rango de montos
-      y el monto total
+     * y el monto total
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2019-08-31
      */
@@ -335,7 +335,7 @@ class Model_RegistroCompras extends \Model_Plural_App
             .' ORDER BY hasta DESC'
         , [
             ':receptor' => $this->getContribuyente()->rut,
-            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+            ':certificacion' => $this->getContribuyente()->enCertificacion(),
         ]);
     }
 

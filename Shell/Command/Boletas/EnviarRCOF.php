@@ -59,14 +59,14 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
             if ($this->verbose) {
                 $this->out('Enviando RCOF del contribuyente '.$Contribuyente->razon_social);
             }
-            if ($Contribuyente->config_ambiente_en_certificacion != $certificacion) {
+            if ($Contribuyente->enCertificacion() != $certificacion) {
                 if ($this->verbose) {
                     $this->out('  Contribuyente no está en el ambiente del envío');
                 }
                 continue;
             }
             // crear objeto con el consumo de folios del día y ambiente solicitados
-            $DteBoletaConsumo = new Model_DteBoletaConsumo($Contribuyente->rut, $dia, (int)$Contribuyente->config_ambiente_en_certificacion);
+            $DteBoletaConsumo = new Model_DteBoletaConsumo($Contribuyente->rut, $dia, $Contribuyente->enCertificacion());
             // si no se indicó URI entonces se debe enviar directamente al SII
             if (!$uri) {
                 $this->enviar_sii($DteBoletaConsumo);

@@ -61,7 +61,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             if ($this->verbose) {
                 $this->out('  Actualizando estado T'.$d['dte'].'F'.$d['folio'].': ', 0);
             }
-            $DteEmitido = new Model_DteEmitido($Contribuyente->rut, $d['dte'], $d['folio'], (int)$Contribuyente->config_ambiente_en_certificacion);
+            $DteEmitido = new Model_DteEmitido($Contribuyente->rut, $d['dte'], $d['folio'], $Contribuyente->enCertificacion());
             try {
                 $estado_original = $DteEmitido->revision_estado;
                 $DteEmitido->actualizarEstado();
@@ -96,7 +96,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
             if ($this->verbose) {
                 $this->out('  Enviando al SII T'.$d['dte'].'F'.$d['folio'].': ', 0);
             }
-            $DteEmitido = new Model_DteEmitido($Contribuyente->rut, $d['dte'], $d['folio'], (int)$Contribuyente->config_ambiente_en_certificacion);
+            $DteEmitido = new Model_DteEmitido($Contribuyente->rut, $d['dte'], $d['folio'], $Contribuyente->enCertificacion());
             try {
                 $DteEmitido->enviar(null, $retry);
                 if ($this->verbose) {
@@ -197,7 +197,7 @@ class Shell_Command_DteEmitidos_Actualizar extends \Shell_App
         sort($periodos);
         foreach ($contribuyentes as $rut) {
             $Contribuyente = (new Model_Contribuyentes())->get($rut);
-            if ((int)$Contribuyente->config_ambiente_en_certificacion!=(int)$certificacion) {
+            if ($Contribuyente->enCertificacion() != (int)$certificacion) {
                 continue;
             }
             if ($this->verbose) {

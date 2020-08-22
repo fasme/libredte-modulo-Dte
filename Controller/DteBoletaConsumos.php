@@ -50,7 +50,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         $this->set([
             'is_admin' => $Emisor->usuarioAutorizado($this->Auth->User, 'admin'),
         ]);
-        $this->forceSearch(['emisor'=>$Emisor->rut, 'certificacion'=>(int)$Emisor->config_ambiente_en_certificacion]);
+        $this->forceSearch(['emisor'=>$Emisor->rut, 'certificacion'=>$Emisor->enCertificacion()]);
         parent::listar($page, $orderby, $order);
     }
 
@@ -90,7 +90,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
     public function xml($dia)
     {
         $Emisor = $this->getContribuyente();
-        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         $xml = $DteBoletaConsumo->getXML();
         if (!$xml) {
             \sowerphp\core\Model_Datasource_Session::message(
@@ -121,7 +121,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
             $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
         }
         $Emisor = $this->getContribuyente();
-        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         try {
             $track_id = $DteBoletaConsumo->enviar();
             if (!$track_id) {
@@ -154,7 +154,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
             $usarWebservice = $Emisor->config_sii_estado_dte_webservice;
         }
         // obtener reporte enviado
-        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         if (!$DteBoletaConsumo->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el reporte de consumo de folios solicitado', 'error'
@@ -193,7 +193,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
         $Emisor = $this->getContribuyente();
         // obtener reporte enviado
-        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         if (!$DteBoletaConsumo->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el reporte de consumo de folios solicitado', 'error'
@@ -227,7 +227,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
             $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
         }
         // obtener reporte enviado
-        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         if (!$DteBoletaConsumo->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'No existe el reporte de consumo de folios solicitado', 'error'

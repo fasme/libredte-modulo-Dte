@@ -301,7 +301,7 @@ class Model_DteFolio extends \Model_App
             throw new \Exception('RUT del CAF '.$Folios->getEmisor().' no corresponde con el RUT de la empresa '.$Emisor->razon_social.' '.$Emisor->rut.'-'.$Emisor->dv);
         }
         // verificar que el folio que se está subiendo sea para el ambiente actual de la empresa
-        $ambiente_empresa = $Emisor->config_ambiente_en_certificacion ? 'certificación' : 'producción';
+        $ambiente_empresa = $Emisor->enCertificacion() ? 'certificación' : 'producción';
         $ambiente_caf = $Folios->getCertificacion() ? 'certificación' : 'producción';
         if ($ambiente_empresa!=$ambiente_caf) {
             throw new \Exception('Empresa está en ambiente de '.$ambiente_empresa.' pero folios son de '.$ambiente_caf);

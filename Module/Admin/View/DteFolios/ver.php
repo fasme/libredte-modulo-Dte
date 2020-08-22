@@ -102,7 +102,7 @@ if ($foliosSinUso) :
 ?>
 <p>Los folios a continuación, que están entre el N° <?=$DteFolio->getPrimerFolio()?> (primer folio emitido en LibreDTE) y el N° <?=$DteFolio->siguiente?> (folio siguiente), se encuentran sin uso en el sistema:</p>
 <p><?=implode(', ', $foliosSinUso)?></p>
-<p>Si estos folios no existen en otro sistema de facturación y no los recuperará, debe <a href="<?=\sasco\LibreDTE\Sii::getURL('/anulacionMsvDteInternet', $Emisor->config_ambiente_en_certificacion)?>" target="_blank">anularlos en el SII</a>.
+<p>Si estos folios no existen en otro sistema de facturación y no los recuperará, debe <a href="<?=\sasco\LibreDTE\Sii::getURL('/anulacionMsvDteInternet', $Emisor->enCertificacion())?>" target="_blank">anularlos en el SII</a>.
 <?php else : ?>
 <p>No hay CAF con folios sin uso menores al folio siguiente <?=$DteFolio->siguiente?>.</p>
 <?php endif; ?>

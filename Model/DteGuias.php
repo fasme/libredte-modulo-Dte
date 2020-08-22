@@ -49,7 +49,7 @@ class Model_DteGuias extends \Model_Plural_App
             $filtros['fecha'] = date('Y-m-d');
         }
         $where = ['e.fecha = :fecha', 'e.anulado = false'];
-        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':fecha' => $filtros['fecha']];
+        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':fecha' => $filtros['fecha']];
         if (!empty($filtros['receptor'])) {
             $where[] = 'e.receptor = :receptor';
             $vars[':receptor'] = \sowerphp\app\Utility_Rut::normalizar($filtros['receptor']);
@@ -121,7 +121,7 @@ class Model_DteGuias extends \Model_Plural_App
     public function getSinFacturar($desde, $hasta, $receptor = null, $con_referencia = false)
     {
         $where = ['e.fecha BETWEEN :desde AND :hasta AND anulado = :anulado'];
-        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta, ':anulado'=>0];
+        $vars = [':rut'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta, ':anulado'=>0];
         if ($receptor) {
             $vars[':receptor'] = \sowerphp\app\Utility_Rut::normalizar($receptor);
             $where[] = 'e.receptor = :receptor';
@@ -164,7 +164,7 @@ class Model_DteGuias extends \Model_Plural_App
         sort($folios);
         $facturacion = [];
         foreach ($folios as $folio) {
-            $Guia = new Model_DteEmitido($this->getContribuyente()->rut, 52, $folio, (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $Guia = new Model_DteEmitido($this->getContribuyente()->rut, 52, $folio, $this->getContribuyente()->enCertificacion());
             $facturacion[$Guia->receptor][] = $Guia;
         }
         // crear el documento temporal de cada receptor

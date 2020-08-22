@@ -106,7 +106,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND e.fecha BETWEEN :desde AND :hasta
                 AND e.dte != 46
             ORDER BY e.fecha, e.dte, e.folio
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
         foreach ($datos as &$dato) {
             $dato['id'] = 'T'.$dato['id'].'F'.$dato['folio'];
         }
@@ -151,7 +151,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND e.dte != 46
             GROUP BY t.tipo
             ORDER BY total DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -171,7 +171,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND dte != 46
             GROUP BY fecha
             ORDER BY fecha
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -192,7 +192,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND dte != 46
             GROUP BY hora
             ORDER BY hora
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -212,7 +212,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND dte != 46
             GROUP BY sucursal
             ORDER BY total DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
         foreach($datos as &$d) {
             $d['sucursal'] = $this->getContribuyente()->getSucursal($d['sucursal'])->sucursal;
         }
@@ -236,7 +236,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND e.dte != 46
             GROUP BY u.usuario
             ORDER BY total DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -258,7 +258,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND '.$nacionalidad.' != \'\'
             GROUP BY nacionalidad
             ORDER BY total DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
         foreach ($datos as &$d) {
             $d['nacionalidad'] = \sasco\LibreDTE\Sii\Aduana::getNacionalidad($d['nacionalidad']);
         }
@@ -284,7 +284,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND '.$moneda.' != \'\'
             GROUP BY moneda
             ORDER BY total DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -346,7 +346,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND dte NOT IN (39, 41)
                 AND certificacion = :certificacion
                 AND SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', self::$revision_estados['rechazados']).'\')
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
         return !empty($aux['total']) ? $aux : null;
     }
 
@@ -370,14 +370,14 @@ class Model_DteEmitidos extends \Model_Plural_App
                 AND certificacion = :certificacion
                 AND receptor_evento IS NULL
                 AND '.$this->db->date('Ym', 'fecha', 'INTEGER').' = :periodo
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':periodo'=>$periodo]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':periodo'=>$periodo]);
         foreach ($dtes as $dte) {
             $documentos = $this->getContribuyente()->getRCV(['operacion'=>'VENTA', 'periodo'=>$periodo, 'dte'=>$dte]);
             foreach ($documentos as $d) {
                 if (!$d['detEventoReceptor']) {
                     continue;
                 }
-                $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $dte, $d['detNroDoc'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+                $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $dte, $d['detNroDoc'], $this->getContribuyente()->enCertificacion());
                 if (!$DteEmitido->usuario or $DteEmitido->receptor_evento) {
                     continue; // DTE no está emitido en LibreDTE o ya tiene evento registrado
                 }
@@ -427,7 +427,7 @@ class Model_DteEmitidos extends \Model_Plural_App
                 )
                 AND d.xml IS NOT NULL
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -442,7 +442,7 @@ class Model_DteEmitidos extends \Model_Plural_App
             WHERE emisor = :emisor AND dte IN (39, 41) AND certificacion = :certificacion AND xml IS NOT NULL
             ORDER BY fecha ASC
             LIMIT 1
-        ', [':emisor' => $this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':emisor' => $this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
     }
 
     /**

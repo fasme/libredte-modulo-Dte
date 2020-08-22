@@ -73,7 +73,7 @@ class Controller_Cobranzas extends \Controller_App
     public function ver($dte, $folio, $fecha)
     {
         $Emisor = $this->getContribuyente();
-        $Pago = new Model_Cobranza($Emisor->rut, $dte, $folio, $Emisor->config_ambiente_en_certificacion, $fecha);
+        $Pago = new Model_Cobranza($Emisor->rut, $dte, $folio, $Emisor->enCertificacion(), $fecha);
         if (!$Pago->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Pago programado solicitado no existe', 'error'
@@ -111,7 +111,7 @@ class Controller_Cobranzas extends \Controller_App
     public function eliminar($dte, $folio, $fecha)
     {
         $Emisor = $this->getContribuyente();
-        $Pago = new Model_Cobranza($Emisor->rut, $dte, $folio, $Emisor->config_ambiente_en_certificacion, $fecha);
+        $Pago = new Model_Cobranza($Emisor->rut, $dte, $folio, $Emisor->enCertificacion(), $fecha);
         if (!$Pago->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Pago programado solicitado no existe', 'error'

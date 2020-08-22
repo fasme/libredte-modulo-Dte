@@ -49,7 +49,7 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
         // determinar desde y hasta
         $desde = $this->db->getValue(
             'SELECT MIN(dia) FROM dte_boleta_consumo WHERE emisor = :emisor AND certificacion = :certificacion',
-            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]
+            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]
         );
         if (!$desde) {
             return false;
@@ -65,7 +65,7 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
         // consultar los dias que si están en el RCOF
         $dias_enviados = $this->db->getCol(
             'SELECT dia FROM dte_boleta_consumo WHERE emisor = :emisor AND certificacion = :certificacion',
-            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]
+            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]
         );
         // calcular la diferencia entre los enviados y los que se solicitaron
         return array_diff($dias, $dias_enviados);
@@ -85,7 +85,7 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
         ];
         $vars = [
             ':emisor'=>$this->getContribuyente()->rut,
-            ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion
+            ':certificacion'=>$this->getContribuyente()->enCertificacion()
         ];
         if ($desde) {
             $where[] = 'dia >= :desde';
@@ -111,7 +111,7 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
             WHERE emisor = :emisor AND certificacion = :certificacion AND dia BETWEEN :desde AND :hasta AND track_id > 0
             GROUP BY revision_estado
             ORDER BY total DESC
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion, ':desde'=>$desde, ':hasta'=>$hasta]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion(), ':desde'=>$desde, ':hasta'=>$hasta]);
     }
 
     /**
@@ -128,7 +128,7 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
                 emisor = :emisor
                 AND certificacion = :certificacion
                 AND revision_estado = \'ERRONEO\'
-        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
         return !empty($aux['total']) ? $aux : null;
     }
 

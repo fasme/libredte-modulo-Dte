@@ -60,7 +60,7 @@ class Controller_DteVentas extends Controller_Base_Libros
     {
         $Emisor = $this->getContribuyente();
         // si el libro fue enviado y no es rectifica error
-        $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, $Emisor->enCertificacion());
         if ($DteVenta->track_id and empty($_POST['CodAutRec']) and $DteVenta->getEstado()!='LRH' and $DteVenta->track_id!=-1) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Libro del período '.$periodo.' ya fue enviado, ahora sólo puede  hacer rectificaciones', 'error'
@@ -101,8 +101,8 @@ class Controller_DteVentas extends Controller_Base_Libros
             'RutEmisorLibro' => $Emisor->rut.'-'.$Emisor->dv,
             'RutEnvia' => $Firma->getID(),
             'PeriodoTributario' => substr($periodo, 0, 4).'-'.substr($periodo, 4),
-            'FchResol' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
-            'NroResol' =>  $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+            'FchResol' => $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+            'NroResol' =>  $Emisor->enCertificacion() ? 0 : $Emisor->config_ambiente_produccion_numero,
             'TipoOperacion' => 'VENTA',
             'TipoLibro' => 'MENSUAL',
             'TipoEnvio' => 'TOTAL',
@@ -176,7 +176,7 @@ class Controller_DteVentas extends Controller_Base_Libros
             $resumenes_errores = [];
             foreach ($resumenes as $resumen) {
                 try {
-                    $r = libredte_api_consume('/sii/rcv/ventas/set_resumen/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.(int)$Emisor->config_ambiente_en_certificacion, [
+                    $r = libredte_api_consume('/sii/rcv/ventas/set_resumen/'.$Emisor->rut.'-'.$Emisor->dv.'/'.$periodo.'?certificacion='.$Emisor->enCertificacion(), [
                         'auth' => [
                             'cert' => [
                                 'cert-data' => $Firma->getCertificate(),
@@ -260,7 +260,7 @@ class Controller_DteVentas extends Controller_Base_Libros
     public function descargar_resumenes($periodo)
     {
         $Emisor = $this->getContribuyente();
-        $Libro = new Model_DteVenta($Emisor->rut, (int)$periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $Libro = new Model_DteVenta($Emisor->rut, (int)$periodo, $Emisor->enCertificacion());
         if (!$Libro->exists()) {
             \sowerphp\core\Model_Datasource_Session::message(
                 'Aun no se ha generado el XML del período '.$periodo, 'error'
@@ -364,7 +364,7 @@ class Controller_DteVentas extends Controller_Base_Libros
     public function eventos_receptor($periodo, $evento)
     {
         $Emisor = $this->getContribuyente();
-        $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, (int)$Emisor->config_ambiente_en_certificacion);
+        $DteVenta = new Model_DteVenta($Emisor->rut, $periodo, $Emisor->enCertificacion());
         $this->set([
             'Emisor' => $Emisor,
             'periodo' => $periodo,

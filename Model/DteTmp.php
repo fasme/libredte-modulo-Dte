@@ -209,8 +209,8 @@ class Model_DteTmp extends \Model_App
         $EnvioDte->setCaratula([
             'RutEnvia' => $Firma ? $Firma->getID() : false,
             'RutReceptor' => $RutReceptor ? $RutReceptor : $Dte->getReceptor(),
-            'FchResol' => $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
-            'NroResol' => $Emisor->config_ambiente_en_certificacion ? 0 : $Emisor->config_ambiente_produccion_numero,
+            'FchResol' => $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha,
+            'NroResol' => $Emisor->enCertificacion() ? 0 : $Emisor->config_ambiente_produccion_numero,
         ]);
         return $EnvioDte;
     }
@@ -326,7 +326,7 @@ class Model_DteTmp extends \Model_App
             throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes de generar el DTE', 506);
         }
         // no hay fecha de resolución configurada
-        $fecha_resolucion = $Emisor->config_ambiente_en_certificacion ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha;
+        $fecha_resolucion = $Emisor->enCertificacion() ? $Emisor->config_ambiente_certificacion_fecha : $Emisor->config_ambiente_produccion_fecha;
         if (empty($fecha_resolucion)) {
             throw new \Exception('No hay fecha de resolución de SII configurada para el ambiente de emisión, debe configurar la fecha antes de generar el DTE', 400);
         }
@@ -380,7 +380,7 @@ class Model_DteTmp extends \Model_App
         }
         // guardar DTE
         $r = $EnvioDte->getDocumentos()[0]->getResumen();
-        $DteEmitido = new Model_DteEmitido($Emisor->rut, $r['TpoDoc'], $r['NroDoc'], (int)$Emisor->config_ambiente_en_certificacion);
+        $DteEmitido = new Model_DteEmitido($Emisor->rut, $r['TpoDoc'], $r['NroDoc'], $Emisor->enCertificacion());
         if ($DteEmitido->exists()) {
             throw new \Exception('Ya existe un DTE del tipo '.$r['TpoDoc'].' y folio '.$r['NroDoc'].' emitido', 409);
         }

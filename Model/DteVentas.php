@@ -49,7 +49,7 @@ class Model_DteVentas extends \Model_Plural_App
             SELECT COUNT(*)
             FROM dte_venta
             WHERE emisor = :emisor AND periodo = :periodo AND certificacion = :certificacion AND track_id IS NOT NULL
-        ', [':emisor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>(int)$this->getContribuyente()->config_ambiente_en_certificacion]);
+        ', [':emisor'=>$this->getContribuyente()->rut, ':periodo'=>$periodo, ':certificacion'=>$this->getContribuyente()->enCertificacion()]);
     }
 
     /**
@@ -68,7 +68,7 @@ class Model_DteVentas extends \Model_Plural_App
             }
             $totales_mensuales[$periodo] = array_merge(
                 ['periodo'=>$periodo],
-                (new Model_DteVenta($this->getContribuyente()->rut, $periodo, $this->getContribuyente()->config_ambiente_en_certificacion))->getTotales()
+                (new Model_DteVenta($this->getContribuyente()->rut, $periodo, $this->getContribuyente()->enCertificacion()))->getTotales()
             );
             $periodo = \sowerphp\general\Utility_Date::nextPeriod($periodo);
         }
@@ -85,7 +85,7 @@ class Model_DteVentas extends \Model_Plural_App
         $libros = [];
         foreach (range(1,12) as $mes) {
             $mes = $mes < 10 ? '0'.$mes : $mes;
-            $DteVenta = new Model_DteVenta($this->getContribuyente()->rut, (int)($anio.$mes), (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $DteVenta = new Model_DteVenta($this->getContribuyente()->rut, (int)($anio.$mes), $this->getContribuyente()->enCertificacion());
             $resumen = $DteVenta->getResumen();
             if ($resumen) {
                 $libros[$anio][$mes] = $resumen;
@@ -125,7 +125,7 @@ class Model_DteVentas extends \Model_Plural_App
         $where = ['d.emisor = :emisor', 'd.certificacion = :certificacion'];
         $vars = [
             ':emisor' => $this->getContribuyente()->rut,
-            ':certificacion' => (int)$this->getContribuyente()->config_ambiente_en_certificacion,
+            ':certificacion' => $this->getContribuyente()->enCertificacion(),
         ];
         // filtrar por tipo de DTE
         if (!empty($filtros['dte'])) {
@@ -249,7 +249,7 @@ class Model_DteVentas extends \Model_Plural_App
             }
             // agregar el documento emitido si no existe
             $Receptor = $Receptores->get(substr($doc['rut'],0,-2));
-            $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $doc['dte'], $doc['folio'], (int)$this->getContribuyente()->config_ambiente_en_certificacion);
+            $DteEmitido = new Model_DteEmitido($this->getContribuyente()->rut, $doc['dte'], $doc['folio'], $this->getContribuyente()->enCertificacion());
             if (!$DteEmitido->usuario or $DteEmitido->mipyme) {
                 $DteEmitido->tasa = $doc['tasa'] ? $doc['tasa'] : 0;
                 $DteEmitido->fecha = $doc['fecha'];

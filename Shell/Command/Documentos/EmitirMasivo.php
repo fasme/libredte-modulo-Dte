@@ -240,7 +240,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
                 }
                 // enviar DTE real por correo al receptor
                 if ($email) {
-                    $DteEmitido = new \website\Dte\Model_DteEmitido($response['body']['emisor'], $response['body']['dte'], $response['body']['folio'], $Emisor->config_ambiente_en_certificacion);
+                    $DteEmitido = new \website\Dte\Model_DteEmitido($response['body']['emisor'], $response['body']['dte'], $response['body']['folio'], $Emisor->enCertificacion());
                     try {
                         // enviar el correo indicado en el archivo
                         if (!empty($dte['Encabezado']['Receptor']['CorreoRecep'])) {

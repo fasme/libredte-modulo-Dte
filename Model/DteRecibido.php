@@ -589,7 +589,7 @@ class Model_DteRecibido extends \Model_App
             // enviar al SII
             try {
                 $r = libredte_api_consume(
-                    '/sii/rcv/compras/set_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.(int)$this->getReceptor()->config_ambiente_en_certificacion,
+                    '/sii/rcv/compras/set_tipo_transaccion/'.$this->getReceptor()->rut.'-'.$this->getReceptor()->dv.'/'.$this->getPeriodo().'?certificacion='.$this->getReceptor()->enCertificacion(),
                     [
                         'auth' => [
                             'pass' => [

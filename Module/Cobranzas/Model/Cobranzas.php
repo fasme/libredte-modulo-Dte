@@ -47,7 +47,7 @@ class Model_Cobranzas extends \Model_Plural_App
     public function getPendientes($filtros = [])
     {
         $where = [];
-        $vars = [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->config_ambiente_en_certificacion];
+        $vars = [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()];
         // estado de vencimiento
         $hoy = date('Y-m-d');
         if (isset($filtros['vencidos'])) {

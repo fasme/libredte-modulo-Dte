@@ -63,7 +63,7 @@ class Shell_Command_Sii_Sincronizar extends \Shell_App
                 continue;
             }
             // verificar que la empresa esté en el mismo ambiente que se solicitó al comando
-            if ($Contribuyente->config_ambiente_en_certificacion != $ambiente) {
+            if ($Contribuyente->enCertificacion() != $ambiente) {
                 continue;
             }
             // sincronizar
