@@ -139,6 +139,7 @@ echo $t->generate([
                     <p>
                         <a class="btn btn-primary<?=$DteEmitido->track_id < 0 ?' disabled':''?>" href="<?=$_base?>/dte/dte_emitidos/actualizar_estado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button" onclick="return Form.loading('Actualizando estado del DTE...')">Actualizar estado</a><br/>
                         <span style="font-size:0.8em">
+<?php if (!$DteEmitido->getTipo()->esBoleta()) : ?>
 <?php if (!$Emisor->config_sii_estado_dte_webservice and $DteEmitido->track_id > 0) : ?>
                             <a href="<?=$_base?>/dte/dte_emitidos/solicitar_revision/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Solicitar nueva revisión del documento por correo electrónico al SII" onclick="return Form.loading('Solicitando revisión del envío al SII...')">solicitar revisión del envío</a>
                             <br/>
@@ -149,6 +150,7 @@ echo $t->generate([
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a><br/>
 <?php if ($DteEmitido->hasLocalXML()) : ?>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/dte_emitidos/verificar_datos_avanzado/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>', 750, 750)" title="Verificar datos avanzados del documento con el servicio web del SII">verificación avanzada en SII</a>
+<?php endif; ?>
 <?php endif; ?>
 <?php if (substr($DteEmitido->revision_estado,0,3)=='RFR') : ?>
                             <br/>

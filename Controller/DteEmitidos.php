@@ -1061,7 +1061,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite actualizar el track_id del DteEmitido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-06-10
+     * @version 2020-08-22
      */
     public function avanzado_track_id($dte, $folio)
     {
@@ -1079,8 +1079,14 @@ class Controller_DteEmitidos extends \Controller_App
             \sowerphp\core\Model_Datasource_Session::message('Sólo el administrador de la empresa puede cambiar el Track ID', 'error');
             $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request));
         }
+        // verificar que track id sea mayor o igual a -2
+        $track_id = (int)trim($_POST['track_id']);
+        if ($track_id < -2) {
+            \sowerphp\core\Model_Datasource_Session::message('Track ID debe ser igual o superior a -2', 'error');
+            $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
+        }
         // cambiar track id
-        $DteEmitido->track_id = (int)$_POST['track_id'];
+        $DteEmitido->track_id = $track_id;
         $DteEmitido->revision_estado = null;
         $DteEmitido->revision_detalle = null;
         $DteEmitido->save();
