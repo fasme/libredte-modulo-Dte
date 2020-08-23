@@ -994,7 +994,7 @@ class Model_DteEmitido extends Model_Base_Envio
     /**
      * Método que indica si el DTE se debe enviar o no al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-22
+     * @version 2020-08-23
      */
     public function seEnvia(): bool
     {
@@ -1003,8 +1003,9 @@ class Model_DteEmitido extends Model_Base_Envio
             return (bool)$this->getTipo()->enviar;
         }
         // si es boleta del ambiente de certificación se envía al SII
+        // por ahora sólo para el ambiente de desarrollo de LibreDTE
         // TODO: esto se puede eliminar a contar del 2021-01-01
-        if ($this->getTipo()->enviar and $this->certificacion and $this->fecha >= '2020-08-01') {
+        if ($this->getTipo()->enviar and $this->certificacion and $this->fecha >= '2020-08-01' and defined('ENVIRONMENT_DEV')) {
             return true;
         }
         // las boletas dependen de la configuración y de la fecha
