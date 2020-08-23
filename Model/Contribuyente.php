@@ -861,7 +861,7 @@ class Model_Contribuyente extends \Model_App
      * a emitir en la aplicación
      * @return Listado de documentos autorizados
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-19
+     * @version 2020-08-22
      */
     public function getDocumentosAutorizados($onlyPK = false, $User = null)
     {
@@ -877,12 +877,14 @@ class Model_Contribuyente extends \Model_App
                 SELECT t.codigo
                 FROM dte_tipo AS t, contribuyente_dte AS c
                 WHERE t.codigo = c.dte AND c.contribuyente = :rut AND c.activo = :activo
+                ORDER BY t.codigo
             ', [':rut'=>$this->rut, ':activo'=>1]);
         } else {
             $documentos = $this->db->getTable('
                 SELECT t.codigo, t.tipo
                 FROM dte_tipo AS t, contribuyente_dte AS c
                 WHERE t.codigo = c.dte AND c.contribuyente = :rut AND c.activo = :activo
+                ORDER BY t.codigo
             ', [':rut'=>$this->rut, ':activo'=>1]);
         }
         // entregar todos los documentos si no se pidió filtrar por usuario o el usuario es administrador o el usuario es de soporte
