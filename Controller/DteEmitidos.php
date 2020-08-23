@@ -145,7 +145,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-08-22
      */
     public function ver($dte, $folio)
     {
@@ -169,7 +169,7 @@ class Controller_DteEmitidos extends \Controller_App
             'referenciados' => $DteEmitido->getReferenciados(),
             'referencias' => $DteEmitido->getReferencias(),
             'referencia' => $DteEmitido->getPropuestaReferencia(),
-            'enviar_sii' => !(in_array($DteEmitido->dte, [39, 41])),
+            'enviar_sii' => $DteEmitido->seEnvia(),
             'Cobro' => (\sowerphp\core\Module::loaded('Pagos') and $DteEmitido->getTipo()->operacion=='S') ? $DteEmitido->getCobro(false) : false,
             'email_html' => $Emisor->getEmailFromTemplate('dte'),
             'sucursales' => $Emisor->getSucursales(),
@@ -1480,7 +1480,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que permite actualizar el estado de envio del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-11
+     * @version 2020-08-22
      */
     public function _api_actualizar_estado_GET($dte, $folio, $emisor)
     {
@@ -1501,12 +1501,12 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
-        if (in_array($dte, [39,41])) {
-            $this->Api->send('Boletas no se envían al SII, no puede consultar estado de envío', 400);
-        }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
+        if (!$DteEmitido->seEnvia()) {
+            $this->Api->send('Documento no se envía al SII, no puede consultar estado de envío', 400);
         }
         // actualizar estado
         try {
@@ -1524,7 +1524,7 @@ class Controller_DteEmitidos extends \Controller_App
      * @param dte Tipo de DTE
      * @param folio Folio del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-10
+     * @version 2020-08-22
      */
     public function _api_enviar_sii_GET($dte, $folio, $emisor, $retry = 1)
     {
@@ -1544,8 +1544,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
         }
-        // si es boleta no se puede enviar
-        if (in_array($dte, [39, 41])) {
+        if (!$DteEmitido->seEnvia()) {
             $this->Api->send('Documento de tipo '.$dte.' no se envía al SII', 400);
         }
         // enviar DTE (si no se puede enviar se generará excepción)
@@ -1577,7 +1576,7 @@ class Controller_DteEmitidos extends \Controller_App
         if (!$Emisor->exists()) {
             $this->Api->send('Emisor no existe', 404);
         }
-        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/actualizar_estado')) {
+        if (!$Emisor->usuarioAutorizado($User, '/dte/dte_emitidos/enviar_email')) {
             $this->Api->send('No está autorizado a operar con la empresa solicitada', 403);
         }
         $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());

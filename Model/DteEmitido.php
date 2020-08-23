@@ -992,13 +992,37 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que indica si el DTE se debe enviar o no al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-08-22
+     */
+    public function seEnvia(): bool
+    {
+        // todos los documentos menos boletas dependen solamente de la configuración
+        if (!in_array($this->dte, [39, 41])) {
+            return (bool)$this->getTipo()->enviar;
+        }
+        // si es boleta del ambiente de certificación se envía al SII
+        // TODO: esto se puede eliminar a contar del 2021-01-01
+        if ($this->getTipo()->enviar and $this->certificacion and $this->fecha >= '2020-08-01') {
+            return true;
+        }
+        // las boletas dependen de la configuración y de la fecha
+        if ($this->getTipo()->enviar and $this->fecha >= Model_DteEmitidos::ENVIO_BOLETA) {
+            return true;
+        }
+        // no se debe enviar
+        return false;
+    }
+
+    /**
      * Método que envía el DTE emitido al SII, básicamente lo saca del sobre y
      * lo pone en uno nuevo con el RUT del SII
      * @param user ID del usuari oque hace el envío
      * @param retry Número de intentos que se usarán para enviar el DTE al SII (=null, valor por defecto LibreDTE, =0 no se enviará, >0 cantidad de intentos)
      * @param gzip Indica si se debe enviar comprimido el XML del DTE al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-22
+     * @version 2020-08-22
      */
     public function enviar($user = null, $retry = null, $gzip = null)
     {
@@ -1009,8 +1033,8 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('No es posible enviar XML emitidos en el Portal MIPYME');
         }
         $Emisor = $this->getEmisor();
-        // boletas no se envían
-        if (in_array($this->dte, [39, 41])) {
+        // verificar que el documento se pueda enviar al SII
+        if (!$this->seEnvia()) {
             return false; // no hay excepción para hacerlo "silenciosamente"
         }
         // determinar retry y gzip
@@ -1059,20 +1083,42 @@ class Model_DteEmitido extends Model_Base_Envio
             ['<DTE', '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">'],
             $xml
         );
-        // obtener token
         \sasco\LibreDTE\Sii::setAmbiente((int)$this->certificacion);
-        $token = \sasco\LibreDTE\Sii\Autenticacion::getToken($Firma);
-        if (!$token) {
-            throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+        // enviar boleta al SII
+        if (in_array($this->dte, [39, 41])) {
+            if (!class_exists('\sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta')) {
+                throw new \Exception('Envío de boletas al SII aún no disponible en esta versión de LibreDTE');
+            }
+            // obtener token
+            $token = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::getToken($Firma);
+            if (!$token) {
+                throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            // enviar XML
+            $result = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
+            if ($result===false) {
+                throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            $this->track_id = (int)$result['trackid'];
+            $this->revision_estado = $result['estado'];
+            $this->revision_detalle = $result['fecha_recepcion'];
         }
-        // enviar XML
-        $result = \sasco\LibreDTE\Sii::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
-        if ($result===false or $result->STATUS!='0') {
-            throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+        // enviar otros DTE
+        else {
+            // obtener token
+            $token = \sasco\LibreDTE\Sii\Autenticacion::getToken($Firma);
+            if (!$token) {
+                throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            // enviar XML
+            $result = \sasco\LibreDTE\Sii::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
+            if ($result===false or $result->STATUS!='0') {
+                throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            $this->track_id = (int)$result->TRACKID;
+            $this->revision_estado = null;
+            $this->revision_detalle = null;
         }
-        $this->track_id = (int)$result->TRACKID;
-        $this->revision_estado = null;
-        $this->revision_detalle = null;
         $this->save();
         return $this->track_id;
     }
@@ -1082,12 +1128,15 @@ class Model_DteEmitido extends Model_Base_Envio
      * es un wrapper para las verdaderas llamadas
      * @param usarWebservice =true se consultará vía servicio web = false vía email
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-06-11
+     * @version 2020-08-22
      */
     public function actualizarEstado($user = null, $usarWebservice = true)
     {
         if (!$this->track_id) {
             throw new \Exception('DTE no tiene Track ID, primero debe enviarlo al SII');
+        }
+        if (in_array($this->dte, [39, 41])) {
+            $usarWebservice = true;
         }
         return $usarWebservice ? $this->actualizarEstadoWebservice($user) : $this->actualizarEstadoEmail();
     }
@@ -1096,7 +1145,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que actualiza el estado de un DTE enviado al SII a través del
      * servicio web que dispone el SII para esta consulta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-21
+     * @version 2020-08-22
      */
     private function actualizarEstadoWebservice($user = null)
     {
@@ -1106,39 +1155,65 @@ class Model_DteEmitido extends Model_Base_Envio
             throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar)');
         }
         \sasco\LibreDTE\Sii::setAmbiente((int)$this->certificacion);
-        // solicitar token
-        $token = \sasco\LibreDTE\Sii\Autenticacion::getToken($Firma);
-        if (!$token) {
-            throw new \Exception('No fue posible obtener el token');
-        }
-        // consultar estado enviado
-        $estado_up = \sasco\LibreDTE\Sii::request('QueryEstUp', 'getEstUp', [$this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token]);
-        // si el estado no se pudo recuperar error
-        if ($estado_up===false) {
-            throw new \Exception('No fue posible obtener el estado del DTE');
-        }
-        // armar estado del dte
-        $estado = (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/ESTADO')[0];
-        if (isset($estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/GLOSA')[0])) {
-            $glosa = (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/GLOSA')[0];
-        } else {
-            $glosa = null;
-        }
-        $this->revision_estado = $glosa ? ($estado.' - '.$glosa) : $estado;
-        $this->revision_detalle = null;
-        if ($estado=='EPR') {
-            $resultado = (array)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_BODY')[0];
-            // DTE aceptado
-            if ($resultado['ACEPTADOS']) {
-                $this->revision_detalle = 'DTE aceptado';
+        // consultar estado de boleta
+        if (in_array($this->dte, [39, 41])) {
+            if (!class_exists('\sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta')) {
+                throw new \Exception('Consulta de estado de boletas aún no disponible en esta versión de LibreDTE');
             }
-            // DTE rechazado
-            else if ($resultado['RECHAZADOS']) {
-                $this->revision_estado = 'RCH - DTE Rechazado';
+            // obtener token
+            $token = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::getToken($Firma);
+            if (!$token) {
+                throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
-            // DTE con reparos
-            else  {
-                $this->revision_estado = 'RLV - DTE Aceptado con Reparos Leves';
+            // consultar estado enviado
+            $estado_up = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::estado($this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token);
+            // si el estado no se pudo recuperar error
+            if ($estado_up===false) {
+                throw new \Exception('No fue posible obtener el estado del DTE<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            $this->revision_estado = $estado_up['estado'];
+            $this->revision_detalle = !empty($estado_up['detalle']) ? $estado_up['detalle'] : (
+                !empty($estado_up['detalle_rep_rech']) ? $estado_up['detalle_rep_rech'] : (
+                    !empty($estado_up['fecha_recepcion']) ? $estado_up['fecha_recepcion'] : null
+                )
+            );
+        }
+        // consultar estado de otros DTE
+        else {
+            // obtener token
+            $token = \sasco\LibreDTE\Sii\Autenticacion::getToken($Firma);
+            if (!$token) {
+                throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            // consultar estado enviado
+            $estado_up = \sasco\LibreDTE\Sii::request('QueryEstUp', 'getEstUp', [$this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token]);
+            // si el estado no se pudo recuperar error
+            if ($estado_up===false) {
+                throw new \Exception('No fue posible obtener el estado del DTE<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
+            }
+            // armar estado del dte
+            $estado = (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/ESTADO')[0];
+            if (isset($estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/GLOSA')[0])) {
+                $glosa = (string)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_HDR/GLOSA')[0];
+            } else {
+                $glosa = null;
+            }
+            $this->revision_estado = $glosa ? ($estado.' - '.$glosa) : $estado;
+            $this->revision_detalle = null;
+            if ($estado=='EPR') {
+                $resultado = (array)$estado_up->xpath('/SII:RESPUESTA/SII:RESP_BODY')[0];
+                // DTE aceptado
+                if ($resultado['ACEPTADOS']) {
+                    $this->revision_detalle = 'DTE aceptado';
+                }
+                // DTE rechazado
+                else if ($resultado['RECHAZADOS']) {
+                    $this->revision_estado = 'RCH - DTE Rechazado';
+                }
+                // DTE con reparos
+                else  {
+                    $this->revision_estado = 'RLV - DTE Aceptado con Reparos Leves';
+                }
             }
         }
         // guardar estado del dte

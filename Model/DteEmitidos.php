@@ -43,6 +43,8 @@ class Model_DteEmitidos extends \Model_Plural_App
         'no_final' => ['002', '004', '005', '007', '106', '107', '-11', '-8', 'VOF', 'PRD', 'SOK', 'CRT'],
     ]; ///< Posibles estados de revisión de envío al SII de los DTE
 
+    const ENVIO_BOLETA = '2021-01-01'; // desde qué día se deben enviar las boletas al SII en producción
+
     /**
      * Método que entrega el detalle de las ventas en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)

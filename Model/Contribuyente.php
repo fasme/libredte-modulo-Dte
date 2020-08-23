@@ -1259,7 +1259,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega el listado de documentos emitidos por el contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-25
+     * @version 2020-08-22
      */
     public function getDocumentosEmitidos($filtros = [])
     {
@@ -1362,6 +1362,7 @@ class Model_Contribuyente extends \Model_App
         $query = '
             SELECT
                 d.emisor,
+                d.receptor,
                 d.dte,
                 d.folio,
                 d.certificacion,
@@ -1384,14 +1385,14 @@ class Model_Contribuyente extends \Model_App
             $query = $this->db->setLimit($query, $filtros['limit'], !empty($filtros['offset']) ? $filtros['offset'] : 0);
         }
         // entregar consulta verdadera (esta si obtiene razón social verdadera en DTE exportación, pero sólo para las filas del límite consultado)
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
             SELECT
                 e.dte,
                 e.tipo,
                 e.folio,
                 d.receptor,
-                CASE WHEN e.dte NOT IN (110, 111, 112) THEN e.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
+                CASE WHEN e.receptor != 55555555 THEN e.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
                 d.fecha,
                 d.total,
                 d.revision_estado AS estado,
@@ -1751,13 +1752,13 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega las ventas de un período
      * @todo Corregir ID en Extranjero y asignar los NULL por los valores que corresponden (quizás haya que modificar tabla dte_emitido)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-04-28
+     * @version 2020-08-22
      */
     public function getVentas($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
-        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN e.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // si el contribuyente tiene impuestos adicionales se crean las query para esos campos
         if ($this->config_extra_impuestos_adicionales) {
             list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('e.xml', [
@@ -1810,8 +1811,8 @@ class Model_Contribuyente extends \Model_App
                 NULL AS monto_periodo,
                 NULL AS pasaje_nacional,
                 NULL AS pasaje_internacional,
-                CASE WHEN e.dte IN (110, 111, 112) THEN '.$extranjero_id.' ELSE NULL END AS extranjero_id,
-                CASE WHEN e.dte IN (110, 111, 112) THEN '.$extranjero_nacionalidad.' ELSE NULL END AS extranjero_nacionalidad,
+                CASE WHEN e.receptor = 55555555 THEN '.$extranjero_id.' ELSE NULL END AS extranjero_id,
+                CASE WHEN e.receptor = 55555555 THEN '.$extranjero_nacionalidad.' ELSE NULL END AS extranjero_nacionalidad,
                 NULL AS indicador_servicio,
                 NULL AS indicador_sin_costo,
                 NULL AS liquidacion_rut,
@@ -2644,7 +2645,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el listado de documentos electrónicos que han sido
      * generados pero no se han enviado al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-22
+     * @version 2020-08-22
      */
     public function getDteEmitidosSinEnviar($certificacion = null)
     {
@@ -2655,16 +2656,16 @@ class Model_Contribuyente extends \Model_App
             WHERE
                 emisor = :rut
                 AND certificacion = :certificacion
-                AND dte NOT IN (39, 41)
+                AND (dte NOT IN (39, 41) OR (dte IN (39, 41) AND fecha >= :envio_boleta))
                 AND track_id IS NULL
-        ', [':rut'=>$this->rut, ':certificacion'=>$certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$certificacion, ':envio_boleta'=>Model_DteEmitidos::ENVIO_BOLETA]);
     }
 
     /**
      * Método que entrega el listado de documentos electrónicos que han sido
      * generados y enviados al SII pero aun no se ha actualizado su estado
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-10-04
+     * @version 2020-08-22
      */
     public function getDteEmitidosSinEstado($certificacion = null)
     {
@@ -2675,14 +2676,14 @@ class Model_Contribuyente extends \Model_App
             WHERE
                 emisor = :rut
                 AND certificacion = :certificacion
-                AND dte NOT IN (39, 41)
+                AND (dte NOT IN (39, 41) OR (dte IN (39, 41) AND fecha >= :envio_boleta))
                 AND track_id > 0
                 AND (
                     revision_estado IS NULL
                     OR revision_estado LIKE \'-%\'
                     OR SUBSTRING(revision_estado FROM 1 FOR 3) IN (\''.implode('\', \'', Model_DteEmitidos::$revision_estados['no_final']).'\')
                 )
-        ', [':rut'=>$this->rut, ':certificacion'=>$certificacion]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$certificacion, ':envio_boleta'=>Model_DteEmitidos::ENVIO_BOLETA]);
     }
 
     /**
@@ -2967,8 +2968,8 @@ class Model_Contribuyente extends \Model_App
             $estado = 'd.revision_estado IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -3022,7 +3023,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el detalle de los documentos emitidos con cierto
      * evento en un rango de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-25
+     * @version 2020-08-22
      */
     public function getDocumentosEmitidosEvento($desde, $hasta, $evento = null)
     {
@@ -3035,8 +3036,8 @@ class Model_Contribuyente extends \Model_App
             $evento = 'd.receptor_evento IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -3074,13 +3075,13 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega el detalle de los documentos emitidos que aun no han
      * sido enviado al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-21
+     * @version 2020-08-22
      */
     public function getDocumentosEmitidosSinEnviar()
     {
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN d.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -3105,12 +3106,12 @@ class Model_Contribuyente extends \Model_App
                 AND d.usuario = u.id
                 AND d.emisor = :rut
                 AND d.certificacion = :certificacion
-                AND d.dte NOT IN (39, 41)
+                AND (d.dte NOT IN (39, 41) OR (d.dte IN (39, 41) AND d.fecha >= :envio_boleta))
                 AND d.track_id IS NULL
                 AND d.xml IS NOT NULL
             ORDER BY d.fecha DESC, t.tipo, d.folio DESC
 
-        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion()]);
+        ', [':rut'=>$this->rut, ':certificacion'=>$this->enCertificacion(), ':envio_boleta'=>Model_DteEmitidos::ENVIO_BOLETA]);
     }
 
     /**
@@ -3145,7 +3146,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que entrega los estados de los DTE para un periodo de tiempo
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-09-23
+     * @version 2020-08-22
      */
     public function getDocumentosEmitidosEstadoIntercambio($desde, $hasta, $recibo, $recepcion, $resultado)
     {
@@ -3165,8 +3166,8 @@ class Model_Contribuyente extends \Model_App
             $where[] = 'resultado.estado IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/Exportaciones/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN e.dte NOT IN (110, 111, 112) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN e.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT

@@ -813,7 +813,7 @@ if ($Emisor->usuarioAutorizado($_Auth->User, 'admin') and $DteEmitido->getTipo()
     </div>
 </div>
 <?php endif; ?>
-<?php if ($DteEmitido->getTipo()->enviar) : ?>
+<?php if ($enviar_sii) : ?>
 <div class="card mt-4">
     <div class="card-header">
         <i class="far fa-paper-plane"></i>
