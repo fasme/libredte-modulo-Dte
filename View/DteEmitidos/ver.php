@@ -167,7 +167,9 @@ echo $t->generate([
                         <a class="btn btn-primary<?=(!$DteEmitido->hasLocalXML()?' disabled':'')?>" href="<?=$_base?>/dte/dte_emitidos/enviar_sii/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" role="button">Enviar documento al SII</a>
                         <br/>
                         <span style="font-size:0.8em">
+<?php if (!$DteEmitido->getTipo()->esBoleta()) : ?>
                             <a href="#" onclick="__.popup('<?=$_base?>/dte/sii/verificar_datos/<?=$DteEmitido->getReceptor()->getRUT()?>/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>/<?=$DteEmitido->fecha?>/<?=$DteEmitido->getTotal()?>', 750, 550)" title="Verificar datos del documento en la web del SII">verificar documento en SII</a>
+<?php endif; ?>
 <?php if ($DteEmitido->eliminable()) : ?>
                             <br/>
                             <a href="<?=$_base?>/dte/dte_emitidos/eliminar/<?=$DteEmitido->dte?>/<?=$DteEmitido->folio?>" title="Eliminar documento" onclick="return Form.confirm(this, '¿Confirmar la eliminación del DTE?')">eliminar documento</a>

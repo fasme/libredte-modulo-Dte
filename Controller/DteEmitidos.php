@@ -1086,7 +1086,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect(str_replace('avanzado_track_id', 'ver', $this->request->request).'#avanzado');
         }
         // cambiar track id
-        $DteEmitido->track_id = $track_id;
+        $DteEmitido->track_id = $track_id ? $track_id : null;
         $DteEmitido->revision_estado = null;
         $DteEmitido->revision_detalle = null;
         $DteEmitido->save();
