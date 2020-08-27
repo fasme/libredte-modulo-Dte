@@ -15,7 +15,7 @@ echo $f->begin(['onsubmit'=>'Form.check() && Form.confirm(this, \'Por favor conf
 echo $f->input([
     'name' => 'periodo',
     'label' => 'Período',
-    'help' => 'Periodo que desea eliminar los XML de boletas',
+    'help' => 'Periodo que desea eliminar los XML de boletas. Formato AAAAMM, ejemplo: '.date('Ym'),
     'check' => 'notempty integer',
 ]);
 echo $f->input([
