@@ -449,8 +449,9 @@ class Model_DteEmitidos extends \Model_Plural_App
 
     /**
      * Método que elimina los XML de las boletas de cierto período
+     * También elimina los datos extra de la boleta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-01
+     * @version 2020-08-27
      */
     public function eliminarBoletasXML(int $periodo)
     {
@@ -460,7 +461,7 @@ class Model_DteEmitidos extends \Model_Plural_App
         }
         return $this->db->query('
             UPDATE dte_emitido
-            SET xml = NULL
+            SET xml = NULL, extra = NULL
             WHERE
                 emisor = :emisor
                 AND dte IN (39, 41)
