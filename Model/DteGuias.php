@@ -180,7 +180,7 @@ class Model_DteGuias extends \Model_Plural_App
      * Método que crea el DTE temporal de una factura para un grupo de guías de
      * despacho
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-12-26
+     * @version 2020-08-29
      */
     private function crearDteTmp($guias, array $datos = [])
     {
@@ -238,12 +238,15 @@ class Model_DteGuias extends \Model_Plural_App
                 'IdDoc' => [
                     'TipoDTE' => 33,
                     'FchEmis' => $datos['fecha'],
+                    'FchVenc' => !empty($datos['vencimiento']) ? $datos['vencimiento'] : false,
                 ],
                 'Emisor' => [
                     'RUTEmisor' => $this->getContribuyente()->rut.'-'.$this->getContribuyente()->dv,
+                    'CdgVendedor' => !empty($datos['vendedor']) ? $datos['vendedor'] : false,
                 ],
                 'Receptor' => [
                     'RUTRecep' => $guias[0]->getReceptor()->rut.'-'.$guias[0]->getReceptor()->dv,
+                    'CdgIntRecep' => !empty($datos['receptor_codigo']) ? $datos['receptor_codigo'] : false,
                     'RznSocRecep' => $guias[0]->getReceptor()->razon_social,
                     'GiroRecep' => $guias[0]->getReceptor()->giro ? $guias[0]->getReceptor()->giro : false,
                     'Contacto' => $guias[0]->getReceptor()->telefono ? $guias[0]->getReceptor()->telefono : false,

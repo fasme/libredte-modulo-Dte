@@ -58,26 +58,43 @@ if (isset($guias)) {
     ]);
     echo $f->input([
         'type' => 'date',
-        'name' => 'fecha',
+        'name' => 'FchEmis',
         'label' => 'Fecha',
-        'value' => !empty($_POST['fecha']) ? $_POST['fecha'] : date('Y-m-d'),
+        'value' => !empty($_POST['FchEmis']) ? $_POST['FchEmis'] : date('Y-m-d'),
         'check' => 'notempty date',
         'help' => 'Fecha de emisión de la factura',
     ]);
-if (!empty($_POST['receptor'])) {
     echo $f->input([
-        'name' => 'orden_compra',
-        'label' => 'Orden de compra',
-        'attr' => 'maxlength="18"',
-        'help' => 'Número de orden de compra asociado a todas las guías que se están facturando',
+        'type' => 'date',
+        'name' => 'FchVenc',
+        'label' => 'Vencimiento',
+        'help' => 'Fecha de vencimiento de la factura',
+        'check' => 'date',
     ]);
     echo $f->input([
-        'name' => 'descuento_global',
-        'label' => 'Descuento global',
-        'check' => 'integer',
-        'help' => 'Descuento global neto (sin IVA) que se debe aplicar a la factura de las guías',
+        'name' => 'CdgVendedor',
+        'label' => 'Vendedor',
+        'help' => 'Código del vendedor del emisor de la factura',
     ]);
-}
+    if (!empty($_POST['receptor'])) {
+        echo $f->input([
+            'name' => 'CdgIntRecep',
+            'label' => 'Código receptor',
+            'help' => 'Código interno asociado al receptor de la factura',
+        ]);
+        echo $f->input([
+            'name' => 'orden_compra',
+            'label' => 'Orden de compra',
+            'attr' => 'maxlength="18"',
+            'help' => 'Número de orden de compra asociado a todas las guías que se están facturando',
+        ]);
+        echo $f->input([
+            'name' => 'ValorDR_global',
+            'label' => 'Descuento global',
+            'check' => 'integer',
+            'help' => 'Descuento global neto (sin IVA) que se debe aplicar a la factura de las guías',
+        ]);
+    }
     echo $f->end('Facturar guías seleccionadas');
 }
 // mostrar resultado de temporales creados

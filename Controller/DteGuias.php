@@ -124,7 +124,7 @@ class Controller_DteGuias extends Controller_Base_Libros
     /**
      * Método que permite buscar las guías que se desean facturar masivamente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-12-31
+     * @version 2020-08-29
      */
     public function facturar()
     {
@@ -141,9 +141,12 @@ class Controller_DteGuias extends Controller_Base_Libros
             try {
                 $this->set([
                     'temporales' => (new Model_DteGuias())->setContribuyente($Emisor)->facturar($_POST['guias'], [
-                        'fecha' => !empty($_POST['fecha']) ? $_POST['fecha'] : null,
+                        'fecha' => !empty($_POST['FchEmis']) ? $_POST['FchEmis'] : null,
+                        'vencimiento' => !empty($_POST['FchVenc']) ? $_POST['FchVenc'] : null,
+                        'vendedor' => !empty($_POST['CdgVendedor']) ? $_POST['CdgVendedor'] : null,
+                        'receptor_codigo' => !empty($_POST['CdgIntRecep']) ? $_POST['CdgIntRecep'] : null,
                         'orden_compra' => !empty($_POST['orden_compra']) ? $_POST['orden_compra'] : null,
-                        'descuento_global' => !empty($_POST['descuento_global']) ? $_POST['descuento_global'] : null,
+                        'descuento_global' => !empty($_POST['ValorDR_global']) ? $_POST['ValorDR_global'] : null,
                     ])
                 ]);
             } catch (\Exception $e) {
