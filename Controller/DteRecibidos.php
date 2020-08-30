@@ -386,7 +386,7 @@ class Controller_DteRecibidos extends \Controller_App
     /**
      * Acción que permite descargar el PDF del documento recibido
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-04
+     * @version 2020-08-29
      */
     public function pdf($emisor, $dte, $folio, $cedible = false)
     {
@@ -420,8 +420,9 @@ class Controller_DteRecibidos extends \Controller_App
         }
         $ext = $config['compress'] ? 'zip' : 'pdf';
         $file_name = 'LibreDTE_'.$DteRecibido->emisor.'_T'.$DteRecibido->dte.'F'.$DteRecibido->folio.'.'.$ext;
+        $disposition = $Receptor->config_pdf_disposition ? 'inline' : 'attachement';
         $this->response->type('application/'.$ext);
-        $this->response->header('Content-Disposition', 'attachement; filename="'.$file_name.'"');
+        $this->response->header('Content-Disposition', $disposition.'; filename="'.$file_name.'"');
         $this->response->header('Content-Length', strlen($pdf));
         $this->response->send($pdf);
     }

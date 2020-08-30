@@ -280,7 +280,7 @@ class Controller_DteIntercambios extends \Controller_App
     /**
      * Acción para mostrar el PDF de un EnvioDTE de un intercambio de DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-17
+     * @version 2020-08-29
      */
     public function pdf($codigo, $cedible = false, $emisor = null, $dte = null, $folio = null)
     {
@@ -294,6 +294,10 @@ class Controller_DteIntercambios extends \Controller_App
         }
         // si dió código 200 se entrega la respuesta del servicio web
         $this->response->type('application/pdf');
+        if (isset($response['header']['Content-Disposition'])) {
+            $disposition = $Receptor->config_pdf_disposition ? 'inline' : 'attachement';
+            $response['header']['Content-Disposition'] = str_replace(['attachement', 'inline'], $disposition, $response['header']['Content-Disposition']);
+        }
         foreach (['Content-Disposition', 'Content-Length'] as $header) {
             if (isset($response['header'][$header])) {
                 $this->response->header($header, $response['header'][$header]);
