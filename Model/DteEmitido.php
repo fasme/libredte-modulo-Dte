@@ -1087,16 +1087,17 @@ class Model_DteEmitido extends Model_Base_Envio
         \sasco\LibreDTE\Sii::setAmbiente((int)$this->certificacion);
         // enviar boleta al SII
         if (in_array($this->dte, [39, 41])) {
-            if (!class_exists('\sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta')) {
-                throw new \Exception('Envío de boletas al SII aún no disponible en esta versión de LibreDTE');
+            $class = \sowerphp\core\Configure::read('dte.clase_boletas');
+            if (!$class or !class_exists($class)) {
+                throw new \Exception('Envío de boletas al SII no está disponible en esta versión de LibreDTE');
             }
             // obtener token
-            $token = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::getToken($Firma);
+            $token = $class::getToken($Firma);
             if (!$token) {
                 throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
             // enviar XML
-            $result = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
+            $result = $class::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
             if ($result===false) {
                 throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
@@ -1158,26 +1159,24 @@ class Model_DteEmitido extends Model_Base_Envio
         \sasco\LibreDTE\Sii::setAmbiente((int)$this->certificacion);
         // consultar estado de boleta
         if (in_array($this->dte, [39, 41])) {
-            if (!class_exists('\sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta')) {
-                throw new \Exception('Consulta de estado de boletas aún no disponible en esta versión de LibreDTE');
+            $class = \sowerphp\core\Configure::read('dte.clase_boletas');
+            if (!$class or !class_exists($class)) {
+                throw new \Exception('Consulta de estado de envío de boletas al SII no está disponible en esta versión de LibreDTE');
             }
             // obtener token
-            $token = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::getToken($Firma);
+            $token = $class::getToken($Firma);
             if (!$token) {
                 throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
             // consultar estado enviado
-            $estado_up = \sasco\LibreDTE\Extra\Sii\Dte\EnvioBoleta::estado($this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token);
+            $estado_up = $class::estado($this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token);
             // si el estado no se pudo recuperar error
             if ($estado_up===false) {
                 throw new \Exception('No fue posible obtener el estado del DTE<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
-            $this->revision_estado = $estado_up['estado'];
-            $this->revision_detalle = !empty($estado_up['detalle']) ? $estado_up['detalle'] : (
-                !empty($estado_up['detalle_rep_rech']) ? $estado_up['detalle_rep_rech'] : (
-                    !empty($estado_up['fecha_recepcion']) ? $estado_up['fecha_recepcion'] : null
-                )
-            );
+            $normalizado = $class::normalizar_estado($estado_up, $this->dte, $this->folio);
+            $this->revision_estado = $normalizado['estado'];
+            $this->revision_detalle = $normalizado['detalle'];
         }
         // consultar estado de otros DTE
         else {
