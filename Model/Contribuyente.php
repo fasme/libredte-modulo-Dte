@@ -1387,14 +1387,14 @@ class Model_Contribuyente extends \Model_App
             $query = $this->db->setLimit($query, $filtros['limit'], !empty($filtros['offset']) ? $filtros['offset'] : 0);
         }
         // entregar consulta verdadera (esta si obtiene razón social verdadera en DTE exportación, pero sólo para las filas del límite consultado)
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social_xpath = $this->db->xml('d.xml', '/*/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
         return $this->db->getTable('
             SELECT
                 e.dte,
                 e.tipo,
                 e.folio,
                 d.receptor,
-                CASE WHEN e.receptor != 55555555 THEN e.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
+                CASE WHEN e.receptor NOT IN (55555555, 66666666) THEN e.razon_social ELSE '.$razon_social_xpath.' END AS razon_social,
                 d.fecha,
                 d.total,
                 d.revision_estado AS estado,
@@ -1759,8 +1759,8 @@ class Model_Contribuyente extends \Model_App
     public function getVentas($periodo)
     {
         $periodo_col = $this->db->date('Ym', 'e.fecha');
-        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN e.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('e.xml', '/*/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN e.receptor NOT IN (55555555, 66666666) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // si el contribuyente tiene impuestos adicionales se crean las query para esos campos
         if ($this->config_extra_impuestos_adicionales) {
             list($impuesto_codigo, $impuesto_tasa, $impuesto_monto) = $this->db->xml('e.xml', [
@@ -2970,8 +2970,8 @@ class Model_Contribuyente extends \Model_App
             $estado = 'd.revision_estado IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN d.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('d.xml', '/*/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.receptor NOT IN (55555555, 66666666) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -3038,8 +3038,8 @@ class Model_Contribuyente extends \Model_App
             $evento = 'd.receptor_evento IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN d.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('d.xml', '/*/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.receptor NOT IN (55555555, 66666666) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -3082,8 +3082,8 @@ class Model_Contribuyente extends \Model_App
     public function getDocumentosEmitidosSinEnviar()
     {
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('d.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN d.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('d.xml', '/*/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN d.receptor NOT IN (55555555, 66666666) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
@@ -3168,8 +3168,8 @@ class Model_Contribuyente extends \Model_App
             $where[] = 'resultado.estado IS NULL';
         }
         // forma de obtener razón social
-        $razon_social_xpath = $this->db->xml('e.xml', '/EnvioDTE/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
-        $razon_social = 'CASE WHEN e.receptor != 55555555 THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
+        $razon_social_xpath = $this->db->xml('e.xml', '/*/SetDTE/DTE/*/Encabezado/Receptor/RznSocRecep', 'http://www.sii.cl/SiiDte');
+        $razon_social = 'CASE WHEN e.receptor NOT IN (55555555, 66666666) THEN r.razon_social ELSE '.$razon_social_xpath.' END AS razon_social';
         // realizar consulta
         return $this->db->getTable('
             SELECT
