@@ -241,11 +241,11 @@ class Model_Item extends \Model_App
     /**
      * Método que guarda el item de facturación
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-03-04
+     * @version 2020-09-14
      */
     public function save()
     {
-        $this->codigo = trim(str_replace(['/', '"', '\'', ' ', '&', '%', '+'], '_', $this->codigo));
+        $this->codigo = trim(str_replace(['/', '"', '\'', ' ', '&', '%', '+', '#'], '_', $this->codigo));
         return parent::save();
     }
 

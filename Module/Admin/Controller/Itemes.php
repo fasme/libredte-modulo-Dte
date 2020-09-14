@@ -69,7 +69,7 @@ class Controller_Itemes extends \Controller_Maintainer
     /**
      * Acción para editar un item
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-07-25
+     * @version 2019-09-14
      */
     public function editar($codigo, $tipo = 'INT1')
     {
@@ -80,18 +80,18 @@ class Controller_Itemes extends \Controller_Maintainer
             'clasificaciones' => (new Model_ItemClasificaciones())->setContribuyente($Contribuyente)->getList(),
             'impuesto_adicionales' => (new \website\Dte\Admin\Mantenedores\Model_ImpuestoAdicionales())->getListContribuyente($Contribuyente->config_extra_impuestos_adicionales),
         ]);
-        parent::editar($Contribuyente->rut, $tipo, $codigo);
+        parent::editar($Contribuyente->rut, urldecode($tipo), urldecode($codigo));
     }
 
     /**
      * Acción para eliminar un item
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-24
+     * @version 2020-09-14
      */
     public function eliminar($codigo, $tipo = 'INT1')
     {
         $Contribuyente = $this->getContribuyente();
-        parent::eliminar($Contribuyente->rut, $tipo, $codigo);
+        parent::eliminar($Contribuyente->rut, urldecode($tipo), urldecode($codigo));
     }
 
     /**
