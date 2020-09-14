@@ -109,7 +109,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
     /**
      * Acción que permite enviar el consumo de folios al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-26
+     * @version 2020-09-14
      */
     public function enviar_sii($dia)
     {
@@ -123,7 +123,7 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
         $Emisor = $this->getContribuyente();
         $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         try {
-            $track_id = $DteBoletaConsumo->enviar();
+            $track_id = $DteBoletaConsumo->enviar($this->Auth->User->id);
             if (!$track_id) {
                 \sowerphp\core\Model_Datasource_Session::message(
                     'No fue posible enviar el reporte de consumo de folios al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()), 'error'

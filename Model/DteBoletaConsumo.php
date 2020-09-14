@@ -151,11 +151,11 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
     /**
      * Método que envia el reporte de consumo de folios al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2020-09-14
      */
-    public function enviar()
+    public function enviar($user_id = null)
     {
-        $ConsumoFolio = $this->generarConsumoFolio();
+        $ConsumoFolio = $this->generarConsumoFolio($user_id);
         $xml = $ConsumoFolio->generar();
         if (!$ConsumoFolio->schemaValidate()) {
             return false;
@@ -187,11 +187,11 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
     /**
      * Método que genera el XML del consumo de folios
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2016-02-14
+     * @version 2020-09-14
      */
     private function generarXML()
     {
-        $ConsumoFolio = $this->generarConsumoFolio();
+        $ConsumoFolio = $this->generarConsumoFolio(null);
         $xml = $ConsumoFolio->generar();
         if (!$ConsumoFolio->schemaValidate()) {
             return false;
@@ -202,9 +202,9 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
     /**
      * Método que crea el objeto del consumo de folios de LibreDTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-12-26
+     * @version 2020-09-14
      */
-    private function generarConsumoFolio()
+    private function generarConsumoFolio($user_id)
     {
         $Emisor = $this->getEmisor();
         $dtes = [];
@@ -216,7 +216,7 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
         sort($dtes);
         $documentos = $Emisor->getDocumentosConsumoFolios($this->dia);
         $ConsumoFolio = new \sasco\LibreDTE\Sii\ConsumoFolio();
-        $Firma = $Emisor->getFirma();
+        $Firma = $Emisor->getFirma($user_id);
         if (!$Firma) {
             throw new \Exception('No hay firma electrónica asociada a la empresa (o bien no se pudo cargar), debe agregar su firma antes generar el RCOF', 506);
         }
