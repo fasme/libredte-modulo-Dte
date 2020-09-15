@@ -255,7 +255,7 @@ class Controller_Itemes extends \Controller_Maintainer
                 }
                 // guardar
                 try {
-                    $existia = (boolean)$Item->precio;
+                    $existia = (boolean)$Item->exists();
                     if ($Item->save()) {
                         $item[] = 'Si';
                         $item[] = '';
