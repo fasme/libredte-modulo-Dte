@@ -97,12 +97,12 @@ class Model_Itemes extends \Model_Plural_App
     /**
      * Método que exporta todos los items de un contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-07-23
+     * @version 2020-09-17
      */
     public function exportar()
     {
         return $this->db->getTable('
-            SELECT codigo_tipo, codigo, item, descripcion, clasificacion, unidad, precio, moneda, exento, descuento, descuento_tipo, impuesto_adicional, activo, bruto
+            SELECT codigo_tipo, codigo, item, descripcion, clasificacion, unidad, precio, moneda, exento, descuento, descuento_tipo, impuesto_adicional, activo::INTEGER, bruto::INTEGER
             FROM item
             WHERE contribuyente = :contribuyente
             ORDER BY clasificacion, codigo_tipo, codigo
