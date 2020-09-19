@@ -543,8 +543,18 @@ if ($referenciados) {
         if (!empty($referenciado['FchRef'])) {
             $referenciado['FchRef'] = \sowerphp\general\Utility_Date::format($referenciado['FchRef']);
         }
+        $acciones = '';
+        if (!empty($referenciado['TpoDocRef']) and !empty($referenciado['FolioRef']) and in_array($referenciado['TpoDocRef'], $tipos_dte)) {
+            $DteReferencia = new \website\Dte\Model_DteEmitido($Emisor->rut, $referenciado['TpoDocRef'], $referenciado['FolioRef'], $Emisor->enCertificacion());
+            if ($DteReferencia->fecha) {
+                $acciones = '<a href="'.$_base.'/dte/dte_emitidos/ver/'.$DteReferencia->dte.'/'.$DteReferencia->folio.'" title="Ver documento" class="btn btn-primary mb-2"><i class="fas fa-search fa-fw"></i></a>';
+                $acciones .= ' <a href="'.$_base.'/dte/dte_emitidos/pdf/'.$DteReferencia->dte.'/'.$DteReferencia->folio.'/'.(int)$Emisor->config_pdf_dte_cedible.'" title="Descargar PDF del documento" class="btn btn-primary mb-2'.((!$DteReferencia->xml and !$DteReferencia->mipyme)?' disabled':'').'"><i class="far fa-file-pdf fa-fw"></i></a>';
+            }
+            unset($DteReferencia);
+        }
+        $referenciado[] = $acciones;
     }
-    array_unshift($referenciados, ['#', 'DTE', 'Ind. Global', 'Folio', 'RUT otro cont.', 'Fecha', 'Código ref.', 'Razón ref.', 'Vendedor', 'Caja']);
+    array_unshift($referenciados, ['#', 'DTE', 'Ind. Global', 'Folio', 'RUT otro cont.', 'Fecha', 'Código ref.', 'Razón ref.', 'Vendedor', 'Caja', 'Acciones']);
     $t = new \sowerphp\general\View_Helper_Table();
     $t->setShowEmptyCols(false);
     echo $t->generate($referenciados);

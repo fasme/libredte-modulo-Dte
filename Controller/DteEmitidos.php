@@ -145,7 +145,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que muestra la página de un DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-22
+     * @version 2020-09-19
      */
     public function ver($dte, $folio)
     {
@@ -174,6 +174,7 @@ class Controller_DteEmitidos extends \Controller_App
             'email_html' => $Emisor->getEmailFromTemplate('dte'),
             'sucursales' => $Emisor->getSucursales(),
             'servidor_sii' => \sasco\LibreDTE\Sii::getServidor(),
+            'tipos_dte' => array_map(function($t) {return $t['codigo'];}, (new \website\Dte\Admin\Mantenedores\Model_DteTipos())->getList()),
         ]);
     }
 
