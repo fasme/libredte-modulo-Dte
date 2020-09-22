@@ -72,6 +72,44 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
     }
 
     /**
+     * Método que entrega los días con RCOF enviados y que se considera que ya no tuvieron respuesta
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-09-22
+     */
+    public function getSinRespuesta($multiplicador_dias = 5, $secuencia_maxima = 5)
+    {
+        $estados_sin_respuesta = [
+            '003', // NO EXISTE
+            //'106', // Usuario sin permiso de envio / Usuario no tiene permiso en empresa
+            '107', // ERROR RETORNO
+            '-6 ', // ERROR: USUARIO NO AUTORIZADO
+        ];
+        $estados_sin_respuesta_dias_atras = ['-11'];
+        return $this->db->getCol('
+            SELECT dia
+            FROM dte_boleta_consumo
+            WHERE
+                emisor = :emisor
+                AND certificacion = :certificacion
+                AND track_id IS NOT NULL
+                AND revision_estado IS NOT NULL
+                AND (
+                    SUBSTRING(revision_estado, 1, 3) IN (\'' . implode('\', \'', $estados_sin_respuesta) . '\')
+                    OR (
+                        SUBSTRING(revision_estado, 1, 3) IN (\'' . implode('\', \'', $estados_sin_respuesta_dias_atras) . '\')
+                        AND dia < (NOW()::DATE - (secuencia * :multiplicador_dias))
+                    )
+                )
+                AND secuencia <= :secuencia_maxima
+        ', [
+            ':emisor' => $this->getContribuyente()->rut,
+            ':certificacion' => $this->getContribuyente()->enCertificacion(),
+            ':multiplicador_dias' => $multiplicador_dias,
+            ':secuencia_maxima' => $secuencia_maxima
+        ]);
+    }
+
+    /**
      * Método que entrega los RCOF rechazados (opcionalmente en un período de tiempo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-04-29
