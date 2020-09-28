@@ -230,8 +230,10 @@ DTE.setTipo = function (tipo) {
             document.getElementById('IndServicioField').value = '';
         }
     }
-    // agregar observación si existe
-    document.getElementById("TermPagoGlosaField").value = (emision_observaciones !== null && emision_observaciones[tipo] !== undefined) ? emision_observaciones[tipo] : '';
+    // agregar observación si existe una predeterminada
+    if (emision_observaciones !== null && emision_observaciones[tipo] !== undefined) {
+        document.getElementById("TermPagoGlosaField").value = emision_observaciones[tipo];
+    }
 }
 
 DTE.setFormaPago = function (tipo) {
