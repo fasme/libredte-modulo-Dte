@@ -1754,7 +1754,7 @@ class Model_Contribuyente extends \Model_App
      * Método que entrega las ventas de un período
      * @todo Corregir ID en Extranjero y asignar los NULL por los valores que corresponden (quizás haya que modificar tabla dte_emitido)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-22
+     * @version 2020-09-29
      */
     public function getVentas($periodo)
     {
@@ -1806,8 +1806,8 @@ class Model_Contribuyente extends \Model_App
                 NULL AS iva_no_retenido,
                 NULL AS ley_18211,
                 '.$credito_constructoras.' AS credito_constructoras,
-                NULL AS referencia_tipo,
-                NULL AS referencia_folio,
+                ref.referencia_dte AS referencia_tipo,
+                ref.referencia_folio AS referencia_folio,
                 NULL AS deposito_envases,
                 NULL AS monto_no_facturable,
                 NULL AS monto_periodo,
@@ -1825,9 +1825,16 @@ class Model_Contribuyente extends \Model_App
                 NULL AS numero_interno,
                 NULL AS emisor_nc_nd_fc,
                 e.total
-            FROM dte_tipo AS t, dte_emitido AS e, contribuyente AS r
+            FROM
+                dte_emitido AS e
+                JOIN contribuyente AS r ON e.receptor = r.rut
+                JOIN dte_tipo AS t ON t.codigo = e.dte
+                JOIN dte_referencia AS ref
+                    ON
+                        ref.emisor = e.emisor AND ref.dte = e.dte AND ref.folio = e.folio AND ref.certificacion = e.certificacion
+                        AND ref.dte IN (56, 61, 111, 112) AND ref.codigo = 1
             WHERE
-                t.codigo = e.dte AND t.venta = true AND e.receptor = r.rut AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
+                t.venta = true AND e.emisor = :rut AND e.certificacion = :certificacion AND '.$periodo_col.' = :periodo AND e.dte != 46
                 AND (e.emisor, e.dte, e.folio, e.certificacion) NOT IN (
                     SELECT e.emisor, e.dte, e.folio, e.certificacion
                     FROM
