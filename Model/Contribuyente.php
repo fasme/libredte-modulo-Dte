@@ -1829,7 +1829,7 @@ class Model_Contribuyente extends \Model_App
                 dte_emitido AS e
                 JOIN contribuyente AS r ON e.receptor = r.rut
                 JOIN dte_tipo AS t ON t.codigo = e.dte
-                JOIN dte_referencia AS ref
+                LEFT JOIN dte_referencia AS ref
                     ON
                         ref.emisor = e.emisor AND ref.dte = e.dte AND ref.folio = e.folio AND ref.certificacion = e.certificacion
                         AND ref.dte IN (56, 61, 111, 112) AND ref.codigo = 1
