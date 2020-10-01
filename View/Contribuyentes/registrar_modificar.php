@@ -866,7 +866,7 @@ echo $f->input([
             </div>
 <?php $f->setColsLabel(2); ?>
 <?php
-$formatos_pdf = (new \website\Dte\Pdf\Utility_Formatos())->setContribuyente($Contribuyente)->getFormatos();
+$formatos_pdf = isset($Contribuyente) ? (new \website\Dte\Pdf\Utility_Formatos())->setContribuyente($Contribuyente)->getFormatos() : false;
 if ($formatos_pdf) {
     $config_pdf_mapeo = [];
     foreach ((array)$Contribuyente->config_pdf_mapeo as $m) {
@@ -898,6 +898,7 @@ if ($formatos_pdf) {
 ?>
         </div>
     </div>
+<?php if (!empty($dtepdfs)) : ?>
     <!-- INICIO DTEPDF -->
     <div class="card mb-4">
         <div class="card-header">
@@ -917,6 +918,7 @@ foreach($dtepdfs as $App) {
         </div>
     </div>
     <!-- FIN DTEPDF -->
+<?php endif; ?>
 </div>
 <!-- FIN CONFIGURACIÓN FACTURACIÓN -->
 
