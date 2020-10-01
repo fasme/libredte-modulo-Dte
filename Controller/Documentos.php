@@ -1063,41 +1063,6 @@ class Controller_Documentos extends \Controller_App
     }
 
     /**
-     * Recurso de la API que genera el PDF de los DTEs contenidos en un EnvioDTE
-     * @deprecated API se movió a /api/utilidades/documentos/generar_pdf
-     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-02-23
-     */
-    public function _api_generar_pdf_POST()
-    {
-        // verificar si se pasaron credenciales de un usuario
-        $User = $this->Api->getAuthUser();
-        if (is_string($User)) {
-            $this->Api->send($User, 401);
-        }
-        // realizar consulta al servicio web verdadero
-        $rest = new \sowerphp\core\Network_Http_Rest();
-        $rest->setAuth($User->hash);
-        $response = $rest->post($this->request->url.'/api/utilidades/documentos/generar_pdf', $this->Api->data);
-        if ($response===false) {
-            $this->Api->send(implode("\n", $rest->getErrors()), 500);
-        }
-        if ($response['status']['code']!=200) {
-            $this->Api->send($response['body'], 500);
-        }
-        // si dió código 200 se entrega la respuesta del servicio web
-        $this->Api->response()->type('application/pdf');
-        foreach (['Content-Disposition', 'Content-Length'] as $header) {
-            if (isset($response['header'][$header])) {
-                $this->Api->response()->header($header, $response['header'][$header]);
-            }
-        }
-        $this->Api->response()->header('X-API-Deprecation-Date', '2017-05-01');
-        $this->Api->response()->header('X-API-Deprecation-Info', 'https://blog.libredte.cl/index.php/2017/04/03/servicio-web-pdf-dte-emitido-apps-conectadas');
-        $this->Api->send($response['body']);
-    }
-
-    /**
      * Acción que permite generar masivamente los DTE
      * En estrictor rigor esta opción sólo lanza un comando que permite hacer la generación masiva
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
