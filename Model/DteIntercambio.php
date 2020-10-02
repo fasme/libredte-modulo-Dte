@@ -909,7 +909,7 @@ class Model_DteIntercambio extends \Model_App
     /**
      * Método que guarda los documentos que han sido aceptados (con acuse de recibo)
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-05-20
+     * @version 2020-10-02
      */
     private function guardarDocumentosRecibidos(array $guardar_dte, array $rc_accion, array $config)
     {
@@ -933,10 +933,12 @@ class Model_DteIntercambio extends \Model_App
                         $EmisorIntercambio->actividad_economica = $actividad_economica;
                     }
                 }
-                $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName($emisor['CmnaOrigen']);
-                if ($comuna) {
-                    $EmisorIntercambio->direccion = $emisor['DirOrigen'];
-                    $EmisorIntercambio->comuna = $comuna;
+                if (!empty($emisor['CmnaOrigen'])) {
+                    $comuna = (new \sowerphp\app\Sistema\General\DivisionGeopolitica\Model_Comunas())->getComunaByName($emisor['CmnaOrigen']);
+                    if ($comuna) {
+                        $EmisorIntercambio->direccion = $emisor['DirOrigen'];
+                        $EmisorIntercambio->comuna = $comuna;
+                    }
                 }
                 $EmisorIntercambio->modificado = date('Y-m-d H:i:s');
                 try {
