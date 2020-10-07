@@ -306,10 +306,12 @@ if ($email_enviados) {
         <div class="row">
             <div class="col-sm-6 mb-2">
                 <div class="btn-group w-100" role="group">
-                    <a class="btn btn-info btn-lg btn-block" href="<?=$links['pagar']?>" role="button">
+                    <a class="btn btn-info btn-lg btn-block<?=!empty($links['pagar'])?'':' disabled'?>" href="<?=!empty($links['pagar'])?$links['pagar']:''?>" role="button">
                         Enlace público para pagar
                     </a>
+<?php if (!empty($links['pagar'])) : ?>
                     <button type="button" class="btn btn-info" onclick="__.copy('<?=$links['pagar']?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
+<?php endif; ?>
                 </div>
             </div>
             <div class="col-sm-6 mb-2">

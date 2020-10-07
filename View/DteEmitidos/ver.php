@@ -456,10 +456,12 @@ if ($Resultado) {
         <div class="row">
             <div class="col-sm-6 mb-2">
                 <div class="btn-group w-100" role="group">
-                    <a class="btn btn-info btn-lg btn-block" href="<?=$enlace_pagar_dte?>" role="button">
+                    <a class="btn btn-info btn-lg btn-block<?=!empty($enlace_pagar_dte)?'':' disabled'?>" href="<?=$enlace_pagar_dte?>" role="button">
                         Enlace público para pagar
                     </a>
+<?php if (!empty($enlace_pagar_dte)) : ?>
                     <button type="button" class="btn btn-info" onclick="__.copy('<?=$enlace_pagar_dte?>')" title="Copiar enlace"><i class="fa fa-copy"></i></button>
+<?php endif; ?>
                 </div>
             </div>
             <div class="col-sm-6 mb-2">
