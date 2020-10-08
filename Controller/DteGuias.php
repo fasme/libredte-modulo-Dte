@@ -124,7 +124,7 @@ class Controller_DteGuias extends Controller_Base_Libros
     /**
      * Método que permite buscar las guías que se desean facturar masivamente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-29
+     * @version 2020-10-08
      */
     public function facturar()
     {
@@ -141,12 +141,18 @@ class Controller_DteGuias extends Controller_Base_Libros
             try {
                 $this->set([
                     'temporales' => (new Model_DteGuias())->setContribuyente($Emisor)->facturar($_POST['guias'], [
-                        'fecha' => !empty($_POST['FchEmis']) ? $_POST['FchEmis'] : null,
-                        'vencimiento' => !empty($_POST['FchVenc']) ? $_POST['FchVenc'] : null,
-                        'vendedor' => !empty($_POST['CdgVendedor']) ? $_POST['CdgVendedor'] : null,
-                        'receptor_codigo' => !empty($_POST['CdgIntRecep']) ? $_POST['CdgIntRecep'] : null,
-                        'orden_compra' => !empty($_POST['orden_compra']) ? $_POST['orden_compra'] : null,
-                        'descuento_global' => !empty($_POST['ValorDR_global']) ? $_POST['ValorDR_global'] : null,
+                        'FchEmis' => !empty($_POST['FchEmis']) ? $_POST['FchEmis'] : null,
+                        'FchVenc' => !empty($_POST['FchVenc']) ? $_POST['FchVenc'] : null,
+                        'CdgVendedor' => !empty($_POST['CdgVendedor']) ? $_POST['CdgVendedor'] : null,
+                        'TermPagoGlosa' => !empty($_POST['TermPagoGlosa']) ? $_POST['TermPagoGlosa'] : null,
+                        'CdgIntRecep' => !empty($_POST['CdgIntRecep']) ? $_POST['CdgIntRecep'] : null,
+                        'referencia_801' => !empty($_POST['referencia_801']) ? $_POST['referencia_801'] : null,
+                        'referencia_hes' => !empty($_POST['referencia_hes']) ? $_POST['referencia_hes'] : null,
+                        'ValorDR_global' => !empty($_POST['ValorDR_global']) ? $_POST['ValorDR_global'] : null,
+                        'MedioPago' => (!empty($_POST['MedioPago']) and !empty($_POST['NumCtaPago'])) ? $_POST['MedioPago'] : false,
+                        'TpoCtaPago' => !empty($_POST['TpoCtaPago']) ? $_POST['TpoCtaPago'] : false,
+                        'BcoPago' => !empty($_POST['BcoPago']) ? $_POST['BcoPago'] : false,
+                        'NumCtaPago' => !empty($_POST['NumCtaPago']) ? $_POST['NumCtaPago'] : false,
                     ])
                 ]);
             } catch (\Exception $e) {

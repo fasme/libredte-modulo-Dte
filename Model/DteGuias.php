@@ -153,12 +153,12 @@ class Model_DteGuias extends \Model_Plural_App
      * Método que realiza la facturación masiva de las guías de despacho
      * Creará una factura para cada RUT que se esté facturando
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-02-03
+     * @version 2020-10-08
      */
     public function facturar(array $folios, array $datos = [])
     {
-        if (empty($datos['fecha'])) {
-            $datos['fecha'] = date('Y-m-d');
+        if (empty($datos['FchEmis'])) {
+            $datos['FchEmis'] = date('Y-m-d');
         }
         // armar arreglo con las guías por cada receptor
         sort($folios);
@@ -180,11 +180,10 @@ class Model_DteGuias extends \Model_Plural_App
      * Método que crea el DTE temporal de una factura para un grupo de guías de
      * despacho
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-29
+     * @version 2020-10-08
      */
-    private function crearDteTmp($guias, array $datos = [])
+    private function crearDteTmp($guias, array $datos = [], $guias_max = 10)
     {
-        $guias_max = 10;
         // crear detalle y referencia usando indicador global
         if (isset($guias[$guias_max])) {
             $folios = [];
@@ -202,7 +201,7 @@ class Model_DteGuias extends \Model_Plural_App
                 'TpoDocRef' => 52,
                 'IndGlobal' => 1,
                 'FolioRef' => 0,
-                'FchRef' => $datos['fecha'],
+                'FchRef' => $datos['FchEmis'],
                 'RazonRef' => 'Se facturan '.count($guias).' guías',
             ];
         }
@@ -224,12 +223,21 @@ class Model_DteGuias extends \Model_Plural_App
             }
         }
         // agregar orden de compra
-        if (!empty($datos['orden_compra'])) {
+        if (!empty($datos['referencia_801'])) {
             $Referencia[] = [
                 'TpoDocRef' => 801,
-                'FolioRef' => $datos['orden_compra'],
-                'FchRef' => $datos['fecha'],
-                'RazonRef' => 'OC',
+                'FolioRef' => $datos['referencia_801'],
+                'FchRef' => $datos['FchEmis'],
+                //'RazonRef' => 'OC',
+            ];
+        }
+        // agregar HES
+        if (!empty($datos['referencia_hes'])) {
+            $Referencia[] = [
+                'TpoDocRef' => 'HES',
+                'FolioRef' => $datos['referencia_hes'],
+                'FchRef' => $datos['FchEmis'],
+                //'RazonRef' => 'HES',
             ];
         }
         // preparar datos del DTE
@@ -237,16 +245,21 @@ class Model_DteGuias extends \Model_Plural_App
             'Encabezado' => [
                 'IdDoc' => [
                     'TipoDTE' => 33,
-                    'FchEmis' => $datos['fecha'],
-                    'FchVenc' => !empty($datos['vencimiento']) ? $datos['vencimiento'] : false,
+                    'FchEmis' => $datos['FchEmis'],
+                    'FchVenc' => !empty($datos['FchVenc']) ? $datos['FchVenc'] : false,
+                    'TermPagoGlosa' => !empty($datos['TermPagoGlosa']) ? $datos['TermPagoGlosa'] : false,
+                    'MedioPago' => !empty($datos['MedioPago']) ? $datos['MedioPago'] : false,
+                    'TpoCtaPago' => !empty($datos['TpoCtaPago']) ? $datos['TpoCtaPago'] : false,
+                    'BcoPago' => !empty($datos['BcoPago']) ? $datos['BcoPago'] : false,
+                    'NumCtaPago' => !empty($datos['NumCtaPago']) ? $datos['NumCtaPago'] : false,
                 ],
                 'Emisor' => [
                     'RUTEmisor' => $this->getContribuyente()->rut.'-'.$this->getContribuyente()->dv,
-                    'CdgVendedor' => !empty($datos['vendedor']) ? $datos['vendedor'] : false,
+                    'CdgVendedor' => !empty($datos['CdgVendedor']) ? $datos['CdgVendedor'] : false,
                 ],
                 'Receptor' => [
                     'RUTRecep' => $guias[0]->getReceptor()->rut.'-'.$guias[0]->getReceptor()->dv,
-                    'CdgIntRecep' => !empty($datos['receptor_codigo']) ? $datos['receptor_codigo'] : false,
+                    'CdgIntRecep' => !empty($datos['CdgIntRecep']) ? $datos['CdgIntRecep'] : false,
                     'RznSocRecep' => $guias[0]->getReceptor()->razon_social,
                     'GiroRecep' => $guias[0]->getReceptor()->giro ? $guias[0]->getReceptor()->giro : false,
                     'Contacto' => $guias[0]->getReceptor()->telefono ? $guias[0]->getReceptor()->telefono : false,
@@ -259,11 +272,11 @@ class Model_DteGuias extends \Model_Plural_App
             'Referencia' => $Referencia,
         ];
         // agregar descuento global
-        if (!empty($datos['descuento_global'])) {
+        if (!empty($datos['ValorDR_global'])) {
             $dte['DscRcgGlobal'] = [
                 'TpoMov' => 'D',
                 'TpoValor' => '$',
-                'ValorDR' => $datos['descuento_global'],
+                'ValorDR' => $datos['ValorDR_global'],
             ];
         }
         // consumir servicio web para crear documento temporal

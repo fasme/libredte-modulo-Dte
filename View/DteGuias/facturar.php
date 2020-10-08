@@ -56,10 +56,11 @@ if (isset($guias)) {
         'titles'=>['Guía', 'Receptor', 'Fecha', 'Total', 'Acciones'],
         'table'=>$guias,
     ]);
+    echo '<hr/>';
     echo $f->input([
         'type' => 'date',
         'name' => 'FchEmis',
-        'label' => 'Fecha',
+        'label' => 'Fecha facturación',
         'value' => !empty($_POST['FchEmis']) ? $_POST['FchEmis'] : date('Y-m-d'),
         'check' => 'notempty date',
         'help' => 'Fecha de emisión de la factura',
@@ -76,6 +77,34 @@ if (isset($guias)) {
         'label' => 'Vendedor',
         'help' => 'Código del vendedor del emisor de la factura',
     ]);
+    echo $f->input([
+        'name' => 'TermPagoGlosa',
+        'label' => 'Observación',
+        'help' => 'Glosa que describe las condiciones del pago del DTE',
+    ]);
+    echo '<hr/>';
+    echo $f->input([
+        'name' => 'MedioPago',
+        'type'=>'hidden',
+        'value'=>'PE',
+    ]);
+    echo $f->input([
+        'name' => 'BcoPago',
+        'label' => 'Banco',
+        'attr' => 'maxlength="40"',
+    ]);
+    echo $f->input([
+        'name' => 'TpoCtaPago',
+        'label' => 'Tipo cuenta',
+        'type' => 'select',
+        'options' => [''=>'Sin cuenta bancaria', 'CORRIENTE'=>'Cuenta corriente', 'VISTA'=>'Cuenta vista', 'AHORRO'=>'Cuenta de ahorro'],
+    ]);
+    echo $f->input([
+        'name' => 'NumCtaPago',
+        'label' => 'Número cuenta',
+        'attr' => 'maxlength="20"',
+    ]);
+    echo '<hr/>';
     if (!empty($_POST['receptor'])) {
         echo $f->input([
             'name' => 'CdgIntRecep',
@@ -83,10 +112,16 @@ if (isset($guias)) {
             'help' => 'Código interno asociado al receptor de la factura',
         ]);
         echo $f->input([
-            'name' => 'orden_compra',
+            'name' => 'referencia_801',
             'label' => 'Orden de compra',
             'attr' => 'maxlength="18"',
             'help' => 'Número de orden de compra asociado a todas las guías que se están facturando',
+        ]);
+        echo $f->input([
+            'name' => 'referencia_hes',
+            'label' => 'HES',
+            'attr' => 'maxlength="18"',
+            'help' => 'Número de Hoja de Entrada de Servicios',
         ]);
         echo $f->input([
             'name' => 'ValorDR_global',
