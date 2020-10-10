@@ -745,6 +745,20 @@ echo $f->input([
     'value' => isset($Contribuyente) ? $Contribuyente->config_sii_envio_gzip : 0,
     'help' => '¿Se debe enviar el XML del DTE comprimido al SII?',
 ]);
+echo $f->input([
+    'type' => 'date',
+    'name' => 'config_sii_envio_rcof_desde',
+    'label' => 'Enviar RCOF Desde',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_sii_envio_rcof_desde : null,
+    'help' => '¿Desde cuándo se debe enviar el RCOF al SII?',
+]);
+echo $f->input([
+    'type' => 'date',
+    'name' => 'config_sii_envio_rcof_hasta',
+    'label' => 'Enviar RCOF Hasta',
+    'value' => isset($Contribuyente) ? $Contribuyente->config_sii_envio_rcof_hasta : null,
+    'help' => '¿Hasta cuándo se debe enviar el RCOF al SII?',
+]);
 ?>
         </div>
     </div>

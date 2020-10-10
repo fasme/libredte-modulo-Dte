@@ -38,7 +38,7 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
      * Método principal del comando
      * @param uri Formato: sftp://usuario:clave@servidor:puerto/ubicacion/desde/raiz
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-08-14
+     * @version 2020-10-10
      */
     public function main($grupo = 'dte_plus', $dia = null, $certificacion = 0, $uri = null, $filename = 'rcof_{rut}_{dia}.xml')
     {
@@ -49,7 +49,7 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
             $dia = date('Y-m-d', $day_before);
         }
         // obtener listado de contribuyentes y procesar cada uno
-        $contribuyentes = $this->getContribuyentes($grupo, $certificacion);
+        $contribuyentes = $this->getContribuyentes($grupo, $dia, $certificacion);
         foreach ($contribuyentes as $rut) {
             // crear objeto del contribuyente
             $Contribuyente = new Model_Contribuyente($rut);
@@ -108,10 +108,14 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
     /**
      * Método que envía el RCOF al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-11
+     * @version 2020-10-10
      */
     private function enviar_sii($DteBoletaConsumo, $retry = 10)
     {
+        if (!$DteBoletaConsumo->seEnvia()) {
+            $this->out('  Día '.$DteBoletaConsumo->dia.' no se puede enviar por reglas de envío');
+            return;
+        }
         // obtener contribuyente
         $Contribuyente = $DteBoletaConsumo->getContribuyente();
         // definir ambiente en que se operará
@@ -147,9 +151,9 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
     /**
      * Método que obtiene el listado de contribuyentes a los cuales se debe enviar el RCOF
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-11
+     * @version 2020-10-10
      */
-    private function getContribuyentes($grupo, $certificacion)
+    private function getContribuyentes($grupo, $dia, $certificacion)
     {
         if (is_numeric($grupo)) {
             return [$grupo];
@@ -159,21 +163,23 @@ class Shell_Command_Boletas_EnviarRCOF extends \Shell_App
             SELECT DISTINCT c.rut
             FROM
                 contribuyente AS c
-                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut
+                JOIN contribuyente_config AS cc ON cc.contribuyente = c.rut AND cc.configuracion = \'ambiente\' AND cc.variable = \'en_certificacion\'
                 JOIN contribuyente_dte AS cd ON cd.contribuyente = c.rut
                 JOIN usuario AS u ON c.usuario = u.id
                 JOIN usuario_grupo AS ug ON ug.usuario = u.id
                 JOIN grupo AS g ON ug.grupo = g.id
                 JOIN dte_folio AS f ON f.emisor = c.rut AND f.dte = cd.dte
+                LEFT JOIN contribuyente_config AS desde ON desde.contribuyente = c.rut AND desde.configuracion = \'sii\' AND desde.variable = \'envio_rcof_desde\'
+                LEFT JOIN contribuyente_config AS hasta ON hasta.contribuyente = c.rut AND hasta.configuracion = \'sii\' AND hasta.variable = \'envio_rcof_hasta\'
             WHERE
                 g.grupo = :grupo
-                AND cc.configuracion = \'ambiente\'
-                AND cc.variable = \'en_certificacion\'
                 AND cc.valor = :certificacion_t
                 AND cd.dte IN (39, 41)
                 AND f.dte IN (39, 41)
                 AND f.certificacion = :certificacion
-        ', [':grupo' => $grupo, ':certificacion'=>(int)$certificacion, ':certificacion_t'=>(int)$certificacion]);
+                AND (desde.valor IS NULL OR :dia >= desde.valor)
+                AND (hasta.valor IS NULL OR :dia <= hasta.valor)
+        ', [':grupo' => $grupo, ':certificacion'=>(int)$certificacion, ':dia'=>$dia, ':certificacion_t'=>(int)$certificacion]);
     }
 
 }

@@ -148,13 +148,71 @@ class Model_DteBoletaConsumo extends Model_Base_Envio
         'Model_Contribuyente' => 'website\Dte'
     ); ///< Namespaces que utiliza esta clase
 
+    private $_Emisor; //< Para emisor
+
+    /**
+     * Método que obtiene el objeto del emisor y lo guarda en caché en la clase
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-10-10
+     */
+    public function getEmisor()
+    {
+        if (!isset($this->_Emisor)) {
+            $this->_Emisor = (new Model_Contribuyentes())->get($this->emisor);
+        }
+        return $this->_Emisor;
+    }
+
+    /**
+     * Método que indica si el RCOF se debe enviar o no al SII
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-10-10
+     */
+    public function seEnvia(): bool
+    {
+        // casos donde no se puede enviar
+        if ($this->dia >= date('Y-m-d')) {
+            return false;
+        }
+        if ($this->getEmisor()->config_sii_envio_rcof_desde and $this->dia < $this->getEmisor()->config_sii_envio_rcof_desde) {
+            return false;
+        }
+        if ($this->getEmisor()->config_sii_envio_rcof_hasta and $this->dia > $this->getEmisor()->config_sii_envio_rcof_hasta) {
+            return false;
+        }
+        // otros días se pueden enviar
+        return true;
+    }
+
     /**
      * Método que envia el reporte de consumo de folios al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-09-14
+     * @version 2020-10-10
      */
     public function enviar($user_id = null)
     {
+        if (!$this->seEnvia()) {
+            $msg = 'Sólo se pueden enviar RCOF de días pasados.';
+            if ($this->getEmisor()->config_sii_envio_rcof_desde and $this->getEmisor()->config_sii_envio_rcof_hasta) {
+                $msg .= sprintf(
+                    ' Y sólo entre los días %s y %s.',
+                    \sowerphp\general\Utility_Date::format($this->getEmisor()->config_sii_envio_rcof_desde),
+                    \sowerphp\general\Utility_Date::format($this->getEmisor()->config_sii_envio_rcof_hasta)
+                );
+            } else if ($this->getEmisor()->config_sii_envio_rcof_desde) {
+                $msg .= sprintf(
+                    ' Y sólo desde el día %s.',
+                    \sowerphp\general\Utility_Date::format($this->getEmisor()->config_sii_envio_rcof_desde)
+                );
+            } else if ($this->getEmisor()->config_sii_envio_rcof_hasta) {
+                $msg .= sprintf(
+                    ' Y sólo hasta el día %s.',
+                    \sowerphp\general\Utility_Date::format($this->getEmisor()->config_sii_envio_rcof_hasta)
+                );
+            }
+            throw new \Exception($msg);
+        }
+        // enviar reporte
         $ConsumoFolio = $this->generarConsumoFolio($user_id);
         $xml = $ConsumoFolio->generar();
         if (!$ConsumoFolio->schemaValidate()) {

@@ -109,17 +109,11 @@ class Controller_DteBoletaConsumos extends \Controller_Maintainer
     /**
      * Acción que permite enviar el consumo de folios al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-09-14
+     * @version 2020-10-10
      */
     public function enviar_sii($dia)
     {
         $filterListar = !empty($_GET['listar']) ? base64_decode($_GET['listar']) : '';
-        if ($dia>=date('Y-m-d')) {
-            \sowerphp\core\Model_Datasource_Session::message(
-                'Sólo se pueden enviar consumos de folios de días pasados', 'error'
-            );
-            $this->redirect('/dte/dte_boleta_consumos/listar'.$filterListar);
-        }
         $Emisor = $this->getContribuyente();
         $DteBoletaConsumo = new Model_DteBoletaConsumo($Emisor->rut, $dia, $Emisor->enCertificacion());
         try {
