@@ -40,21 +40,30 @@ class Model_DteBoletaConsumos extends \Model_Plural_App
 
     /**
      * Método que entrega los días pendientes de enviar RCOF
-     * Se busca entre el primer día enviado y el día de ayer
+     * Por defecto, se busca entre el primer día enviado y el día de ayer
+     * Si está configurado el desde y/o hasta se usan esos para el rango
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-11-11
+     * @version 2020-10-10
      */
     public function getPendientes()
     {
         // determinar desde y hasta
-        $desde = $this->db->getValue(
-            'SELECT MIN(dia) FROM dte_boleta_consumo WHERE emisor = :emisor AND certificacion = :certificacion',
-            [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]
-        );
-        if (!$desde) {
+        if ($this->getContribuyente()->config_sii_envio_rcof_desde) {
+            $desde = $this->getContribuyente()->config_sii_envio_rcof_desde;
+        } else {
+            $desde = $this->db->getValue(
+                'SELECT MIN(dia) FROM dte_boleta_consumo WHERE emisor = :emisor AND certificacion = :certificacion',
+                [':emisor'=>$this->getContribuyente()->rut, ':certificacion'=>$this->getContribuyente()->enCertificacion()]
+            );
+        }
+        if (empty($desde)) {
             return false;
         }
-        $hasta = \sowerphp\general\Utility_Date::getPrevious(date('Y-m-d'), 'D');
+        if ($this->getContribuyente()->config_sii_envio_rcof_hasta) {
+            $hasta = $this->getContribuyente()->config_sii_envio_rcof_hasta;
+        } else {
+            $hasta = \sowerphp\general\Utility_Date::getPrevious(date('Y-m-d'), 'D');
+        }
         // crear listado de días que se buscarán
         $dias = [];
         $dia = $desde;
