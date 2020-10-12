@@ -40,7 +40,7 @@ class Model_DteEmitidos extends \Model_Plural_App
 
     public static $revision_estados = [
         'rechazados' => ['RSC', 'RCT', 'RCH', 'RFR'],
-        'no_final' => ['002', '004', '005', '007', '106', '107', '-11', '-8', 'VOF', 'PRD', 'SOK', 'CRT'],
+        'no_final' => ['002', '004', '005', '007', '106', '107', '-11', '-8', 'VOF', 'PRD', 'SOK', 'CRT', 'REC'],
     ]; ///< Posibles estados de revisión de envío al SII de los DTE
 
     const ENVIO_BOLETA = '2021-01-01'; // desde qué día se deben enviar las boletas al SII en producción
