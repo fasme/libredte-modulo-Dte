@@ -1373,6 +1373,22 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que indica la cantidad de veces que un DTE ha sido enviado por correo electrónico
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-10-16
+     */
+    public function emailEnviado(string $email = null): int
+    {
+        $where = ['emisor = :emisor', 'dte = :dte', 'folio = :folio', 'certificacion = :certificacion'];
+        $vars = [':emisor' => $this->emisor, ':dte' => $this->dte, ':folio' => $this->folio, ':certificacion' => $this->certificacion];
+        if (!empty($email)) {
+            $where[] = 'email = :email';
+            $vars[':email'] = $email;
+        }
+        return (int)$this->db->getValue('SELECT COUNT(*) FROM dte_emitido_email WHERE '.implode(' AND ', $where), $vars);
+    }
+
+    /**
      * Método que envía el DTE por correo electrónico
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2020-08-02

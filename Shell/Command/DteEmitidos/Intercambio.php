@@ -48,9 +48,14 @@ class Shell_Command_DteEmitidos_Intercambio extends \Shell_App
     private function enviarDTE($d, $certificacion)
     {
         $DteEmitido = new Model_DteEmitido($d['emisor'], $d['dte'], $d['folio'], (int)$certificacion);
-        if ($DteEmitido->getEstado()=='R')
+        if ($DteEmitido->getEstado()=='R') {
             return;
-        $this->out('Enviando XML del DTE T'.$DteEmitido->dte.'F'.$DteEmitido->folio.' de '.$DteEmitido->getEmisor()->razon_social.' al correo '.$DteEmitido->getReceptor()->config_email_intercambio_user);
+        }
+        $email = $DteEmitido->getReceptor()->config_email_intercambio_user;
+        if ($DteEmitido->emailEnviado($email)) {
+            return;
+        }
+        $this->out('Enviando XML del DTE T'.$DteEmitido->dte.'F'.$DteEmitido->folio.' de '.$DteEmitido->getEmisor()->razon_social.' al correo '.$email);
         try {
             $status = $DteEmitido->email();
             if ($status!==true) {
