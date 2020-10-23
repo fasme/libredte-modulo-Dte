@@ -709,9 +709,9 @@ echo $f->input([
     'type' => 'select',
     'name' => 'config_sii_timbraje_automatico',
     'label' => 'Timbraje automático',
-    'options' => ['Nunca timbrar automáticamente', 'Timbrar automáticamente cuando se llegue a la alerta de folios'],
+    'options' => ['Nunca timbrar automáticamente', 'Tratar de timbrar automáticamente'],
     'value' => isset($Contribuyente) ? $Contribuyente->config_sii_timbraje_automatico : 0,
-    'help' => '¿Se debe timbrar automáticamente folios cuando se alcance la alerta? Si se activa, debe asignar multiplicador (abajo)',
+    'help' => '¿Se debe tratar de timbrar automáticamente folios cuando se alcance la alerta? Si se activa, debe asignar multiplicador (abajo). Importante: esta opción, si bien funciona en la mayoría de los casos, en algunos puede no funcionar como corresponde (ejemplo: por temas de firma electrónica, situaciones del contribuyente o del SII). En esos escenarios, se recomienda desactivar.',
 ]);
 echo $f->input([
     'name' => 'config_sii_timbraje_multiplicador',
