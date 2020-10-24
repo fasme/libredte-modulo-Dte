@@ -521,7 +521,7 @@ class Model_Contribuyente extends \Model_App
     /**
      * Método que envía un correo electrónico al contribuyente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2018-04-26
+     * @version 2020-10-24
      */
     public function notificar($asunto, $mensaje, $para = null, $responder_a = null, $attach = null)
     {
@@ -534,7 +534,9 @@ class Model_Contribuyente extends \Model_App
             $email->attach($attach);
         }
         $email->subject('['.\sowerphp\core\Configure::read('page.body.title').'] '.$this->getRUT().': '.$asunto);
-        $msg = $mensaje."\n\n".'-- '."\n".\sowerphp\core\Configure::read('page.body.title');
+        $msg = $mensaje."\n\n";
+        $msg .= 'PD: este correo es generado de forma automática, por favor no contestar.'."\n\n";
+        $msg .= '-- '."\n".\sowerphp\core\Configure::read('page.body.title');
         return $email->send($msg) === true ? true : false;
     }
 
