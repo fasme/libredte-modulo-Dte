@@ -124,7 +124,7 @@ class Controller_DteGuias extends Controller_Base_Libros
     /**
      * Método que permite buscar las guías que se desean facturar masivamente
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-10-08
+     * @version 2020-10-25
      */
     public function facturar()
     {
@@ -153,6 +153,7 @@ class Controller_DteGuias extends Controller_Base_Libros
                         'TpoCtaPago' => !empty($_POST['TpoCtaPago']) ? $_POST['TpoCtaPago'] : false,
                         'BcoPago' => !empty($_POST['BcoPago']) ? $_POST['BcoPago'] : false,
                         'NumCtaPago' => !empty($_POST['NumCtaPago']) ? $_POST['NumCtaPago'] : false,
+                        'agrupar' => isset($_POST['agrupar']) ? (bool)$_POST['agrupar'] : false,
                     ])
                 ]);
             } catch (\Exception $e) {

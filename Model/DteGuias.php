@@ -184,42 +184,66 @@ class Model_DteGuias extends \Model_Plural_App
      */
     private function crearDteTmp($guias, array $datos = [], $guias_max = 10)
     {
-        // crear detalle y referencia usando indicador global
-        if (isset($guias[$guias_max])) {
+        // crear detalle único y con una referencia por cada guía que se está facturando
+        if (!empty($datos['agrupar'])) {
             $folios = [];
             $neto = 0;
+            $Referencia = [];
             foreach ($guias as $Guia) {
                 $folios[] = '#'.$Guia->folio.' del '.\sowerphp\general\Utility_Date::format($Guia->fecha);
                 $neto += $Guia->neto;
-            }
-            $Detalle = [
-                'NmbItem' => 'Facturación de múltiples guías de despacho',
-                'DscItem' => 'Según folios número: '.implode(', ', $folios),
-                'PrcItem' => $neto,
-            ];
-            $Referencia = [
-                'TpoDocRef' => 52,
-                'IndGlobal' => 1,
-                'FolioRef' => 0,
-                'FchRef' => $datos['FchEmis'],
-                'RazonRef' => 'Se facturan '.count($guias).' guías',
-            ];
-        }
-        // se crea una referencia por cada guía que se está facturando
-        else {
-            $Detalle = [];
-            $Referencia = [];
-            foreach ($guias as $Guia) {
-                $Detalle[] = [
-                    'NmbItem' => 'Guía de despacho #'.$Guia->folio.' del '.\sowerphp\general\Utility_Date::format($Guia->fecha),
-                    'PrcItem' => $Guia->neto,
-                ];
                 $Referencia[] = [
                     'TpoDocRef' => 52,
                     'FolioRef' => $Guia->folio,
                     'FchRef' => $Guia->fecha,
                     'RazonRef' => 'Se factura guía',
                 ];
+            }
+            $Detalle = [
+                'NmbItem' => 'Facturación de múltiples guías de despacho',
+                'DscItem' => 'Según folios número: '.implode(', ', $folios),
+                'PrcItem' => $neto,
+            ];
+        }
+        // no se especificó agrupar el detalle, se usa comportamiento automático
+        else {
+            // crear detalle único con las guías agrupadas y referencia usando indicador global
+            if (isset($guias[$guias_max])) {
+                $folios = [];
+                $neto = 0;
+                foreach ($guias as $Guia) {
+                    $folios[] = '#'.$Guia->folio.' del '.\sowerphp\general\Utility_Date::format($Guia->fecha);
+                    $neto += $Guia->neto;
+                }
+                $Detalle = [
+                    'NmbItem' => 'Facturación de múltiples guías de despacho',
+                    'DscItem' => 'Según folios número: '.implode(', ', $folios),
+                    'PrcItem' => $neto,
+                ];
+                $Referencia = [
+                    'TpoDocRef' => 52,
+                    'IndGlobal' => 1,
+                    'FolioRef' => 0,
+                    'FchRef' => $datos['FchEmis'],
+                    'RazonRef' => 'Se facturan '.count($guias).' guías',
+                ];
+            }
+            // se crea una referencia por cada guía que se está facturando
+            else {
+                $Detalle = [];
+                $Referencia = [];
+                foreach ($guias as $Guia) {
+                    $Detalle[] = [
+                        'NmbItem' => 'Guía de despacho #'.$Guia->folio.' del '.\sowerphp\general\Utility_Date::format($Guia->fecha),
+                        'PrcItem' => $Guia->neto,
+                    ];
+                    $Referencia[] = [
+                        'TpoDocRef' => 52,
+                        'FolioRef' => $Guia->folio,
+                        'FchRef' => $Guia->fecha,
+                        'RazonRef' => 'Se factura guía',
+                    ];
+                }
             }
         }
         // agregar orden de compra

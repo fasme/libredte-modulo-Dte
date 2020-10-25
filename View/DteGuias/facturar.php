@@ -82,6 +82,13 @@ if (isset($guias)) {
         'label' => 'Observación',
         'help' => 'Glosa que describe las condiciones del pago del DTE',
     ]);
+    echo $f->input([
+        'type' => 'select',
+        'name' => 'agrupar',
+        'label' => '¿Agrupar?',
+        'options' => ['Se agruparán sólo si son más de 10 guías, tanto en referencias como en detalle', 'Se agruparán siempre en el detalle, en referencias irán una a una'],
+        'help' => '¿Cómo se deben agrupar las guías al generar la factura?',
+    ]);
     echo '<hr/>';
     echo $f->input([
         'name' => 'MedioPago',
