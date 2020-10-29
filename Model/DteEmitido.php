@@ -701,6 +701,32 @@ class Model_DteEmitido extends Model_Base_Envio
     }
 
     /**
+     * Método que indica si el documento permite o no ser cobrado
+     * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
+     * @version 2020-10-29
+     */
+    public function permiteCobro()
+    {
+        if (!$this->getTipo()->permiteCobro()) {
+            return false;
+        }
+        $anulado = (bool)$this->db->getValue('
+            SELECT COUNT(*)
+            FROM dte_referencia AS r
+            WHERE
+                r.emisor = :rut
+                AND r.certificacion = :certificacion
+                AND r.referencia_dte = :dte
+                AND r.referencia_folio = :folio
+                AND r.codigo = 1
+        ', [':rut'=>$this->emisor, ':dte'=>$this->dte, ':folio'=>$this->folio, ':certificacion'=>(int)$this->certificacion]);
+        if ($anulado) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Método que entrega del intercambio el objeto del Recibo del DTE
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
      * @version 2015-12-23

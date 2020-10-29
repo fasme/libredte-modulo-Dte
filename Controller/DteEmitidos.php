@@ -1098,7 +1098,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción que permite crear el cobro para el DTE y enviar al formulario de pago
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2017-01-10
+     * @version 2020-10-29
      */
     public function pagar($dte, $folio)
     {
@@ -1112,7 +1112,7 @@ class Controller_DteEmitidos extends \Controller_App
             $this->redirect('/dte/dte_emitidos/listar');
         }
         // si no permite cobro error
-        if (!$DteEmitido->getTipo()->permiteCobro()) {
+        if (!$DteEmitido->permiteCobro()) {
             \sowerphp\core\Model_Datasource_Session::message('Documento no permite cobro', 'error');
             $this->redirect(str_replace('pagar', 'ver', $this->request->request));
         }
@@ -1680,7 +1680,7 @@ class Controller_DteEmitidos extends \Controller_App
     /**
      * Acción de la API que entrega el cobro asociado al documento
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2019-06-16
+     * @version 2020-10-29
      */
     public function _api_cobro_GET($dte, $folio, $emisor)
     {
@@ -1699,6 +1699,10 @@ class Controller_DteEmitidos extends \Controller_App
         $DteEmitido = new Model_DteEmitido($Emisor->rut, (int)$dte, (int)$folio, $Emisor->enCertificacion());
         if (!$DteEmitido->exists()) {
             $this->Api->send('No existe el documento solicitado T'.$dte.'F'.$folio, 404);
+        }
+        // si no permite cobro error
+        if (!$DteEmitido->permiteCobro()) {
+            $this->Api->send('Documento T'.$dte.'F'.$folio.' no permite cobro', 400);
         }
         // entregar cobro (se agrega URL)
         $Cobro = $DteEmitido->getCobro();
