@@ -1122,7 +1122,7 @@ class Model_DteEmitido extends Model_Base_Envio
             if ($result===false) {
                 throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
-            $this->track_id = (int)$result['trackid'];
+            $this->track_id = (int)(!empty($result['track_id']) ? $result['track_id'] : $result['trackid']);
             $this->revision_estado = $result['estado'];
             $this->revision_detalle = $result['fecha_recepcion'];
         }
