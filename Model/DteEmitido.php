@@ -1050,7 +1050,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * @param retry Número de intentos que se usarán para enviar el DTE al SII (=null, valor por defecto LibreDTE, =0 no se enviará, >0 cantidad de intentos)
      * @param gzip Indica si se debe enviar comprimido el XML del DTE al SII
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-22
+     * @version 2020-10-31
      */
     public function enviar($user = null, $retry = null, $gzip = null)
     {
@@ -1118,13 +1118,7 @@ class Model_DteEmitido extends Model_Base_Envio
             if (!$class or !class_exists($class)) {
                 throw new \Exception('Envío de boletas al SII no está disponible en esta versión de LibreDTE');
             }
-            // obtener token
-            $token = $class::getToken($Firma);
-            if (!$token) {
-                throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
-            }
-            // enviar XML
-            $result = $class::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $token, $gzip, $retry);
+            $result = $class::enviar($Firma->getID(), $Emisor->rut.'-'.$Emisor->dv, $xml, $Firma, $gzip, $retry);
             if ($result===false) {
                 throw new \Exception('No fue posible enviar el DTE al SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
@@ -1174,7 +1168,7 @@ class Model_DteEmitido extends Model_Base_Envio
      * Método que actualiza el estado de un DTE enviado al SII a través del
      * servicio web que dispone el SII para esta consulta
      * @author Esteban De La Fuente Rubio, DeLaF (esteban[at]sasco.cl)
-     * @version 2020-08-22
+     * @version 2020-10-31
      */
     private function actualizarEstadoWebservice($user = null)
     {
@@ -1190,20 +1184,12 @@ class Model_DteEmitido extends Model_Base_Envio
             if (!$class or !class_exists($class)) {
                 throw new \Exception('Consulta de estado de envío de boletas al SII no está disponible en esta versión de LibreDTE');
             }
-            // obtener token
-            $token = $class::getToken($Firma);
-            if (!$token) {
-                throw new \Exception('No fue posible obtener el token para el SII<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
-            }
-            // consultar estado enviado
-            $estado_up = $class::estado($this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $token);
-            // si el estado no se pudo recuperar error
+            $estado_up = $class::estado_normalizado($this->getEmisor()->rut, $this->getEmisor()->dv, $this->track_id, $Firma, $this->dte, $this->folio);
             if ($estado_up===false) {
                 throw new \Exception('No fue posible obtener el estado del DTE<br/>'.implode('<br/>', \sasco\LibreDTE\Log::readAll()));
             }
-            $normalizado = $class::normalizar_estado($estado_up, $this->dte, $this->folio);
-            $this->revision_estado = $normalizado['estado'];
-            $this->revision_detalle = $normalizado['detalle'];
+            $this->revision_estado = $estado_up['estado'];
+            $this->revision_detalle = $estado_up['detalle'];
         }
         // consultar estado de otros DTE
         else {
