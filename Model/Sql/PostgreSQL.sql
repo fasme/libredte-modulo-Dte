@@ -205,6 +205,7 @@ CREATE TABLE dte_tmp (
 	datos TEXT NOT NULL,
 	sucursal_sii INTEGER,
 	usuario INTEGER NOT NULL,
+	extra TEXT,
 	CONSTRAINT dte_tmp_pkey PRIMARY KEY (emisor, receptor, dte, codigo),
 	CONSTRAINT dte_tmp_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL
@@ -264,6 +265,7 @@ CREATE TABLE dte_emitido (
 	receptor_evento CHAR(1),
 	fecha_hora_creacion TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	mipyme BIGINT,
+	extra TEXT,
 	CONSTRAINT dte_emitido_pk PRIMARY KEY (emisor, dte, folio, certificacion),
 	CONSTRAINT dte_emitido_emisor_fk FOREIGN KEY (emisor)
 		REFERENCES contribuyente (rut) MATCH FULL
