@@ -144,6 +144,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
         $Request = new \sowerphp\core\Network_Request();
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($Usuario->hash);
+        $Request->url = \sowerphp\core\Configure::read('app.miurl');
         foreach($documentos as $dte) {
             if ($this->verbose) {
                 $this->out('Generando DTE T'.$dte['Encabezado']['IdDoc']['TipoDTE'].'F'.$dte['Encabezado']['IdDoc']['Folio']);
