@@ -214,6 +214,7 @@ class Shell_Command_Documentos_EmitirMasivo extends \Shell_App
             // emitir DTE real
             else {
                 // consumir servicio web
+                $this->request->url = \sowerphp\core\Configure::read('app.miurl');
                 $response = $rest->post($Request->url.'/api/dte/documentos/generar', $response['body']);
                 if ($response['status']['code']!=200) {
                     $this->documentoAgregarResultado(
