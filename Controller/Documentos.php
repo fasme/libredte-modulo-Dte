@@ -975,12 +975,15 @@ class Controller_Documentos extends \Controller_App
     public function generar($receptor, $dte, $codigo)
     {
         $Emisor = $this->getContribuyente();
+        $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+                file_put_contents("log.log","api url".serialize($this));
         $response = $this->consume('/api/dte/documentos/generar', [
             'emisor' => $Emisor->rut,
             'receptor' => $receptor,
             'dte' => $dte,
             'codigo' => $codigo,
         ]);
+
         if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message(
                 $response['body'], 'error'
