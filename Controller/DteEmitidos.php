@@ -106,6 +106,8 @@ class Controller_DteEmitidos extends \Controller_App
         $Emisor = $this->getContribuyente();
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
+        $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
         $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/eliminar/'.$dte.'/'.$folio.'/'.$Emisor->rut);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
@@ -129,6 +131,8 @@ class Controller_DteEmitidos extends \Controller_App
         $Emisor = $this->getContribuyente();
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
+        $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
         $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/eliminar_xml/'.$dte.'/'.$folio.'/'.$Emisor->rut);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
@@ -193,6 +197,8 @@ class Controller_DteEmitidos extends \Controller_App
         $Emisor = $this->getContribuyente();
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
+        $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
         $response = $rest->get($this->request->url.'/api/dte/dte_emitidos/enviar_sii/'.$dte.'/'.$folio.'/'.$Emisor->rut.'/'.$retry);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
