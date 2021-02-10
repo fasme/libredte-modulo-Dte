@@ -155,6 +155,8 @@ class Controller_DteTmps extends \Controller_App
         // realizar consulta a la API
         $rest = new \sowerphp\core\Network_Http_Rest();
         $rest->setAuth($this->Auth->User->hash);
+        $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
         $response = $rest->get($this->request->url.'/api/dte/dte_tmps/pdf/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut.'?formato='.$formato.'&papelContinuo='.$papelContinuo.'&compress='.$compress);
         if ($response===false) {
             \sowerphp\core\Model_Datasource_Session::message(implode('<br/>', $rest->getErrors()), 'error');
@@ -220,6 +222,8 @@ class Controller_DteTmps extends \Controller_App
             $Emisor = $this->getContribuyente();
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->Auth->User->hash);
+            $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
             $response = $rest->post(
                 $this->request->url.'/api/dte/dte_tmps/enviar_email/'.$receptor.'/'.$dte.'/'.$codigo.'/'.$Emisor->rut,
                 [
@@ -394,6 +398,8 @@ class Controller_DteTmps extends \Controller_App
         } else {
             $webVerificacion = \sowerphp\core\Configure::read('dte.web_verificacion');
             if (!$webVerificacion) {
+                $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
                 $webVerificacion = $this->request->url.'/boletas';
             }
         }
@@ -803,6 +809,9 @@ class Controller_DteTmps extends \Controller_App
         if (isset($_POST['submit'])) {
             $rest = new \sowerphp\core\Network_Http_Rest();
             $rest->setAuth($this->Auth->User->hash);
+            $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
+            
             $response = $rest->post($this->request->url.'/api/dte/dte_tmps/buscar/'.$Emisor->rut, [
                 'dte' => $_POST['dte'],
                 'receptor' => $_POST['receptor'],
