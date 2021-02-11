@@ -850,6 +850,8 @@ class Controller_Documentos extends \Controller_App
             }
         }
         // consumir servicio web para crear documento temporal
+        $this->request->url = \sowerphp\core\Configure::read('app.miurl');
+
         $response = $this->consume('/api/dte/documentos/emitir', $dte);
         if ($response['status']['code']!=200) {
             \sowerphp\core\Model_Datasource_Session::message(
