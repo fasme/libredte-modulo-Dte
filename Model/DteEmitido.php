@@ -1113,7 +1113,7 @@ class Model_DteEmitido extends Model_Base_Envio
         );
         \sasco\LibreDTE\Sii::setAmbiente((int)$this->certificacion);
         // enviar boleta al SII
-        if (in_array($this->dte, [39, 41])) {
+        if (in_array($this->dte, [41])) {
             $class = \sowerphp\core\Configure::read('dte.clase_boletas');
             if (!$class or !class_exists($class)) {
                 throw new \Exception('Envío de boletas al SII no está disponible en esta versión de LibreDTE');
@@ -1158,7 +1158,7 @@ class Model_DteEmitido extends Model_Base_Envio
         if (!$this->track_id) {
             throw new \Exception('DTE no tiene Track ID, primero debe enviarlo al SII');
         }
-        if (in_array($this->dte, [39, 41])) {
+        if (in_array($this->dte, [ 41])) {
             $usarWebservice = true;
         }
         return $usarWebservice ? $this->actualizarEstadoWebservice($user) : $this->actualizarEstadoEmail();
