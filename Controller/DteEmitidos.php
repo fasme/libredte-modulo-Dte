@@ -1897,6 +1897,7 @@ class Controller_DteEmitidos extends \Controller_App
                 }
             }
             // buscar datos del DTE
+            $this->request->url = \sowerphp\core\Configure::read('app.miurl');
             $r = $this->consume('/api/dte/dte_emitidos/consultar?getXML=1', $_POST);
             if ($r['status']['code']!=200) {
                 \sowerphp\core\Model_Datasource_Session::message(

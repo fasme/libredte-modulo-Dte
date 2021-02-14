@@ -59,6 +59,7 @@ $f = new \sowerphp\general\View_Helper_Form(false);
             </div>
 <?php else: ?>
 <?php $links = $DteEmitido->getLinks(); ?>
+
             <div class="card mb-4">
                 <div class="card-body">
                     <h1 class="text-center mb-4"><?=$DteEmitido->getTipo()->tipo?> #<?=$DteEmitido->folio?><br/><small><?=$DteEmitido->getEmisor()->getNombre()?></small></h1>
