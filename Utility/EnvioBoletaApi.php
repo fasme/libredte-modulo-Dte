@@ -80,13 +80,13 @@ class Utility_EnvioBoleta
         //Servidor de envio para boletas producción
         $certificacion = \sasco\LibreDTE\Sii::getAmbiente();
         //Servidor de consultas  para boletas producción
-        if ($certificacion == 0) {
+       // if ($certificacion == 0) {
             $url = 'https://api.sii.cl/recursos/v1/boleta.electronica.envio/' . $rut . '-' . $dv . '-' . $track_id . '';
-        } else
+        //} else
         //Servidor de consultas para boletas pruebas 
-        {
-            $url = 'https://apicert.sii.cl/recursos/v1/boleta.electronica.envio/' . $rut . '-' . $dv . '-' . $track_id . '';
-        }
+        //{
+          //  $url = 'https://apicert.sii.cl/recursos/v1/boleta.electronica.envio/' . $rut . '-' . $dv . '-' . $track_id . '';
+       // }
 
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
@@ -153,13 +153,13 @@ class Utility_EnvioBoleta
 
         $certificacion = \sasco\LibreDTE\Sii::getAmbiente();
         //Servidor de consultas  para boletas producción
-        if ($certificacion == 0) {
+       // if ($certificacion == 0) {
             
                 $ch = curl_init("https://api.sii.cl/recursos/v1/boleta.electronica.semilla");
-            }
-        else{
-                $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.semilla");
-            }
+         //   }
+        //else{
+          //      $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.semilla");
+            //}
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept:application/xml'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $resp = curl_exec($ch);
@@ -235,13 +235,9 @@ class Utility_EnvioBoleta
         ];
         $certificacion = \sasco\LibreDTE\Sii::getAmbiente();
         //Servidor de consultas  para boletas producción
-        if ($certificacion == 0) {
         
             $ch = curl_init("https://api.sii.cl/recursos/v1/boleta.electronica.token");
-        }
-        else{
-            $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.token");
-        }
+        
 
         
         curl_setopt($ch, CURLOPT_POST, true);
@@ -320,14 +316,14 @@ class Utility_EnvioBoleta
 
 
         //Servidor de envio para boletas 
-        if (\sasco\LibreDTE\Sii::getAmbiente() == \sasco\LibreDTE\Sii::PRODUCCION) {
+        //if (\sasco\LibreDTE\Sii::getAmbiente() == \sasco\LibreDTE\Sii::PRODUCCION) {
             //Servidor de envio para boletas producción
             $url = 'https://rahue.sii.cl/recursos/v1/boleta.electronica.envio';
-        } else
+        //} else
         //Servidor de envio para boletas pruebas 
-        {
-            $url = 'https://pangal.sii.cl/recursos/v1/boleta.electronica.envio';
-        }
+        //{
+          //  $url = 'https://pangal.sii.cl/recursos/v1/boleta.electronica.envio';
+       // }
 
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
