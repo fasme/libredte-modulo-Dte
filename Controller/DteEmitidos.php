@@ -1878,6 +1878,7 @@ class Controller_DteEmitidos extends \Controller_App
         $this->layout .= '.min';
         // si se solicitó un documento se busca
         if (isset($_POST['emisor'])) {
+            
             // verificar captcha
             $private_key = \sowerphp\core\Configure::read('recaptcha.private_key');
             if ($private_key) {
@@ -1906,6 +1907,7 @@ class Controller_DteEmitidos extends \Controller_App
                 return;
             }
             // asignar DTE a la vista
+            
             $this->set('DteEmitido', (new Model_DteEmitido())->set($r['body']));
         }
     }

@@ -149,8 +149,17 @@ class Utility_EnvioBoleta
      */
     private static function getSeed()
     {
+        
 
-        $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.semilla");
+        $certificacion = \sasco\LibreDTE\Sii::getAmbiente();
+        //Servidor de consultas  para boletas producción
+        if ($certificacion == 0) {
+            
+                $ch = curl_init("https://api.sii.cl/recursos/v1/boleta.electronica.semilla");
+            }
+        else{
+                $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.semilla");
+            }
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept:application/xml'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $resp = curl_exec($ch);
@@ -224,7 +233,17 @@ class Utility_EnvioBoleta
             'Referer: https://libredte.cl',
             'Content-type: application/xml'
         ];
-        $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.token");
+        $certificacion = \sasco\LibreDTE\Sii::getAmbiente();
+        //Servidor de consultas  para boletas producción
+        if ($certificacion == 0) {
+        
+            $ch = curl_init("https://api.sii.cl/recursos/v1/boleta.electronica.token");
+        }
+        else{
+            $ch = curl_init("https://apicert.sii.cl/recursos/v1/boleta.electronica.token");
+        }
+
+        
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER,  $header);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestFirmado);
